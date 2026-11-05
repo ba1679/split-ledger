@@ -37,7 +37,7 @@ export function TripLedger() {
         <div className="section-head"><h2>沿途的花費</h2><span>{totalCount} 筆紀錄</span></div>
         <div className="ledger">{rows.map(expense => <Link className="expense-row" to={`/trips/${tripId}/expenses/${expense.id}`} key={expense.id}>
           <span className="category-icon" aria-hidden="true"><svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M6 3h12v18H6zM9 8h6m-6 4h6m-6 4h3" /></svg></span>
-          <div className="row-info"><div className="row-title">{expense.item}</div><div className="row-sub">{expense.spentOn} · {expense.category?.name ?? '未分類'}</div></div>
+          <div className="row-info"><div className="row-title">{expense.item}</div><div className="row-sub"><span>{expense.spentOn}</span> · <span>{expense.category?.name ?? '未分類'}</span></div></div>
           <div className="row-amount">{displayAmount(expense.amount)}<small>{expense.currencyCode}</small></div><span aria-hidden="true">→</span>
         </Link>)}</div>
         {expenses.error ? <p className="error" role="alert">暫時無法更新支出清單，已載入的紀錄仍保留。{!expenses.isFetchNextPageError ? <button type="button" className="text-btn" disabled={expenses.isFetching} onClick={() => { void expenses.refetch(); }}>重新更新清單</button> : null}</p> : null}

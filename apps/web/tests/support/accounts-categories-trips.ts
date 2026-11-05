@@ -66,6 +66,16 @@ export async function categoryRename(page: Page, name: string) {
   const dialog = page.getByRole('dialog');
   await dialog.getByLabel('分類名稱', { exact: true }).fill(name);
   await dialog.getByRole('button', { name: /^(儲存|保存|保存分類)$/ }).click();
+  await waitForCategoryResult(page);
+}
+
+export async function waitForCategoryResult(page: Page) {
+  await expect.poll(() => page.getByRole('dialog').evaluateAll(dialogs =>
+    dialogs.length === 0 || dialogs.some(dialog => {
+      const cancel = [...dialog.querySelectorAll<HTMLButtonElement>('button')].find(button => button.textContent?.trim() === '取消');
+      return Boolean(dialog.querySelector('[role="alert"]')?.textContent?.trim()) && cancel?.disabled === false;
+    }),
+  ), { message: 'Category mutation must settle before authoritative assertions' }).toBe(true);
 }
 
 export async function assertCategoriesUnchanged(world: LedgerWorld) {

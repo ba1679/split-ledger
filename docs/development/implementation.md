@@ -39,7 +39,7 @@ pnpm test:web --project chromium
 pnpm test:web --project webkit
 ```
 
-`pnpm test:api` / `test:web` are acceptance runs and remain RED until the corresponding product feature is implemented. Never use a passing setup smoke test as a substitute for feature acceptance.
+`pnpm test:api` / `test:web` run executable acceptance features against real product code. Setup smoke tests do not replace feature acceptance.
 
 ## Phase 3 review gate
 
@@ -90,3 +90,9 @@ Real API-backed expense CRUD, searchable keyboard comboboxes, strict amount/past
 ## Pagination and unknown write outcomes — T241/T242
 
 Cursor-based InfiniteQuery appends and deduplicates rows, takes totalCount from the server, retains loaded rows on read failure and keeps totals independent. POST/PATCH/DELETE unavailable responses are checked against the original UUID and intent; unresolved outcomes preserve/lock the draft and expose manual GET verification without retrying mutations. A missing POST read does not imply not-saved. Exact BDD6/6, unknown-result support8/8 and prior frontend regression56/56 pass across both engines. Support covers 404/503 followed by successful recheck with one POST; explicit400/403/409 remain editable without probes; PATCH/DELETE manual verification does not resend. Types/lint/build/diff pass. Refactor assessment kept clear existing boundaries; exact6/6 rerun passes.
+
+## Frontend categories and device defaults — T243
+
+Category CRUD and cross-trip cache invalidation use the real API. Validation trims Unicode whitespace, counts codepoints and folds only ASCII A-Z for same-owner name checks. In-use delete remains an actionable explanation. Account-keyed localStorage remembers only explicit option selections; inaccessible storage and invalid/foreign IDs safely fall back. Pending preference verification blocks accidental unclassified submission; submitted category ID/label stay frozen during unknown write outcomes. Full frontend96/96, final category scope34/34, new category risks10/10 and prior expense/unknown support12/12 pass across Chromium/WebKit; web/test types, lint and build pass. Full regression exposed a Phase3 When synchronization gap: rename/delete helpers now await terminal success/error before unchanged authoritative DB/API assertions. The root reviewed this correction.
+
+T244 retained the clear category form/delete/preference boundaries without further abstraction. Exact category scope34/34 rerun passes.

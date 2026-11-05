@@ -1,14 +1,14 @@
 import React, { useId, useRef, useState } from 'react';
 
 export interface ComboOption { value: string; label: string }
-export function SearchCombo({ label, value, options, onChange, error, optional = false, disabled = false }: {
-  label: string; value: string; options: ComboOption[]; onChange: (value: string) => void; error?: string; optional?: boolean; disabled?: boolean;
+export function SearchCombo({ label, value, options, onChange, onSelect, error, optional = false, disabled = false }: {
+  label: string; value: string; options: ComboOption[]; onChange: (value: string) => void; onSelect?: (value: string) => void; error?: string; optional?: boolean; disabled?: boolean;
 }) {
   const id = useId(), root = useRef<HTMLDivElement>(null), input = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false), [search, setSearch] = useState<string | null>(null), [active, setActive] = useState(0);
   const filtered = search === null ? options : options.filter(option => option.label.toLowerCase().includes(search.toLowerCase()));
   const selected = options.find(option => option.value === value);
-  function select(option: ComboOption) { onChange(option.value); setSearch(null); setOpen(false); input.current?.focus(); }
+  function select(option: ComboOption) { onChange(option.value); onSelect?.(option.value); setSearch(null); setOpen(false); input.current?.focus(); }
   function move(step: number) {
     setOpen(true);
     const next = open ? (active + step + filtered.length) % Math.max(1, filtered.length) : step < 0 ? Math.max(0, filtered.length - 1) : 0;

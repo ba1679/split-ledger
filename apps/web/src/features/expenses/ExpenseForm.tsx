@@ -11,6 +11,7 @@ import { FormDialog } from '../../components/FormDialog.js';
 import { useSession } from '../auth/session.js';
 import { displayAmount } from './money.js';
 import { definitelyRejected, OfflineWrite, UnconfirmedWrite, unconfirmedMessage, verifiedDelete, verifiedSave, type SaveIntent, type WriteIntent } from './save-outcome.js';
+import { readCategoryPreference, saveCategoryPreference } from '../categories/preference.js';
 
 type FieldErrors = Partial<Record<'item' | 'currency' | 'amount' | 'date', string>>;
 export function ExpenseForm() {
@@ -27,13 +28,18 @@ function ExpenseEditor({ trip, expense, readError }: { trip: Trip; expense?: Exp
   const itemId = useId(), amountId = useId();
   const itemInput = useRef<HTMLInputElement>(null), amountInput = useRef<HTMLInputElement>(null), writing = useRef(false);
   const [id] = useState(() => expense?.id ?? crypto.randomUUID());
-  const [item, setItem] = useState(expense?.item ?? ''), [currency, setCurrency] = useState(expense?.currencyCode ?? 'JPY'), [amount, setAmount] = useState(expense?.amount ?? ''), [category, setCategory] = useState(expense?.category?.id ?? '');
+  const [item, setItem] = useState(expense?.item ?? ''), [currency, setCurrency] = useState(expense?.currencyCode ?? 'JPY'), [amount, setAmount] = useState(expense?.amount ?? '');
+  const [categoryChoice, setCategory] = useState<string | null>(expense ? expense.category?.id ?? '' : null);
+  const [preferredCategory] = useState(() => readCategoryPreference(account!.id));
+  const [submittedCategory, setSubmittedCategory] = useState<{ value: string; label: string } | null>(null);
   const [date, setDate] = useState(() => (expense?.spentOn ?? dateOnly(localToday())).replaceAll('-', '/'));
   const [errors, setErrors] = useState<FieldErrors>({}), [saveError, setSaveError] = useState('');
   const [deleting, setDeleting] = useState(false);
   const [unconfirmed, setUnconfirmed] = useState<WriteIntent | null>(null);
   const currencies = useQuery({ queryKey: ['currencies'], queryFn: ({ signal }) => apiRequest<CurrencyList>('/api/currencies', { signal }) });
   const categories = useQuery({ queryKey: ['account', account!.id, 'categories'], queryFn: ({ signal }) => apiRequest<ItemList<Category>>('/api/categories', { signal }) });
+  const category = categoryChoice ?? (categories.data?.items.some(option => option.id === preferredCategory) ? preferredCategory! : '');
+  const awaitingPreference = categoryChoice === null && Boolean(preferredCategory) && (categories.isPending || Boolean(categories.error));
   const precision = expense?.currencyCode === currency ? expense.minorUnit : currencies.data?.items.find(option => option.code === currency)?.minorUnit;
   const digits = currency === 'TWD' ? 0 : precision;
   function accepted(value: string) { return digits !== undefined && value.length <= 25 && (digits === 0 ? /^\d*$/ : new RegExp(`^\\d*(?:\\.\\d{0,${digits}})?$`)).test(value); }
@@ -106,9 +112,11 @@ function ExpenseEditor({ trip, expense, readError }: { trip: Trip; expense?: Exp
     onSettled: () => { writing.current = false; },
   });
   const busy = mutation.isPending || deletion.isPending || verification.isPending;
+  const categoryOptions = [{ value: '', label: '未分類' }, ...(categories.data?.items.map(option => ({ value: option.id, label: option.name })) ?? [])];
+  if ((busy || unconfirmed) && submittedCategory && !categoryOptions.some(option => option.value === submittedCategory.value)) categoryOptions.push(submittedCategory);
   function recheck() { if (unconfirmed && !writing.current) { writing.current = true; verification.mutate(unconfirmed); } }
   function submit(event: React.FormEvent) {
-    event.preventDefault(); if (writing.current || unconfirmed) return;
+    event.preventDefault(); if (writing.current || unconfirmed || awaitingPreference) return;
     const validation: FieldErrors = {};
     if (!item.trim()) validation.item = '請填寫支出項目。';
     if (precision === undefined || currencies.error) validation.currency = '請從可用目錄選擇幣別。';
@@ -122,6 +130,8 @@ function ExpenseEditor({ trip, expense, readError }: { trip: Trip; expense?: Exp
       return;
     }
     if (!navigator.onLine) { setSaveError('目前無法連線，這筆支出尚未保存。請保留畫面並在連線後再試。'); return; }
+    // Freeze the effective preference and its display label before any unavailable response can lock this draft.
+    setCategory(category); setSubmittedCategory(categoryOptions.find(option => option.value === category) ?? null);
     writing.current = true; mutation.mutate(dateOnly(parsed!));
   }
   return <>
@@ -156,14 +166,14 @@ function ExpenseEditor({ trip, expense, readError }: { trip: Trip; expense?: Exp
           <p id={`${amountId}-error`} className="error" role="status">{errors.amount}</p>
         </div>
         <div className="two-col"><DateField label="支出日期" value={date} onChange={setDate} error={errors.date} />
-          <div><SearchCombo label="分類" value={category} options={[{ value: '', label: '未分類' }, ...(categories.data?.items.map(option => ({ value: option.id, label: option.name })) ?? [])]} onChange={setCategory} optional disabled={categories.isPending || Boolean(categories.error)} />
+          <div><SearchCombo label="分類" value={category} options={categoryOptions} onChange={setCategory} onSelect={value => saveCategoryPreference(account!.id, value)} optional disabled={categories.isPending || Boolean(categories.error)} />
             {categories.error ? <p className="error" role="alert">暫時無法取得分類。<button type="button" className="text-btn" onClick={() => { void categories.refetch(); }}>重新取得分類</button></p> : null}
           </div>
         </div>
       </fieldset>
       <p className="error" role="alert">{saveError}</p>
       {unconfirmed && !deleting ? <button className="btn secondary" type="button" disabled={busy} onClick={recheck}>{verification.isPending ? '查證中…' : '重新查證'}</button> : null}
-      <div className="form-actions">{expense ? <button className="text-btn danger delete-expense" type="button" disabled={busy || Boolean(unconfirmed)} onClick={() => { setSaveError(''); setDeleting(true); }}>刪除支出</button> : null}<Link className="btn secondary" aria-disabled={busy} onClick={event => { if (busy) event.preventDefault(); }} to={`/trips/${tripId}`}>取消</Link><button className="btn" disabled={busy || Boolean(unconfirmed) || currencies.isPending || Boolean(currencies.error)}>{mutation.isPending ? '儲存中…' : '儲存支出'}</button></div>
+      <div className="form-actions">{expense ? <button className="text-btn danger delete-expense" type="button" disabled={busy || Boolean(unconfirmed)} onClick={() => { setSaveError(''); setDeleting(true); }}>刪除支出</button> : null}<Link className="btn secondary" aria-disabled={busy} onClick={event => { if (busy) event.preventDefault(); }} to={`/trips/${tripId}`}>取消</Link><button className="btn" disabled={busy || Boolean(unconfirmed) || awaitingPreference || currencies.isPending || Boolean(currencies.error)}>{mutation.isPending ? '儲存中…' : '儲存支出'}</button></div>
     </form>
     {deleting && expense ? <FormDialog title="刪除這筆支出？" onClose={() => setDeleting(false)} busy={busy}>
       <p>確定刪除「{expense.item}」{expense.currencyCode} {displayAmount(expense.amount)}？此操作無法復原。</p>
