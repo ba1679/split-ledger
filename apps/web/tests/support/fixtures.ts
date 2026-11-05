@@ -4,7 +4,7 @@ import { createServer } from 'vite';
 import { fileURLToPath } from 'node:url';
 export const test = apiTest.extend<Record<never, never>, { webServer: string }>({
  webServer: [async ({ runtime }, use) => {
-  const server = await createServer({ root: fileURLToPath(new URL('../../', import.meta.url)), configFile: false, server: { host: '127.0.0.1', port: Number(new URL(runtime.webOrigin).port), strictPort: true, proxy: { '/api': runtime.origin } }, logLevel: 'error' });
+  const server = await createServer({ root: fileURLToPath(new URL('../../', import.meta.url)), cacheDir: fileURLToPath(new URL(`../../../../.cache/vite-${process.pid}-${new URL(runtime.webOrigin).port}/`, import.meta.url)), configFile: false, server: { host: '127.0.0.1', port: Number(new URL(runtime.webOrigin).port), strictPort: true, proxy: { '/api': runtime.origin } }, logLevel: 'error' });
   try { await server.listen(); await use(runtime.webOrigin); } finally { await server.close(); }
  }, { scope: 'worker' }],
  baseURL: async ({ webServer }, use) => { await use(webServer); },

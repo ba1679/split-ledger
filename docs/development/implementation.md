@@ -74,3 +74,7 @@ Exact expense BDD14 and unit17 green at initial implementation. Independent read
 T233 final: backend40/40, support17/17, unit17/17 (money and runtime); workspace/test typechecks, repo lint and workspace build pass. Compiled Node24 server executes an authenticated maximum-USD write and totals through the shared package. Real PostgreSQL18.3 EXPLAIN(ANALYZE,BUFFERS) on 20k synthetic rows is archived in expense-query-plans.md, without planner forcing or production latency claims.
 
 T234 found no justified further split/abstraction; exact expense14 and API/shared typechecks remain green. All backend feature phases are complete before frontend implementation begins.
+
+## Frontend account session — T235/T236
+
+Real Better Auth client, account-scoped Query cache, protected routes and approved responsive application shell are implemented. Auth acceptance passes Chromium3/3 and WebKit3/3, plus web/test types, lint and production build. Refactor only makes the existing zero stale-time explicit. Browser fixtures use isolated Vite caches and an external Google authorization HTML redirect supported by both engines; real callback/state/PKCE/session verification remains exercised.

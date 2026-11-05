@@ -20,7 +20,10 @@ export async function mockGoogle(page:Page,world:LedgerWorld,label='甲',outcome
   callback.searchParams.set('state',url.searchParams.get('state')??'');
   if(outcome==='cancel')callback.searchParams.set('error','access_denied');
   else { const {registerGoogleCode}=await import('../../../api/tests/support/google.js');callback.searchParams.set('code',outcome==='invalid'?'invalid-code':registerGoogleCode(user,url)); }
-  await route.fulfill({status:302,headers:{location:callback.toString()},body:''});
+  // WebKit route fulfillment rejects redirect statuses; only the external authorization
+  // page is replaced. Its navigation still reaches the real Better Auth callback.
+  const destination = JSON.stringify(callback.toString()).replaceAll('<', String.fromCharCode(92) + 'u003c');
+  await route.fulfill({ status: 200, contentType: 'text/html', body: `<!doctype html><meta charset="utf-8"><script>location.replace(${destination})</script>` });
  });
  return user;
 }
