@@ -44,3 +44,7 @@ pnpm test:web --project webkit
 ## Phase 3 review gate
 
 T010–T223 implemented and individually mapped to exact DSL registrations. Both independent cross-reviews have no remaining findings after fixes to OAuth fixture identity/cancellation, category timestamp expectations, pure GET device actions, cleanup ordering and authoritative totals assertions. Fail-on-generation rejects undefined steps. Final serial RED: all 40 API and 48 Chromium scenarios failed only at explicit missing-product-migration assertions; no undefined steps, compilation, startup or teardown errors. Lint and test TypeScript pass. T224 passed before any product Green implementation.
+
+## Currencies — T225/T226
+
+Exact feature 1/1 green; root lint/workspace typecheck pass. Compiled API startup serves the archived 165-row catalog with JPY=0 and USD/TWD=2. Concurrent checksummed migration replay preserves one history row and 165 currencies. Refactor assessment found no justified cleanup; focused rerun stays green.
