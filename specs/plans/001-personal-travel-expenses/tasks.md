@@ -652,8 +652,8 @@ Phase 3 涵蓋 T010–T223，共 214 個唯一句型。
 **Test Scope**:
 - `specs/truth/features/frontend/expenses/expense-recording-and-totals.feature`
 
-- [ ] T239 [BDD-GREEN] 以真實產品邏輯讓 Test Scope 全綠，並確認已完成相依功能沒有回歸。
-- [ ] T240 [BDD-REFACTOR] 在綠燈保護下整理本 feature 的產品碼，重跑 Test Scope。
+- [X] T239 [BDD-GREEN] 以真實產品邏輯讓 Test Scope 全綠，並確認已完成相依功能沒有回歸。
+- [X] T240 [BDD-REFACTOR] 在綠燈保護下整理本 feature 的產品碼，重跑 Test Scope。
 
 ## Phase 4I: ADD Feature File - frontend/expenses/pagination-and-save-outcomes.feature
 

@@ -5,6 +5,7 @@ import { Login } from '../features/auth/Login.js';
 import { Trips } from '../features/trips/Trips.js';
 import { TripLedger } from '../features/trips/TripLedger.js';
 import { Categories } from '../features/categories/Categories.js';
+import { ExpenseForm } from '../features/expenses/ExpenseForm.js';
 import { AppShell } from '../components/AppShell.js';
 import { QueryState } from '../components/QueryState.js';
 
@@ -22,6 +23,8 @@ export function App() {
     <Route path="/" element={<Login />} />
     <Route path="/trips" element={<PrivatePage><Trips /></PrivatePage>} />
     <Route path="/trips/:tripId" element={<PrivatePage><TripLedger /></PrivatePage>} />
+    <Route path="/trips/:tripId/expenses/new" element={<PrivatePage><ExpenseForm /></PrivatePage>} />
+    <Route path="/trips/:tripId/expenses/:expenseId" element={<PrivatePage><ExpenseForm /></PrivatePage>} />
     <Route path="/categories" element={<PrivatePage><Categories /></PrivatePage>} />
     <Route path="*" element={<PrivatePage><div className="empty"><h1>找不到這個頁面</h1><Link className="btn" to="/trips">返回我的旅行</Link></div></PrivatePage>} />
   </Routes>;
