@@ -1,0 +1,5 @@
+BetterAuthSession:
+  type: apiKey
+  in: cookie
+  name: travelledger_session
+  description: 由 Better Auth 發行、HttpOnly 且正式環境為 Secure 的已驗證 session cookie；服務端驗證後取得 userId。

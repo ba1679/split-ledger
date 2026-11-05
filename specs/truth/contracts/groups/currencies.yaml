@@ -1,0 +1,17 @@
+currencies:
+  get:
+    tags: [currencies]
+    operationId: listCurrencies
+    security: []
+    summary: 取得可用幣別與小數位數
+    description: |
+      回傳部署中封存之 SIX ISO 4217 List One 數字 minor unit 條目，按代碼排序。
+      2026-09-17 快照有 165 個可用代碼；不包含 N.A. 條目。前端以此
+      提供代碼/名稱自動完成並執行即時輸入限制，後端仍獨立驗證。
+    responses:
+      '200':
+        description: 幣別目錄；可供登入頁預載，不含個人資料。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/currencies.yaml#/CurrencyList

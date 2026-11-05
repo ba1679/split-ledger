@@ -1,0 +1,29 @@
+Currency:
+  type: object
+  additionalProperties: false
+  required: [code, name, minorUnit]
+  properties:
+    code:
+      $ref: ./shared.yaml#/CurrencyCode
+    name:
+      type: string
+      description: 供搜尋和顯示的英文標準名稱；UI 可另提供中文別名。
+    minorUnit:
+      type: integer
+      minimum: 0
+      maximum: 4
+      description: 本系統封存之 SIX List One 快照中的數字位數。
+CurrencyList:
+  type: object
+  additionalProperties: false
+  required: [snapshotDate, items]
+  properties:
+    snapshotDate:
+      type: string
+      format: date
+      description: SIX List One 發布日期。
+      example: '2026-09-17'
+    items:
+      type: array
+      items:
+        $ref: '#/Currency'

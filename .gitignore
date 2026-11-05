@@ -1,0 +1,27 @@
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+
+# Dependencies, builds, and local caches
+node_modules/
+.pnpm-store/
+dist/
+build/
+.vite/
+.cache/
+*.tsbuildinfo
+
+# Test results and tool logs
+coverage/
+playwright-report/
+test-results/
+*.log
+
+# Operating system files
+.DS_Store
+._*
+Thumbs.db

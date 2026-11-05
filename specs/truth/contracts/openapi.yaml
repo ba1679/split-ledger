@@ -1,0 +1,76 @@
+openapi: 3.0.3
+info:
+  title: 旅帳 Phase 1A API
+  version: 0.1.0
+  description: |
+    個人旅行記帳的業務 API。金額一律為十進位字串，日期為不帶時區的 YYYY-MM-DD。
+    Google OAuth、session cookie 與登出由掛在 /api/auth/* 的 Better Auth 處理；
+    其套件產生的路由與回應不在本業務契約中重新定義。每個受保護的業務請求
+    都由伺服器從有效 session 取得 userId，不能由客戶端指定 owner。
+servers:
+  - url: /
+    description: 同 origin 提供網頁與 /api，開發與正式環境共用相對路徑。
+tags:
+  - name: account
+    description: 登入後的最小使用者投影
+  - name: trips
+    description: 個人旅行帳本
+  - name: expenses
+    description: 個人支出與分幣別統計
+  - name: categories
+    description: 跨旅行共用的個人分類
+  - name: currencies
+    description: 固定版本的幣別目錄
+paths:
+  /api/me:
+    $ref: ./groups/account.yaml#/me
+  /api/trips:
+    $ref: ./groups/trips.yaml#/trips
+  /api/trips/{tripId}:
+    $ref: ./groups/trips.yaml#/trip
+  /api/trips/{tripId}/expenses:
+    $ref: ./groups/expenses.yaml#/expenses
+  /api/trips/{tripId}/expenses/{expenseId}:
+    $ref: ./groups/expenses.yaml#/expense
+  /api/trips/{tripId}/totals:
+    $ref: ./groups/expenses.yaml#/totals
+  /api/categories:
+    $ref: ./groups/categories.yaml#/categories
+  /api/categories/{categoryId}:
+    $ref: ./groups/categories.yaml#/category
+  /api/currencies:
+    $ref: ./groups/currencies.yaml#/currencies
+components:
+  securitySchemes:
+    BetterAuthSession:
+      $ref: ./components/security.yaml#/BetterAuthSession
+  parameters:
+    TripId:
+      $ref: ./components/parameters.yaml#/TripId
+    ExpenseId:
+      $ref: ./components/parameters.yaml#/ExpenseId
+    CategoryId:
+      $ref: ./components/parameters.yaml#/CategoryId
+    PageLimit:
+      $ref: ./components/parameters.yaml#/PageLimit
+    PageCursor:
+      $ref: ./components/parameters.yaml#/PageCursor
+  schemas:
+    ApiError:
+      $ref: ./components/schemas/shared.yaml#/ApiError
+    DateOnly:
+      $ref: ./components/schemas/shared.yaml#/DateOnly
+    MoneyAmount:
+      $ref: ./components/schemas/shared.yaml#/MoneyAmount
+    CurrencyCode:
+      $ref: ./components/schemas/shared.yaml#/CurrencyCode
+    Me:
+      $ref: ./components/schemas/account.yaml#/Me
+    Trip:
+      $ref: ./components/schemas/trips.yaml#/Trip
+    Expense:
+      $ref: ./components/schemas/expenses.yaml#/Expense
+    Category:
+      $ref: ./components/schemas/categories.yaml#/Category
+    Currency:
+      $ref: ./components/schemas/currencies.yaml#/Currency

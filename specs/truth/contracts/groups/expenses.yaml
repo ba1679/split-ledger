@@ -1,0 +1,240 @@
+expenses:
+  parameters:
+    - $ref: ../components/parameters.yaml#/TripId
+  get:
+    tags: [expenses]
+    operationId: listExpenses
+    x-session-required: true
+    security:
+      - BetterAuthSession: []
+    summary: 分頁列出旅行支出
+    description: 只列本人旅行的支出，依 spentOn、id 由新到舊排序；分類名稱取目前名稱，不複製舊字串。
+    parameters:
+      - $ref: ../components/parameters.yaml#/PageLimit
+      - $ref: ../components/parameters.yaml#/PageCursor
+    responses:
+      '200':
+        description: 支出清單，沒有資料時 items 為空陣列。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/expenses.yaml#/ExpenseList
+      '400':
+        description: 分頁參數或 cursor 不合法。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '404':
+        description: 旅行不存在或不屬於目前帳號。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+  post:
+    tags: [expenses]
+    operationId: createExpense
+    x-session-required: true
+    security:
+      - BetterAuthSession: []
+    summary: 記錄個人支出
+    description: |
+      項目、正數金額、幣別、日期必填；分類選填。支出日期可在旅行日期之外。
+      日期預設由裝置填入，API 不推測使用者時區。金額依指定幣別位數精確驗證，
+      不接受靜默修正。用戶端產生 UUID 並在結果未確認時保留用於查證。
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/expenses.yaml#/CreateExpenseRequest
+    responses:
+      '201':
+        description: 建立成功，回應已保存支出。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/expenses.yaml#/Expense
+      '400':
+        description: 欄位、日期、金額、幣別、位數或 Content-Type 不合法；code=VALIDATION_ERROR。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '404':
+        description: 旅行或指定分類不存在或不屬於目前帳號；不揭露他人資源。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '409':
+        description: 建立 UUID 已存在，code=ID_CONFLICT；不得把衝突資料回傳給其他帳號。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '403':
+        description: Origin 缺失、不可信或不符；code=REQUEST_ORIGIN_REJECTED。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+expense:
+  parameters:
+    - $ref: ../components/parameters.yaml#/TripId
+    - $ref: ../components/parameters.yaml#/ExpenseId
+  get:
+    tags: [expenses]
+    operationId: getExpense
+    x-session-required: true
+    security:
+      - BetterAuthSession: []
+    summary: 查看單筆支出
+    responses:
+      '200':
+        description: 指定旅行中的本人支出。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/expenses.yaml#/Expense
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '404':
+        description: 旅行或支出不存在、不屬於目前帳號，或支出不在指定旅行，均回相同 NOT_FOUND。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+  patch:
+    tags: [expenses]
+    operationId: updateExpense
+    x-session-required: true
+    security:
+      - BetterAuthSession: []
+    summary: 修改單筆支出
+    description: |
+      省略欄位保留原值，categoryId=null 才清除分類。合併新舊欄位後重新驗證
+      金額與幣別位數；若改幣別但未改金額，沿用原大單位數值，絕不換算。
+      若不符合新位數，拒絕保存並保留原紀錄。成功後各受影響幣別的統計
+      從權威支出資料重新計算。
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/expenses.yaml#/UpdateExpenseRequest
+    responses:
+      '200':
+        description: 修改後支出。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/expenses.yaml#/Expense
+      '400':
+        description: 欄位、金額、幣別位數、日期或 Content-Type 不合法。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '404':
+        description: 旅行、支出或新分類不存在或不屬於目前帳號。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '403':
+        description: Origin 缺失、不可信或不符；code=REQUEST_ORIGIN_REJECTED。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+  delete:
+    tags: [expenses]
+    operationId: deleteExpense
+    x-session-required: true
+    security:
+      - BetterAuthSession: []
+    summary: 刪除單筆支出
+    description: 成功後支出不再列出，也不計入任何幣別總額；重複刪除回 404。
+    responses:
+      '204':
+        description: 刪除成功，無回應本文。
+      '400':
+        description: DELETE 帶有本文；code=VALIDATION_ERROR。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '404':
+        description: 旅行或支出不存在、不屬於目前帳號，或支出不在此旅行。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '403':
+        description: Origin 缺失、不可信或不符；code=REQUEST_ORIGIN_REJECTED。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+totals:
+  parameters:
+    - $ref: ../components/parameters.yaml#/TripId
+  get:
+    tags: [expenses]
+    operationId: getTripTotals
+    x-session-required: true
+    security:
+      - BetterAuthSession: []
+    summary: 查看旅行各原幣別總額
+    description: |
+      只加總指定本人旅行中的已保存支出。各幣別分開呈現，不換匯。
+      以精確整數或 PostgreSQL NUMERIC 聚合後轉為字串，避免 BIGINT SUM
+      被錯誤轉成 JavaScript Number；修改或刪除後讀取反映目前資料。
+    responses:
+      '200':
+        description: 依幣別代碼升序的總額陣列；空旅行回空陣列。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/expenses.yaml#/TotalsResponse
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '404':
+        description: 旅行不存在或不屬於目前帳號。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError

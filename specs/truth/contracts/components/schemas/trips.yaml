@@ -1,0 +1,83 @@
+Trip:
+  type: object
+  additionalProperties: false
+  required: [id, name, startDate, endDate, expenseCount, createdAt, updatedAt]
+  properties:
+    id:
+      type: string
+      format: uuid
+    name:
+      type: string
+      minLength: 1
+      description: 已移除前後空白；不可只含空白。
+    startDate:
+      type: string
+      format: date
+      nullable: true
+    endDate:
+      type: string
+      format: date
+      nullable: true
+    expenseCount:
+      type: integer
+      minimum: 0
+      description: 此旅行目前已保存的支出總筆數，供清單卡與帳本標題顯示；不是當頁筆數。
+    createdAt:
+      $ref: ./shared.yaml#/IsoTimestamp
+    updatedAt:
+      $ref: ./shared.yaml#/IsoTimestamp
+CreateTripRequest:
+  type: object
+  additionalProperties: false
+  required: [id, name]
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: 客戶端為這次建立產生並保留的 UUID；回應遺失時用 GET /api/trips/{tripId} 查證。
+    name:
+      type: string
+      minLength: 1
+      description: 前後空白會移除，空白名稱遭拒。
+    startDate:
+      type: string
+      format: date
+      nullable: true
+      description: 省略或 null 均表示未設定。
+    endDate:
+      type: string
+      format: date
+      nullable: true
+      description: 省略或 null 均表示未設定。
+UpdateTripRequest:
+  type: object
+  additionalProperties: false
+  minProperties: 1
+  properties:
+    name:
+      type: string
+      minLength: 1
+      description: 可在補日期時一併更新名稱；空白名稱遭拒。
+    startDate:
+      type: string
+      format: date
+      nullable: true
+      description: 省略代表不變；null 代表清除。
+    endDate:
+      type: string
+      format: date
+      nullable: true
+      description: 省略代表不變；null 代表清除。
+TripList:
+  type: object
+  additionalProperties: false
+  required: [items, nextCursor]
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/Trip'
+    nextCursor:
+      type: string
+      nullable: true
+      description: null 表示沒有下一頁。

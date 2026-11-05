@@ -1,0 +1,150 @@
+trips:
+  get:
+    tags: [trips]
+    operationId: listTrips
+    x-session-required: true
+    security:
+      - BetterAuthSession: []
+    summary: 分頁列出自己的旅行帳本
+    description: 只回傳目前 session 所屬帳號的旅行，按 createdAt、id 由新到舊排序；cursor 綁定本帳號與排序條件。
+    parameters:
+      - $ref: ../components/parameters.yaml#/PageLimit
+      - $ref: ../components/parameters.yaml#/PageCursor
+    responses:
+      '200':
+        description: 旅行清單，沒有資料時 items 為空陣列。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/trips.yaml#/TripList
+      '400':
+        description: 分頁參數或 cursor 不合法。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+  post:
+    tags: [trips]
+    operationId: createTrip
+    x-session-required: true
+    security:
+      - BetterAuthSession: []
+    summary: 建立個人旅行帳本
+    description: 名稱必填；起迄日各自可省略或為 null，有兩端時結束日不得早於開始日。建立用的 UUID 由客戶端產生。
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/trips.yaml#/CreateTripRequest
+    responses:
+      '201':
+        description: 建立成功。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/trips.yaml#/Trip
+      '400':
+        description: 名稱、日期順序、格式、識別或 Content-Type 不合法；code=VALIDATION_ERROR。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '409':
+        description: 提供的 UUID 已存在，不以此回應推斷既有資料是否屬於其他帳號。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '403':
+        description: Origin 缺失、不可信或不符；code=REQUEST_ORIGIN_REJECTED。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+trip:
+  parameters:
+    - $ref: ../components/parameters.yaml#/TripId
+  get:
+    tags: [trips]
+    operationId: getTrip
+    x-session-required: true
+    security:
+      - BetterAuthSession: []
+    summary: 查看自己的旅行帳本
+    responses:
+      '200':
+        description: 旅行帳本。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/trips.yaml#/Trip
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '404':
+        description: 旅行不存在或不屬於目前帳號，皆回相同 NOT_FOUND。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+  patch:
+    tags: [trips]
+    operationId: updateTrip
+    x-session-required: true
+    security:
+      - BetterAuthSession: []
+    summary: 修改旅行名稱或日期
+    description: 省略欄位保留原值；日期傳 null 清除。合併現有值後檢查日期先後；失敗時原資料不變。
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/trips.yaml#/UpdateTripRequest
+    responses:
+      '200':
+        description: 更新後的旅行。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/trips.yaml#/Trip
+      '400':
+        description: 名稱、日期格式、合併後日期順序或 Content-Type 不合法。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '404':
+        description: 旅行不存在或不屬於目前帳號。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '403':
+        description: Origin 缺失、不可信或不符；code=REQUEST_ORIGIN_REJECTED。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError

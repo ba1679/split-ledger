@@ -1,0 +1,11 @@
+Me:
+  type: object
+  additionalProperties: false
+  required: [id, name]
+  properties:
+    id:
+      type: string
+      description: Better Auth user id 的不透明字串；供前端隔離本裝置分類預設與 Query 快取。
+    name:
+      type: string
+      description: Google 登入後保存在使用者資料中的顯示名稱。

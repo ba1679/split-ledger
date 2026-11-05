@@ -1,0 +1,191 @@
+categories:
+  get:
+    tags: [categories]
+    operationId: listCategories
+    x-session-required: true
+    security:
+      - BetterAuthSession: []
+    summary: 列出自己的跨旅行分類與使用筆數
+    description: 只包含目前帳號的分類；usageCount 計算所有本人旅行中目前仍引用的支出。
+    responses:
+      '200':
+        description: 分類清單，按名稱與 id 升序；無分類則為空陣列。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/categories.yaml#/CategoryList
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+  post:
+    tags: [categories]
+    operationId: createCategory
+    x-session-required: true
+    security:
+      - BetterAuthSession: []
+    summary: 建立跨旅行分類
+    description: 名稱去除前後空白後須為 1–30 個 Unicode code points；同帳號不可重名，僅 ASCII 英文不分大小寫。
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/categories.yaml#/CreateCategoryRequest
+    responses:
+      '201':
+        description: 建立成功。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/categories.yaml#/Category
+      '400':
+        description: UUID、名稱或 Content-Type 不合法；code=VALIDATION_ERROR。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '409':
+        description: 同帳號同名則 CATEGORY_NAME_CONFLICT；提供的 UUID 已存在則 ID_CONFLICT。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '403':
+        description: Origin 缺失、不可信或不符；code=REQUEST_ORIGIN_REJECTED。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+category:
+  parameters:
+    - $ref: ../components/parameters.yaml#/CategoryId
+  get:
+    tags: [categories]
+    operationId: getCategory
+    x-session-required: true
+    security:
+      - BetterAuthSession: []
+    summary: 查看自己的分類
+    responses:
+      '200':
+        description: 分類及目前使用筆數。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/categories.yaml#/Category
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '404':
+        description: 分類不存在或不屬於目前帳號，均回相同 NOT_FOUND。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+  patch:
+    tags: [categories]
+    operationId: renameCategory
+    x-session-required: true
+    security:
+      - BetterAuthSession: []
+    summary: 修改分類名稱
+    description: 原有支出仍關聯同一個分類；所有支出查詢即顯示新名稱。改名成自己的原名稱不算重名衝突。
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/categories.yaml#/UpdateCategoryRequest
+    responses:
+      '200':
+        description: 修改後分類。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/categories.yaml#/Category
+      '400':
+        description: 名稱或 Content-Type 不合法。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '404':
+        description: 分類不存在或不屬於目前帳號。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '409':
+        description: 同帳號另一分類已使用此名稱；code=CATEGORY_NAME_CONFLICT。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '403':
+        description: Origin 缺失、不可信或不符；code=REQUEST_ORIGIN_REJECTED。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+  delete:
+    tags: [categories]
+    operationId: deleteCategory
+    x-session-required: true
+    security:
+      - BetterAuthSession: []
+    summary: 刪除未使用的分類
+    description: |
+      若任何支出仍引用此分類，回 409 並保留分類與支出。檢查與刪除必須
+      具有資料庫層保護，不能只依事先讀取的 usageCount 決定；成功後裝置偏好
+      中的舊分類 id 由 UI 在下次表單載入時檢查可用性。
+    responses:
+      '204':
+        description: 刪除成功，無回應本文。
+      '400':
+        description: DELETE 帶有本文；code=VALIDATION_ERROR。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '404':
+        description: 分類不存在或不屬於目前帳號。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '409':
+        description: 分類仍被支出使用；code=CATEGORY_IN_USE。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '403':
+        description: Origin 缺失、不可信或不符；code=REQUEST_ORIGIN_REJECTED。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError

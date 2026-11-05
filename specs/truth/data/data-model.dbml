@@ -1,0 +1,149 @@
+Project "travel_ledger_phase_1a" {
+  database_type: "PostgreSQL"
+  Note: '''
+  個人旅行記帳的目前完整持久化模型。auth schema 的四張表由固定版本 Better Auth
+  及 Drizzle adapter 產生並管理；業務表由應用 migration 管理。業務 UUID 由客戶端
+  在建立時提供，owner_id 一律由伺服器驗證後的 session 寫入。具體 CHECK、generated
+  column、collation、金額與交易規則見同目錄 README.md。
+  '''
+}
+
+Table auth.user {
+  id text [pk, not null, note: 'Better Auth 使用者 ID；業務 owner_id 採相同 text 型別']
+  name text [not null]
+  email text [not null, unique]
+  email_verified boolean [not null]
+  image text [null]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+
+  Note: 'Better Auth 核心 user 投影。欄位/property 映射與 migration 須由固定版本 auth generate 核對，業務服務不可直接偽造使用者。'
+}
+
+Table auth.session {
+  id text [pk, not null]
+  user_id text [not null]
+  token text [not null, unique, note: '敏感 session token，絕不輸出到業務 API 或日誌']
+  expires_at timestamptz [not null]
+  ip_address text [null]
+  user_agent text [null]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+
+  Indexes {
+    user_id [name: 'session_user_id_idx']
+  }
+
+  Note: 'Better Auth 核心 session；過期與撤銷由 Better Auth 處理。'
+}
+
+Table auth.account {
+  id text [pk, not null]
+  user_id text [not null]
+  account_id text [not null, note: 'Google provider 端穩定識別']
+  provider_id text [not null, note: '本版只啟用 Google provider']
+  access_token text [null, note: '敏感 OAuth token；是否有值由 provider 決定']
+  refresh_token text [null, note: '敏感 OAuth token']
+  access_token_expires_at timestamptz [null]
+  refresh_token_expires_at timestamptz [null]
+  scope text [null]
+  id_token text [null, note: '敏感 provider ID token']
+  password text [null, note: 'Better Auth 核心 optional 欄位；本版不啟用密碼登入']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+
+  Indexes {
+    (provider_id, account_id) [unique, name: 'account_provider_account_uq']
+    user_id [name: 'account_user_id_idx']
+  }
+
+  Note: 'Better Auth 核心 account；provider/account 二元組是第三方身分的定位鍵。'
+}
+
+Table auth.verification {
+  id text [pk, not null]
+  identifier text [not null]
+  value text [not null, note: '敏感暫時驗證資料']
+  expires_at timestamptz [not null]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+
+  Indexes {
+    identifier [name: 'verification_identifier_idx']
+  }
+
+  Note: 'Better Auth 核心 verification，供 OAuth/框架內部驗證流程使用。'
+}
+
+Table trips {
+  id uuid [pk, not null, note: '客戶端在建立請求產生；全系統唯一']
+  owner_id text [not null, note: '取自驗證後 session；不接受客戶端傳入']
+  name text [not null, note: '去除前後空白後非空']
+  start_date date [null]
+  end_date date [null]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+
+  Indexes {
+    (owner_id, id) [unique, name: 'trips_owner_id_id_uq']
+    (owner_id, created_at, id) [name: 'trips_owner_created_id_idx']
+  }
+
+  Note: '開始/結束日各自可空；兩者都有值才要求 end_date >= start_date。此版無刪除旅行入口。'
+}
+
+Table categories {
+  id uuid [pk, not null, note: '客戶端在建立請求產生；全系統唯一']
+  owner_id text [not null]
+  name text [not null, note: '已去首尾空白；1 至 30 個 Unicode code points']
+  name_key text [not null, note: 'generated stored：只轉 ASCII A-Z 為 a-z；採 C collation 精確比對']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+
+  Indexes {
+    (owner_id, id) [unique, name: 'categories_owner_id_id_uq']
+    (owner_id, name_key) [unique, name: 'categories_owner_name_key_uq']
+    (owner_id, name, id) [name: 'categories_owner_name_id_idx']
+  }
+
+  Note: '全帳號共用；改名只更新本表，支出仍參照同一 id。被任何支出引用時 FK RESTRICT 阻止刪除。'
+}
+
+Table currencies {
+  code char(3) [pk, not null, note: 'SIX ISO 4217 三碼']
+  name text [not null, note: '英文顯示/搜尋名稱']
+  minor_unit smallint [not null, note: '目前可選條目的數字小數位數，0 至 4']
+  snapshot_date date [not null, note: '此可選條目所屬的 SIX List One 發布日期']
+  is_selectable boolean [not null, note: '退役條目保留外鍵，新的支出不得再選']
+
+  Note: 'Setup 原子匯入固定快照；更新時舊代碼可標為不可選，不刪除仍被支出引用的代碼。支出的歷史 minor_unit 獨立保存。'
+}
+
+Table expenses {
+  id uuid [pk, not null, note: '客戶端在建立請求產生；全系統唯一']
+  owner_id text [not null, note: '冗餘於 trip 但用於複合外鍵隔離及查詢']
+  trip_id uuid [not null]
+  category_id uuid [null]
+  item text [not null, note: '去除前後空白後非空']
+  amount_minor bigint [not null, note: '正整數最小貨幣單位；單筆 <= 9223372036854775807']
+  currency_code char(3) [not null]
+  minor_unit smallint [not null, note: '此筆金額建立或實際更改幣別時適用的歷史位數']
+  spent_on date [not null, note: '日曆日期，可在旅行日期範圍之外']
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+
+  Indexes {
+    (owner_id, trip_id, spent_on, id) [name: 'expenses_owner_trip_date_id_idx']
+    (owner_id, category_id) [name: 'expenses_owner_category_idx']
+  }
+
+  Note: '權威記帳紀錄；修改/刪除後從目前紀錄即時計算 count 與各幣別總額，不另存摘要。'
+}
+
+Ref: auth.session.user_id > auth.user.id [delete: cascade]
+Ref: auth.account.user_id > auth.user.id [delete: cascade]
+Ref: trips.owner_id > auth.user.id [delete: restrict]
+Ref: categories.owner_id > auth.user.id [delete: restrict]
+Ref: expenses.(owner_id, trip_id) > trips.(owner_id, id) [delete: restrict]
+Ref: expenses.(owner_id, category_id) > categories.(owner_id, id) [delete: restrict]
+Ref: expenses.currency_code > currencies.code [delete: restrict]

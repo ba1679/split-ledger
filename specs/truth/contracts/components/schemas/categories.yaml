@@ -1,0 +1,65 @@
+CategoryReference:
+  type: object
+  additionalProperties: false
+  required: [id, name]
+  properties:
+    id:
+      type: string
+      format: uuid
+    name:
+      type: string
+Category:
+  type: object
+  additionalProperties: false
+  required: [id, name, usageCount, createdAt, updatedAt]
+  properties:
+    id:
+      type: string
+      format: uuid
+    name:
+      type: string
+      minLength: 1
+      maxLength: 30
+      description: 去除前後空白後的名稱，最多 30 個 Unicode code points。
+    usageCount:
+      type: integer
+      minimum: 0
+      description: 目前帳號的所有旅行中，仍引用此分類的支出筆數。
+    createdAt:
+      $ref: ./shared.yaml#/IsoTimestamp
+    updatedAt:
+      $ref: ./shared.yaml#/IsoTimestamp
+CreateCategoryRequest:
+  type: object
+  additionalProperties: false
+  required: [id, name]
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: 客戶端為這次建立產生並保留的 UUID；結果未確認時可透過單筆 GET 查證。
+    name:
+      type: string
+      minLength: 1
+      description: |
+        去除前後空白後須為 1–30 個 Unicode code points。每個帳號不可重名；
+        只將 ASCII 英文字母 A-Z 轉小寫後比較，不合併內部空白或其他 Unicode 字形。
+        改名時保留自己的原名稱不算衝突。
+UpdateCategoryRequest:
+  type: object
+  additionalProperties: false
+  required: [name]
+  properties:
+    name:
+      type: string
+      minLength: 1
+      description: 去除前後空白後須為 1–30 個 Unicode code points；同帳號名稱唯一，僅 ASCII 英文不分大小寫。
+CategoryList:
+  type: object
+  additionalProperties: false
+  required: [items]
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/Category'

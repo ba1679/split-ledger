@@ -1,0 +1,22 @@
+me:
+  get:
+    tags: [account]
+    operationId: getMe
+    x-session-required: true
+    security:
+      - BetterAuthSession: []
+    summary: 取得目前登入帳號的最小投影
+    description: 由 Better Auth 已驗證的 session 取得身分；不接受客戶端指定使用者識別。
+    responses:
+      '200':
+        description: 目前登入帳號。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/account.yaml#/Me
+      '401':
+        description: 未登入、session 失效或登入流程未完成。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError

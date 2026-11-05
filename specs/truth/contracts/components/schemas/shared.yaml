@@ -1,0 +1,49 @@
+ApiError:
+  type: object
+  additionalProperties: false
+  required: [code, message]
+  properties:
+    code:
+      type: string
+      enum:
+        - VALIDATION_ERROR
+        - UNAUTHENTICATED
+        - NOT_FOUND
+        - CATEGORY_IN_USE
+        - CATEGORY_NAME_CONFLICT
+        - ID_CONFLICT
+        - REQUEST_ORIGIN_REJECTED
+        - INTERNAL_ERROR
+    message:
+      type: string
+      description: 可直接顯示的繁體中文訊息，不包含他人的資源或私人資料。
+    field:
+      type: string
+      description: 可選，與表單欄位對應的識別。
+    requestId:
+      type: string
+      description: 可選，供支援與伺服器日誌對照，不包含敏感資訊。
+DateOnly:
+  type: string
+  format: date
+  description: ISO 8601 日曆日期 YYYY-MM-DD；不帶時區，不使用 UTC 轉換更改日期。
+  example: '2027-03-11'
+MoneyAmount:
+  type: string
+  description: |
+    正數十進位大單位金額。請求不接受負號、指數、千分位、前後空白、
+    靜默截斷或四捨五入。小數位數由所選幣別快照的 minorUnit 決定；
+    轉成最小單位後必須在 PostgreSQL 正數 BIGINT 範圍內。
+    回應固定補足該幣別位數，例如 USD 12.50、JPY 1200。
+  pattern: '^(?:0|[1-9][0-9]*)(?:\.[0-9]+)?$'
+  example: '12.50'
+CurrencyCode:
+  type: string
+  pattern: '^[A-Z]{3}$'
+  description: 必須存在於伺服器封存的 SIX ISO 4217 數字 minor unit 清單。
+  example: TWD
+IsoTimestamp:
+  type: string
+  format: date-time
+  description: 伺服器產生的 UTC 時間戳，用於排序或記錄更新時間。
+  example: '2027-03-11T08:30:00Z'

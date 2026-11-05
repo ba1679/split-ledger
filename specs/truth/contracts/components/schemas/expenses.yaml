@@ -1,0 +1,128 @@
+Expense:
+  type: object
+  additionalProperties: false
+  required: [id, tripId, item, amount, currencyCode, minorUnit, spentOn, category, createdAt, updatedAt]
+  properties:
+    id:
+      type: string
+      format: uuid
+    tripId:
+      type: string
+      format: uuid
+    item:
+      type: string
+      minLength: 1
+      description: 已移除前後空白；不可只含空白。
+    amount:
+      $ref: ./shared.yaml#/MoneyAmount
+    currencyCode:
+      $ref: ./shared.yaml#/CurrencyCode
+    minorUnit:
+      type: integer
+      minimum: 0
+      maximum: 4
+      description: 建立或修改此筆金額時採用的幣別小數位數，歷史資料不隨目錄更新而重算。
+    spentOn:
+      $ref: ./shared.yaml#/DateOnly
+    category:
+      type: object
+      nullable: true
+      description: 未分類時為 null；分類改名後回傳目前名稱。
+      additionalProperties: false
+      required: [id, name]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+    createdAt:
+      $ref: ./shared.yaml#/IsoTimestamp
+    updatedAt:
+      $ref: ./shared.yaml#/IsoTimestamp
+CreateExpenseRequest:
+  type: object
+  additionalProperties: false
+  required: [id, item, amount, currencyCode, spentOn]
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: 客戶端為這次建立產生並保留的 UUID；結果未確認時可透過單筆 GET 查證。
+    item:
+      type: string
+      minLength: 1
+      description: 前後空白會移除，空白項目遭拒。
+    amount:
+      $ref: ./shared.yaml#/MoneyAmount
+    currencyCode:
+      $ref: ./shared.yaml#/CurrencyCode
+    spentOn:
+      $ref: ./shared.yaml#/DateOnly
+    categoryId:
+      type: string
+      format: uuid
+      nullable: true
+      description: 省略或 null 均為未分類；必須屬於目前帳號。
+UpdateExpenseRequest:
+  type: object
+  additionalProperties: false
+  minProperties: 1
+  properties:
+    item:
+      type: string
+      minLength: 1
+      description: 前後空白會移除，空白項目遭拒。
+    amount:
+      $ref: ./shared.yaml#/MoneyAmount
+    currencyCode:
+      $ref: ./shared.yaml#/CurrencyCode
+    spentOn:
+      $ref: ./shared.yaml#/DateOnly
+    categoryId:
+      type: string
+      format: uuid
+      nullable: true
+      description: 省略不變；null 清除分類。新分類須屬於目前帳號。
+ExpenseList:
+  type: object
+  additionalProperties: false
+  required: [items, nextCursor, totalCount]
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/Expense'
+    nextCursor:
+      type: string
+      nullable: true
+      description: null 表示沒有下一頁。
+    totalCount:
+      type: integer
+      minimum: 0
+      description: 請求時此本人旅行的全部支出筆數，不是當頁筆數。
+CurrencyTotal:
+  type: object
+  additionalProperties: false
+  required: [currencyCode, amount, minorUnit]
+  properties:
+    currencyCode:
+      $ref: ./shared.yaml#/CurrencyCode
+    amount:
+      type: string
+      description: 該原幣別支出的精確總額；可為 0，固定補足其小數位數，不與其他幣別相加。
+      example: '17000'
+    minorUnit:
+      type: integer
+      minimum: 0
+      maximum: 4
+TotalsResponse:
+  type: object
+  additionalProperties: false
+  required: [totals]
+  properties:
+    totals:
+      type: array
+      description: 僅列出目前仍有支出的幣別；沒有支出則為空陣列。
+      items:
+        $ref: '#/CurrencyTotal'
