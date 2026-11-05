@@ -18,7 +18,8 @@
     "db:up": "docker compose up -d --wait",
     "db:down": "docker compose down",
     "test:support": "playwright test -c playwright.support.config.ts",
-    "test:web-support": "playwright test -c playwright.web-support.config.ts"
+    "test:web-support": "playwright test -c playwright.web-support.config.ts",
+    "test:ui-quality": "playwright test -c playwright.ui-quality.config.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

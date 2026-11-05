@@ -705,5 +705,5 @@ Phase 3 涵蓋 T010–T223，共 214 個唯一句型。
 
 **Boundary**: 不改 truth、不新增 feature，不以重跑 GREEN 取代設計對齊。核對分類驗證、TWD 整數輸入及未確認結果等雛形尚未同步的差異，以最新 UI plan 為準。
 
-- [ ] T245 subagent review (ui quality gate)：核對版面、日期互動、行動版與已核可的錯誤／載入狀態；記錄差異並修正至符合計畫。
+- [X] T245 subagent review (ui quality gate)：核對版面、日期互動、行動版與已核可的錯誤／載入狀態；記錄差異並修正至符合計畫。
 

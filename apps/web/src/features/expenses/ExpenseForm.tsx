@@ -12,13 +12,14 @@ import { useSession } from '../auth/session.js';
 import { displayAmount } from './money.js';
 import { definitelyRejected, OfflineWrite, UnconfirmedWrite, unconfirmedMessage, verifiedDelete, verifiedSave, type SaveIntent, type WriteIntent } from './save-outcome.js';
 import { readCategoryPreference, saveCategoryPreference } from '../categories/preference.js';
+import { Icon } from '../../components/Icon.js';
 
 type FieldErrors = Partial<Record<'item' | 'currency' | 'amount' | 'date', string>>;
 export function ExpenseForm() {
   const { tripId, expenseId } = useParams(), { account } = useSession();
   const trip = useQuery({ queryKey: ['account', account!.id, 'trip', tripId], queryFn: ({ signal }) => apiRequest<Trip>(`/api/trips/${tripId}`, { signal }) });
   const expense = useQuery({ queryKey: ['account', account!.id, 'expense', tripId, expenseId], queryFn: ({ signal }) => apiRequest<Expense>(`/api/trips/${tripId}/expenses/${expenseId}`, { signal }), enabled: Boolean(expenseId) });
-  if (!trip.data || (expenseId && !expense.data)) return <><Link className="back" to={tripId ? `/trips/${tripId}` : '/trips'}>返回旅行帳本</Link><QueryState pending={trip.isPending || Boolean(expenseId && expense.isPending)} error={trip.error ?? expense.error} retry={() => { void trip.refetch(); if (expenseId) void expense.refetch(); }} /></>;
+  if (!trip.data || (expenseId && !expense.data)) return <><Link className="back" to={tripId ? `/trips/${tripId}` : '/trips'}><Icon name="back" /><span>返回旅行帳本</span></Link><QueryState pending={trip.isPending || Boolean(expenseId && expense.isPending)} error={trip.error ?? expense.error} retry={() => { void trip.refetch(); if (expenseId) void expense.refetch(); }} /></>;
   return <ExpenseEditor key={`${account!.id}:${tripId}:${expenseId ?? 'new'}`} trip={trip.data} expense={expense.data} readError={trip.error ?? expense.error} />;
 }
 
@@ -135,7 +136,7 @@ function ExpenseEditor({ trip, expense, readError }: { trip: Trip; expense?: Exp
     writing.current = true; mutation.mutate(dateOnly(parsed!));
   }
   return <>
-    <Link className="back" to={`/trips/${tripId}`}>{trip.name}</Link>
+    <Link className="back" to={`/trips/${tripId}`}><Icon name="back" /><span>{trip.name}</span></Link>
     <header className="page-head"><div><div className="eyebrow">LITTLE DETAILS, WELL KEPT</div><h1>{expense ? '編輯這筆花費' : '記下這一刻的花費。'}</h1><p className="muted">{expense ? '修正紀錄，讓帳本更準確。' : '每一筆小事，都是旅程的一部分。'}</p></div></header>
     {readError ? <p className="error" role="alert">暫時無法更新已保存資料，請保留草稿後再試。</p> : null}
     <form className="form-panel" noValidate onSubmit={submit}>

@@ -31,6 +31,8 @@ pnpm lint
 pnpm build
 pnpm test:unit
 pnpm test:support
+pnpm test:web-support
+pnpm test:ui-quality
 pnpm test:smoke
 pnpm test:api
 pnpm test:web --project chromium
@@ -40,3 +42,5 @@ pnpm test:web --project webkit
 BDD 使用正式 migrations、每個 worker 的獨立 PostgreSQL、真實 API/session 與瀏覽器。Google 自動測試僅替換外部 Google HTTP 回應；真實 Google 登入及手機實機驗證另行執行。測試資料庫與開發資料庫分開，測試不使用開發帳本資料。
 
 目前實作狀態與驗證證據見 [實作紀錄](docs/development/implementation.md)，任務進度見 [tasks.md](specs/plans/001-personal-travel-expenses/tasks.md)。
+
+UI 核對方式、修正與瀏覽器驗證限制見 [UI 品質審查](docs/development/ui-quality-review.md)。

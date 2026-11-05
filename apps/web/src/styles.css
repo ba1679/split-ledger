@@ -10,6 +10,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 h1, h2, h3, p { margin: 0; }
 h1 { font-size: 36px; line-height: 1.3; letter-spacing: -1px; }
 h2 { font-size: 22px; }
+h1, h2, h3, p { overflow-wrap: anywhere; }
 .muted { color: var(--muted); }
 .eyebrow { font-size: 11px; letter-spacing: 2px; font-weight: 700; color: var(--muted); margin-bottom: 12px; }
 .brand { display: flex; align-items: center; gap: 12px; font-weight: 750; letter-spacing: 1px; min-height: 44px; }
@@ -22,6 +23,8 @@ h2 { font-size: 22px; }
 .sidebar footer .text-btn { display: block; margin-top: 16px; padding-left: 0; }
 .main { max-width: 1300px; margin-left: 228px; padding: 48px 56px 80px; }
 .page-head { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 36px; }
+.page-head > div { min-width: 0; }
+.page-head > .btn { flex-shrink: 0; }
 .page-head p { margin-top: 10px; }
 .btn { display: inline-flex; justify-content: center; align-items: center; gap: 8px; background: var(--green); color: white; border: 1px solid var(--green); border-radius: 7px; padding: 11px 21px; min-height: 46px; font-weight: 600; font-size: 14px; white-space: nowrap; transition: background .15s; }
 .btn:hover { background: #174733; }
@@ -37,9 +40,11 @@ h2 { font-size: 22px; }
 .landscape.warm { background: #eee5d6; }
 .landscape.warm .word { color: #806a49; }
 .card-content { padding: 24px; overflow-wrap: anywhere; }
+.card-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.card-top h2 { min-width: 0; }
 .card-date { font-size: 13px; color: var(--muted); margin: 8px 0 24px; }
 .card-bottom { border-top: 1px solid var(--line); padding-top: 14px; display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--muted); }
-.intro-note { margin-top: 32px; color: var(--muted); font-size: 13px; }
+.intro-note { display: flex; align-items: flex-start; gap: 10px; margin-top: 32px; color: var(--muted); font-size: 13px; }
 .ledger { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
 .category-row { padding: 16px 24px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 12px; }
 .category-row:last-child { border: 0; }
@@ -65,16 +70,18 @@ input::placeholder { color: #7b887f; }
 .form-dialog::backdrop { background: #12251d66; }
 .form-dialog h2 { margin-bottom: 24px; }
 .form-dialog .form-actions { padding-top: 18px; }
-.back { display: inline-flex; gap: 6px; align-items: center; margin-bottom: 24px; color: var(--muted); min-height: 44px; font-size: 14px; }
-.form-panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 32px; max-width: 760px; }
+.back { display: inline-flex; gap: 6px; align-items: center; margin-bottom: 24px; color: var(--muted); min-height: 44px; font-size: 14px; max-width: 100%; overflow-wrap: anywhere; }
+.back > span { min-width: 0; }
+.form-panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 32px; max-width: 710px; }
 fieldset { padding: 0; margin: 0; border: 0; min-width: 0; }
 .section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 28px 0 16px; font-size: 13px; color: var(--muted); }
 .section-head h2 { color: var(--ink); font-size: 20px; }
-.totals { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr)); gap: 16px; }
-.total-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 22px 24px; min-width: 0; }
-.total-label { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
-.total-value { font-size: clamp(26px, 2.5vw, 36px); font-weight: 600; line-height: 1.3; letter-spacing: -.5px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-.currency-code { font-size: 11px; letter-spacing: 1.5px; color: var(--muted); margin-top: 10px; }
+.totals { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(165px, 100%), 1fr)); gap: 16px; margin: 22px 0 34px; }
+.total-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 24px; min-width: 0; }
+.total-card:first-child { background: var(--green); color: white; border-color: var(--green); }
+.total-label { font-size: 12px; letter-spacing: 1px; opacity: .8; }
+.total-value { font-size: 32px; font-weight: 550; letter-spacing: -1px; margin-top: 9px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.currency-code { font-size: 14px; letter-spacing: 1px; font-weight: 500; }
 .expense-row { display: flex; align-items: center; gap: 16px; padding: 20px 24px; border-bottom: 1px solid var(--line); }
 .expense-row:last-child { border-bottom: 0; }
 .expense-row:hover { background: #f8faf5; }
@@ -123,11 +130,12 @@ fieldset { padding: 0; margin: 0; border: 0; min-width: 0; }
 @media (max-width: 700px) {
   .form-panel { padding: 24px 18px; } .form-panel .two-col { grid-template-columns: 1fr; gap: 0; }
   .expense-row { padding: 16px 14px; gap: 10px; } .expense-row > .category-icon { width: 34px; height: 34px; }
-  .total-card { padding: 18px; } .totals { gap: 12px; } .form-actions { flex-wrap: wrap; }
+  .total-card { padding: 18px; } .totals { gap: 10px; grid-template-columns: repeat(auto-fit, minmax(min(135px, 100%), 1fr)); } .total-value { font-size: 26px; } .form-actions { flex-wrap: wrap; }
   h1 { font-size: 28px; } .sidebar { display: none; } .main { margin: 0; padding: 25px 20px 110px; }
   .page-head { align-items: flex-start; gap: 12px; margin-bottom: 25px; } .grid { grid-template-columns: 1fr; gap: 20px; } .landscape { height: 145px; }
+  .page-head > .btn { padding: 10px 13px; }
   .bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: #ffffffed; border-top: 1px solid var(--line); justify-content: space-around; padding: 8px 12px max(8px, env(safe-area-inset-bottom)); z-index: 10; }
-  .bottom-nav a, .bottom-nav button { display: flex; align-items: center; justify-content: center; padding: 4px 20px; font-size: 12px; color: var(--muted); min-height: 48px; }
+  .bottom-nav a, .bottom-nav button { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px 20px; font-size: 11px; color: var(--muted); min-height: 48px; }
   .bottom-nav a.active { color: var(--green); font-weight: 700; } .category-row { padding: 14px; }
   .login { grid-template-columns: 1fr; } .login-story { padding: 28px; min-height: 280px; gap: 35px; } .login-story h1 { font-size: 36px; margin-top: 10px; }
   .login-story p, .login-story footer, .travel-stamp { display: none !important; } .login-panel { padding: 40px 26px; } .login-box { max-width: 100%; } .login-box h2 { font-size: 26px; } .state { padding: 32px 18px; }

@@ -7,6 +7,7 @@ import { QueryState } from '../../components/QueryState.js';
 import { tripDates } from './Trips.js';
 import { TripForm } from './TripForm.js';
 import { displayAmount } from '../expenses/money.js';
+import { Icon } from '../../components/Icon.js';
 
 export function TripLedger() {
   const { tripId } = useParams(), { account } = useSession();
@@ -21,10 +22,10 @@ export function TripLedger() {
   const totals = useQuery({ queryKey: ['account', account!.id, 'totals', tripId], queryFn: ({ signal }) => apiRequest<{ totals: CurrencyTotal[] }>(`/api/trips/${tripId}/totals`, { signal }) });
   const rows = [...new Map(expenses.data?.pages.flatMap(page => page.items).map(expense => [expense.id, expense])).values()];
   const totalCount = expenses.data?.pages.at(-1)?.totalCount ?? 0;
-  if (trip.isPending || trip.error) return <><Link className="back" to="/trips">我的旅行</Link><QueryState pending={trip.isPending} error={trip.error} retry={() => { void trip.refetch(); }} /></>;
+  if (trip.isPending || trip.error) return <><Link className="back" to="/trips"><Icon name="back" /><span>我的旅行</span></Link><QueryState pending={trip.isPending} error={trip.error} retry={() => { void trip.refetch(); }} /></>;
   return <>
-    <Link className="back" to="/trips">我的旅行</Link>
-    <header className="page-head"><div><div className="eyebrow">TRAVEL JOURNAL</div><h1>{trip.data.name}</h1><p className="muted"><span>{tripDates(trip.data)}</span><button className="text-btn" onClick={() => setEditing(true)}>旅行日期</button></p></div><Link className="btn" to={`/trips/${trip.data.id}/expenses/new`}>記一筆</Link></header>
+    <Link className="back" to="/trips"><Icon name="back" /><span>我的旅行</span></Link>
+    <header className="page-head"><div><div className="eyebrow">TRAVEL JOURNAL</div><h1>{trip.data.name}</h1><p className="muted"><span>{tripDates(trip.data)}</span><button className="text-btn" onClick={() => setEditing(true)}>旅行日期</button></p></div><Link className="btn" to={`/trips/${trip.data.id}/expenses/new`}><Icon name="plus" /><span>記一筆</span></Link></header>
     {(location.state as { message?: string } | null)?.message ? <p className="feedback" role="status">{(location.state as { message: string }).message}</p> : null}
     {totals.isPending || totals.error ? <QueryState pending={totals.isPending} error={totals.error} retry={() => { void totals.refetch(); }} /> : totals.data.totals.length ? <>
       <div className="section-head"><span>這趟旅行的花費 · 依幣別分開統計</span></div>
@@ -33,12 +34,12 @@ export function TripLedger() {
       </section>)}</section>
     </> : null}
     {expenses.isPending || !expenses.data ? <QueryState pending={expenses.isPending} error={expenses.error} retry={() => { void expenses.refetch(); }} /> : totalCount === 0 ?
-      <div className="empty"><h2>旅程還有很多空白，真好。</h2><p>先記下一筆機票，或今天的一杯咖啡。</p><Link className="btn" to={`/trips/${trip.data.id}/expenses/new`}>記錄第一筆支出</Link></div> : <>
+      <div className="empty"><Icon name="note" /><h2>旅程還有很多空白，真好。</h2><p>先記下一筆機票，或今天的一杯咖啡。</p><Link className="btn" to={`/trips/${trip.data.id}/expenses/new`}>記錄第一筆支出</Link></div> : <>
         <div className="section-head"><h2>沿途的花費</h2><span>{totalCount} 筆紀錄</span></div>
         <div className="ledger">{rows.map(expense => <Link className="expense-row" to={`/trips/${tripId}/expenses/${expense.id}`} key={expense.id}>
-          <span className="category-icon" aria-hidden="true"><svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M6 3h12v18H6zM9 8h6m-6 4h6m-6 4h3" /></svg></span>
+          <span className="category-icon"><Icon name="note" /></span>
           <div className="row-info"><div className="row-title">{expense.item}</div><div className="row-sub"><span>{expense.spentOn}</span> · <span>{expense.category?.name ?? '未分類'}</span></div></div>
-          <div className="row-amount">{displayAmount(expense.amount)}<small>{expense.currencyCode}</small></div><span aria-hidden="true">→</span>
+          <div className="row-amount">{displayAmount(expense.amount)}<small>{expense.currencyCode}</small></div><Icon name="arrow" />
         </Link>)}</div>
         {expenses.error ? <p className="error" role="alert">暫時無法更新支出清單，已載入的紀錄仍保留。{!expenses.isFetchNextPageError ? <button type="button" className="text-btn" disabled={expenses.isFetching} onClick={() => { void expenses.refetch(); }}>重新更新清單</button> : null}</p> : null}
         {expenses.hasNextPage ? <div className="load-more"><button type="button" className="btn secondary" disabled={expenses.isFetching} onClick={() => { void expenses.fetchNextPage(); }}>{expenses.isFetchingNextPage ? '載入中…' : '載入更多'}</button></div> : null}
