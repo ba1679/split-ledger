@@ -17,3 +17,9 @@ export function copyCookies(headers: Headers, reply: FastifyReply) {
   const cookies = headers.getSetCookie();
   if (cookies.length) reply.header('set-cookie', cookies);
 }
+export function postgresError(error: unknown): { code: string; constraint?: string } | undefined {
+  if (!error || typeof error !== 'object') return;
+  const value = error as { code?: unknown; constraint?: unknown; cause?: unknown };
+  if (typeof value.code === 'string' && /^[0-9A-Z]{5}$/.test(value.code)) return { code: value.code, ...(typeof value.constraint === 'string' ? { constraint: value.constraint } : {}) };
+  if (value.cause && value.cause !== error) return postgresError(value.cause);
+}

@@ -575,8 +575,8 @@ Phase 3 涵蓋 T010–T223，共 214 個唯一句型。
 **Test Scope**:
 - `specs/truth/features/backend/categories/categories-across-trips.feature`
 
-- [ ] T231 [BDD-GREEN] 以真實產品邏輯讓 Test Scope 全綠，並確認已完成相依功能沒有回歸。
-- [ ] T232 [BDD-REFACTOR] 在綠燈保護下整理本 feature 的產品碼，重跑 Test Scope。
+- [X] T231 [BDD-GREEN] 以真實產品邏輯讓 Test Scope 全綠，並確認已完成相依功能沒有回歸。
+- [X] T232 [BDD-REFACTOR] 在綠燈保護下整理本 feature 的產品碼，重跑 Test Scope。
 
 ## Phase 4E: ADD Feature File - backend/expenses/expenses-and-totals.feature
 

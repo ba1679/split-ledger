@@ -5,6 +5,7 @@ import { listCurrencies, registerCurrencyRoutes } from './modules/currencies/ind
 import { createAuth, registerAuthRoutes } from './modules/auth/index.js';
 import { registerTripRoutes } from './modules/trips/index.js';
 import { registerCategoryRoutes } from './modules/categories/index.js';
+import { registerExpenseRoutes } from './modules/expenses/index.js';
 import { checkOrigin, HttpError, invalid } from './http.js';
 
 export interface AppOptions {
@@ -60,5 +61,6 @@ export function buildApp(options: AppOptions = {}) {
   registerAuthRoutes(app, auth, authConfig);
   registerTripRoutes(app, db, auth, authConfig);
   registerCategoryRoutes(app, db, auth);
+  registerExpenseRoutes(app, db, auth);
   return app;
 }

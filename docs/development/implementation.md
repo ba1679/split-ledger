@@ -60,3 +60,9 @@ T228 removed the unused testMode option and broad fixture factory cast; direct t
 Exact trip feature 5/5 and prior account/currency regression 7/7 green. Support 9/9 includes UUID collision without disclosure/mutation, strict invalid-date/body rejection, Unicode trim and null-clearing with authoritative re-read. Product trip creation inserts under the verified session owner and reads back inside one transaction. API/test types, lint and API build pass.
 
 T230 extracted shared trip field validation without changing omitted/null behavior or transaction boundaries. Completed BDD 12/12, trip support 3/3, typechecks and lint pass.
+
+## Categories — T231
+
+Category feature 14/14; all completed backend features 26/26; support 13/13 green. Added owner-scoped category CRUD/list, Unicode codepoint validation, generated ASCII name-key uniqueness and constraint-backed deletion. Supporting expense single-read joins the current category label; category-only PATCH preserves historical money. Deterministic concurrent insert/delete test verifies FK wait then 409 with both records intact. PostgreSQL18 RESTRICT emits 23001; mapping recognizes this and 23503 only for the category-reference constraint. Cross-owner UUID privacy, 30/31 emoji limits, ASCII-only folding, bodyless DELETE and category clearing/foreign rejection are covered. Types/lint/API build pass.
+
+T232 assessment found no justified cleanup; exact category14 rerun and typechecks remain green.
