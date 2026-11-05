@@ -16,7 +16,8 @@
     "test:api": "bddgen -c apps/api/playwright.config.ts && playwright test -c apps/api/playwright.config.ts",
     "test:web": "bddgen -c apps/web/playwright.config.ts && playwright test -c apps/web/playwright.config.ts",
     "db:up": "docker compose up -d --wait",
-    "db:down": "docker compose down"
+    "db:down": "docker compose down",
+    "test:support": "playwright test -c playwright.support.config.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

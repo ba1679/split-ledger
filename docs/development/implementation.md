@@ -48,3 +48,9 @@ T010–T223 implemented and individually mapped to exact DSL registrations. Both
 ## Currencies — T225/T226
 
 Exact feature 1/1 green; root lint/workspace typecheck pass. Compiled API startup serves the archived 165-row catalog with JPY=0 and USD/TWD=2. Concurrent checksummed migration replay preserves one history row and 165 currencies. Refactor assessment found no justified cleanup; focused rerun stays green.
+
+## Accounts and ownership — T227
+
+Account + currency feature regression: 7/7 green. Canonical support tests: 6/6 green, covering real Better Auth callback/session/cookie forwarding/revocation, forged/expired tokens, source rejection before malformed JSON, strict validation with unchanged DB and non-disclosing ownership responses, and pinned auth schema metadata. SQL/Drizzle auth namespace and necessary owner-scoped business persistence are migrated. API/test typechecks, lint, build and compiled server startup with .env loading pass. No live Google credentials or production login bypass are present.
+
+T228 removed the unused testMode option and broad fixture factory cast; direct typed assembly catches interface drift. Scoped 7/7 regression, API/test typechecks and lint remain green.
