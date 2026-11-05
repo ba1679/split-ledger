@@ -44,7 +44,7 @@
 - 對應雛形：expense.html?trip=…；編輯另帶 expense=…。
 - 必填：項目、金額、幣別、日期；分類選填。日期取裝置當地日期，不使用 UTC 日期截取。
 - 幣別為可搜尋的 combobox，顯示代碼與名稱；鍵盤上下移動、Enter 選取、Escape 關閉。搜尋文字本身不構成選定幣別。分類也可搜尋，選項含「未分類」。
-- 輸入即時阻擋：負號、JPY 小數點及超出所選幣別位數的輸入；貼上不合法的整筆金額時拒絕整次貼上，保留原值並提示，不刪字符後當另一金額保存。支援保留輸入過程的空值及尾端小數點，保存前要求有效正數。
+- 輸入即時阻擋：負號、JPY 與 TWD 小數點及超出所選幣別位數的輸入；貼上不合法的整筆金額時拒絕整次貼上，保留原值並提示，不刪字符後當另一金額保存。支援保留輸入過程的空值及尾端小數點，保存前要求有效正數。
 - 變更幣別：若原金額不符合新幣別位數，不四捨五入，顯示提示並要求手動修正後再保存。
 - 預設分類：取此裝置上次選擇且仍可用的分類；沒有可用紀錄則未分類。雛形記憶可用分類識別，不以名稱記憶，改名後仍正確。正式版按帳號隔離，登入/登出需清快取。
 - 保存中防止重複提交；成功回明細；失敗保留表單，提示再試。取消回原旅行。刪除對話框確認項目/金額，不提供未定義的復原功能。
@@ -135,7 +135,7 @@ Handoff：plan package `specs/plans/001-personal-travel-expenses`、truth root `
 | 支出新增、查看、修改、刪除 | `/api/trips/{tripId}/expenses` 及 `/{expenseId}` | 金額以大單位字串送出，不經 Number。以回應的歷史 minorUnit 顯示及驗證原幣別；換成其他幣別才套用目前目錄位數。分類 null 表示未分類。 |
 | 幣別統計與列表筆數 | `GET /api/trips/{tripId}/totals`、`ExpenseList.totalCount` | 總額由後端提供，不用目前載入頁面試算全帳本；跨頁支出以 cursor 載入更多。無支出時 totals 為空陣列。 |
 | 分類建立、改名、刪除與筆數 | `GET/POST /api/categories`、`GET/PATCH/DELETE /api/categories/{categoryId}` | 使用 usageCount 呈現筆數；以 409 區分使用中不可刪與名稱重複，保留草稿。前端先提示 30 字/重名，伺服器仍為權威。 |
-| 幣別自動完成 | `GET /api/currencies` | 以固定清單的 code/name 搜尋與 minorUnit 限制輸入；請求失敗不使用猜測位數保存。 |
+| 幣別自動完成 | `GET /api/currencies` | 以固定清單的 code/name 搜尋與 minorUnit 限制輸入；TWD 另依產品規則只允許輸入整數（不改目錄的 ISO 位數）；請求失敗不使用猜測位數保存。 |
 
 實作與 DSL 必須承接的行為：
 
@@ -163,3 +163,5 @@ Handoff：plan package `specs/plans/001-personal-travel-expenses`、truth root `
 - 既有主流程回歸通過：模擬登入、記帳、JPY/負號/貼上/USD 位數阻擋、分類改名/使用中刪除、旅行日期反序、空帳本與離線；五頁共 20 個響應式版面檢查通過，無瀏覽器執行錯誤。
 - WebKit 補查在建立空白頁階段停滯，20 秒限時內未完成，尚未載入雛形，不列為通過。後續正式瀏覽器矩陣仍需執行。
 - 實際 HTML 截圖：design-previews/prototype-date-picker-desktop.png、prototype-date-picker-mobile.png、prototype-date-picker-months.png；原 design-previews/date-picker*.png 保留為核可設計參考。
+
+- TWD 整數輸入為後續確認的產品例外；既有靜態雛形尚未同步，正式介面與後端需驗證。ISO 目錄與保存位數仍為 2。

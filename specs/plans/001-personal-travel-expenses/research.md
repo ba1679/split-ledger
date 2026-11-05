@@ -56,7 +56,7 @@
 ## 決策 6：幣別來源採 SIX ISO 4217 固定快照
 
 - **Decision**: 以 SIX 維護的 ISO 4217 List One 為代碼與 minor unit 位數來源，去除重複代碼；提供 minor unit 為數字的現行條目。N.A. 條目（例如 XAU、XXX）不提供為一般支出幣別。資料隨版本封存，前後端使用同一份；不在開啟表單時即時下載。更新由人工 review 差異，不能改寫歷史支出的金額解讀。搜尋至少涵蓋代碼與幣別名稱，自動完成只允許選擇清單中的值。
-- **Rationale**: 避免前後端分別依瀏覽器或第三方套件判定位數。2026-11-04 已實際取得 [SIX XML](https://www.six-group.com/dam/download/financial-information/data-center/iso-currrency/lists/list-one.xml)，發布日期 2026-09-17，SHA-256 為 `33139b438657d1cee116ba737807ea71d19d6de4b90f799a09c56f0cc6a1b0ff`；178 個去重代碼中有 165 個具數字 minor unit。JPY=0、USD/TWD=2、KWD=3、CLF=4，不能固定所有幣別兩位。該規則也包含部分基金或計價單位，這不是即時匯率清單。[SIX 維護來源](https://www.six-group.com/en/products-services/financial-information/market-reference-data/data-standards.html)。Setup 須將檢查過的快照及來源資訊納入專案；目前只完成研究取樣，尚未建立執行期資料檔。
+- **Rationale**: 避免前後端分別依瀏覽器或第三方套件判定位數。2026-11-04 已實際取得 [SIX XML](https://www.six-group.com/dam/download/financial-information/data-center/iso-currrency/lists/list-one.xml)，發布日期 2026-09-17，SHA-256 為 `33139b438657d1cee116ba737807ea71d19d6de4b90f799a09c56f0cc6a1b0ff`；178 個去重代碼中有 165 個具數字 minor unit。JPY=0、USD/TWD=2、KWD=3、CLF=4，不能固定所有幣別兩位。使用者決定 TWD 輸入只接受整數：這是產品輸入規則，ISO 快照與資料儲存仍使用 TWD minorUnit=2，例如 TWD 8000 儲存為 800000；API 回應仍按保存位數輸出。該規則也包含部分基金或計價單位，這不是即時匯率清單。[SIX 維護來源](https://www.six-group.com/en/products-services/financial-information/market-reference-data/data-standards.html)。Setup 須將檢查過的快照及來源資訊納入專案；目前只完成研究取樣，尚未建立執行期資料檔。
 - **Alternatives considered**:
   - Intl 作為驗證權威：適合名稱/顯示輔助，但不同 runtime 的資料版本可能不同。
   - 即時幣別或匯率 API：增加外部依賴，本版不做換算，沒有必要逐次查詢。

@@ -7,7 +7,7 @@
 | `支出保存被拒絕且帳本沒有新增支出` | 無 | 不支援 | 無 | 驗 400 VALIDATION_ERROR，資料庫此旅行支出筆數未增加，GET /api/trips/{tripId}/expenses 與 totals 均維持原值。 |
 | `使用者"甲"的"日本旅行"期間為"2027-03-10"至"2027-03-15"` | 無 | 不支援 | 無 | 以隔離測試資料庫建立句中帳號、有效 session 與指定業務資料；檢查擁有者關聯和已落地狀態；回寫業務識別供唯一 Act 使用，不必由 API 重演前序操作。 |
 | `使用者"甲"在"日本旅行"記錄"機票"為 TWD 8000，日期"2027-01-15"` | 無 | 不支援 | 無 | 以甲的有效 session 與可信 Origin 呼叫 POST /api/trips/{tripId}/expenses；使用句中金額、幣別及日期，其他必要欄位由既定有效資料補齊；記錄回應，成功或失敗均核對資料庫權威支出。 |
-| `"機票"以 TWD 8000 及"2027-01-15"保存` | 無 | 不支援 | 無 | 201；回應與 expenses row 的 item=機票、currency_code=TWD、amount_minor=8000、minor_unit=0、spent_on=2027-01-15 一致；GET 單筆再讀相同。 |
+| `"機票"以 TWD 8000 及"2027-01-15"保存` | 無 | 不支援 | 無 | 201；回應與 expenses row 的 item=機票、currency_code=TWD、amount_minor=800000、minor_unit=2、spent_on=2027-01-15 一致；GET 單筆再讀相同。 |
 | `使用者"甲"的"日本旅行"有 TWD 8000、JPY 15000 與 JPY 2000 的已保存支出` | 無 | 不支援 | 無 | 以隔離測試資料庫建立句中帳號、有效 session 與指定業務資料；檢查擁有者關聯和已落地狀態；回寫業務識別供唯一 Act 使用，不必由 API 重演前序操作。 |
 | `使用者"甲"查詢"日本旅行"總額` | 無 | 不支援 | 無 | 以甲的有效 session 呼叫 GET /api/trips/{tripId}/totals；記錄回應，查詢不修改資料。 |
 | `"日本旅行"總額為 TWD 8000 與 JPY 17000` | 無 | 不支援 | 無 | 200；totals 僅有 TWD=8000、JPY=17000 兩組；由資料庫各已保存支出精確加總，再讀 totals 一致。 |
@@ -33,3 +33,4 @@
 | `使用者"甲"在手機工作階段已保存"日本旅行"的 JPY 1200 午餐` | 無 | 不支援 | 無 | 以隔離測試資料庫建立句中帳號、有效 session 與指定業務資料；檢查擁有者關聯和已落地狀態；回寫業務識別供唯一 Act 使用，不必由 API 重演前序操作。 |
 | `使用者"甲"在電腦工作階段查詢"日本旅行"支出` | 無 | 不支援 | 無 | 以甲的有效 session 呼叫 GET /api/trips/{tripId}/expenses；記錄回應，查詢不修改資料。 |
 | `支出清單包含 JPY 1200 的"午餐"` | 無 | 不支援 | 無 | 200；電腦 session 回應包含與手機已存相同 id、JPY minor_unit=0、amount_minor=1200 的午餐；核對資料庫 owner 為甲。 |
+| `使用者"甲"記錄"午餐"為 TWD 100.50，日期"2027-03-11"` | 無 | 不支援 | 無 | 使用甲的 session 與可信 Origin 呼叫 POST /api/trips/{tripId}/expenses，送入 item=午餐、amount="100.50"、currencyCode=TWD、spentOn=2027-03-11；記錄回應，不變更權威資料。 |

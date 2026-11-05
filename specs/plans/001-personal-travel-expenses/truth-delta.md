@@ -29,6 +29,8 @@
 | ADD | `specs/truth/contracts/components/schemas/shared.yaml` -> 金額、日期與錯誤語意 | 明定字串金額、日曆日期、404 擁有者隔離、409 分類與 UUID 衝突、403 來源拒絕，以及 401/400 等錯誤。 | 避免浮點、時區、權限與 CSRF 語意分歧。 |
 | ADD | `specs/truth/contracts/openapi.yaml` -> info.description；`components/` 與 `groups/` -> 對應 description | 明定 UUID 查證未確認建立、歷史位數精確加總、session 配置、Origin/JSON 防護與嚴格解析；依使用者要求將額外說明文件整併至契約，語意不變。 | 必要規則直接隨操作/欄位呈現，無需跨說明文件查找。 |
 
+| MODIFY | `specs/truth/contracts/components/schemas/shared.yaml` -> `MoneyAmount` | TWD 新送入金額僅允許整數字串，保留 ISO 的二位儲存及輸出。 | 使用者確認台幣輸入只用整數。 |
+
 ## /data-plan
 
 | 動作 | Truth 規格 | 改動摘要 | 原因 |
@@ -68,3 +70,12 @@
 | ADD | `specs/truth/features/frontend/categories/category-management-and-device-default.feature` -> 分類管理與裝置偏好 Rule | 新增跨旅行分類、改名、刪除衝突、可用分類及裝置預選案例。 | 承接分類可選與本機上次選擇驗收。 |
 | ADD | `specs/truth/features/frontend/categories/dsl.md` -> 分類管理與預選句型 | 定義分類頁操作、權威分類清單與裝置偏好驗證。 | 區分伺服器分類資料和本機預選行為。 |
 | ADD | `specs/truth/features/frontend/dsl.md` -> `When: 使用者開啟新增支出表單` | 新增分類與支出模組共用的開啟支出表單句型。 | 同一畫面操作在介面根維持單一權威位置。 |
+
+| MODIFY | `specs/truth/features/backend/expenses/expenses-and-totals.feature` -> 台幣輸入拒絕小數 Rule | 新增 TWD 小數輸入拒絕案例。 | 承接使用者確認的整數輸入規則。 |
+| MODIFY | `specs/truth/features/backend/expenses/dsl.md` -> TWD 8000 保存與小數拒絕句型 | 修正 TWD 保存為 minorUnit 2、800000 最小單位，並新增小數拒絕句型。 | 與 ISO 資料模型及產品輸入規則一致。 |
+| MODIFY | `specs/truth/features/frontend/expenses/expense-recording-and-totals.feature` -> 台幣輸入 Rule | 新增輸入時阻擋 TWD 小數點案例。 | 承接使用者確認的整數輸入規則。 |
+| MODIFY | `specs/truth/features/frontend/expenses/dsl.md` -> TWD 金額輸入 Given | 新增 TWD 表單安排句型。 | 支援 TWD 整數輸入案例。 |
+
+## 本輪 TWD 決策補充
+
+使用者確認 TWD 輸入僅允許整數；不改 SIX 快照的 TWD minorUnit=2 或資料儲存規則。`/api-plan` 的 `MoneyAmount` 與 `/dsl-refine` 的前後端支出 feature/DSL 已更新，TWD 8000 儲存為 800000 最小單位。`/data-plan` 的資料模型無語意變更。
