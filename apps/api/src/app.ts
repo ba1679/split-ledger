@@ -61,6 +61,6 @@ export function buildApp(options: AppOptions = {}) {
   registerAuthRoutes(app, auth, authConfig);
   registerTripRoutes(app, db, auth, authConfig);
   registerCategoryRoutes(app, db, auth);
-  registerExpenseRoutes(app, db, auth);
+  registerExpenseRoutes(app, db, auth, authConfig);
   return app;
 }

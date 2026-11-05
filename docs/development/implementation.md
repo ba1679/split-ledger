@@ -66,3 +66,11 @@ T230 extracted shared trip field validation without changing omitted/null behavi
 Category feature 14/14; all completed backend features 26/26; support 13/13 green. Added owner-scoped category CRUD/list, Unicode codepoint validation, generated ASCII name-key uniqueness and constraint-backed deletion. Supporting expense single-read joins the current category label; category-only PATCH preserves historical money. Deterministic concurrent insert/delete test verifies FK wait then 409 with both records intact. PostgreSQL18 RESTRICT emits 23001; mapping recognizes this and 23503 only for the category-reference constraint. Cross-owner UUID privacy, 30/31 emoji limits, ASCII-only folding, bodyless DELETE and category clearing/foreign rejection are covered. Types/lint/API build pass.
 
 T232 assessment found no justified cleanup; exact category14 rerun and typechecks remain green.
+
+## Expenses — T233 independent verification
+
+Exact expense BDD14 and unit17 green at initial implementation. Independent read-only review plus 23 real HTTP probes against fresh PostgreSQL found no issues: JPY/USD/TWD maximum/overflow boundaries, historical scale retained on same-currency/omitted-amount updates, exact currency changes with precision-loss refusal, TWD omitted-amount exception, totals beyond BIGINT (18446744073709551614), mixed historical USD scales (13.53), full counts and owner/trip-bound untampered cursors. Final feature/support/static/index-plan evidence follows after completion.
+
+T233 final: backend40/40, support17/17, unit17/17 (money and runtime); workspace/test typechecks, repo lint and workspace build pass. Compiled Node24 server executes an authenticated maximum-USD write and totals through the shared package. Real PostgreSQL18.3 EXPLAIN(ANALYZE,BUFFERS) on 20k synthetic rows is archived in expense-query-plans.md, without planner forcing or production latency claims.
+
+T234 found no justified further split/abstraction; exact expense14 and API/shared typechecks remain green. All backend feature phases are complete before frontend implementation begins.
