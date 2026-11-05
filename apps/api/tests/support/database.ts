@@ -1,5 +1,6 @@
 import pg from 'pg';
 import { readdir, readFile } from 'node:fs/promises';
+import { once } from 'node:events';
 import { fileURLToPath } from 'node:url';
 export const testDatabaseUrl = process.env.TEST_DATABASE_URL ?? 'postgres://ledger_test:ledger_test_local@127.0.0.1:54330/ledger_test';
 export async function runMigrations(pool: pg.Pool) {
@@ -15,7 +16,10 @@ export async function createWorkerDatabase(worker: number) {
  await admin.query(`CREATE DATABASE "${name}"`);
  url.pathname = `/${name}`;
  const pool = new pg.Pool({ connectionString: url.toString() });
- try { await runMigrations(pool); } catch (error) { await pool.end(); await admin.query(`DROP DATABASE "${name}" WITH (FORCE)`); await admin.end(); throw error; }
- return { pool, url: url.toString(), async dispose() { await pool.end(); await admin.query(`DROP DATABASE "${name}" WITH (FORCE)`); await admin.end(); } };
+ const clients = new Set<pg.PoolClient>();
+ pool.on('connect', client => { clients.add(client); client.once('end', () => clients.delete(client)); });
+ const closePool = async () => { const closed = [...clients].map(client => once(client, 'end')); await pool.end(); await Promise.all(closed); };
+ try { await runMigrations(pool); } catch (error) { await closePool(); await admin.query(`DROP DATABASE "${name}"`); await admin.end(); throw error; }
+ return { pool, url: url.toString(), async dispose() { await closePool(); await admin.query(`DROP DATABASE "${name}"`); await admin.end(); } };
 }
 export const migrationsPath = fileURLToPath(new URL('../../drizzle/', import.meta.url));

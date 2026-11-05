@@ -3,18 +3,31 @@ import { request, expect } from '@playwright/test';
 import { randomUUID } from 'node:crypto';
 import { createWorkerDatabase } from './database.js';
 import { LedgerWorld } from './world.js';
+import { installGoogleMock } from './google.js';
+import { TEST_AUTH_SECRET } from './seed.js';
+import type pg from 'pg';
 import { buildApp } from '../../src/app.js';
-type Runtime = { database: Awaited<ReturnType<typeof createWorkerDatabase>>; origin: string };
+type Runtime = { database: Awaited<ReturnType<typeof createWorkerDatabase>>; origin: string; webOrigin: string };
 export const test = base.extend<{ world: LedgerWorld }, { runtime: Runtime }>({
+ // Playwright requires an object-destructured fixture parameter even with no dependencies.
+ // eslint-disable-next-line no-empty-pattern
  runtime: [async ({}, use, workerInfo) => {
   const database = await createWorkerDatabase(workerInfo.workerIndex);
-  const app = buildApp();
-  await app.listen({ host: '127.0.0.1', port: 0 });
-  try { await use({ database, origin: app.listeningOrigin }); } finally { await app.close(); await database.dispose(); }
+  const restoreGoogle = installGoogleMock();
+  const webOrigin = `http://127.0.0.1:${44000 + workerInfo.workerIndex}`;
+  const factory = buildApp as (options: { pool: pg.Pool; appOrigin: string; authSecret: string; testMode: boolean; google: { clientId: string; clientSecret: string } }) => ReturnType<typeof buildApp>;
+  let app: ReturnType<typeof buildApp> | undefined;
+  try {
+   app = factory({ pool: database.pool, appOrigin: webOrigin, authSecret: TEST_AUTH_SECRET, testMode: true, google: { clientId: 'ledger-test-google', clientSecret: 'isolated-test-google-secret' } });
+   await app.listen({ host: '127.0.0.1', port: 0 });
+   await use({ database, origin: app.listeningOrigin, webOrigin });
+  } finally {
+   try { await app?.close(); } finally { try { await database.dispose(); } finally { restoreGoogle(); } }
+  }
  }, { scope: 'worker' }],
  world: async ({ runtime }, use) => {
   const api = await request.newContext({ baseURL: runtime.origin });
-  try { await use(new LedgerWorld(runtime.database.pool, api, runtime.origin, randomUUID())); } finally { await api.dispose(); }
+  try { const world = new LedgerWorld(runtime.database.pool, api, runtime.origin, randomUUID()); world.set('webOrigin', runtime.webOrigin); await use(world); } finally { await api.dispose(); }
  },
 });
 export const { Given, When, Then } = createBdd(test);
