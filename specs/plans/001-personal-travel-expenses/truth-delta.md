@@ -47,3 +47,24 @@
 
 | 動作 | Truth 規格 | 改動摘要 | 原因 |
 | --- | --- | --- | --- |
+| ADD | `specs/truth/features/backend/account/accounts-and-access.feature` -> 帳號、未登入、隔離與跨工作階段 Rule | 新增帳號投影、未完成登入拒絕、他人旅行與分類不可讀，以及同帳號跨裝置讀取案例。 | 承接登入與帳本擁有者驗收。 |
+| ADD | `specs/truth/features/backend/account/dsl.md` -> 帳號查詢與隔離句型 | 定義 session、HTTP 回應、資料庫擁有者與再讀驗證。 | 後端案例需驗權威身分與資料隔離。 |
+| ADD | `specs/truth/features/backend/trips/trip-creation-and-dates.feature` -> 可選日期與更新 Rule | 新增無日期、單端日期、反序拒絕與合法補填案例。 | 承接旅行建立及日期順序驗收。 |
+| ADD | `specs/truth/features/backend/trips/dsl.md` -> 旅行建立與日期句型 | 定義建立或修改請求、日期落地、拒絕時原值不變及再讀。 | 讓日期驗證可由 HTTP 與資料庫共同證明。 |
+| ADD | `specs/truth/features/backend/expenses/expenses-and-totals.feature` -> 支出、金額與總額 Rule | 新增原幣別與旅行外日期、幣別分組、修改/刪除重算、金額驗證、未分類及跨工作階段讀取案例。 | 承接多幣別個人支出驗收。 |
+| ADD | `specs/truth/features/backend/expenses/dsl.md` -> 支出保存、修改、刪除與查詢句型 | 定義支出請求、權威金額與分類狀態、總額再讀及拒絕時資料不變。 | 防止只依回應或畫面判定支出已保存。 |
+| ADD | `specs/truth/features/backend/categories/categories-across-trips.feature` -> 分類生命週期與名稱 Rule | 新增跨旅行引用、改名、使用中刪除拒絕、解除關聯、空白/長度/重名及帳號隔離案例。 | 承接分類驗收及已確認的 30 字命名規則。 |
+| ADD | `specs/truth/features/backend/categories/dsl.md` -> 分類建立、改名、刪除與關聯句型 | 定義分類 HTTP 操作、資料庫識別與關聯、衝突及失敗不變驗證。 | 分類改名與刪除需以權威關聯確認。 |
+| ADD | `specs/truth/features/backend/currencies/available-currencies.feature` -> 可用幣別 Rule | 新增 JPY、USD 小數位數的目錄案例。 | 金額輸入與驗證需共用固定幣別來源。 |
+| ADD | `specs/truth/features/backend/currencies/dsl.md` -> 幣別目錄句型 | 定義公開目錄查詢及封存資料交叉驗證。 | 確保位數不由測試或前端猜測。 |
+| ADD | `specs/truth/features/backend/dsl.md` -> 已登入帳號共用 Given | 新增跨旅行與分類模組共用的有效 session 準備句型。 | 同一登入安排在兩個模組有相同契約與唯一權威位置。 |
+| ADD | `specs/truth/features/frontend/auth/google-login-and-account-isolation.feature` -> 登入與帳號隔離 Rule | 新增完成/未完成登入及換帳號後的可見資料案例。 | 承接使用者可觀察的登入與個人資料邊界。 |
+| ADD | `specs/truth/features/frontend/auth/dsl.md` -> 登入畫面與工作階段句型 | 定義受控登入安排、頁面操作與帳號來源驗證。 | 前端測試需確認畫面與實際帳號一致。 |
+| ADD | `specs/truth/features/frontend/trips/trip-creation-and-dates.feature` -> 旅行表單與日期 Rule | 新增選填日期、建立、補填與反序日期提示案例。 | 承接手機與桌機的旅行操作。 |
+| ADD | `specs/truth/features/frontend/trips/dsl.md` -> 旅行頁面與表單句型 | 定義頁面安排、日期操作、保存結果與權威資料核對。 | 讓旅行 UI 驗收可由瀏覽器測試落地。 |
+| ADD | `specs/truth/features/frontend/expenses/expense-recording-and-totals.feature` -> 支出輸入與總額 Rule | 新增日期預設、幣別位數、負號/零元限制、保存與分幣別呈現案例。 | 承接支出表單及統計的可觀察行為。 |
+| ADD | `specs/truth/features/frontend/expenses/pagination-and-save-outcomes.feature` -> 分頁與未知保存結果 Rule | 新增載入更多後總額維持、查證建立結果與保留草稿案例。 | 承接 UI plan 的分頁及未知結果處理。 |
+| ADD | `specs/truth/features/frontend/expenses/dsl.md` -> 支出表單、列表與保存句型 | 定義瀏覽器操作、伺服器資料安排、精確金額顯示與保存狀態驗證。 | 前端不能只以提示文字推定已保存。 |
+| ADD | `specs/truth/features/frontend/categories/category-management-and-device-default.feature` -> 分類管理與裝置偏好 Rule | 新增跨旅行分類、改名、刪除衝突、可用分類及裝置預選案例。 | 承接分類可選與本機上次選擇驗收。 |
+| ADD | `specs/truth/features/frontend/categories/dsl.md` -> 分類管理與預選句型 | 定義分類頁操作、權威分類清單與裝置偏好驗證。 | 區分伺服器分類資料和本機預選行為。 |
+| ADD | `specs/truth/features/frontend/dsl.md` -> `When: 使用者開啟新增支出表單` | 新增分類與支出模組共用的開啟支出表單句型。 | 同一畫面操作在介面根維持單一權威位置。 |
