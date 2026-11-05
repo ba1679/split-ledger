@@ -78,3 +78,7 @@ T234 found no justified further split/abstraction; exact expense14 and API/share
 ## Frontend account session — T235/T236
 
 Real Better Auth client, account-scoped Query cache, protected routes and approved responsive application shell are implemented. Auth acceptance passes Chromium3/3 and WebKit3/3, plus web/test types, lint and production build. Refactor only makes the existing zero stale-time explicit. Browser fixtures use isolated Vite caches and an external Google authorization HTML redirect supported by both engines; real callback/state/PKCE/session verification remains exercised.
+
+## Frontend trips and custom calendar — T237/T238
+
+Trip creation, optional independent dates and validated date editing use real API data. Trips12/12 across Chromium/WebKit and prior auth6/6 pass; web/test types, lint and build pass. Custom React date dialog retains approved desktop positioning/mobile sheet and local-date semantics. Dedicated browser risk checks6/6 cover initial focus, leap day/month boundary, nested Escape/outside click without closing the form, focus restoration/Tab trapping, 5-to-6-week repositioning, year/month selection and 320x568 mobile geometry with 44px cells. An additional2/2 verifies mobile date fields stack; screenshots inspected in ignored .cache/ui-validation/. Run `sh scripts/pnpm.sh exec playwright test -c playwright.date-picker.config.ts`. Refactor assessment justified no further abstraction; exact trips12/12 rerun passes.
