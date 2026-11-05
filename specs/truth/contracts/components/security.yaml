@@ -2,4 +2,8 @@ BetterAuthSession:
   type: apiKey
   in: cookie
   name: travelledger_session
-  description: 由 Better Auth 發行、HttpOnly 且正式環境為 Secure 的已驗證 session cookie；服務端驗證後取得 userId。
+  description: |-
+    Better Auth 發行的已驗證 session cookie，服務端由此取得 userId。
+    advanced.cookies.session_token.name 明確設為 travelledger_session；HttpOnly、SameSite=Lax，正式環境 Secure。
+    Setup 核對自訂名稱/前綴、反向代理完整轉送 Set-Cookie 及文件名稱一致。
+    同 origin client/SDK 保留 credentials；cookie/token 不進入業務回應或日誌。

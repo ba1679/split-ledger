@@ -133,8 +133,8 @@ packages/
 | Wave | Planner | 結果 |
 | --- | --- | --- |
 | 1 | `/ui-plan` | 已承接使用者核可的五頁與自訂日期設計；日期後續已同步可操作 HTML，正式程式仍未實作。 |
-| 2 | `/api-plan` → `/truth-delta` | 已建立 contracts/openapi.yaml、groups、components 及 README：9 個 path、17 個業務操作，其中 16 個需登入；8 筆 ADD。 |
-| 3 | `/data-plan` → `/truth-delta` | 已建立 data/data-model.dbml 及 README：8 表、7 關聯；9 筆 ADD。包含 3 張核心業務表、幣別目錄及 4 張框架管理的登入表。 |
+| 2 | `/api-plan` → `/truth-delta` | 已建立 contracts/openapi.yaml、groups、components：9 個 path、17 個業務操作，其中 16 個需登入；8 筆 ADD。規則收在對應 description，不另設說明文件。 |
+| 3 | `/data-plan` → `/truth-delta` | 已建立 data/data-model.dbml：8 表、7 關聯；9 筆 ADD。包含 3 張核心業務表、幣別目錄及 4 張框架管理的登入表；約束與交易規則收在各表 Note。 |
 | 4 | `/ui-plan` 與 API/data owner 核對 | 已在 ui/ui-plan.md 列出畫面/契約對應、帳號快取、歷史位數、分頁筆數、未知結果與待同步項目。 |
 
 本輪額外收斂分類命名：最多 30 個 Unicode code points、去除前後空白、同帳號名稱唯一、ASCII 英文不分大小寫；已回寫 spec、acceptance、research 與 UI plan。FR-017 的幣別來源待確認標記已依既有研究結果清理。這兩項是本輪相對於上一版的需求文件差異。
@@ -142,7 +142,14 @@ packages/
 ### 規劃驗證與限制
 
 - Redocly CLI 2.75.0：OpenAPI lint 與 bundle 通過；另核對 17 個 operationId 唯一、所有外部/內部 `$ref` 可解析。lint 仍有兩項建議：尚未指定授權條款、公開幣別查詢未列 4xx；不自行替使用者選擇開源授權，也不為消除警告虛構錯誤流程。
-- DBML 經 `@dbml/cli dbml2sql --postgres` 成功解析/匯出，核對 8 表與 7 關聯；匯出 SQL 僅為檢查用，並非可直接套用的 migration。README 的 CHECK、generated 欄、collation 等補充仍須落實到正式 migrations 並在 PostgreSQL 驗證。
+- DBML 經 `@dbml/cli dbml2sql --postgres` 成功解析/匯出，核對 8 表與 7 關聯；匯出 SQL 僅為檢查用，並非可直接套用的 migration。模型 Note 的 CHECK、generated 欄、collation 與檔尾 app_trim 定義仍須落實到正式 migrations 並在 PostgreSQL 驗證。
 - 規劃與 Markdown 引用檢查不等於真實服務測試。套件相容性、auth schema 生成、資料庫交易與瀏覽器 E2E 都由 Setup/後續任務承接。
 
 **Readiness**：本輪系統/API/data 規劃已交付，可進入 `/dsl-refine`。目前沒有 interface features/DSL 或 tasks.md，不跳過它們直接實作。日期已依使用者要求先同步 HTML；分類新驗證等其餘雛形缺口與正式元件工作仍須由後續任務承接。
+
+### 開啟 API 預覽
+
+- 維護來源：`specs/truth/contracts/openapi.yaml` 與其 groups/components。支援本地多檔引用的工具可直接開啟來源。
+- VS Code／Swagger 單檔匯入：在專案根目錄執行 `sh scripts/preview-openapi.sh`，開啟 `.cache/openapi/openapi.yaml`；網頁版開啟 `.cache/openapi/index.html`。
+- 預覽檔自動產生且由既有 `.cache/` 忽略規則排除，不作第二份 truth，不手動維護。修改來源後重跑同一指令。
+- Swagger Parser 已驗證來源及預覽檔。實際 Swagger UI 重現「只有根檔、缺少外部分檔位置」的 Resolver error；單檔預覽顯示全部 17 個操作，沒有 Resolver error。

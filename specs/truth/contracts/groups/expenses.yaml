@@ -128,11 +128,11 @@ expense:
     security:
       - BetterAuthSession: []
     summary: 修改單筆支出
-    description: |
-      省略欄位保留原值，categoryId=null 才清除分類。合併新舊欄位後重新驗證
-      金額與幣別位數；若改幣別但未改金額，沿用原大單位數值，絕不換算。
-      若不符合新位數，拒絕保存並保留原紀錄。成功後各受影響幣別的統計
-      從權威支出資料重新計算。
+    description: |-
+      省略欄位保留原值，categoryId=null 才清除分類。合併後驗證金額與幣別位數，失敗保留原紀錄。
+      僅改項目/日期/分類不重解讀金額；幣別未變、只改金額時仍用本筆歷史 minorUnit。
+      實際改幣別才採新目錄位數；未傳新金額則沿用原大單位數值，不換算、不四捨五入；不合新位數則拒絕。
+      成功後從權威支出資料重算各受影響幣別總額、旅行筆數與分類使用筆數。
     requestBody:
       required: true
       content:
@@ -215,10 +215,11 @@ totals:
     security:
       - BetterAuthSession: []
     summary: 查看旅行各原幣別總額
-    description: |
-      只加總指定本人旅行中的已保存支出。各幣別分開呈現，不換匯。
-      以精確整數或 PostgreSQL NUMERIC 聚合後轉為字串，避免 BIGINT SUM
-      被錯誤轉成 JavaScript Number；修改或刪除後讀取反映目前資料。
+    description: |-
+      只加總本人旅行中已保存支出；各幣別分開，不換匯，不用前端已載入的當頁資料代表全帳本。
+      按 currency_code,minor_unit 使用 SUM(bigint)，以 NUMERIC 整數字串接收，不轉 JS Number。
+      同代碼若有不同歷史位數，用 BigInt 升到該幣別最大 minorUnit 再加總；如 12.3 + 1.23 = 13.53。
+      群組總額可超過單筆 BIGINT 範圍。修改/刪除後讀取目前結果；沒有支出的幣別不列出。
     responses:
       '200':
         description: 依幣別代碼升序的總額陣列；空旅行回空陣列。

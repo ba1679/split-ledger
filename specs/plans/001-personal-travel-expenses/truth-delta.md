@@ -27,7 +27,7 @@
 | ADD | `specs/truth/contracts/groups/categories.yaml` -> 分類建立、查詢、改名、刪除 | 新增跨旅行分類、使用筆數、同帳號名稱唯一、使用中刪除衝突。 | 使用者確認 30 字、ASCII 英文不分大小寫與跨旅行分類生命週期。 |
 | ADD | `specs/truth/contracts/groups/currencies.yaml` -> `GET /api/currencies` | 新增固定 SIX ISO 4217 快照的代碼、名稱及 minorUnit 目錄。 | 前端自動完成與前後端金額位數一致。 |
 | ADD | `specs/truth/contracts/components/schemas/shared.yaml` -> 金額、日期與錯誤語意 | 明定字串金額、日曆日期、404 擁有者隔離、409 分類與 UUID 衝突、403 來源拒絕，以及 401/400 等錯誤。 | 避免浮點、時區、權限與 CSRF 語意分歧。 |
-| ADD | `specs/truth/contracts/README.md` -> 跨操作一致性與未知結果 | 明定前端產生 UUID 查證未確認建立、歷史幣別位數精確加總、session 配置、業務寫入 Origin/JSON CSRF 防護、403/400 錯誤與嚴格解析。 | 讓後續 data-plan、UI 對齊和實作可承接網路失敗、歷史資料與 cookie 安全邊界。 |
+| ADD | `specs/truth/contracts/openapi.yaml` -> info.description；`components/` 與 `groups/` -> 對應 description | 明定 UUID 查證未確認建立、歷史位數精確加總、session 配置、Origin/JSON 防護與嚴格解析；依使用者要求將額外說明文件整併至契約，語意不變。 | 必要規則直接隨操作/欄位呈現，無需跨說明文件查找。 |
 
 ## /data-plan
 
@@ -41,7 +41,7 @@
 | ADD | `specs/truth/data/data-model.dbml` -> `Table currencies` | 新增固定 SIX 目錄、可選狀態、來源日期與目前小數位數。 | 金額輸入與 API 幣別清單需要同一可封存來源。 |
 | ADD | `specs/truth/data/data-model.dbml` -> `Table expenses` | 新增正數 BIGINT 最小單位、歷史 minor_unit、原幣別及 DATE 支出日期。 | 精確多幣別統計及歷史金額解讀不能依賴浮點或目前目錄。 |
 | ADD | `specs/truth/data/data-model.dbml` -> `Ref expenses.(owner_id, trip_id/category_id)` | 新增複合外鍵與分類刪除 RESTRICT，支出只能連到本人旅行/分類。 | 防跨帳號關聯並由資料庫保證使用中分類不可刪。 |
-| ADD | `specs/truth/data/README.md` -> CHECK、交易與即時計數生命週期 | 明定日期/分類/金額約束、併發衝突映射、row lock、即時計數/總額與快照更新方式。 | DBML 無法完整表達約束及交易；供 migrations 與後續 BDD 承接。 |
+| ADD | `specs/truth/data/data-model.dbml` -> Project/Table Note 與 migration 註解 | 明定日期/分類/金額約束、併發衝突映射、row lock、計數/總額、trim 與快照更新；依使用者要求整併額外說明文件，語意不變。 | 約束與交易直接在模型內承接，供 migrations 與後續 BDD 使用。 |
 
 ## /dsl-refine
 

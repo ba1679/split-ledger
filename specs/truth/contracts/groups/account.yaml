@@ -6,7 +6,7 @@ me:
     security:
       - BetterAuthSession: []
     summary: 取得目前登入帳號的最小投影
-    description: 由 Better Auth 已驗證的 session 取得身分；不接受客戶端指定使用者識別。
+    description: 由 Better Auth 已驗證 session 取得最小身分投影，不接受客戶端指定 userId/owner。Google 登入、取消、callback、續期與登出由 /api/auth/* 及 Better Auth client 處理，不另定一套業務 OAuth JSON 契約。
     responses:
       '200':
         description: 目前登入帳號。

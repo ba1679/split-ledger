@@ -3,8 +3,11 @@ Project "travel_ledger_phase_1a" {
   Note: '''
   個人旅行記帳的目前完整持久化模型。auth schema 的四張表由固定版本 Better Auth
   及 Drizzle adapter 產生並管理；業務表由應用 migration 管理。業務 UUID 由客戶端
-  在建立時提供，owner_id 一律由伺服器驗證後的 session 寫入。具體 CHECK、generated
-  column、collation、金額與交易規則見同目錄 README.md。
+  在建立時提供，owner_id 一律由伺服器驗證後的 session 寫入；所有查詢仍須按 owner 篩選。
+  本模型是規劃，不是已執行的 migration；SQL 特有限制見各表 Note 與檔尾註解。
+  名稱/項目先依 ECMAScript String.trim() 去首尾空白，再驗證非空。
+  created_at 用資料庫時鐘；updated_at 在同一次更新中寫入，兩者皆為 timestamptz。
+  count 與清單以同一 SQL 或一致性 snapshot 讀取；聚合值不得轉成浮點金額。
   '''
 }
 
@@ -17,7 +20,12 @@ Table auth.user {
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
 
-  Note: 'Better Auth 核心 user 投影。欄位/property 映射與 migration 須由固定版本 auth generate 核對，業務服務不可直接偽造使用者。'
+  Note: '''
+  Better Auth 核心 user 投影，僅啟用 Google provider，不提供密碼登入或刪除帳號。
+  固定 Better Auth/Drizzle 相容版本後，generate 核對四張 auth 表、索引及 snake_case 映射，
+  再產生 migration；業務服務不可偽造使用者。業務 owner FK 採 RESTRICT，不能直接刪 auth user。
+  正式與隔離測試 DB 使用同一套 migrations；真實 Google 串接另行驗證。
+  '''
 }
 
 Table auth.session {
@@ -89,7 +97,13 @@ Table trips {
     (owner_id, created_at, id) [name: 'trips_owner_created_id_idx']
   }
 
-  Note: '開始/結束日各自可空；兩者都有值才要求 end_date >= start_date。此版無刪除旅行入口。'
+  Note: '''
+  起迄日各自可空；CHECK (start_date IS NULL OR end_date IS NULL OR end_date >= start_date)。
+  name 須等於 trim 後值且非空。日期為真實日曆 DATE，不做時區轉換；本版無刪除旅行 API。
+  PATCH 在交易中鎖定本人旅行（SELECT FOR UPDATE），合併新舊日期後驗證再更新；
+  CHECK 違反（23514）回 400 VALIDATION_ERROR，原資料不變。
+  expenseCount 從 expenses 批次計算；列表索引配合 owner、created_at、id，不逐列發 SQL 計數。
+  '''
 }
 
 Table categories {
@@ -106,7 +120,16 @@ Table categories {
     (owner_id, name, id) [name: 'categories_owner_name_id_idx']
   }
 
-  Note: '全帳號共用；改名只更新本表，支出仍參照同一 id。被任何支出引用時 FK RESTRICT 阻止刪除。'
+  Note: '''
+  本人各旅行共用；name 去首尾空白後以 char_length/JS Array.from 計數，長度 1–30。
+  name_key 必須是 GENERATED ALWAYS AS
+  (translate(name, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')) STORED，COLLATE "C"。
+  僅 ASCII 英文不分大小寫；不合併內部空白、重音或其他 Unicode 字形；不同 owner 可同名。
+  CHECK 要求 name 已 trim 且長度合法；同 owner 名稱唯一違反（23505）回 409 CATEGORY_NAME_CONFLICT。
+  改名保留 id，支出 JOIN 目前名稱；usageCount 由本人所有旅行的支出引用數計算，不存摘要。
+  刪除由 FK RESTRICT 保護競爭；該 FK 違反（23503）回 409 CATEGORY_IN_USE，不能只看舊 usageCount。
+  category_id 為 null 時採 MATCH SIMPLE；有值時複合 FK 限制分類必須和支出同 owner。
+  '''
 }
 
 Table currencies {
@@ -116,7 +139,13 @@ Table currencies {
   snapshot_date date [not null, note: '此可選條目所屬的 SIX List One 發布日期']
   is_selectable boolean [not null, note: '退役條目保留外鍵，新的支出不得再選']
 
-  Note: 'Setup 原子匯入固定快照；更新時舊代碼可標為不可選，不刪除仍被支出引用的代碼。支出的歷史 minor_unit 獨立保存。'
+  Note: '''
+  CHECK：code 為三碼大寫，minor_unit 在 0–4。來源 SIX ISO 4217 List One。
+  快照 SHA-256：33139b438657d1cee116ba737807ea71d19d6de4b90f799a09c56f0cc6a1b0ff。
+  初始快照 2026-09-17 共 165 個可選代碼；可選列的 snapshot_date 必須一致，否則匯入/啟動驗證失敗。
+  更新快照以單一交易封存來源、更新可選條目並將退役代碼標不可選；本版無自動更新工作。
+  保留舊代碼外鍵與每筆支出的歷史位數，不重解讀舊金額。165 列直接掃描，不另加布林索引。
+  '''
 }
 
 Table expenses {
@@ -137,7 +166,17 @@ Table expenses {
     (owner_id, category_id) [name: 'expenses_owner_category_idx']
   }
 
-  Note: '權威記帳紀錄；修改/刪除後從目前紀錄即時計算 count 與各幣別總額，不另存摘要。'
+  Note: '''
+  CHECK：amount_minor > 0、minor_unit BETWEEN 0 AND 4、item 已 trim 且非空。
+  支出日期可在旅行期間之外。客戶端 UUID 撞 PK 回 409 ID_CONFLICT，不回衝突紀錄。
+  寫入時檢查可選幣別及其位數；FK 只保證代碼存在。以 BigInt 解析大單位字串，單筆最多 9223372036854775807 最小單位。
+  PATCH 在交易中鎖定本人支出，合併後一次驗證/更新；外鍵為旅行與分類歸屬的最終保護。
+  未改幣別時沿用本筆 minor_unit；實際換幣別才使用新快照位數，沒有換匯或靜默四捨五入。
+  修改/刪除後直接從目前紀錄計算 count/總額；GROUP BY currency_code,minor_unit 的 SUM(bigint)
+  回 NUMERIC 整數字串，後端用 BigInt 升到同幣別最大位數再加總。總額可超過單筆 BIGINT 範圍。
+  (owner_id,trip_id,spent_on,id) 支援列表及游標；(owner_id,category_id) 支援使用筆數與刪除 FK 檢查。
+  實作後以 EXPLAIN (ANALYZE, BUFFERS) 檢查索引效益，不另建摘要或每欄索引。
+  '''
 }
 
 Ref: auth.session.user_id > auth.user.id [delete: cascade]
@@ -147,3 +186,11 @@ Ref: categories.owner_id > auth.user.id [delete: restrict]
 Ref: expenses.(owner_id, trip_id) > trips.(owner_id, id) [delete: restrict]
 Ref: expenses.(owner_id, category_id) > categories.(owner_id, id) [delete: restrict]
 Ref: expenses.currency_code > currencies.code [delete: restrict]
+
+// Migration 補充（DBML Note 不會自動產生 generated/collation/function DDL）：
+// app_trim(text) = btrim(value, U&'\0009\000A\000B\000C\000D\0020\00A0\1680\2000\2001\2002\2003\2004\2005\2006\2007\2008\2009\200A\2028\2029\202F\205F\3000\FEFF')。
+// 以 IMMUTABLE SQL function 實作；不可只用預設 btrim（只去一般空格）。
+// trips.name/expenses.item：CHECK (value = app_trim(value) AND char_length(value) > 0)。
+// categories.name：CHECK (name = app_trim(name) AND char_length(name) BETWEEN 1 AND 30)。
+// Setup 必須補齊各表 Note 的 CHECK、generated name_key、C collation，再驗證 migration。
+// 回歸涵蓋 trim/emoji/ASCII 重名、跨 owner FK、分類刪除競爭、PATCH 與多幣別精確加總。

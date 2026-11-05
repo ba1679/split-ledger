@@ -1,12 +1,30 @@
+# 單檔預覽：sh scripts/preview-openapi.sh → .cache/openapi/openapi.yaml
+# 修改本來源及 groups/components，預覽檔不手動維護。
 openapi: 3.0.3
 info:
   title: 旅帳 Phase 1A API
   version: 0.1.0
-  description: |
-    個人旅行記帳的業務 API。金額一律為十進位字串，日期為不帶時區的 YYYY-MM-DD。
-    Google OAuth、session cookie 與登出由掛在 /api/auth/* 的 Better Auth 處理；
-    其套件產生的路由與回應不在本業務契約中重新定義。每個受保護的業務請求
-    都由伺服器從有效 session 取得 userId，不能由客戶端指定 owner。
+  description: |-
+    個人旅行記帳 API；此文件與 groups/components 是唯一可維護來源。
+
+    登入與權限
+    - Google OAuth、session 續期與登出由 Better Auth /api/auth/* 管理，僅開 Google provider。
+    - 以真實 session 決定 userId；業務請求不得提供 owner。不存在與他人資源統一回 404。
+    - 正式 HTTPS、trusted origins、Google callback、所有 Set-Cookie 轉送及生成 auth schema 由 Setup 驗證。
+    - 自動測試控制外部 Google 身分回應，保留真實本地 session/資料權限；真實 Google 另測。
+
+    寫入規則
+    - POST/PATCH 限 application/json（可帶 charset），DELETE 不帶本文；不符回 400 VALIDATION_ERROR。
+    - 寫入前完整比對 Origin 的 scheme/host/port 與明確允許的對外 origin；缺少、null 或不符回 403 REQUEST_ORIGIN_REJECTED。
+    - 來源檢查先於本文驗證；不信任 Host/未受信任轉送標頭，不只依賴 CORS 或 SameSite。HTTP 測試須送合法 Origin 並驗證拒絕情境。
+    - 本文拒絕額外欄位與寬鬆型別轉換；Fastify 關閉 removeAdditional/coerceTypes，query limit 另做嚴格解析。
+
+    未確認結果
+    - 建立前保留客戶端 UUID；回應遺失先以單筆 GET 查證。查到視為已保存，暫時 404 仍可能正在處理。
+    - 畫面保留草稿與原 UUID，顯示「保存結果尚未確認」及重新整理入口，不自動重送或產生新 UUID。這不是 exactly-once 保證。
+    - PATCH/DELETE 結果不明也先重新讀取資源/統計；不先宣稱成功或失敗。
+
+    金額與日期的格式見各 schema；目前是規劃契約，尚未實作服務。
 servers:
   - url: /
     description: 同 origin 提供網頁與 /api，開發與正式環境共用相對路徑。

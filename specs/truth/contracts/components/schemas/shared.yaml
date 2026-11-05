@@ -23,18 +23,23 @@ ApiError:
     requestId:
       type: string
       description: 可選，供支援與伺服器日誌對照，不包含敏感資訊。
+  description: |-
+    400：輸入驗證；401：未登入；403：寫入來源被拒；404：不存在或非本人（相同回應）。
+    409：分類使用中/重名/建立 UUID 衝突，以 code 區分，不回傳衝突資源。
+    500 INTERNAL_ERROR：非預期伺服器錯誤，訊息不包含 cookie、token、secret 或完整私人支出。
+    網路逾時不是 HTTP 錯誤碼，也不能據此判斷是否已保存。
 DateOnly:
   type: string
   format: date
-  description: ISO 8601 日曆日期 YYYY-MM-DD；不帶時區，不使用 UTC 轉換更改日期。
+  description: 真實存在的 Gregorian 日曆日期 YYYY-MM-DD，不帶時區。支出預設由裝置本地日期送出，伺服器不推測；不得經 UTC 轉換更改日期。
   example: '2027-03-11'
 MoneyAmount:
   type: string
-  description: |
-    正數十進位大單位金額。請求不接受負號、指數、千分位、前後空白、
-    靜默截斷或四捨五入。小數位數由所選幣別快照的 minorUnit 決定；
-    轉成最小單位後必須在 PostgreSQL 正數 BIGINT 範圍內。
-    回應固定補足該幣別位數，例如 USD 12.50、JPY 1200。
+  description: |-
+    正數十進位大單位字串，例如 USD "12.50"、JPY "1200"。
+    不接受負號、指數、千分位、前後空白、靜默截斷或四捨五入；後端仍獨立驗證。
+    依適用 minorUnit 轉為最小單位 BigInt，範圍 1–9223372036854775807；不得用 Number/parseFloat 計算。
+    回應固定補足本筆保存的位數。未實際換幣別時沿用歷史 minorUnit，實際換幣別才採新目錄位數；沒有換匯。
   pattern: '^(?:0|[1-9][0-9]*)(?:\.[0-9]+)?$'
   example: '12.50'
 CurrencyCode:

@@ -26,7 +26,7 @@ PageLimit:
   name: limit
   in: query
   required: false
-  description: 每頁筆數，預設 50，最高 100。
+  description: 每頁預設 50，最高 100。HTTP query 為字串，先完整比對十進位正整數後再解析；空字串、浮點、50abc 拒絕，不使用寬鬆轉型。
   schema:
     type: integer
     minimum: 1
@@ -36,7 +36,7 @@ PageCursor:
   name: cursor
   in: query
   required: false
-  description: 前次回應的 nextCursor；不透明字串，不能自行推算。
+  description: 前次回應的 nextCursor；不透明，綁定帳號、查詢範圍及排序。不可自行推算，也不可沿用另一帳號的 cursor。
   schema:
     type: string
     minLength: 1
