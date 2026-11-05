@@ -10,6 +10,7 @@ import { SearchCombo } from '../../components/SearchCombo.js';
 import { FormDialog } from '../../components/FormDialog.js';
 import { useSession } from '../auth/session.js';
 import { displayAmount } from './money.js';
+import { definitelyRejected, OfflineWrite, UnconfirmedWrite, unconfirmedMessage, verifiedDelete, verifiedSave, type SaveIntent, type WriteIntent } from './save-outcome.js';
 
 type FieldErrors = Partial<Record<'item' | 'currency' | 'amount' | 'date', string>>;
 export function ExpenseForm() {
@@ -30,6 +31,7 @@ function ExpenseEditor({ trip, expense, readError }: { trip: Trip; expense?: Exp
   const [date, setDate] = useState(() => (expense?.spentOn ?? dateOnly(localToday())).replaceAll('-', '/'));
   const [errors, setErrors] = useState<FieldErrors>({}), [saveError, setSaveError] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [unconfirmed, setUnconfirmed] = useState<WriteIntent | null>(null);
   const currencies = useQuery({ queryKey: ['currencies'], queryFn: ({ signal }) => apiRequest<CurrencyList>('/api/currencies', { signal }) });
   const categories = useQuery({ queryKey: ['account', account!.id, 'categories'], queryFn: ({ signal }) => apiRequest<ItemList<Category>>('/api/categories', { signal }) });
   const precision = expense?.currencyCode === currency ? expense.minorUnit : currencies.data?.items.find(option => option.code === currency)?.minorUnit;
@@ -49,6 +51,8 @@ function ExpenseEditor({ trip, expense, readError }: { trip: Trip; expense?: Exp
   }
   const mutation = useMutation({
     mutationFn: async (spentOn: string) => {
+      if (!navigator.onLine) throw new OfflineWrite('save');
+      const intent: SaveIntent = { kind: 'save', id, tripId, item: item.trim(), spentOn, currencyCode: currency, minorUnit: precision!, amountMinor: parseMoney(amount, precision!).toString(), categoryId: category || null };
       const payload = { item: item.trim(), spentOn, categoryId: category || null,
         ...(!expense || amount !== expense.amount ? { amount } : {}),
         ...(!expense || currency !== expense.currencyCode ? { currencyCode: currency } : {}),
@@ -59,19 +63,17 @@ function ExpenseEditor({ trip, expense, readError }: { trip: Trip; expense?: Exp
           method: expense ? 'PATCH' : 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload),
         });
       } catch (error) {
-        if (!expense || error instanceof ApiError) throw error;
-        // A PATCH is never blindly retried: first verify the intended saved values.
-        try {
-          const saved = await apiRequest<Expense>(`/api/trips/${tripId}/expenses/${id}`);
-          if (saved.item === item.trim() && saved.spentOn === spentOn && saved.currencyCode === currency && saved.minorUnit === precision &&
-            (saved.category?.id ?? '') === category && parseMoney(saved.amount, saved.minorUnit) === parseMoney(amount, precision!)) return saved;
-        } catch { /* Preserve the draft when the outcome cannot be verified. */ }
-        throw new Error('保存結果尚未確認，請重新整理確認。', { cause: error });
+        if (definitelyRejected(error)) throw error;
+        // The original UUID is queried after an unavailable response; no mutation is retried.
+        const confirmed = await verifiedSave(intent);
+        if (confirmed) return confirmed;
+        throw new UnconfirmedWrite(intent, error);
       }
     },
     onSuccess: () => saved('支出已保存'),
     onError: error => {
-      setSaveError(error instanceof ApiError ? error.message : '無法確認保存結果，請保留這個畫面並重新整理確認。');
+      setSaveError(error.message);
+      if (error instanceof UnconfirmedWrite) setUnconfirmed(error.intent);
       if (error instanceof ApiError && error.field) {
         const field = error.field === 'currencyCode' ? 'currency' : error.field === 'spentOn' ? 'date' : error.field;
         if (['item', 'currency', 'amount', 'date'].includes(field)) setErrors(previous => ({ ...previous, [field]: error.message }));
@@ -81,22 +83,32 @@ function ExpenseEditor({ trip, expense, readError }: { trip: Trip; expense?: Exp
   });
   const deletion = useMutation({
     mutationFn: async () => {
+      if (!navigator.onLine) throw new OfflineWrite('delete');
       try { await apiRequest<void>(`/api/trips/${tripId}/expenses/${id}`, { method: 'DELETE' }); }
       catch (error) {
-        if (error instanceof ApiError) throw error;
+        if (definitelyRejected(error)) throw error;
         // An unavailable response does not justify a second DELETE.
-        try { await apiRequest<Expense>(`/api/trips/${tripId}/expenses/${id}`); }
-        catch (verified) { if (verified instanceof ApiError && verified.status === 404) return; }
-        throw new Error('刪除結果尚未確認，請重新整理確認。', { cause: error });
+        const intent = { kind: 'delete' as const, id, tripId };
+        if (await verifiedDelete(intent)) return;
+        throw new UnconfirmedWrite(intent, error);
       }
     },
     onSuccess: () => saved('支出已刪除'),
-    onError: error => setSaveError(error.message),
+    onError: error => { setSaveError(error.message); if (error instanceof UnconfirmedWrite) setUnconfirmed(error.intent); },
     onSettled: () => { writing.current = false; },
   });
-  const busy = mutation.isPending || deletion.isPending;
+  const verification = useMutation({
+    mutationFn: async (intent: WriteIntent) => intent.kind === 'save' ? Boolean(await verifiedSave(intent)) : verifiedDelete(intent),
+    onSuccess: async (confirmed, intent) => {
+      if (confirmed) { await saved(intent.kind === 'save' ? '支出已保存' : '支出已刪除'); }
+      else setSaveError(unconfirmedMessage(intent.kind));
+    },
+    onSettled: () => { writing.current = false; },
+  });
+  const busy = mutation.isPending || deletion.isPending || verification.isPending;
+  function recheck() { if (unconfirmed && !writing.current) { writing.current = true; verification.mutate(unconfirmed); } }
   function submit(event: React.FormEvent) {
-    event.preventDefault(); if (writing.current) return;
+    event.preventDefault(); if (writing.current || unconfirmed) return;
     const validation: FieldErrors = {};
     if (!item.trim()) validation.item = '請填寫支出項目。';
     if (precision === undefined || currencies.error) validation.currency = '請從可用目錄選擇幣別。';
@@ -117,7 +129,7 @@ function ExpenseEditor({ trip, expense, readError }: { trip: Trip; expense?: Exp
     <header className="page-head"><div><div className="eyebrow">LITTLE DETAILS, WELL KEPT</div><h1>{expense ? '編輯這筆花費' : '記下這一刻的花費。'}</h1><p className="muted">{expense ? '修正紀錄，讓帳本更準確。' : '每一筆小事，都是旅程的一部分。'}</p></div></header>
     {readError ? <p className="error" role="alert">暫時無法更新已保存資料，請保留草稿後再試。</p> : null}
     <form className="form-panel" noValidate onSubmit={submit}>
-      <fieldset disabled={busy}>
+      <fieldset disabled={busy || Boolean(unconfirmed)}>
         <div className="field"><label htmlFor={itemId}>支出項目</label><input id={itemId} ref={itemInput} value={item} onChange={event => setItem(event.target.value)} placeholder="例如：巷口的拉麵店" aria-invalid={Boolean(errors.item)} aria-describedby={errors.item ? `${itemId}-error` : undefined} required /><p id={`${itemId}-error`} className="error">{errors.item}</p></div>
         <SearchCombo label="幣別" value={currency} options={currencyOptions} onChange={value => {
           setCurrency(value);
@@ -150,12 +162,14 @@ function ExpenseEditor({ trip, expense, readError }: { trip: Trip; expense?: Exp
         </div>
       </fieldset>
       <p className="error" role="alert">{saveError}</p>
-      <div className="form-actions">{expense ? <button className="text-btn danger delete-expense" type="button" disabled={busy} onClick={() => { setSaveError(''); setDeleting(true); }}>刪除支出</button> : null}<Link className="btn secondary" aria-disabled={busy} onClick={event => { if (busy) event.preventDefault(); }} to={`/trips/${tripId}`}>取消</Link><button className="btn" disabled={busy || currencies.isPending || Boolean(currencies.error)}>{mutation.isPending ? '儲存中…' : '儲存支出'}</button></div>
+      {unconfirmed && !deleting ? <button className="btn secondary" type="button" disabled={busy} onClick={recheck}>{verification.isPending ? '查證中…' : '重新查證'}</button> : null}
+      <div className="form-actions">{expense ? <button className="text-btn danger delete-expense" type="button" disabled={busy || Boolean(unconfirmed)} onClick={() => { setSaveError(''); setDeleting(true); }}>刪除支出</button> : null}<Link className="btn secondary" aria-disabled={busy} onClick={event => { if (busy) event.preventDefault(); }} to={`/trips/${tripId}`}>取消</Link><button className="btn" disabled={busy || Boolean(unconfirmed) || currencies.isPending || Boolean(currencies.error)}>{mutation.isPending ? '儲存中…' : '儲存支出'}</button></div>
     </form>
     {deleting && expense ? <FormDialog title="刪除這筆支出？" onClose={() => setDeleting(false)} busy={busy}>
       <p>確定刪除「{expense.item}」{expense.currencyCode} {displayAmount(expense.amount)}？此操作無法復原。</p>
       <p className="error" role="alert">{saveError}</p>
-      <div className="form-actions"><button className="btn secondary" type="button" disabled={busy} onClick={() => setDeleting(false)}>取消</button><button className="btn danger" type="button" disabled={busy} onClick={() => { if (!writing.current) { writing.current = true; deletion.mutate(); } }}>{deletion.isPending ? '刪除中…' : '確認刪除'}</button></div>
+      {unconfirmed ? <button className="btn secondary" type="button" disabled={busy} onClick={recheck}>{verification.isPending ? '查證中…' : '重新查證'}</button> : null}
+      <div className="form-actions"><button className="btn secondary" type="button" disabled={busy} onClick={() => setDeleting(false)}>取消</button><button className="btn danger" type="button" disabled={busy || Boolean(unconfirmed)} onClick={() => { if (!writing.current && !unconfirmed) { writing.current = true; deletion.mutate(); } }}>{deletion.isPending ? '刪除中…' : '確認刪除'}</button></div>
     </FormDialog> : null}
   </>;
 }
