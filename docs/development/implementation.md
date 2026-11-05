@@ -54,3 +54,9 @@ Exact feature 1/1 green; root lint/workspace typecheck pass. Compiled API startu
 Account + currency feature regression: 7/7 green. Canonical support tests: 6/6 green, covering real Better Auth callback/session/cookie forwarding/revocation, forged/expired tokens, source rejection before malformed JSON, strict validation with unchanged DB and non-disclosing ownership responses, and pinned auth schema metadata. SQL/Drizzle auth namespace and necessary owner-scoped business persistence are migrated. API/test typechecks, lint, build and compiled server startup with .env loading pass. No live Google credentials or production login bypass are present.
 
 T228 removed the unused testMode option and broad fixture factory cast; direct typed assembly catches interface drift. Scoped 7/7 regression, API/test typechecks and lint remain green.
+
+## Trips — T229
+
+Exact trip feature 5/5 and prior account/currency regression 7/7 green. Support 9/9 includes UUID collision without disclosure/mutation, strict invalid-date/body rejection, Unicode trim and null-clearing with authoritative re-read. Product trip creation inserts under the verified session owner and reads back inside one transaction. API/test types, lint and API build pass.
+
+T230 extracted shared trip field validation without changing omitted/null behavior or transaction boundaries. Completed BDD 12/12, trip support 3/3, typechecks and lint pass.
