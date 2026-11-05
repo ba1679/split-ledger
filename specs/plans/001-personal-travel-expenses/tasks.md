@@ -25,19 +25,19 @@
 
 **Goal**: 建立程式與測試的入口及共用骨架，不提前實作產品行為或 DSL 句型。
 
-- [ ] T006 建立前後端和共用套件的模組落點與入口。
+- [X] T006 建立前後端和共用套件的模組落點與入口。
   - Read: `plan.md` -> 專案結構；`truth-delta.md` -> /technical-research。
   - 只做：建立 `apps/api/src`、`apps/web/src`、`packages/shared/src` 的空模組、可組裝入口及測試掛載點。
   - 不做：不實作業務規則、API 行為或 DSL。
-- [ ] T007 建立測試資料庫連線、migration 執行入口與案例隔離 fixture 骨架。
+- [X] T007 建立測試資料庫連線、migration 執行入口與案例隔離 fixture 骨架。
   - Read: `specs/truth/data/data-model.dbml` -> auth、trips、categories、expenses、currencies。
   - 只做：隔離 worker 的資料庫連線、清理與 fixture 注入介面。
   - 不做：不建立業務 schema、測試情境資料或 step definitions。
-- [ ] T008 建立身份、HTTP 與瀏覽器測試共用 fixture / helper 骨架。
+- [X] T008 建立身份、HTTP 與瀏覽器測試共用 fixture / helper 骨架。
   - Read: `specs/truth/techstack.md` -> 測試隔離及登入測試；`specs/truth/contracts/groups/account.yaml` -> 登入邊界。
   - 只做：預留受控外部身份、真實本地 session、APIRequestContext、瀏覽器和測試上下文介面。
   - 不做：不實作 Google 產品流程、各句測試語意或模擬持久化結果。
-- [ ] T009 建立 feature 掛載與逐句 step definition 的檔案落點。
+- [X] T009 建立 feature 掛載與逐句 step definition 的檔案落點。
   - Read: `truth-delta.md` -> /dsl-refine 所有列。
   - 只做：設定各介面載入 truth feature、測試檔案目錄及共用 helper 依賴；逐句獨立落點避免平行衝突。
   - 不做：不編寫任何 Given、When、Then 或產品行為。

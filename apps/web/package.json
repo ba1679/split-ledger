@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "tsc"
+    "build": "vite build",
+    "dev": "vite"
   },
   "dependencies": {
     "@split-ledger/shared": "workspace:*",

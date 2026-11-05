@@ -1,2 +1,5 @@
-import { defineConfig } from '@playwright/test';
-export default defineConfig({ testDir: './tests', testMatch: '**/*.spec.ts', use: { baseURL: 'http://127.0.0.1:3001' } });
+import { fileURLToPath } from 'node:url';
+import { defineConfig, devices } from '@playwright/test';
+import { defineBddConfig } from 'playwright-bdd';
+const testDir = defineBddConfig({ featuresRoot: fileURLToPath(new URL('../../specs/truth/features/backend/', import.meta.url)), features: '../../specs/truth/features/backend/**/*.feature', steps: './tests/steps/**/*.ts', importTestFrom: './tests/support/fixtures.ts', outputDir: './.features-gen', missingSteps: 'fail-on-run' });
+export default defineConfig({ testDir, timeout: 15000, expect: { timeout: 3000 }, workers: 2, fullyParallel: true, reporter: [['list']], use: { trace: 'retain-on-failure' }, projects: [{ name: 'api', use: {} }] });
