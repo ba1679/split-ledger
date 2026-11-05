@@ -14,12 +14,12 @@
 
 **Goal**: 安裝並驗證本輪採用的技術，不實作業務或 DSL。
 
-- [ ] T001 配置 Node.js 24、pnpm workspace、TypeScript strict 與鎖定版本；建立 `apps/web`、`apps/api`、`packages/shared` workspace。
+- [X] T001 配置 Node.js 24、pnpm workspace、TypeScript strict 與鎖定版本；建立 `apps/web`、`apps/api`、`packages/shared` workspace。
   - Read: `specs/truth/techstack.md` -> 專案與執行環境；`truth-delta.md` -> /technical-research。
-- [ ] T002 安裝 React、Vite、React Router、TanStack Query、Fastify、TypeBox、Better Auth、Drizzle ORM、node-postgres 與 Drizzle Kit，配置同 origin 開發代理；驗證套件相容後固定版本。
-- [ ] T003 設定 PostgreSQL 18 的 Docker Compose 開發與隔離測試環境，配置正式與測試連線；不寫資料模型或產品規則。
-- [ ] T004 安裝 Playwright Test、playwright-bdd、Vitest、ESLint 與 TypeScript 工具，配置 Chromium、WebKit 與前後端獨立測試入口；封存 SIX List One 快照及來源 SHA，保留 TWD ISO 位數 2。
-- [ ] T005 執行 Setup smoke-test：重建依賴、連線測試 PostgreSQL、啟動最小 Fastify 與 Vite、執行空白 Playwright/Vitest 測試，確認工具鏈；不執行業務案例。
+- [X] T002 安裝 React、Vite、React Router、TanStack Query、Fastify、TypeBox、Better Auth、Drizzle ORM、node-postgres 與 Drizzle Kit，配置同 origin 開發代理；驗證套件相容後固定版本。
+- [X] T003 設定 PostgreSQL 18 的 Docker Compose 開發與隔離測試環境，配置正式與測試連線；不寫資料模型或產品規則。
+- [X] T004 安裝 Playwright Test、playwright-bdd、Vitest、ESLint 與 TypeScript 工具，配置 Chromium、WebKit 與前後端獨立測試入口；封存 SIX List One 快照及來源 SHA，保留 TWD ISO 位數 2。
+- [X] T005 執行 Setup smoke-test：重建依賴、連線測試 PostgreSQL、啟動最小 Fastify 與 Vite、執行空白 Playwright/Vitest 測試，確認工具鏈；不執行業務案例。
 
 ## Phase 2: Foundational
 

@@ -1,0 +1,31 @@
+{
+  "name": "split-ledger",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": "24.22.2",
+    "pnpm": "11.25.0"
+  },
+  "scripts": {
+    "typecheck": "pnpm -r typecheck",
+    "build": "pnpm -r build",
+    "lint": "eslint .",
+    "test:unit": "vitest run",
+    "test:smoke": "playwright test -c playwright.smoke.config.ts",
+    "test:api": "bddgen -c apps/api/playwright.config.ts && playwright test -c apps/api/playwright.config.ts",
+    "test:web": "bddgen -c apps/web/playwright.config.ts && playwright test -c apps/web/playwright.config.ts",
+    "db:up": "docker compose up -d --wait",
+    "db:down": "docker compose down"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.64.1",
+    "@types/node": "24.19.2",
+    "eslint": "10.14.0",
+    "playwright-bdd": "9.2.1",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.72.1",
+    "vitest": "5.1.0"
+  }
+}
