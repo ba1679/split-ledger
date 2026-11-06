@@ -38,8 +38,9 @@ disable-model-invocation: true
 
 1. READ 讀取 `rules/嚴格禁止跳步驟判準.md` 與 `rules/平行執行與檔案衝突判準.md`，確認本輪任務集邊界。
 2. READ 若 `tasks.md` 當前 phase 含 `Parallel Hint`，讀取 `rules/ParallelHint平行Subagent與衝突Merge判準.md`。
-3. THINK 收斂本輪任務集：有 `Parallel Hint` 則為 Hint 列出的 `[P]` 批次；否則恰好 1 個已解鎖 task。
-4. THINK 收斂執行模式：Setup 與 Foundational 直接實作並停在該則「只做／不做」；Phase 3 的 ALIGN / REMOVE / RED 走 subagent 測試層；review 走 review 迴圈；`[BDD-GREEN]` / `[BDD-REFACTOR]` 委派 `/bdd`；`[CODE-REMOVE]`、`[REGRESSION]` 直接實作或直接驗證。
+3. READ 若遇到 `[USER-CONFIRM]`，讀取 `rules/user-confirmation-gate.md`；關卡未通過時依賴它的任務不得解鎖。
+4. THINK 收斂本輪任務集：有 `Parallel Hint` 則為 Hint 列出的 `[P]` 批次；否則恰好 1 個已解鎖 task。
+5. THINK 收斂執行模式：Setup 與 Foundational 直接實作並停在該則「只做／不做」；Phase 3 的 ALIGN / REMOVE / RED 走 subagent 測試層；review 走 review 迴圈；`[BDD-GREEN]` / `[BDD-REFACTOR]` 委派 `/bdd`；`[CODE-REMOVE]`、`[REGRESSION]` 直接實作或直接驗證。
 
 ## Phase 4 -- 載入精確參照並執行
 
@@ -49,7 +50,7 @@ disable-model-invocation: true
 4. READ 讀取 `rules/自主決策與阻塞處理判準.md`，確認規格缺口、局部矛盾或環境阻礙時的決策優先序。
 5. DELEGATE 若本輪是 `Parallel Hint` 批次，為每個 `[P]` task 派出獨立 subagent，prompt 指向該 plan `tasks.md` 的對應任務；全部回來後執行 review 迴圈。
 6. DELEGATE 若本輪是 `[BDD-GREEN]` 或 `[BDD-REFACTOR]`，呼叫 `/bdd` 的單一 requested step，傳入 `Test Scope`、action、truth rows、模組 DSL 與實際使用的共用 DSL rows。
-7. WRITE 若 task 不帶上述 marker，依 task marker 完成本輪所需的程式、設定、文件或測試變更；不得越出本輪任務與 phase boundary。
+7. WRITE 若 task 為 `[USER-CONFIRM]`，依關卡規則展示並等待明確確認；否則若 task 不帶上述 marker，依 task marker 完成本輪所需的程式、設定、文件或測試變更；不得越出本輪任務與 phase boundary。
 
 ## Phase 5 -- 驗證、回寫、繼續 One-Shot 直到交付
 

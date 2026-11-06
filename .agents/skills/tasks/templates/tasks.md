@@ -5,9 +5,10 @@
 
 ## Task Binding Contract
 
-- 每個**開發任務**都必須對應 `truth-delta.md` 中的 ADD / MODIFY / DELETE / NOOP 語意。
+- 產品行為開發任務對應 `truth-delta.md` 的語意；重構、工程交付與確認任務追溯 spec / plan，並引用相關 truth 或 NOOP（若有）。
 - Phase 1 `Setup` 只做本輪新增技術的基礎建設、技術環境與最後的 smoke-test；不寫 DSL 語意、不寫產品行為。
 - Phase 2 `Foundational` 只建立後續實作程式、測試共用元件、入口、fixture、helper 與落點骨架。
+- 無需對齊 DSL 時省略 Phase 3，記錄原因與既有回歸範圍。
 - Phase 3 `Test Alignment & Implementation` 的目的：在寫產品碼之前，先把本輪所有受影響 DSL 的自動化測試對齊最新版 truth。
 - Truth 參照必須使用 `specs/truth/**` 路徑；plan 參照才使用當前 plan package 內相對路徑。
 - Feature `Shared Must Read` 除 feature、同模組 DSL、對應 `truth-delta` 列外，還必須列入回追到的 planner 產物。
@@ -178,3 +179,16 @@
 - 本輪沒有 plan-side 產物時省略整個 phase。
 
 - [ ] T{{PLAN_SIDE_GATE_TASK_ID}} subagent review ({{PLAN_SIDE_GATE_NAME}} quality gate)
+
+## Phase {{DELIVERY_PHASE}}: 工程交付與確認（依需求選用）
+
+**來源**: `spec.md` -> {{DELIVERY_REQUIREMENT}}
+**Dependencies**: {{DELIVERY_DEPENDENCIES}}
+
+- [ ] T{{REFACTOR_TASK_ID}} {{REFACTOR_ACTION}}
+  - 既有回歸範圍與入口：{{REGRESSION_SCOPE}}
+  - 工程檢查及證據：{{ENGINEERING_EVIDENCE}}
+- [ ] T{{CONFIRM_TASK_ID}} [USER-CONFIRM] {{CONFIRM_DELIVERABLE}}
+  - 前置：T{{REFACTOR_TASK_ID}}；確認對象：{{CONFIRMER}}；通過條件：{{CONFIRM_CRITERIA}}
+- [ ] T{{REMAINING_TASK_ID}} {{REMAINING_ACTION}}
+  - Dependencies: T{{CONFIRM_TASK_ID}}

@@ -5,9 +5,10 @@
 
 ## Task Binding Contract
 
-- 每個**開發任務**都必須對應 `truth-delta.md` 中的 ADD / MODIFY / DELETE / NOOP 語意。
+- 產品行為開發任務對應 `truth-delta.md` 的語意；重構、工程交付與確認任務追溯 spec / plan，並引用相關 truth 或 NOOP（若有）。
 - Phase 1 `Setup` 只做本輪新增技術的基礎建設、技術環境與最後的 smoke-test；不寫 DSL 語意、不寫產品行為。
 - Phase 2 `Foundational` 只建立後續實作程式、測試共用元件、入口、fixture、helper 與落點骨架。
+- 無需對齊 DSL 時省略 Phase 3，記錄原因與既有回歸範圍。
 - Phase 3 `Test Alignment & Implementation` 的目的：在寫產品碼之前，先把本輪所有受影響 DSL 的自動化測試對齊最新版 truth。
 - Truth 參照必須使用 `specs/truth/**` 路徑；plan 參照才使用當前 plan package 內相對路徑。
 - Feature `Shared Must Read` 除 feature、同模組 DSL、對應 `truth-delta` 列外，還必須列入回追到的 planner 產物。
@@ -211,3 +212,16 @@
 - 不改 truth、不加 feature、不重跑 GREEN 當通過條件。
 
 - [ ] T024 subagent review (ui quality gate)
+
+## Phase 5: 示範遷移與確認（示意：依需求選用）
+
+**來源**: `spec.md` -> 先示範並取得確認，再完成其餘遷移
+**Dependencies**: 前置環境與相關測試對齊完成
+
+- [ ] T024 遷移示範表單
+  - 既有回歸範圍與入口：執行表單既有 feature。
+  - 工程檢查及證據：對照遷移前後畫面，檢查共用設計值與圖示來源。
+- [ ] T025 [USER-CONFIRM] 展示示範表單與對照結果
+  - 前置：T024；確認對象：使用者；通過條件：使用者明確確認可繼續。
+- [ ] T026 遷移其餘介面並檢查無用舊樣式
+  - Dependencies: T025

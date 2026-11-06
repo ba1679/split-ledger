@@ -1,7 +1,7 @@
-# Rule 1 - 盤點只用來寫 Phase 3，不得輸出 Impact Audit phase
+# Rule 1 - 盤點用於測試對齊與回歸規劃，不得輸出 Impact Audit phase
 
 - Level: `MUST`
-- 當 `truth-delta.md` 包含 `MODIFY` 或 `DELETE` row，寫 Phase 3 前必須盤點受影響的 truth feature/dsl、既有 step definitions、fixtures、helpers、focused tests、產品分支與回歸測試面。
+- 當 `truth-delta.md` 包含 `MODIFY` 或 `DELETE` 的 feature / DSL row，寫 Phase 3 前必須盤點受影響的 truth feature/dsl、既有 step definitions、fixtures、helpers、focused tests、產品分支與回歸測試面。
 - 這份盤點只發生在 `/tasks` 收斂與寫 task 時，用來決定 ALIGN / REMOVE / RED、Foundational 的 `Read`，以及 Feature 的產品碼落點。
 - 不得把盤點寫成 `Truth Delta Impact Audit` phase，也不得輸出給 `/implement` 做的 T00x。
 - Phase 1 `Setup` 只在本輪有新增技術時建立：寫清套件名、配置、技術環境與最後的 smoke-test；不寫 DSL 語意、不寫產品行為。
@@ -69,7 +69,7 @@
 # Rule 3 - Phase 3 必須列出本輪 Feature 用到的全部待處理 DSL
 
 - Level: `MUST`
-- Phase 3 清單必須包含 truth-delta 的 `ADD` / `MODIFY` / `DELETE` 句，以及本輪 Feature 用到、尚無 stepdef 的句。
+- 有待處理 DSL 時，Phase 3 清單必須包含 truth-delta 的 `ADD` / `MODIFY` / `DELETE` 句，以及本輪 Feature 用到、尚無 stepdef 的句。
 - 一條 DSL 一個 `[P]` task；語意沒變且 stepdef 已在的句不列。
 - `[BDD-ALIGN]` 只改既有測試，讓它表達最新版 `StepDef 實作語意`，不寫產品碼。
 - `[BDD-REMOVE]` 只移除或改寫仍保護舊 truth 的測試，不寫產品碼。
