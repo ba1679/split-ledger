@@ -1,3 +1,4 @@
+import { Button } from '../components/ui/button.js';
 import React from 'react';
 import { ApiError } from '../api/index.js';
 
@@ -26,9 +27,9 @@ export function QueryState({
     <div className="state" role="alert">
       <h2>暫時無法取得帳本</h2>
       <p>{message}</p>
-      <button className="btn" onClick={retry}>
+      <Button variant="default" onClick={retry}>
         重新嘗試
-      </button>
+      </Button>
     </div>
   );
 }

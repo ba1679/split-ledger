@@ -1,0 +1,181 @@
+/* Preflight is intentionally omitted during the staged migration. */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+/* Brand values live here; legacy CSS consumes the same variables while migration proceeds. */
+:root {
+  --bg: #f6f6f0;
+  --panel: #fff;
+  --ink: #192e29;
+  --muted: #5b6b64;
+  --green: #245c49;
+  --green-hover: #174733;
+  --soft: #e9f0e8;
+  --line: #dce3dc;
+  --danger: #a83232;
+  --focus: #b77421;
+  --serif: Georgia, 'Noto Serif TC', serif;
+  --ds-card-gap: 24px;
+  --ds-card-gap-mobile: 20px;
+  --ds-card-padding: 24px;
+  --ds-card-radius: 12px;
+  --ds-button-radius: 7px;
+  --ds-label-size: 14px;
+}
+
+@theme inline {
+  --color-journey-action: var(--green);
+  --color-journey-surface: var(--panel);
+  --color-journey-border: var(--line);
+  --color-journey-ink: var(--ink);
+  --color-journey-muted: var(--muted);
+  --font-journey-serif: var(--serif);
+}
+
+.trips-page {
+  @apply relative;
+}
+.trips-page .page-head,
+.trips-page .grid {
+  gap: var(--ds-card-gap);
+}
+.trips-page .ds-trip-card {
+  border-color: var(--line);
+  background: var(--panel);
+  border-radius: var(--ds-card-radius);
+  color: var(--ink);
+}
+.trips-page .ds-trip-card .card-content {
+  padding: var(--ds-card-padding);
+}
+
+/* Local styling of shadcn's Button API. Its core geometry and states are owned here. */
+.ds-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+  border-radius: var(--ds-button-radius);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.6;
+  transition: background 0.15s;
+}
+.ds-button:focus-visible,
+.ds-input:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+.ds-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.ds-button-default {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+}
+.ds-button-default:hover:not(:disabled) {
+  background: var(--green-hover);
+}
+.ds-button-secondary,
+.ds-button-outline {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink);
+}
+.ds-button-secondary:hover:not(:disabled),
+.ds-button-outline:hover:not(:disabled) {
+  background: var(--soft);
+}
+.ds-button-ghost {
+  background: transparent;
+  color: var(--ink);
+}
+.ds-button-ghost:hover:not(:disabled) {
+  background: var(--soft);
+}
+.ds-button-destructive {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+.ds-button-destructive:hover:not(:disabled) {
+  filter: brightness(0.9);
+}
+.ds-button-link {
+  background: transparent;
+  color: var(--green);
+  text-decoration: underline;
+}
+.ds-button-size-default {
+  min-height: 46px;
+  padding: 11px 21px;
+}
+.ds-button-size-sm {
+  min-height: 36px;
+  padding: 6px 12px;
+}
+.ds-button-size-lg {
+  min-height: 50px;
+  padding: 12px 28px;
+}
+.ds-button-size-icon {
+  width: 46px;
+  height: 46px;
+  padding: 0;
+}
+.ds-input {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  border: 1px solid #bccac0;
+  border-radius: 6px;
+  padding: 12px 14px;
+  background: var(--panel);
+  color: var(--ink);
+}
+.ds-input::placeholder {
+  color: #7b887f;
+}
+.ds-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.ds-trip-form .field label {
+  font-size: var(--ds-label-size);
+}
+
+@media (max-width: 700px) {
+  .trips-page .grid {
+    gap: var(--ds-card-gap-mobile);
+  }
+  .trips-page .page-head > .ds-button {
+    padding: 10px 13px;
+  }
+}
+
+/* Text actions use the same Button API while retaining their compact product layout. */
+.ds-button.text-btn {
+  display: inline-block;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  color: var(--green);
+  padding: 10px;
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 400;
+  text-decoration: none;
+}
+.ds-button.text-btn.danger {
+  color: var(--danger);
+}
+.ds-button.text-btn:hover {
+  background: none;
+}

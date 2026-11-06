@@ -30,11 +30,12 @@
 
 | 動作 | Truth 規格 | 改動摘要 | 原因 |
 | --- | --- | --- | --- |
-| ADD | `specs/truth/features/frontend/design-system/interface-regression.feature` -> `旅行清單在桌面和手機保留原有版面` | 新增桌面與手機視覺對照案例。 | 為示範範圍保留原有外觀提供可驗證基準。 |
-| ADD | `specs/truth/features/frontend/design-system/interface-regression.feature` -> `載入旅行時明確告知目前狀態` | 新增載入提示案例。 | 遷移時保護可理解的載入狀態。 |
-| ADD | `specs/truth/features/frontend/design-system/interface-regression.feature` -> `旅行清單無法讀取時提供可理解的重試入口` | 新增讀取失敗及重試入口案例。 | 保護錯誤回饋及既有資料。 |
-| ADD | `specs/truth/features/frontend/design-system/interface-regression.feature` -> `新增旅行對話框保留鍵盤與輔助工具可理解的操作` | 新增鍵盤開啟、焦點與可存取名稱案例。 | 保護示範介面操作及基本無障礙。 |
-| ADD | `specs/truth/features/frontend/design-system/dsl.md` -> `Given / When / Then 句型` | 新增上述案例的專屬句型與 Playwright 實作語意。 | 提供唯一權威位置供後續測試實作。 |
-| NOOP | `specs/truth/features/frontend/trips/trip-creation-and-dates.feature` -> `旅行建立與日期` | 已檢查，保留現有旅行建立與日期規格。 | 遷移不改變既有業務行為。 |
+| DELETE | specs/truth/features/frontend/design-system/interface-regression.feature -> 旅行清單在桌面和手機保留原有版面 | 移除圖片比較 Rule 及專屬資料/開頁/視覺 Then 句型。 | 使用者2026-11-09明確要求不維護視覺回歸、移除截圖。 |
+| ADD | specs/truth/features/frontend/design-system/interface-regression.feature -> 載入旅行時明確告知目前狀態 | 保留可見且可宣告的載入提示。 | 持續保護行為，不依賴截圖。 |
+| ADD | specs/truth/features/frontend/design-system/interface-regression.feature -> 旅行清單讀取失敗後可重試，且保留既有資料 | 失敗提示、真實再讀及權威資料不變。 | 合併重複 support 案例。 |
+| ADD | specs/truth/features/frontend/design-system/interface-regression.feature -> 新增旅行表單支援鍵盤開啟與焦點還原 | 桌面/手機共用鍵盤案例，含 Escape 與焦點還原。 | 合併 feature 與遷移專用 support 檢查。 |
+| MODIFY | specs/truth/features/frontend/design-system/dsl.md -> Given / When / Then 句型 | 移除圖片句型，保留狀態與鍵盤，補重試、關閉及焦點還原契約。 | 使用者已確認精簡，不移除有價值的行為覆蓋。 |
+| NOOP | specs/truth/features/frontend/trips/trip-creation-and-dates.feature -> 旅行建立與日期 | 維持原契約。 | 精簡不改業務行為。 |
 
-示範確認、設計值及圖示盤點、文件與舊樣式清理屬交付檢查；其餘介面的外觀及可存取性仍須於遷移任務逐項驗證，不以本次示範案例宣稱全站已覆蓋。視覺基準尚待遷移前建立並審查；新增 DSL 尚未實作成測試。
+2026-11-09 使用者確認精簡測試與證據；行為步驟合併為單一 interface.steps.ts。
+交付紀錄只留 evidence/delivery-summary.md；不保留圖片基準、逐輪log或預覽工具。

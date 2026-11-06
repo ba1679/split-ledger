@@ -1,0 +1,138 @@
+@media (min-width: 1500px) {
+  .main {
+    padding-right: 90px;
+    padding-left: 90px;
+  }
+}
+@media (max-width: 1000px) {
+  .sidebar {
+    width: 190px;
+    padding: 30px 20px;
+  }
+  .main {
+    margin-left: 190px;
+    padding: 35px 30px 80px;
+  }
+}
+@media (max-width: 700px) {
+  .form-panel {
+    padding: 24px 18px;
+  }
+  .form-panel .two-col {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .expense-row {
+    padding: 16px 14px;
+    gap: 10px;
+  }
+  .expense-row > .category-icon {
+    width: 34px;
+    height: 34px;
+  }
+  .total-card {
+    padding: 18px;
+  }
+  .totals {
+    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(min(135px, 100%), 1fr));
+  }
+  .total-value {
+    font-size: 26px;
+  }
+  .form-actions {
+    flex-wrap: wrap;
+  }
+  h1 {
+    font-size: 28px;
+  }
+  .sidebar {
+    display: none;
+  }
+  .main {
+    margin: 0;
+    padding: 25px 20px 110px;
+  }
+  .page-head {
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 25px;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .landscape {
+    height: 145px;
+  }
+  .page-head > :is(.btn, .ds-button) {
+    padding: 10px 13px;
+  }
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #ffffffed;
+    border-top: 1px solid var(--line);
+    justify-content: space-around;
+    padding: 8px 12px max(8px, env(safe-area-inset-bottom));
+    z-index: 10;
+  }
+  .bottom-nav a,
+  .bottom-nav button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 20px;
+    font-size: 11px;
+    color: var(--muted);
+    min-height: 48px;
+  }
+  .bottom-nav a.active {
+    color: var(--green);
+    font-weight: 700;
+  }
+  .category-row {
+    padding: 14px;
+  }
+  .login {
+    grid-template-columns: 1fr;
+  }
+  .login-story {
+    padding: 28px;
+    min-height: 280px;
+    gap: 35px;
+  }
+  .login-story h1 {
+    font-size: 36px;
+    margin-top: 10px;
+  }
+  .login-story p,
+  .login-story footer,
+  .travel-stamp {
+    display: none !important;
+  }
+  .login-panel {
+    padding: 40px 26px;
+  }
+  .login-box {
+    max-width: 100%;
+  }
+  .login-box h2 {
+    font-size: 26px;
+  }
+  .state {
+    padding: 32px 18px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

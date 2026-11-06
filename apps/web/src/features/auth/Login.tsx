@@ -1,3 +1,4 @@
+import { Button } from '../../components/ui/button.js';
 import React, { useState } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { authClient, useSession } from './session.js';
@@ -65,8 +66,9 @@ export function Login() {
             從這裡開始。
           </h2>
           <p>登入你的個人旅行帳本，隨手記下沿途的花費。</p>
-          <button
-            className="btn google"
+          <Button
+            variant="outline"
+            className="google"
             disabled={busy}
             aria-busy={busy}
             onClick={() => {
@@ -74,7 +76,7 @@ export function Login() {
             }}
           >
             {busy ? '正在登入…' : '使用 Google 帳號登入'}
-          </button>
+          </Button>
           <p className="error" role="alert">
             {error || (params.has('error') ? '登入尚未完成，請重新嘗試。' : '')}
           </p>

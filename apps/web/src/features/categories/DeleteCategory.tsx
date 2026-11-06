@@ -1,3 +1,4 @@
+import { Button } from '../../components/ui/button.js';
 import React, { useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest, ApiError, type Category } from '../../api/index.js';
@@ -71,9 +72,9 @@ export function DeleteCategory({
           </p>
           <p className="muted">請先在支出中更換分類，或改為未分類。</p>
           <div className="form-actions">
-            <button className="btn" onClick={onClose}>
+            <Button variant="default" onClick={onClose}>
               知道了
-            </button>
+            </Button>
           </div>
         </>
       ) : (
@@ -83,9 +84,9 @@ export function DeleteCategory({
             {error}
           </p>
           {unconfirmed ? (
-            <button
+            <Button
               type="button"
-              className="btn secondary"
+              variant="outline"
               disabled={busy}
               onClick={() => {
                 if (!writing.current) {
@@ -95,15 +96,15 @@ export function DeleteCategory({
               }}
             >
               重新查證
-            </button>
+            </Button>
           ) : null}
           <div className="form-actions">
-            <button type="button" className="btn secondary" disabled={busy} onClick={onClose}>
+            <Button type="button" variant="outline" disabled={busy} onClick={onClose}>
               取消
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              className="btn danger"
+              variant="destructive"
               disabled={busy || unconfirmed}
               onClick={() => {
                 if (!writing.current) {
@@ -113,7 +114,7 @@ export function DeleteCategory({
               }}
             >
               {deletion.isPending ? '刪除中…' : '確認刪除'}
-            </button>
+            </Button>
           </div>
         </>
       )}

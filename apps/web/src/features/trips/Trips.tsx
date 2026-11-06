@@ -5,7 +5,8 @@ import { apiRequest, type Trip, type ItemList } from '../../api/index.js';
 import { useSession } from '../auth/session.js';
 import { QueryState } from '../../components/QueryState.js';
 import { TripForm } from './TripForm.js';
-import { Icon } from '../../components/Icon.js';
+import { Button } from '../../components/ui/button.js';
+import { ArrowRight, FileText, Plus } from 'lucide-react';
 
 export function tripDates(trip: Pick<Trip, 'startDate' | 'endDate'>) {
   if (!trip.startDate && !trip.endDate) return '旅行日期未定';
@@ -22,17 +23,17 @@ export function Trips() {
   });
 
   return (
-    <>
+    <div className="trips-page">
       <header className="page-head">
         <div>
           <div className="eyebrow">MY JOURNEYS</div>
           <h1>每一趟，都有故事。</h1>
           <p className="muted">把沿途的小花費，留在各自的旅行裡。</p>
         </div>
-        <button className="btn" onClick={() => setCreating(true)}>
-          <Icon name="plus" />
+        <Button onClick={() => setCreating(true)}>
+          <Plus className="icon" size={19} strokeWidth={1.6} aria-hidden="true" />
           <span>新增旅行</span>
-        </button>
+        </Button>
       </header>
       {trips.isPending || trips.error ? (
         <QueryState
@@ -45,14 +46,14 @@ export function Trips() {
       ) : trips.data.items.length ? (
         <div className="grid">
           {trips.data.items.map((trip, index) => (
-            <Link className="trip-card" to={`/trips/${trip.id}`} key={trip.id}>
+            <Link className="trip-card ds-trip-card" to={`/trips/${trip.id}`} key={trip.id}>
               <div className={`landscape${index % 2 ? ' warm' : ''}`} aria-hidden="true">
                 <span className="word">JOURNEY</span>
               </div>
               <div className="card-content">
                 <div className="card-top">
                   <h2>{trip.name}</h2>
-                  <Icon name="arrow" />
+                  <ArrowRight className="icon" size={19} strokeWidth={1.6} aria-hidden="true" />
                 </div>
                 <p className="card-date">{tripDates(trip)}</p>
                 <div className="card-bottom">
@@ -70,10 +71,10 @@ export function Trips() {
         </div>
       )}
       <p className="intro-note">
-        <Icon name="note" />
+        <FileText className="icon" size={19} strokeWidth={1.6} aria-hidden="true" />
         <span>不同幣別各自統計，保留每筆支出原本的樣子。</span>
       </p>
       {creating ? <TripForm onClose={() => setCreating(false)} /> : null}
-    </>
+    </div>
   );
 }

@@ -1,3 +1,5 @@
+import { ChevronDown } from 'lucide-react';
+import { Input } from '../components/ui/input.js';
 import React, { useId, useRef, useState } from 'react';
 
 export interface ComboOption {
@@ -76,7 +78,7 @@ export function SearchCombo({
         {optional ? <span className="optional">選填</span> : null}
       </label>
       <div className="combo">
-        <input
+        <Input
           id={id}
           ref={input}
           role="combobox"
@@ -130,16 +132,7 @@ export function SearchCombo({
           }}
         >
           <span>
-            <svg
-              className="icon"
-              aria-hidden="true"
-              viewBox="0 0 20 20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-            >
-              <path d="m6 8 4 4 4-4" />
-            </svg>
+            <ChevronDown className="icon" size={19} strokeWidth={1.6} aria-hidden="true" />
           </span>
         </button>
         {open ? (

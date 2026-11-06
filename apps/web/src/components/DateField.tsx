@@ -1,3 +1,5 @@
+import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Input } from '../components/ui/input.js';
 import React, { useId, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { calendarDate, dateOnly, localToday, parseDate, shiftMonth } from './date.js';
@@ -5,39 +7,14 @@ import './date-picker.css';
 
 const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
 
-function CalendarIcon() {
-  return (
-    <svg
-      className="icon"
-      aria-hidden="true"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="3" y="5" width="18" height="16" rx="2" />
-      <path d="M7 3v5m10-5v5M3 11h18M7 15h2m3 0h2m-7 3h2" />
-    </svg>
-  );
-}
+const CalendarIcon = () => (
+  <CalendarDays className="icon" size={19} strokeWidth={1.6} aria-hidden="true" />
+);
 
 function Arrow({ forward }: { forward?: boolean }) {
-  return (
-    <svg
-      className="icon"
-      aria-hidden="true"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d={forward ? 'm10 7 5 5-5 5' : 'm14 7-5 5 5 5'} />
-    </svg>
-  );
+  const Component = forward ? ChevronRight : ChevronLeft;
+
+  return <Component className="icon" size={19} strokeWidth={1.6} aria-hidden="true" />;
 }
 
 interface PickerProps {
@@ -450,7 +427,7 @@ export function DateField({
         ref={fieldRef}
         className={`date-field${value ? ' has-value' : ''}${open ? ' is-open' : ''}`}
       >
-        <input
+        <Input
           id={id}
           ref={inputRef}
           className="date-input"

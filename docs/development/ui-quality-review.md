@@ -2,6 +2,8 @@
 
 Reviewed on 2026-11-05 by an independent implementation agent that did not author the frontend product code. The final review has no outstanding actionable findings within the approved five-page UI scope.
 
+2026-11-09 maintenance note: plan 003 removed stored screenshots, image comparison, and capture-only tests. The current runner checks behavior, accessibility and viewport fit without producing review images. The filenames below describe historical review output, not maintained baselines.
+
 ## Reference and method
 
 The approved source is `specs/plans/001-personal-travel-expenses/ui/ui-plan.md`, the five HTML pages rendered by `app.js`, `styles.css`, `date-picker.js` / `.css`, the structure of `prototype-design.pen`, and its `design-previews` images. The latest UI plan takes precedence over the older prototype for TWD integer input, category names up to 30 Unicode code points, and unconfirmed write results. The ui-ux-pro-max accessibility, interaction, responsive layout, and long-token wrapping guidelines were used as review criteria without replacing the approved design.
@@ -45,7 +47,7 @@ The existing 28 support cases additionally cover date keyboard movement, leap da
 
 ## Local evidence
 
-The runner writes ignored screenshots under `.cache/ui-review/`; filenames start with `chromium-` or `webkit-`:
+Historical output from this review was written under `.cache/ui-review/`; filenames start with `chromium-` or `webkit-`:
 
 | Evidence | Filename suffix |
 | --- | --- |

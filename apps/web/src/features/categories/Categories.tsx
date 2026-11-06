@@ -1,3 +1,4 @@
+import { Button } from '../../components/ui/button.js';
 import React, { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiRequest, type Category, type ItemList } from '../../api/index.js';
@@ -37,10 +38,10 @@ export function Categories() {
           <h1>照你的方式，整理花費。</h1>
           <p className="muted">建立自己的分類，在每一趟旅行中使用。</p>
         </div>
-        <button className="btn" onClick={() => setEditing('new')} disabled={!categories.data}>
+        <Button variant="default" onClick={() => setEditing('new')} disabled={!categories.data}>
           <Icon name="plus" />
           <span>新增分類</span>
-        </button>
+        </Button>
       </header>
       {feedback ? (
         <p className="feedback" role="status">
@@ -68,20 +69,22 @@ export function Categories() {
                   {category.usageCount ? `已用於 ${category.usageCount} 筆支出` : '尚未使用'}
                 </small>
               </div>
-              <button
+              <Button
+                variant="ghost"
                 className="text-btn"
                 aria-label={`改名：${category.name}`}
                 onClick={() => setEditing(category)}
               >
                 改名
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="ghost"
                 className="text-btn danger"
                 aria-label={`刪除：${category.name}`}
                 onClick={() => setDeleting(category)}
               >
                 刪除
-              </button>
+              </Button>
             </div>
           ))}
         </div>

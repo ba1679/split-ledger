@@ -1,3 +1,5 @@
+import { Input } from '../../components/ui/input.js';
+import { Button } from '../../components/ui/button.js';
 import React, { useId, useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest, ApiError, type Category } from '../../api/index.js';
@@ -104,7 +106,7 @@ export function CategoryForm({
       <form noValidate onSubmit={submit}>
         <div className="field">
           <label htmlFor={fieldId}>分類名稱</label>
-          <input
+          <Input
             id={fieldId}
             ref={input}
             value={name}
@@ -123,9 +125,9 @@ export function CategoryForm({
           </p>
         </div>
         {unconfirmed ? (
-          <button
+          <Button
             type="button"
-            className="btn secondary"
+            variant="outline"
             disabled={busy}
             onClick={() => {
               if (!writing.current) {
@@ -135,15 +137,15 @@ export function CategoryForm({
             }}
           >
             重新查證
-          </button>
+          </Button>
         ) : null}
         <div className="form-actions">
-          <button type="button" className="btn secondary" disabled={busy} onClick={onClose}>
+          <Button type="button" variant="outline" disabled={busy} onClick={onClose}>
             取消
-          </button>
-          <button className="btn" disabled={busy || Boolean(unconfirmed)}>
+          </Button>
+          <Button variant="default" disabled={busy || Boolean(unconfirmed)}>
             {save.isPending ? '儲存中…' : '儲存'}
-          </button>
+          </Button>
         </div>
       </form>
     </FormDialog>

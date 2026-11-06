@@ -1,3 +1,4 @@
+import { Button } from '../../components/ui/button.js';
 import React, { useState } from 'react';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { Link, useLocation, useParams } from 'react-router-dom';
@@ -72,15 +73,17 @@ export function TripLedger() {
           <h1>{trip.data.name}</h1>
           <p className="muted">
             <span>{tripDates(trip.data)}</span>
-            <button className="text-btn" onClick={() => setEditing(true)}>
+            <Button variant="ghost" className="text-btn" onClick={() => setEditing(true)}>
               旅行日期
-            </button>
+            </Button>
           </p>
         </div>
-        <Link className="btn" to={`/trips/${trip.data.id}/expenses/new`}>
-          <Icon name="plus" />
-          <span>記一筆</span>
-        </Link>
+        <Button asChild variant="default">
+          <Link to={`/trips/${trip.data.id}/expenses/new`}>
+            <Icon name="plus" />
+            <span>記一筆</span>
+          </Link>
+        </Button>
       </header>
       {(location.state as { message?: string } | null)?.message ? (
         <p className="feedback" role="status">
@@ -129,9 +132,9 @@ export function TripLedger() {
           <Icon name="note" />
           <h2>旅程還有很多空白，真好。</h2>
           <p>先記下一筆機票，或今天的一杯咖啡。</p>
-          <Link className="btn" to={`/trips/${trip.data.id}/expenses/new`}>
-            記錄第一筆支出
-          </Link>
+          <Button asChild variant="default">
+            <Link to={`/trips/${trip.data.id}/expenses/new`}>記錄第一筆支出</Link>
+          </Button>
         </div>
       ) : (
         <>
@@ -169,7 +172,8 @@ export function TripLedger() {
             <p className="error" role="alert">
               暫時無法更新支出清單，已載入的紀錄仍保留。
               {!expenses.isFetchNextPageError ? (
-                <button
+                <Button
+                  variant="ghost"
                   type="button"
                   className="text-btn"
                   disabled={expenses.isFetching}
@@ -178,22 +182,22 @@ export function TripLedger() {
                   }}
                 >
                   重新更新清單
-                </button>
+                </Button>
               ) : null}
             </p>
           ) : null}
           {expenses.hasNextPage ? (
             <div className="load-more">
-              <button
+              <Button
                 type="button"
-                className="btn secondary"
+                variant="outline"
                 disabled={expenses.isFetching}
                 onClick={() => {
                   void expenses.fetchNextPage();
                 }}
               >
                 {expenses.isFetchingNextPage ? '載入中…' : '載入更多'}
-              </button>
+              </Button>
             </div>
           ) : null}
         </>

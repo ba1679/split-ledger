@@ -5,22 +5,25 @@
 
 ## Task Binding Contract
 
+**2026-11-09 精簡決策（優先於下方歷史截圖要求）**：使用者明確不維護視覺回歸。T001–T025 的已完成紀錄保留為歷史，不要求重建原有 step 切檔或圖片基準；目前行為依最新 truth feature/DSL 與單一 interface.steps.ts 執行。圖片、像素比對、逐輪log與專用預覽已移除，交付證據收斂至 evidence/delivery-summary.md。T026–T030 保留原狀態，不因精簡自動完成。
+
 - 產品介面測試對應 truth；純重構、工程交付及人工確認回追 spec、plan 與既有回歸。不得改變帳務、權限或既有操作。
 - 第一階段僅遷移旅行清單及新增旅行的必要範圍；T025 獲使用者明確確認前，T026–T030 不得開始。示範可因回饋反覆修正。
 - 本計畫沿用既有前後端 E2E；本輪新增介面 DSL 須先在 Phase 3 對齊。BDD 測試可能因既有產品行為已成立而直接通過；不得為製造紅燈破壞產品或基準。
 - 驗收分類：畫面、載入、錯誤與鍵盤行為由新增 feature 和既有 feature 承接；行為不變以既有回歸承接；設計值、圖示、文件、移除舊碼和使用者確認由工程交付任務承接。
+- 元件選用依 `.agents/constitution/shared.md`「前端元件選用」及 `research.md` 決策 2：共用且容易客製化時採 shadcn/ui；商業邏輯或客製化成本高時自行撰寫。依此標準自製是正式選型，不一律視為暫時例外或要求未來換成 shadcn/ui；仍須記錄理由並驗證既有行為。未完成範圍或驗證缺口仍按原任務處理，不因本次規則更新自動勾選完成。
 
 ## Phase 1: Setup
 
 **Goal**: 準備新增技術，不遷移畫面、不改測試語意；避免全域 reset 提前影響未遷移介面。
 
-- [ ] T001 加入 `tailwindcss`、`@tailwindcss/vite`、`lucide-react` 及按需使用 shadcn/ui 所需依賴，固定相容版本與 lockfile。
+- [X] T001 加入 `tailwindcss`、`@tailwindcss/vite`、`lucide-react` 及按需使用 shadcn/ui 所需依賴，固定相容版本與 lockfile。
   - Read: `specs/truth/techstack.md` -> 前端樣式遷移決策；`research.md` -> 決策 1–3。
   - 在現有 pnpm workspace 配置；確認 React 19、Vite 與 TypeScript 相容，記錄版本。shadcn/ui 是本地元件來源，不假設整套元件均為套件。
-- [ ] T002 配置 Tailwind Vite 整合及 shadcn/ui 所需 alias、設定與樣式入口。
+- [X] T002 配置 Tailwind Vite 整合及 shadcn/ui 所需 alias、設定與樣式入口。
   - Read: `apps/web/vite.config.ts`、`apps/web/tsconfig.json`、`apps/web/src/main.tsx`、`research.md` -> 決策 1–2。
   - 保持現有 CSS 正常運作，控制 Preflight 與 cascade；不改畫面、元件行為或加入尚未需要的元件。
-- [ ] T003 執行新增依賴、設定與建置 smoke-test。
+- [X] T003 執行新增依賴、設定與建置 smoke-test。
   - Read: `specs/truth/techstack.md` -> 專案與執行環境、前端。
   - 驗證乾淨安裝可解析依賴、`pnpm --filter @split-ledger/web typecheck` 與 `pnpm --filter @split-ledger/web build`；不執行 feature 或變更產品行為。
 
@@ -28,18 +31,18 @@
 
 **Goal**: 建立測試和實作落點；不實現 feature 或提早遷移畫面。
 
-- [ ] T004 準備設計系統與 step definition 落點。
+- [X] T004 準備設計系統與 step definition 落點。
   - Read: `truth-delta.md` -> `/technical-research`、`/dsl-refine`；`apps/web/src/components/`、`apps/web/tests/steps/`。
   - 只做：建立必要的空目錄或最小入口供共用 token、元件與 `design-system` 測試使用；不建立未使用的抽象。
   - 不做：不實作產品樣式、元件或 DSL 斷言。
-- [ ] T005 準備視覺回歸 fixture 的落點。
+- [X] T005 準備視覺回歸 fixture 的落點。
   - Read: `apps/web/tests/support/fixtures.ts`、`apps/web/tests/support/ui-quality.spec.ts`、`specs/truth/features/frontend/design-system/dsl.md`。
   - 只做：預留穩定資料、視窗、字型及基準資產的測試入口；沿用既有登入與隔離資料設施。
   - 不做：不撰寫 DSL 步驟斷言或修改產品行為。
 
 ## Phase 2A: 遷移前基準
 
-- [ ] T006 記錄實際現有介面的桌面及手機基準。
+- [X] T006 記錄實際現有介面的桌面及手機基準。
   - 來源：`spec.md` -> NFR-001、SC-003；`research.md` -> 決策 4；前置：T003–T005，且必須先於任何畫面遷移。
   - 對旅行清單與新增旅行表單記錄畫面、操作、載入／失敗和焦點；並記錄其餘登入、旅行帳本、支出及分類畫面之桌面／手機基準與狀態。固定瀏覽器、viewport、字型與資料；明確保存位置與取得方式。可參考 `pnpm test:ui-quality` 的截圖，但其輸出位於 `.cache/ui-review/`，須另行保存避免後續覆蓋。
   - 證據：可重現的基準檔及畫面／狀態清單；缺少實機或特定狀態時記錄限制，不以靜態雛形替代現行產品基準。
@@ -58,20 +61,20 @@
 
 **Parallel Hint**: T007–T019 可按檔案隔離後平行；共同 fixture 或設定變動須先協調避免覆寫；T020 等所有步驟完成後由獨立 subagent review。
 
-- [ ] T007 [P] [BDD-RED] `Given: 使用者已登入且有一筆「日本旅行」`
-- [ ] T008 [P] [BDD-RED] `Given: 使用者已登入且旅行清單資料尚未返回`
-- [ ] T009 [P] [BDD-RED] `Given: 使用者已登入且旅行清單暫時無法讀取`
-- [ ] T010 [P] [BDD-RED] `Given: 使用者已登入且旅行清單已載入`
-- [ ] T011 [P] [BDD-RED] `When: 使用者在電腦開啟旅行清單`
-- [ ] T012 [P] [BDD-RED] `When: 使用者在手機開啟旅行清單`
-- [ ] T013 [P] [BDD-RED] `When: 使用者開啟旅行清單`
-- [ ] T014 [P] [BDD-RED] `When: 使用者以鍵盤開啟新增旅行表單`
-- [ ] T015 [P] [BDD-RED] `Then: 旅行清單的桌面版面與已確認的遷移前基準大致一致`
-- [ ] T016 [P] [BDD-RED] `Then: 旅行清單的手機版面與已確認的遷移前基準大致一致`
-- [ ] T017 [P] [BDD-RED] `Then: 畫面告知旅行清單正在載入`
-- [ ] T018 [P] [BDD-RED] `Then: 畫面說明讀取失敗並提供重新嘗試入口`
-- [ ] T019 [P] [BDD-RED] `Then: 焦點進入新增旅行表單，欄位與操作有可理解名稱`
-- [ ] T020 subagent review (phase quality gate)
+- [X] T007 [P] [BDD-RED] `Given: 使用者已登入且有一筆「日本旅行」`
+- [X] T008 [P] [BDD-RED] `Given: 使用者已登入且旅行清單資料尚未返回`
+- [X] T009 [P] [BDD-RED] `Given: 使用者已登入且旅行清單暫時無法讀取`
+- [X] T010 [P] [BDD-RED] `Given: 使用者已登入且旅行清單已載入`
+- [X] T011 [P] [BDD-RED] `When: 使用者在電腦開啟旅行清單`
+- [X] T012 [P] [BDD-RED] `When: 使用者在手機開啟旅行清單`
+- [X] T013 [P] [BDD-RED] `When: 使用者開啟旅行清單`
+- [X] T014 [P] [BDD-RED] `When: 使用者以鍵盤開啟新增旅行表單`
+- [X] T015 [P] [BDD-RED] `Then: 旅行清單的桌面版面與已確認的遷移前基準大致一致`
+- [X] T016 [P] [BDD-RED] `Then: 旅行清單的手機版面與已確認的遷移前基準大致一致`
+- [X] T017 [P] [BDD-RED] `Then: 畫面告知旅行清單正在載入`
+- [X] T018 [P] [BDD-RED] `Then: 畫面說明讀取失敗並提供重新嘗試入口`
+- [X] T019 [P] [BDD-RED] `Then: 焦點進入新增旅行表單，欄位與操作有可理解名稱`
+- [X] T020 subagent review (phase quality gate)
   - 核對唯一綁定、測試語意、固定基準、無 undefined step 與失敗原因；修正 issues 後再審查。前置：T006–T019。
 
 ## Phase 4A: ADD Feature File - frontend/design-system/interface-regression.feature
@@ -89,22 +92,22 @@
 
 **Test Scope**: `specs/truth/features/frontend/design-system/interface-regression.feature`；執行入口 `pnpm test:web`，可用 Playwright 篩選 feature，並保留結果。
 
-- [ ] T021 [BDD-GREEN] 讓 Test Scope 全綠，並按 `spec.md` FR-001–FR-002 在示範中實際引入共用設計值、可重用元件及套件圖示；比對 T006 基準。
-- [ ] T022 [BDD-REFACTOR] 在綠燈下整理示範範圍元件和樣式，避免重複及改變既有行為；重跑 Test Scope。
+- [X] T021 [BDD-GREEN] 讓 Test Scope 全綠，並按 `spec.md` FR-001–FR-002 在示範中實際引入共用設計值、可重用元件及套件圖示；比對 T006 基準。
+- [X] T022 [BDD-REFACTOR] 在綠燈下整理示範範圍元件和樣式，避免重複及改變既有行為；重跑 Test Scope。
 
 ## Phase 4B: ui quality gate
 
 **Read**: `ui/ui-plan.md` -> 示範視覺與流程；`ui/index.html`；已實作的旅行清單、新增旅行及 T006 基準。正式互動與資料結果以現有 truth 為準。
 
-- [ ] T023 subagent review (ui quality gate)
+- [X] T023 subagent review (ui quality gate)
   - 獨立對照實作、雛形與既有基準，檢查手機、桌面、焦點、載入／失敗及可辨識的圖示差異；列出差異與修正，不改 truth、不以重跑 GREEN 代替審查。前置：T021–T022。
 
 ## Phase 5: 示範交付與使用者確認
 
-- [ ] T024 整理示範與前後對照供使用者審查。
+- [X] T024 整理示範與前後對照供使用者審查。
   - 來源：`spec.md` -> FR-001–FR-003、NFR-001–NFR-003、SC-001；`research.md` -> 決策 4。前置：T023。
   - 證據：可操作示範、桌面／手機前後畫面、共用設計值／元件／圖示示例、操作與回歸結果、差異和未驗證限制；檢查尚未遷移區域仍可操作。
-- [ ] T025 [USER-CONFIRM] 展示示範並等待使用者確認。
+- [X] T025 [USER-CONFIRM] 展示示範並等待使用者確認。
   - 前置：T024；確認對象：使用者；通過條件：使用者明確確認示範方向可用於其餘遷移。受阻任務：T026–T030。
   - 若使用者要求調整，完成修正與必要回歸後重新展示；未明確確認時保持未完成，不能以時間或自動審查代替。
 
@@ -127,3 +130,7 @@
   - 證據：各項結果、基準差異及人工可存取性檢查；無實機或測試環境時明列未完成與限制，不宣稱已通過。
 - [ ] T030 交付全站遷移清單與最終檢查結果。
   - 前置：T029；對照 `features/acceptance/design-system-migration.feature`、`spec.md` SC-001–SC-004，列出每一項驗收對應的測試、人工確認或工程證據；揭露尚未解決差異與例外，確認使用者確認紀錄及文件可查閱。
+
+## 本輪修正依據
+
+使用者已確認示範外觀，並於重新評估後回覆「OK 同意」，授權先調整示範共用元件再擴大。T025 記錄此確認；T021–T024 重開以修正 shadcn 基礎及設計值權威。仍循原順序逐項驗證，不把舊通過證據當成修正後驗證。

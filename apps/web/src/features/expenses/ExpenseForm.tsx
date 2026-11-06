@@ -1,3 +1,5 @@
+import { Input } from '../../components/ui/input.js';
+import { Button } from '../../components/ui/button.js';
 import React, { useId, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -363,7 +365,7 @@ function ExpenseEditor({
         <fieldset disabled={busy || Boolean(unconfirmed)}>
           <div className="field">
             <label htmlFor={itemId}>支出項目</label>
-            <input
+            <Input
               id={itemId}
               ref={itemInput}
               value={item}
@@ -410,7 +412,8 @@ function ExpenseEditor({
           {currencies.error ? (
             <p className="error" role="alert">
               無法取得幣別目錄，請保留草稿。
-              <button
+              <Button
+                variant="ghost"
                 className="text-btn"
                 type="button"
                 onClick={() => {
@@ -418,12 +421,12 @@ function ExpenseEditor({
                 }}
               >
                 重新取得幣別
-              </button>
+              </Button>
             </p>
           ) : null}
           <div className="field">
             <label htmlFor={amountId}>金額</label>
-            <input
+            <Input
               id={amountId}
               ref={amountInput}
               className="money-input"
@@ -493,7 +496,8 @@ function ExpenseEditor({
               {categories.error ? (
                 <p className="error" role="alert">
                   暫時無法取得分類。
-                  <button
+                  <Button
+                    variant="ghost"
                     type="button"
                     className="text-btn"
                     onClick={() => {
@@ -501,7 +505,7 @@ function ExpenseEditor({
                     }}
                   >
                     重新取得分類
-                  </button>
+                  </Button>
                 </p>
               ) : null}
             </div>
@@ -511,13 +515,14 @@ function ExpenseEditor({
           {saveError}
         </p>
         {unconfirmed && !deleting ? (
-          <button className="btn secondary" type="button" disabled={busy} onClick={recheck}>
+          <Button variant="outline" type="button" disabled={busy} onClick={recheck}>
             {verification.isPending ? '查證中…' : '重新查證'}
-          </button>
+          </Button>
         ) : null}
         <div className="form-actions">
           {expense ? (
-            <button
+            <Button
+              variant="ghost"
               className="text-btn danger delete-expense"
               type="button"
               disabled={busy || Boolean(unconfirmed)}
@@ -527,20 +532,21 @@ function ExpenseEditor({
               }}
             >
               刪除支出
-            </button>
+            </Button>
           ) : null}
-          <Link
-            className="btn secondary"
-            aria-disabled={busy}
-            onClick={(event) => {
-              if (busy) event.preventDefault();
-            }}
-            to={`/trips/${tripId}`}
-          >
-            取消
-          </Link>
-          <button
-            className="btn"
+          <Button asChild variant="outline">
+            <Link
+              aria-disabled={busy}
+              onClick={(event) => {
+                if (busy) event.preventDefault();
+              }}
+              to={`/trips/${tripId}`}
+            >
+              取消
+            </Link>
+          </Button>
+          <Button
+            variant="default"
             disabled={
               busy ||
               Boolean(unconfirmed) ||
@@ -550,7 +556,7 @@ function ExpenseEditor({
             }
           >
             {mutation.isPending ? '儲存中…' : '儲存支出'}
-          </button>
+          </Button>
         </div>
       </form>
       {deleting && expense ? (
@@ -563,21 +569,21 @@ function ExpenseEditor({
             {saveError}
           </p>
           {unconfirmed ? (
-            <button className="btn secondary" type="button" disabled={busy} onClick={recheck}>
+            <Button variant="outline" type="button" disabled={busy} onClick={recheck}>
               {verification.isPending ? '查證中…' : '重新查證'}
-            </button>
+            </Button>
           ) : null}
           <div className="form-actions">
-            <button
-              className="btn secondary"
+            <Button
+              variant="outline"
               type="button"
               disabled={busy}
               onClick={() => setDeleting(false)}
             >
               取消
-            </button>
-            <button
-              className="btn danger"
+            </Button>
+            <Button
+              variant="destructive"
               type="button"
               disabled={busy || Boolean(unconfirmed)}
               onClick={() => {
@@ -588,7 +594,7 @@ function ExpenseEditor({
               }}
             >
               {deletion.isPending ? '刪除中…' : '確認刪除'}
-            </button>
+            </Button>
           </div>
         </FormDialog>
       ) : null}

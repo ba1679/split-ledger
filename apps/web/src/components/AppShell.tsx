@@ -1,3 +1,4 @@
+import { Button } from '../components/ui/button.js';
 import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useSession } from '../features/auth/session.js';
@@ -20,7 +21,8 @@ function Navigation({ mobile = false }: { mobile?: boolean }) {
         <span>支出分類</span>
       </NavLink>
       {mobile ? (
-        <button
+        <Button
+          variant="ghost"
           className="text-btn"
           disabled={closing}
           onClick={() => {
@@ -29,7 +31,7 @@ function Navigation({ mobile = false }: { mobile?: boolean }) {
         >
           <Icon name="back" />
           <span>登出</span>
-        </button>
+        </Button>
       ) : null}
     </nav>
   );
@@ -55,7 +57,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             OF EVERY JOURNEY.
           </div>
           <p>{account?.name}</p>
-          <button
+          <Button
+            variant="ghost"
             className="text-btn"
             disabled={closing}
             onClick={() => {
@@ -64,7 +67,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           >
             <Icon name="back" />
             <span>登出</span>
-          </button>
+          </Button>
         </footer>
       </aside>
       <main className="main">

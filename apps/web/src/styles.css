@@ -1,14 +1,3 @@
-:root {
-  --bg: #f6f6f0;
-  --panel: #fff;
-  --ink: #192e29;
-  --muted: #5b6b64;
-  --green: #245c49;
-  --soft: #e9f0e8;
-  --line: #dce3dc;
-  --danger: #a83232;
-  --serif: Georgia, 'Noto Serif TC', serif;
-}
 * {
   box-sizing: border-box;
 }
@@ -47,7 +36,7 @@ button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 select:focus-visible {
-  outline: 3px solid #b77421;
+  outline: 3px solid var(--focus);
   outline-offset: 3px;
 }
 h1,
@@ -174,7 +163,7 @@ p {
   transition: background 0.15s;
 }
 .btn:hover {
-  background: #174733;
+  background: var(--green-hover);
 }
 .text-btn {
   border: 0;

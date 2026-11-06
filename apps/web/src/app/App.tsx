@@ -1,3 +1,4 @@
+import { Button } from '../components/ui/button.js';
 import React from 'react';
 import { Navigate, Route, Routes, Link } from 'react-router-dom';
 import { useSession } from '../features/auth/session.js';
@@ -82,9 +83,9 @@ export function App() {
           <PrivatePage>
             <div className="empty">
               <h1>找不到這個頁面</h1>
-              <Link className="btn" to="/trips">
-                返回我的旅行
-              </Link>
+              <Button asChild variant="default">
+                <Link to="/trips">返回我的旅行</Link>
+              </Button>
             </div>
           </PrivatePage>
         }

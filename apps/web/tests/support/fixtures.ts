@@ -2,6 +2,8 @@ import { test as apiTest } from '../../../api/tests/support/fixtures.js';
 import { createBdd } from 'playwright-bdd';
 import { createServer } from 'vite';
 import { fileURLToPath } from 'node:url';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 
 export const test = apiTest.extend<Record<never, never>, { webServer: string }>({
   webServer: [
@@ -15,6 +17,7 @@ export const test = apiTest.extend<Record<never, never>, { webServer: string }>(
           ),
         ),
         configFile: false,
+        plugins: [react(), tailwindcss()],
         server: {
           host: '127.0.0.1',
           port: Number(new URL(runtime.webOrigin).port),

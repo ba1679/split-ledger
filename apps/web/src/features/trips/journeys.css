@@ -1,0 +1,137 @@
+.page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 36px;
+}
+.page-head > div {
+  min-width: 0;
+}
+.page-head > :is(.btn, .ds-button) {
+  flex-shrink: 0;
+}
+.page-head p {
+  margin-top: 10px;
+}
+.btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  background: var(--green);
+  color: white;
+  border: 1px solid var(--green);
+  border-radius: 7px;
+  padding: 11px 21px;
+  min-height: 46px;
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.btn:hover {
+  background: var(--green-hover);
+}
+.text-btn {
+  border: 0;
+  background: none;
+  color: var(--green);
+  padding: 10px;
+  min-height: 44px;
+  font-size: 14px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+.trip-card {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 12px;
+  overflow: hidden;
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
+  display: block;
+}
+.trip-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px #192e290a;
+}
+.landscape {
+  height: 170px;
+  position: relative;
+  overflow: hidden;
+  background: #e4e9e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.landscape .word {
+  font: 54px var(--serif);
+  letter-spacing: 8px;
+  color: #536f5b;
+  z-index: 1;
+}
+.landscape::before,
+.landscape::after {
+  content: '';
+  border: 1px solid #97ad90;
+  border-radius: 50%;
+  position: absolute;
+}
+.landscape::before {
+  width: 260px;
+  height: 260px;
+  right: -20px;
+  top: 45px;
+}
+.landscape::after {
+  width: 180px;
+  height: 180px;
+  left: -30px;
+  top: 95px;
+}
+.landscape.warm {
+  background: #eee5d6;
+}
+.landscape.warm .word {
+  color: #806a49;
+}
+.card-content {
+  padding: 24px;
+  overflow-wrap: anywhere;
+}
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.card-top h2 {
+  min-width: 0;
+}
+.card-date {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 8px 0 24px;
+}
+.card-bottom {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.intro-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 32px;
+  color: var(--muted);
+  font-size: 13px;
+}

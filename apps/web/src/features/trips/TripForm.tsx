@@ -6,6 +6,8 @@ import { useSession } from '../auth/session.js';
 import { FormDialog } from '../../components/FormDialog.js';
 import { DateField } from '../../components/DateField.js';
 import { dateOnly, parseDate } from '../../components/date.js';
+import { Button } from '../../components/ui/button.js';
+import { Input } from '../../components/ui/input.js';
 
 export function TripForm({ trip, onClose }: { trip?: Trip; onClose: () => void }) {
   const { account } = useSession(),
@@ -86,11 +88,11 @@ export function TripForm({ trip, onClose }: { trip?: Trip; onClose: () => void }
 
   return (
     <FormDialog title={trip ? '旅行日期' : '新增旅行'} onClose={onClose} busy={mutation.isPending}>
-      <form noValidate onSubmit={submit}>
+      <form noValidate onSubmit={submit} className={trip ? undefined : 'ds-trip-form'}>
         {!trip ? (
           <div className="field">
             <label htmlFor={inputId}>旅行名稱</label>
-            <input
+            <Input
               id={inputId}
               ref={nameInput}
               value={name}
@@ -108,17 +110,35 @@ export function TripForm({ trip, onClose }: { trip?: Trip; onClose: () => void }
           {validation || mutation.error?.message}
         </p>
         <div className="form-actions">
-          <button
-            type="button"
-            className="btn secondary"
-            disabled={mutation.isPending}
-            onClick={onClose}
-          >
-            取消
-          </button>
-          <button className="btn" disabled={mutation.isPending}>
-            {mutation.isPending ? '儲存中…' : trip ? '儲存日期' : '建立旅行'}
-          </button>
+          {trip ? (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={mutation.isPending}
+                onClick={onClose}
+              >
+                取消
+              </Button>
+              <Button variant="default" disabled={mutation.isPending}>
+                {mutation.isPending ? '儲存中…' : '儲存日期'}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={mutation.isPending}
+                onClick={onClose}
+              >
+                取消
+              </Button>
+              <Button disabled={mutation.isPending}>
+                {mutation.isPending ? '儲存中…' : '建立旅行'}
+              </Button>
+            </>
+          )}
         </div>
       </form>
     </FormDialog>

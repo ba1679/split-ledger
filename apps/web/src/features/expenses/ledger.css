@@ -1,0 +1,148 @@
+.back {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 24px;
+  color: var(--muted);
+  min-height: 44px;
+  font-size: 14px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.back > span {
+  min-width: 0;
+}
+.form-panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 32px;
+  max-width: 710px;
+}
+fieldset {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  min-width: 0;
+}
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 28px 0 16px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.section-head h2 {
+  color: var(--ink);
+  font-size: 20px;
+}
+.totals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(165px, 100%), 1fr));
+  gap: 16px;
+  margin: 22px 0 34px;
+}
+.total-card {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  padding: 24px;
+  min-width: 0;
+}
+.total-card:first-child {
+  background: var(--green);
+  color: white;
+  border-color: var(--green);
+}
+.total-label {
+  font-size: 12px;
+  letter-spacing: 1px;
+  opacity: 0.8;
+}
+.total-value {
+  font-size: 32px;
+  font-weight: 550;
+  letter-spacing: -1px;
+  margin-top: 9px;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.currency-code {
+  font-size: 14px;
+  letter-spacing: 1px;
+  font-weight: 500;
+}
+.expense-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--line);
+}
+.expense-row:last-child {
+  border-bottom: 0;
+}
+.expense-row:hover {
+  background: #f8faf5;
+}
+.category-icon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  background: var(--soft);
+  border-radius: 8px;
+  color: var(--green);
+  flex-shrink: 0;
+}
+.row-title {
+  font-weight: 550;
+  font-size: 15px;
+}
+.row-sub {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 5px;
+}
+.row-amount {
+  max-width: 45%;
+  text-align: right;
+  font-weight: 650;
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.row-amount small {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.feedback {
+  color: var(--green);
+  background: var(--soft);
+  padding: 12px 18px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+.danger {
+  color: var(--danger);
+}
+.btn.danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: var(--panel);
+}
+.delete-expense {
+  margin-right: auto;
+}
+.load-more {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+}
