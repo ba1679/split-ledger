@@ -1,0 +1,30 @@
+name: split-ledger
+services:
+  db:
+    image: postgres:18.3
+    environment:
+      POSTGRES_USER: ledger
+      POSTGRES_PASSWORD: ledger_local
+      POSTGRES_DB: ledger
+    ports: ['127.0.0.1:54329:5432']
+    volumes: [ledger_dev:/var/lib/postgresql]
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ledger -d ledger']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  test-db:
+    image: postgres:18.3
+    environment:
+      POSTGRES_USER: ledger_test
+      POSTGRES_PASSWORD: ledger_test_local
+      POSTGRES_DB: ledger_test
+    ports: ['127.0.0.1:54330:5432']
+    tmpfs: ['/var/lib/postgresql']
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ledger_test -d ledger_test']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+volumes:
+  ledger_dev:
