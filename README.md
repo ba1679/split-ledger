@@ -22,6 +22,24 @@ pnpm --filter @split-ledger/web dev
 
 Google OAuth client 的授權 origin 使用 `APP_ORIGIN`，redirect URI 設為 `${APP_ORIGIN}/api/auth/callback/google`；本機預設為 `http://127.0.0.1:5173/api/auth/callback/google`。更換域名或 port 時同步更新 Google 與 `.env`，設定細節見 [Google provider 官方文件](https://better-auth.com/docs/authentication/google)。正式使用須配置 HTTPS；登入 secret、OAuth secret、cookie 或 token 不得提交。
 
+## 程式碼排版
+
+全專案程式碼、測試與設定檔採用已確認的分類 API 與分類表單排版風格。歷史規格、Markdown 文件、skills、幣別資料快照、資料庫 migrations、lockfile 及產生檔由 `.prettierignore` 排除。
+
+Prettier 負責縮排與換行：2 格縮排、單引號、分號、100 字元目標行寬。ESLint 保留現有基本檢查，並要求 imports 與主體之間、函式之間、回傳之前留空行。其他邏輯分段由整理時依驗證、資料處理、回傳等步驟判斷；相關變數放一起，不要求每一行之間都留白。
+
+```sh
+# 修正空行，再整理格式
+pnpm lint:fix
+pnpm format
+
+# 檢查全專案格式與 lint 規則
+pnpm format:check
+pnpm lint
+```
+
+設定集中在 `.prettierrc.json`、`.prettierignore` 與 `eslint.config.js`。Prettier 與 ESLint 分開執行，並使用 `eslint-config-prettier` 關閉衝突規則，做法依循 [Prettier 官方整合說明](https://prettier.io/docs/integrating-with-linters)。本輪需求、技術決策與驗證結果見 [002-code-formatting](specs/plans/002-code-formatting/spec.md)。
+
 ## 驗證
 
 ```sh

@@ -6,8 +6,9 @@ export const migrationsDirectory = new URL('../../drizzle/', import.meta.url);
 
 /** Apply the same archived SQL migrations in production and isolated test databases. */
 export async function migrate(pool: pg.Pool): Promise<void> {
-  const files = (await readdir(migrationsDirectory)).filter(file => file.endsWith('.sql')).sort();
+  const files = (await readdir(migrationsDirectory)).filter((file) => file.endsWith('.sql')).sort();
   const client = await pool.connect();
+
   try {
     await client.query('BEGIN');
     // Serialize startup migration attempts across application processes.
@@ -20,13 +21,23 @@ export async function migrate(pool: pg.Pool): Promise<void> {
     for (const name of files) {
       const sql = await readFile(new URL(name, migrationsDirectory), 'utf8');
       const checksum = createHash('sha256').update(sql).digest('hex');
-      const prior = await client.query<{ sha256: string }>('SELECT sha256 FROM _ledger_migrations WHERE name=$1', [name]);
+      const prior = await client.query<{ sha256: string }>(
+        'SELECT sha256 FROM _ledger_migrations WHERE name=$1',
+        [name],
+      );
+
       if (prior.rows[0]) {
-        if (prior.rows[0].sha256 !== checksum) throw new Error(`Applied migration was modified: ${name}`);
+        if (prior.rows[0].sha256 !== checksum)
+          throw new Error(`Applied migration was modified: ${name}`);
+
         continue;
       }
+
       await client.query(sql);
-      await client.query('INSERT INTO _ledger_migrations(name,sha256) VALUES($1,$2)', [name, checksum]);
+      await client.query('INSERT INTO _ledger_migrations(name,sha256) VALUES($1,$2)', [
+        name,
+        checksum,
+      ]);
     }
     await client.query('COMMIT');
   } catch (error) {

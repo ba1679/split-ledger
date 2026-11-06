@@ -10,7 +10,21 @@ describe('exact monetary values', () => {
     expect(formatMoney(9007199254740993n, 2)).toBe('90071992547409.93');
     expect(formatMoney(1n, 4)).toBe('0.0001');
   });
-  test.each(['-1', '+1', '0', '0.00', '01', '1e2', '1,000', ' 1', '1 ', '.5', '1.', 'NaN', '92233720368547758.08'])('rejects invalid or overflowing input %s', amount => {
+  test.each([
+    '-1',
+    '+1',
+    '0',
+    '0.00',
+    '01',
+    '1e2',
+    '1,000',
+    ' 1',
+    '1 ',
+    '.5',
+    '1.',
+    'NaN',
+    '92233720368547758.08',
+  ])('rejects invalid or overflowing input %s', (amount) => {
     expect(() => parseMoney(amount, 2, 'USD')).toThrow(RangeError);
   });
   test('refuses precision loss and any explicit TWD decimal', () => {
@@ -22,13 +36,16 @@ describe('exact monetary values', () => {
     expect(rescaleMoney(123n, 1, 2)).toBe(1230n);
     expect(() => rescaleMoney(9223372036854775807n, 0, 1)).toThrow();
   });
+
   test('normalizes historical scales and allows total sums beyond BIGINT', () => {
-    expect(combineMoney([
-      { currencyCode: 'USD', minorUnit: 1, amountMinor: 123n },
-      { currencyCode: 'USD', minorUnit: 2, amountMinor: 123n },
-      { currencyCode: 'JPY', minorUnit: 0, amountMinor: 9223372036854775807n },
-      { currencyCode: 'JPY', minorUnit: 0, amountMinor: 9223372036854775807n },
-    ])).toEqual([
+    expect(
+      combineMoney([
+        { currencyCode: 'USD', minorUnit: 1, amountMinor: 123n },
+        { currencyCode: 'USD', minorUnit: 2, amountMinor: 123n },
+        { currencyCode: 'JPY', minorUnit: 0, amountMinor: 9223372036854775807n },
+        { currencyCode: 'JPY', minorUnit: 0, amountMinor: 9223372036854775807n },
+      ]),
+    ).toEqual([
       { currencyCode: 'JPY', minorUnit: 0, amount: '18446744073709551614' },
       { currencyCode: 'USD', minorUnit: 2, amount: '13.53' },
     ]);

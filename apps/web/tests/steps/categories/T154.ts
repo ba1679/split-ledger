@@ -6,5 +6,8 @@ Then('表單預選 "交通" 分類', async ({ page, world }) => {
   expect(world.get<string[]>('web:formWrites')).toEqual([]);
   expect(await rows(world, 'expenses')).toEqual(world.get('expense:before'));
   const category = await named(world, 'categories', '交通');
-  expect((await apiItems(world, '/api/categories')).some(row => row.id === category.id)).toBe(true);
+
+  expect((await apiItems(world, '/api/categories')).some((row) => row.id === category.id)).toBe(
+    true,
+  );
 });

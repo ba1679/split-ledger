@@ -3,8 +3,10 @@ import { seedIdentity, seedTrip, seedCategory } from '../../support/accounts-cat
 
 Given('使用者尚未登入', async ({ page, world }) => {
   await seedIdentity(world);
-  await seedTrip(world, '日本旅行'); await seedCategory(world, '餐飲');
-  await seedTrip(world, '他人的旅行', '乙'); await seedCategory(world, '他人的分類', '乙');
+  await seedTrip(world, '日本旅行');
+  await seedCategory(world, '餐飲');
+  await seedTrip(world, '他人的旅行', '乙');
+  await seedCategory(world, '他人的分類', '乙');
   await page.context().clearCookies();
   await page.goto('/');
   expect((await page.request.get('/api/me')).status()).toBe(401);

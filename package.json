@@ -11,6 +11,9 @@
     "typecheck": "pnpm -r typecheck",
     "build": "pnpm -r build",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test:unit": "vitest run",
     "test:smoke": "playwright test -c playwright.smoke.config.ts",
     "test:api": "bddgen -c apps/api/playwright.config.ts && playwright test -c apps/api/playwright.config.ts",
@@ -24,9 +27,12 @@
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@playwright/test": "1.64.1",
+    "@stylistic/eslint-plugin": "5.10.0",
     "@types/node": "24.19.2",
     "eslint": "10.14.0",
+    "eslint-config-prettier": "10.1.8",
     "playwright-bdd": "9.2.1",
+    "prettier": "3.9.10",
     "typescript": "5.9.3",
     "typescript-eslint": "8.72.1",
     "vitest": "5.1.0"

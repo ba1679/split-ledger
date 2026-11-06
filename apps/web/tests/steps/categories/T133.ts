@@ -6,6 +6,7 @@ When('使用者查看兩趟旅行的支出', async ({ page, world }) => {
     await openTrip(page, world, name);
     await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
     const trip = await named(world, 'trips', name);
+
     expect(await apiItems(world, `/api/trips/${trip.id}/expenses`)).toHaveLength(1);
   }
 });

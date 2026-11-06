@@ -3,6 +3,7 @@ import { rows, apiItems, assertTrip } from '../../support/accounts-categories-tr
 
 Then('使用者看到 "日本旅行" 的空帳本與未定日期', async ({ page, world }) => {
   const trip = await assertTrip(world, '日本旅行', null, null);
+
   expect(trip.expenseCount).toBe(0);
   expect(await apiItems(world, `/api/trips/${trip.id}/expenses`)).toHaveLength(0);
   expect(await rows(world, 'expenses')).toHaveLength(0);

@@ -8,7 +8,7 @@ When('第二個帳號完成 Google 登入', async ({ page, world }) => {
   expect((await page.request.get('/api/me')).status()).toBe(401);
   await mockGoogle(page, world, '乙', 'success');
   await Promise.all([
-    page.waitForRequest(request => request.url().startsWith('https://accounts.google.com/')),
+    page.waitForRequest((request) => request.url().startsWith('https://accounts.google.com/')),
     page.getByRole('button', { name: /使用 Google 帳號登入/ }).click(),
   ]);
   await expect(page).toHaveURL(/\/trips(?:[?#].*)?$/);
