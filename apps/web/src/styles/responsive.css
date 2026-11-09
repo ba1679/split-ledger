@@ -65,7 +65,7 @@
   .landscape {
     height: 145px;
   }
-  .page-head > :is(.btn, .ds-button) {
+  .page-head > .ds-button {
     padding: 10px 13px;
   }
   .bottom-nav {

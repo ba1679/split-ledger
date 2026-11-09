@@ -1,13 +1,4 @@
-import {
-  BriefcaseBusiness,
-  List,
-  Plus,
-  ChevronRight,
-  ChevronLeft,
-  Check,
-  FileText,
-  CalendarDays,
-} from 'lucide-react';
+import { BriefcaseBusiness, List, Plus, ChevronRight, ChevronLeft, FileText } from 'lucide-react';
 
 const icons = {
   trips: BriefcaseBusiness,
@@ -15,9 +6,7 @@ const icons = {
   plus: Plus,
   arrow: ChevronRight,
   back: ChevronLeft,
-  check: Check,
   note: FileText,
-  calendar: CalendarDays,
 };
 
 export type IconName = keyof typeof icons;

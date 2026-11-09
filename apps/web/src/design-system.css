@@ -3,7 +3,7 @@
 @import 'tailwindcss/theme.css' layer(theme);
 @import 'tailwindcss/utilities.css' layer(utilities);
 
-/* Brand values live here; legacy CSS consumes the same variables while migration proceeds. */
+/* Brand values live here; page and component styles consume the same variables. */
 :root {
   --bg: #f6f6f0;
   --panel: #fff;

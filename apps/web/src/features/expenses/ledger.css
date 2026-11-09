@@ -133,11 +133,6 @@ fieldset {
 .danger {
   color: var(--danger);
 }
-.btn.danger {
-  background: var(--danger);
-  border-color: var(--danger);
-  color: var(--panel);
-}
 .delete-expense {
   margin-right: auto;
 }
