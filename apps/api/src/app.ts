@@ -1,4 +1,5 @@
 import Fastify from 'fastify';
+import statics from '@fastify/static';
 import pg from 'pg';
 import { createDatabase, migrate } from './db/index.js';
 import { listCurrencies, registerCurrencyRoutes } from './modules/currencies/index.js';
@@ -9,6 +10,7 @@ import { registerExpenseRoutes } from './modules/expenses/index.js';
 import { checkOrigin, HttpError, invalid } from './http.js';
 
 export interface AppOptions {
+  staticRoot?: string;
   pool?: pg.Pool;
   appOrigin?: string;
   authSecret?: string;
@@ -117,6 +119,34 @@ export function buildApp(options: AppOptions = {}) {
     app.addHook('onClose', async () => {
       await pool.end();
     });
+
+  if (options.staticRoot) {
+    app.register(statics, { root: options.staticRoot });
+    app.setNotFoundHandler((request, reply) => {
+      let path: string;
+
+      try {
+        path = decodeURIComponent(new URL(request.url, 'http://localhost').pathname);
+      } catch {
+        return reply.code(404).send({ message: 'Not Found' });
+      }
+      const page = /^(?:\/|\/categories\/?|\/trips(?:\/[^/.]+(?:\/expenses\/[^/.]+)?)?\/?)$/.test(
+        path,
+      );
+
+      if (
+        ['GET', 'HEAD'].includes(request.method) &&
+        page &&
+        request.headers.accept?.includes('text/html')
+      ) {
+        return reply.header('Cache-Control', 'no-cache').sendFile('index.html');
+      }
+
+      return reply.code(404).send({ message: 'Not Found' });
+    });
+  }
+
+  app.get('/healthz', async (_request, reply) => reply.code(204).send());
 
   registerCurrencyRoutes(app, db);
   registerAuthRoutes(app, auth, authConfig);

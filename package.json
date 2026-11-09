@@ -22,7 +22,9 @@
     "db:down": "docker compose down",
     "test:support": "playwright test -c playwright.support.config.ts",
     "test:web-support": "playwright test -c playwright.web-support.config.ts",
-    "test:ui-quality": "playwright test -c playwright.ui-quality.config.ts"
+    "test:ui-quality": "playwright test -c playwright.ui-quality.config.ts",
+    "test:deployment": "playwright test -c playwright.deployment.config.ts",
+    "start": "pnpm --filter @split-ledger/api start"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
@@ -33,6 +35,7 @@
     "eslint-config-prettier": "10.1.8",
     "playwright-bdd": "9.2.1",
     "prettier": "3.9.10",
+    "railway": "3.16.0",
     "typescript": "5.9.3",
     "typescript-eslint": "8.72.1",
     "vitest": "5.1.0"

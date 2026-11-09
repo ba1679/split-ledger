@@ -62,3 +62,7 @@ BDD 使用正式 migrations、每個 worker 的獨立 PostgreSQL、真實 API/se
 目前實作狀態與驗證證據見 [實作紀錄](docs/development/implementation.md)，任務進度見 [tasks.md](specs/plans/001-personal-travel-expenses/tasks.md)。
 
 UI 核對方式、修正與瀏覽器驗證限制見 [UI 品質審查](docs/development/ui-quality-review.md)。
+
+## Railway 免費試用
+
+試用網址：[旅帳](https://app-production-ca12.up.railway.app/)。部署、Google 設定、備份還原及到期處置見 [操作手冊](specs/plans/004-railway-trial-deployment/runbook.md)，實際驗證結果見 [驗證紀錄](specs/plans/004-railway-trial-deployment/validation.md)。試用僅驗證測試資料，不代表正式帳本的長期保存保障。

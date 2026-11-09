@@ -28,3 +28,7 @@ Thumbs.db
 
 # Generated executable Gherkin tests
 .features-gen/
+
+# Deployment backup artifacts
+backups/
+*.dump

@@ -78,6 +78,16 @@
 | 資料庫環境 | Docker Compose | 開發及測試 PostgreSQL；資料隔離 |
 | 開發入口 | pnpm scripts | 啟動 web/api、驗證及測試；lint:fix 修正空行、format 整理排版、format:check 檢查格式 |
 
+### 試用部署決策（尚未實作或驗證）
+
+| 類別 | 採用技術 | 用途 |
+| --- | --- | --- |
+| 試用平台 | Railway 免費試用、Railway HTTPS 網址 | 兩人以測試資料驗證；不代表正式營運或保證免費持續運行 |
+| 應用部署 | Node.js 24、Fastify 提供 Vite 靜態產物及同 origin `/api` | 單一公開服務；建置、SPA fallback 與正式啟動待驗證 |
+| 試用資料庫 | Railway PostgreSQL 18、持久 volume、私有連線 | 測試資料持久化；重新部署及連線待驗證 |
+| 試用資料還原 | PostgreSQL 邏輯備份與隔離還原驗證 | 測試資料保護與還原演練；正式環境另行規劃 |
+
+
 ## 本次開發不引入的技術
 
 - Turborepo/Nx：先以 workspace scripts 管理，待量測需求再評估。
@@ -86,4 +96,5 @@
 - Redux Toolkit / RTK Query 與 SSR 框架：伺服器資料由 TanStack Query 管理，局部狀態由 React 管理；後續依需求評估 Redux。
 - 共編基礎設施及離線同步：後續產品階段再評估。
 
-部署供應商尚未選定，正式使用前需落實 HTTPS、資料備份/還原、OAuth 正式設定及 migration 發布流程。具體套件版本由 Setup 驗證相容性並鎖定。
+
+正式部署供應商尚未確定；正式使用前需落實 HTTPS、資料備份/還原、OAuth 正式設定及 migration 發布流程。

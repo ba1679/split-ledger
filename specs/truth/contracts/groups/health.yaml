@@ -1,0 +1,13 @@
+healthz:
+  get:
+    tags: [health]
+    operationId: getDeploymentReadiness
+    summary: 檢查應用是否完成啟動
+    description: |-
+      供 Railway 部署健康檢查使用，不需登入；無回應本文或敏感資訊。
+      僅在啟動時 migrations 成功、幣別資料檢查通過且應用完成初始化後可回應。
+      啟動失敗時不得宣告就緒；此端點不代表持續的資料庫可用性監控。
+    security: []
+    responses:
+      '204':
+        description: 應用已完成啟動，可以接收流量。

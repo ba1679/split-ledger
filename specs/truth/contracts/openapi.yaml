@@ -39,7 +39,11 @@ tags:
     description: 跨旅行共用的個人分類
   - name: currencies
     description: 固定版本的幣別目錄
+  - name: health
+    description: 部署切流使用的應用就緒檢查
 paths:
+  /healthz:
+    $ref: ./groups/health.yaml#/healthz
   /api/me:
     $ref: ./groups/account.yaml#/me
   /api/trips:

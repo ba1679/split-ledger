@@ -6,9 +6,11 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "tsc",
-    "dev": "tsx watch src/server.ts"
+    "dev": "pnpm --filter @split-ledger/shared build && tsx watch src/server.ts",
+    "start": "node dist/server.js"
   },
   "dependencies": {
+    "@fastify/static": "10.1.10",
     "@fastify/type-provider-typebox": "5.2.0",
     "@sinclair/typebox": "0.34.52",
     "@split-ledger/shared": "workspace:*",

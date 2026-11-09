@@ -6,7 +6,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "vite build",
-    "dev": "vite"
+    "dev": "pnpm --filter @split-ledger/shared build && vite"
   },
   "dependencies": {
     "@radix-ui/react-slot": "1.5.0",
