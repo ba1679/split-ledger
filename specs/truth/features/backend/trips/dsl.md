@@ -13,3 +13,11 @@
 | `日期更新被拒絕且"日本旅行"日期維持不變` | 無 | 不支援 | 無 | 400 VALIDATION_ERROR；資料庫 start_date=2027-03-10、end_date=null，GET 旅行再讀相同。 |
 | `使用者"甲"將"日本旅行"結束日改為"2027-03-15"` | 無 | 不支援 | 無 | 以甲的有效 session 和可信 Origin 呼叫 PATCH /api/trips/{tripId}；按句中名稱與日期送出，記錄回應；成功確認資料庫旅行，失敗確認原值未變。 |
 | `"日本旅行"期間為"2027-03-10"至"2027-03-15"` | 無 | 不支援 | 無 | 200；回應與資料庫 start_date=2027-03-10、end_date=2027-03-15；GET 旅行再讀相同。 |
+
+## Phase 1B 旅行分帳
+
+所有 Given 以隔離資料建立權威狀態；When 只有一次受測命令或查詢，寫入前擷取完整帳務快照，記錄回應與資源 ID，寫入成功才讀取落地資料；失敗保持來源。Then 依各列驗 DB 與 API，再讀僅作確認，不是第二個 Act。有理數 oracle 不共用受測計算函式；金額均依歷史 minorUnit 作 BigInt 交叉相乘，不使用浮點近似。
+
+| DSL 句型 | Gherkin 參數 | Data Table 參數 | 預設參數 | StepDef 實作語意 |
+| --- | --- | --- | --- | --- |
+| `新旅行同時具有唯一固定 owner 成員` | 無 | 不支援 | 無 | Then：201 Trip.ownerMemberId與DB同owner/trip的trip_members一致，role=owner/isActive=true/name來自該帳號、恰一位；trip.simplifyDebts=false、accountingRevision為非負十進位；GET trip與members再讀一致。不能先建travel再由client補member以掩蓋非原子建立。 |
