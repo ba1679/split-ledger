@@ -71,7 +71,7 @@ packages/shared/           # 共用精確計算
 #### Wave 3：UI 流程
 
 - 介面：`owner 分帳與結算介面`，委派 `/ui-plan`。
-- 分析重點：平均數與未取整顯示、Simplify Debts 三句說明、記錄實付與結清、部分還款、手機與鍵盤、載入/失敗/結果不明狀態；不提供取整選擇。
+- 分析重點：平均份額的最多兩位小數顯示與內部精度分離、簡化付款 三句說明、記錄實付與結清、部分還款、手機與鍵盤、載入/失敗/結果不明狀態；不提供取整選擇。
 - 安排理由：以更新後 API/data truth 為依據設計完整操作與靜態雛形，避免 UI 假設未被契約支援。
 
 ### 共通 handoff
@@ -80,3 +80,9 @@ packages/shared/           # 共用精確計算
 - 後續 owner 必須先讀更新後的 spec、research、acceptance 及 truth-delta。各 owner 僅修改自身 truth 範圍並委派 truth-delta 記錄。
 - 一筆實付後結清不要求取整方式；部分還款與超額規則須與結清明確區分，若既有描述仍有矛盾先停止並回交。
 - `/dsl-refine` 在 API、data、UI 已對齊後進行；`/tasks` 應等待 system-analysis 與相關 truth／UI handoff 完成。
+
+## Prototype review 後的開發依據（2026-11-10）
+
+- 採用最新 `spec.md` FR-012、FR-026 及介面文案與表單要求，並遵守 `ui/ui-plan.md` 的回饋決策。
+- HTML prototype 保留為流程示意；若示意與上述文件不一致，以文件為準。日期沿用正式程式既有 `DateField`，不依 prototype 的原生日期欄位重建。
+- 後續 `/dsl-refine` 與 `/tasks` 須納入名稱「簡化付款」、中性文案、金額顯示格式、選項間距與日期元件回歸檢查。API/data 的精確數值及技術欄位名稱不因顯示名稱改變。

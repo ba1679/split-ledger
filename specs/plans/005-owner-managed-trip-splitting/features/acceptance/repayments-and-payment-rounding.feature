@@ -17,13 +17,13 @@ Feature: 實際還款與付款安排結清
       And JPY 付款安排顯示已結清
       And 兩筆實際還款都保留原付款人、收款人、幣別、金額與日期
 
-  Rule: 付款安排顯示精確公平金額，實付後由 owner 記錄金額並結清
+  Rule: 付款安排依顯示格式呈現應付金額，實付後由 owner 記錄金額並結清
 
     Example: 同一筆三人平均支出的兩筆安排以不同實付金額結清
       Given owner 支付 JPY 100 並由 owner、Amy、Bob 三人平均分攤
       And 三人的精確公平份額各為 JPY "100/3"
       And Amy 與 Bob 各有一筆向 owner 支付 JPY "100/3" 的精確付款安排
-      And 畫面顯示兩筆精確公平應付且不提供取整方式選擇
+      And 畫面顯示兩筆 "JPY 33.33" 的應付金額且不提供取整方式選擇
       When Amy 實際支付 owner JPY 33，owner 輸入實付 JPY 33 並按結清
       Then Amy 的該筆付款安排以 JPY 33 結清
       And 系統保留 JPY 33 實付事實與成對、總和為零的 JPY "1/3" 差額調整
