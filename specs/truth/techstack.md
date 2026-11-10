@@ -1,6 +1,6 @@
 # 技術堆疊總覽：旅行記帳與分帳工具
 
-截至 2026-11-06 的採用技術。前後端、共用套件與測試已在工作區實作，套件版本由 package.json 與 pnpm lockfile 固定；本清單不代表已正式部署。
+截至 2026-11-10 的採用技術。既有前後端、共用套件與測試已在工作區實作，版本由 package.json 與 pnpm lockfile 固定；Phase 1B 下列分帳方向已選定但尚未實作。
 
 ## 技術堆疊總覽
 
@@ -51,10 +51,24 @@
 | 資料庫 | PostgreSQL 18 | 帳號、旅行、支出、分類與 session 持久化 |
 | 資料存取 | Drizzle ORM、node-postgres | 型別化 SQL 查詢 |
 | 結構變更 | Drizzle Kit、SQL migrations | 可 review 及重建的 schema 歷史 |
-| 金額 | 最小單位整數、BigInt、PostgreSQL BIGINT | 精確加總；API 使用十進位字串並驗證範圍 |
+| 原始與實付金額 | 最小單位整數、BigInt、PostgreSQL BIGINT | 保留原始金額；API 使用十進位字串並驗證範圍 |
 | 幣別 | SIX ISO 4217 List One 固定快照 | 代碼與小數位數；數字 minor unit 條目，排除 N.A. |
 | 快照基準 | 發布 2026-09-17，取樣 2026-11-04 | 178 個唯一代碼中 165 個具數字 minor unit；Setup 封存資料及來源 |
 | 日期 | 日期字串與 PostgreSQL DATE | 支出及旅行日曆日期；新增支出預設裝置當地日期 |
+
+### Phase 1B 分帳決策（已選定，尚未實作）
+
+| 類別 | 採用技術 | 用途 |
+| --- | --- | --- |
+| 精確分攤 | TypeScript BigInt 約分有理數、packages/shared | 分子分母精確運算與有號淨額；不以有限小數取代循環份額 |
+| 分數持久化與傳輸 | PostgreSQL NUMERIC 整數分子分母、十進位字串 | 保存結算調整；原始支出與成員集合重建份額；不以 SQL 除法生成近似權威值 |
+| 債務簡化 | 直接債務圖、確定性淨額貪婪配對、筆數比較回退 | 每幣別保留淨額，付款筆數不增加；穩定 ID 排序，未宣稱全域最少 |
+| 安排說明 | 後端確定性文字模板 | 三句內說明改道及筆數變化 |
+| 付款取整 | BigInt 商餘數、還款與成對調整原子寫入 | 付款人當次決定取整，維持全體零和及原始公平份額 |
+| 寫入一致性 | 旅行列 FOR UPDATE、READ COMMITTED、帳務 revision | 同旅行寫入序列化；超額與取整確認需核對最新版本 |
+| 結算讀取 | REPEATABLE READ read-only snapshot | 同一份來源快照重建分攤、淨額與兩種安排 |
+| 成員名稱 | 旅行成員統一命名空間、trim、ASCII 不分大小寫名稱鍵與唯一鍵 | owner 及啟用/停用同行者不重名；穩定 ID 關聯 |
+| 資料演進 | 新增 SQL migration、既有 checksum/advisory lock | 回填 owner 成員與既有單人分攤，不改歷史金額 |
 
 ### 測試與驗證
 
@@ -95,6 +109,7 @@
 - 即時匯率服務、瀏覽器浮點金額運算：本版保留原幣別，使用精確金額表示。
 - Redux Toolkit / RTK Query 與 SSR 框架：伺服器資料由 TanStack Query 管理，局部狀態由 React 管理；後續依需求評估 Redux。
 - 共編基礎設施及離線同步：後續產品階段再評估。
+- Phase 1B 不引入浮點分攤、有限小數作權威份額、全域最少轉帳求解器或生成式 AI 結算說明服務。
 
 
 正式部署供應商尚未確定；正式使用前需落實 HTTPS、資料備份/還原、OAuth 正式設定及 migration 發布流程。
