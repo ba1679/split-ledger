@@ -2,12 +2,20 @@ import { Button } from '../../components/ui/button.js';
 import React, { useState } from 'react';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import { apiRequest, type Trip, type ExpenseList, type CurrencyTotal } from '../../api/index.js';
+import {
+  apiRequest,
+  type Trip,
+  type ExpenseList,
+  type CurrencyTotal,
+  type TripMember,
+  type ItemList,
+} from '../../api/index.js';
 import { useSession } from '../auth/session.js';
 import { QueryState } from '../../components/QueryState.js';
 import { tripDates } from './Trips.js';
 import { TripForm } from './TripForm.js';
 import { displayAmount } from '../expenses/money.js';
+import { ExpenseShares } from '../expenses/ExpenseShares.js';
 import { Icon } from '../../components/Icon.js';
 
 export function TripLedger() {
@@ -29,6 +37,12 @@ export function TripLedger() {
         { signal },
       ),
     getNextPageParam: (page) => page.nextCursor ?? undefined,
+  });
+
+  const members = useQuery({
+    queryKey: ['account', account!.id, 'members', tripId],
+    queryFn: ({ signal }) =>
+      apiRequest<ItemList<TripMember>>(`/api/trips/${tripId}/members`, { signal }),
   });
 
   const totals = useQuery({
@@ -85,6 +99,14 @@ export function TripLedger() {
           </Link>
         </Button>
       </header>
+      <nav aria-label="旅行內導覽" className="trip-navigation">
+        <Button asChild variant="outline">
+          <Link to={`/trips/${tripId}/members`}>同行者</Link>
+        </Button>
+        <Button asChild variant="outline">
+          <Link to={`/trips/${tripId}/settlement`}>分帳結算</Link>
+        </Button>
+      </nav>
       {(location.state as { message?: string } | null)?.message ? (
         <p className="feedback" role="status">
           {(location.state as { message: string }).message}
@@ -159,10 +181,12 @@ export function TripLedger() {
                     {' · '}
                     <span>{expense.category?.name ?? '未分類'}</span>
                   </div>
-                </div>
+                  {members.data ? (
+                    <ExpenseShares expense={expense} members={members.data.items} />
+                  ) : null}
+                </div>{' '}
                 <div className="row-amount">
-                  {displayAmount(expense.amount)}
-                  <small>{expense.currencyCode}</small>
+                  {expense.currencyCode} {displayAmount(expense.amount)}
                 </div>
                 <Icon name="arrow" />
               </Link>

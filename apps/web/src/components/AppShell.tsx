@@ -1,11 +1,12 @@
 import { Button } from '../components/ui/button.js';
 import React from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useMatch } from 'react-router-dom';
 import { useSession } from '../features/auth/session.js';
 import { Icon } from './Icon.js';
 
 function Navigation({ mobile = false }: { mobile?: boolean }) {
   const { signOut, closing } = useSession();
+  const tripMatch = useMatch('/trips/:tripId/*');
 
   return (
     <nav
@@ -20,6 +21,18 @@ function Navigation({ mobile = false }: { mobile?: boolean }) {
         <Icon name="list" />
         <span>支出分類</span>
       </NavLink>
+      {tripMatch ? (
+        <NavLink to={`/trips/${tripMatch.params.tripId}/members`}>
+          <Icon name="list" />
+          <span>同行者</span>
+        </NavLink>
+      ) : null}
+      {tripMatch ? (
+        <NavLink to={`/trips/${tripMatch.params.tripId}/settlement`}>
+          <Icon name="list" />
+          <span>分帳結算</span>
+        </NavLink>
+      ) : null}
       {mobile ? (
         <Button
           variant="ghost"
@@ -56,7 +69,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <br />
             OF EVERY JOURNEY.
           </div>
-          <p>{account?.name}</p>
+          <p>{account?.name} 的旅行帳本</p>
           <Button
             variant="ghost"
             className="text-btn"

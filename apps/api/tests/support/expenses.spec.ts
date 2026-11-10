@@ -97,10 +97,15 @@ test('expense cursors bind account and trip; foreign references and UUIDs never 
   const foreignTrip = await seedTrip(world, '私人旅行', '乙');
   const foreignCategory = await seedCategory(world, '私人分類', '乙');
 
-  await world.db.query(
-    "INSERT INTO expenses(id,owner_id,trip_id,item,amount_minor,currency_code,minor_unit,spent_on) SELECT gen_random_uuid(),$1,$2,'跨頁支出'||g,100,'JPY',0,'2027-03-11'::date-(g%3) FROM generate_series(1,53) AS g",
-    [user.id, trip.id],
-  );
+  for (let index = 1; index <= 53; index++)
+    await seedExpense(world, {
+      owner: '甲',
+      tripName: '日本旅行',
+      item: `跨頁支出${index}`,
+      amount: '100',
+      currencyCode: 'JPY',
+      spentOn: `2027-03-${String(11 - (index % 3)).padStart(2, '0')}`,
+    });
   const path = `/api/trips/${trip.id}/expenses`;
   const headers = { cookie: user.cookie, origin: world.get<string>('webOrigin') };
   const first = await world.api.get(path, { headers });

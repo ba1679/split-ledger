@@ -1,0 +1,71 @@
+.repayment-page {
+  display: grid;
+  gap: 24px;
+}
+.repayment-page > .back,
+.repayment-page .page-head {
+  margin: 0;
+}
+.repayment-page fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.repayment-parties,
+.repayment-money {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.repayment-due,
+.repayment-preview,
+.repayment-warning {
+  border: 1px solid var(--line);
+  border-radius: var(--ds-card-radius);
+  padding: 24px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.repayment-due {
+  background: var(--soft);
+}
+.repayment-due > strong {
+  display: block;
+  color: var(--green);
+  font: 500 28px/1.5 var(--serif);
+  margin-top: 20px;
+}
+.repayment-preview {
+  background: var(--panel);
+  margin-bottom: 24px;
+}
+.repayment-preview p + p {
+  margin-top: 20px;
+}
+.repayment-warning {
+  background: var(--warning-surface);
+  margin: 24px 0;
+}
+.repayment-warning h2 {
+  font: 500 22px/1.5 var(--serif);
+  margin-bottom: 16px;
+}
+.repayment-warning p + p {
+  margin-top: 12px;
+}
+.repayment-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+@media (max-width: 700px) {
+  .repayment-due > strong {
+    font-size: 24px;
+  }
+  .repayment-parties {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+}

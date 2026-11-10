@@ -9,6 +9,9 @@ import { Categories } from '../features/categories/Categories.js';
 import { ExpenseForm } from '../features/expenses/ExpenseForm.js';
 import { AppShell } from '../components/AppShell.js';
 import { QueryState } from '../components/QueryState.js';
+import { TripSettlement } from '../features/settlement/TripSettlement.js';
+import { TripMembers } from '../features/members/TripMembers.js';
+import { IndependentRepayment } from '../features/repayments/IndependentRepayment.js';
 
 function PrivatePage({ children }: { children: React.ReactNode }) {
   const session = useSession();
@@ -66,6 +69,30 @@ export function App() {
         element={
           <PrivatePage>
             <ExpenseForm />
+          </PrivatePage>
+        }
+      />
+      <Route
+        path="/trips/:tripId/members"
+        element={
+          <PrivatePage>
+            <TripMembers />
+          </PrivatePage>
+        }
+      />
+      <Route
+        path="/trips/:tripId/settlement"
+        element={
+          <PrivatePage>
+            <TripSettlement />
+          </PrivatePage>
+        }
+      />
+      <Route
+        path="/trips/:tripId/repayments/new"
+        element={
+          <PrivatePage>
+            <IndependentRepayment />
           </PrivatePage>
         }
       />

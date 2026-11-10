@@ -1,9 +1,10 @@
 import { Type } from '@sinclair/typebox';
+import { randomUUID } from 'node:crypto';
 import type { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 import type { FastifyInstance } from 'fastify';
 import { and, desc, eq, sql } from 'drizzle-orm';
 import type { Database } from '../../db/index.js';
-import { trips, expenses } from '../../db/schema.js';
+import { trips, expenses, tripMembers } from '../../db/schema.js';
 import {
   DateOnly,
   Timestamp,
@@ -23,6 +24,9 @@ const Trip = Type.Object(
     startDate: DateOnly,
     endDate: DateOnly,
     expenseCount: Type.Integer({ minimum: 0 }),
+    ownerMemberId: Uuid,
+    simplifyDebts: Type.Boolean(),
+    accountingRevision: Type.String({ pattern: '^(?:0|[1-9][0-9]*)$' }),
     createdAt: Timestamp,
     updatedAt: Timestamp,
   },
@@ -34,6 +38,7 @@ const TripPatch = Type.Object(
     name: Type.Optional(Type.String({ minLength: 1 })),
     startDate: Type.Optional(DateOnly),
     endDate: Type.Optional(DateOnly),
+    simplifyDebts: Type.Optional(Type.Boolean()),
   },
   { additionalProperties: false, minProperties: 1 },
 );
@@ -61,6 +66,9 @@ const projection = {
   createdAt: trips.createdAt,
   updatedAt: trips.updatedAt,
   expenseCount: sql<number>`count(${expenses.id})::int`,
+  ownerMemberId: sql<string>`(SELECT id FROM trip_members WHERE trip_id=${trips.id} AND owner_id=${trips.ownerId} AND role='owner')`,
+  simplifyDebts: trips.simplifyDebts,
+  accountingRevision: trips.accountingRevision,
   cursorTime: sql<string>`${trips.createdAt}::text`,
 };
 const countJoin = and(eq(expenses.ownerId, trips.ownerId), eq(expenses.tripId, trips.id));
@@ -74,11 +82,15 @@ function view(row: {
   startDate: string | null;
   endDate: string | null;
   expenseCount: number;
+  ownerMemberId: string;
+  simplifyDebts: boolean;
+  accountingRevision: bigint;
 }) {
   const { cursorTime: _cursorTime, ...rest } = row;
 
   return {
     ...rest,
+    accountingRevision: row.accountingRevision.toString(),
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
@@ -132,6 +144,15 @@ export function registerTripRoutes(
 
         if (!inserted)
           throw new HttpError(409, 'ID_CONFLICT', '這次建立的識別碼已被使用，請重新確認。');
+
+        await tx.insert(tripMembers).values({
+          id: randomUUID(),
+          ownerId: user.id,
+          tripId: inserted.id,
+          role: 'owner',
+          name: user.name.trim(),
+          isActive: true,
+        });
 
         const [row] = await tx
           .select(projection)
@@ -257,7 +278,13 @@ export function registerTripRoutes(
 
         await tx
           .update(trips)
-          .set({ ...fields, updatedAt: new Date() })
+          .set({
+            ...fields,
+            simplifyDebts: patch.simplifyDebts ?? prior.simplifyDebts,
+            accountingRevision:
+              prior.accountingRevision + (patch.simplifyDebts !== undefined ? 1n : 0n),
+            updatedAt: new Date(),
+          })
           .where(owner);
         const [updated] = await tx
           .select(projection)

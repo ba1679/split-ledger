@@ -11,6 +11,8 @@ export interface SaveIntent {
   minorUnit: number;
   amountMinor: string;
   categoryId: string | null;
+  payerMemberId?: string;
+  shareMemberIds?: string[];
 }
 
 export interface DeleteIntent {
@@ -51,6 +53,13 @@ export async function verifiedSave(intent: SaveIntent): Promise<Expense | null> 
     const saved = await apiRequest<Expense>(`/api/trips/${intent.tripId}/expenses/${intent.id}`);
 
     if (
+      (!intent.payerMemberId || saved.payerMemberId === intent.payerMemberId) &&
+      (!intent.shareMemberIds ||
+        [...intent.shareMemberIds].sort().join() ===
+          saved.shares
+            .map((share) => share.memberId)
+            .sort()
+            .join()) &&
       saved.id === intent.id &&
       saved.tripId === intent.tripId &&
       saved.item === intent.item &&
