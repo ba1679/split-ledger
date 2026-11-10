@@ -1,0 +1,172 @@
+members:
+  parameters:
+    - $ref: ../components/parameters.yaml#/TripId
+  get:
+    tags: [members]
+    operationId: listTripMembers
+    x-session-required: true
+    security: [{BetterAuthSession: []}]
+    summary: 列出旅行的 owner 與同行者
+    description: 只有旅行 owner 可查看，包含停用同行者以辨識歷史紀錄；同行者本身沒有帳號權限。
+    responses:
+      '200':
+        description: 完整旅行成員清單。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/members.yaml#/MemberList}
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '404':
+        description: 旅行不存在或不屬於目前帳號。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+  post:
+    tags: [members]
+    operationId: createTripMember
+    x-session-required: true
+    security: [{BetterAuthSession: []}]
+    summary: 建立同行者
+    description: 新增的成員 role 固定為 companion；名稱在同旅行 owner、啟用及停用成員間唯一。成功後遞增 accountingRevision。
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema: {$ref: ../components/schemas/members.yaml#/CreateMemberRequest}
+    responses:
+      '201':
+        description: 建立成功。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/members.yaml#/TripMember}
+      '400':
+        description: 名稱、識別或本文不合法。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '403':
+        description: Origin 不可信。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '404':
+        description: 旅行不存在或不屬於目前帳號。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '409':
+        description: MEMBER_NAME_CONFLICT 或 ID_CONFLICT；不揭露衝突資源。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+member:
+  parameters:
+    - $ref: ../components/parameters.yaml#/TripId
+    - $ref: ../components/parameters.yaml#/MemberId
+  get:
+    tags: [members]
+    operationId: getTripMember
+    x-session-required: true
+    security: [{BetterAuthSession: []}]
+    summary: 查看單筆旅行成員
+    responses:
+      '200':
+        description: 成員資料。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/members.yaml#/TripMember}
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '404':
+        description: 旅行或成員不存在、非本人或成員不屬於此旅行。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+  patch:
+    tags: [members]
+    operationId: updateTripMember
+    x-session-required: true
+    security: [{BetterAuthSession: []}]
+    summary: 改名、停用或重新啟用同行者
+    description: owner 成員不可透過此端點改名或停用。停用者保留歷史及名稱，僅排除於新紀錄選取；成功後遞增 accountingRevision。
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema: {$ref: ../components/schemas/members.yaml#/UpdateMemberRequest}
+    responses:
+      '200':
+        description: 更新後成員。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/members.yaml#/TripMember}
+      '400':
+        description: 名稱不合法、本文不合法或嘗試修改 owner 成員。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '403':
+        description: Origin 不可信。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '404':
+        description: 旅行或成員不存在、非本人或不屬此旅行。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '409':
+        description: 名稱衝突；code=MEMBER_NAME_CONFLICT。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+  delete:
+    tags: [members]
+    operationId: deleteTripMember
+    x-session-required: true
+    security: [{BetterAuthSession: []}]
+    summary: 刪除未被引用的同行者
+    description: owner 不可刪除；曾被支出、分攤、還款、結清或調整引用者回 409 MEMBER_IN_USE，須改為停用。成功後遞增 accountingRevision。
+    responses:
+      '204': {description: 刪除成功，無回應本文。}
+      '400':
+        description: DELETE 帶本文或試圖刪除 owner。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '403':
+        description: Origin 不可信。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '404':
+        description: 旅行或成員不存在、非本人或不屬此旅行。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '409':
+        description: 已被歷史引用；code=MEMBER_IN_USE。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}

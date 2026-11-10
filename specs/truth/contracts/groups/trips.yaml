@@ -35,8 +35,8 @@ trips:
     x-session-required: true
     security:
       - BetterAuthSession: []
-    summary: 建立個人旅行帳本
-    description: 名稱必填；起迄日各自可省略或為 null，有兩端時結束日不得早於開始日。建立用的 UUID 由客戶端產生。
+    summary: 建立旅行帳本與 owner 成員
+    description: 名稱必填；起迄日各自可省略或為 null，有兩端時結束日不得早於開始日。建立用的 UUID 由客戶端產生；同一交易建立固定 owner 成員，名稱為當時帳號顯示名稱，之後不因 Google profile 改名而變。
     requestBody:
       required: true
       content:
@@ -109,8 +109,8 @@ trip:
     x-session-required: true
     security:
       - BetterAuthSession: []
-    summary: 修改旅行名稱或日期
-    description: 省略欄位保留原值；日期傳 null 清除。合併現有值後檢查日期先後；失敗時原資料不變。
+    summary: 修改旅行資訊或 Simplify Debts 設定
+    description: 省略欄位保留原值；日期傳 null 清除。合併現有值後檢查日期先後；失敗時原資料不變。切換 simplifyDebts 僅改付款建議、遞增 accountingRevision，不改支出、份額、還款與結清歷史。
     requestBody:
       required: true
       content:

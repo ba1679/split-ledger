@@ -1,0 +1,83 @@
+Repayment:
+  type: object
+  additionalProperties: false
+  required: [id, tripId, payerMemberId, payeeMemberId, amount, currencyCode, minorUnit, paidOn, kind, settlementId, createdAt]
+  properties:
+    id: {type: string, format: uuid}
+    tripId: {type: string, format: uuid}
+    payerMemberId: {type: string, format: uuid}
+    payeeMemberId: {type: string, format: uuid}
+    amount: {$ref: ./shared.yaml#/MoneyAmount}
+    currencyCode: {$ref: ./shared.yaml#/CurrencyCode}
+    minorUnit:
+      type: integer
+      minimum: 0
+      maximum: 4
+      description: 實付時保存的幣別位數，不隨日後目錄變更。
+    paidOn: {$ref: ./shared.yaml#/DateOnly}
+    kind:
+      type: string
+      enum: [independent, settlement]
+      description: 獨立還款可部分還款；結清實付有對應 settlementId。
+    settlementId:
+      type: string
+      format: uuid
+      nullable: true
+    createdAt: {$ref: ./shared.yaml#/IsoTimestamp}
+RepaymentList:
+  type: object
+  additionalProperties: false
+  required: [items]
+  properties:
+    items:
+      type: array
+      items: {$ref: '#/Repayment'}
+OverpaymentConfirmation:
+  type: object
+  description: owner 已看見的精確超額與反向債權快照；重送時必須由 owner 明確確認，後端不能只信任客戶端欄位。
+  additionalProperties: false
+  required: [accountingRevision, excessAmount, reverseDebtorMemberId, reverseCreditorMemberId, confirmationToken]
+  properties:
+    accountingRevision:
+      type: string
+      pattern: '^(?:0|[1-9][0-9]*)$'
+      description: owner 看見警告時的帳務 revision；重試時須相同。
+    excessAmount:
+      $ref: ./shared.yaml#/ExactAmount
+    reverseDebtorMemberId: {type: string, format: uuid}
+    reverseCreditorMemberId: {type: string, format: uuid}
+    confirmationToken:
+      type: string
+      minLength: 1
+      description: 伺服器簽發的不透明短效 token，綁定 owner、旅行、還款 UUID 與內容、revision 及警告結果；驗證 token 仍須於旅行鎖內重算，不能以客戶端欄位自行宣稱確認。
+CreateRepaymentRequest:
+  type: object
+  description: 獨立還款；只有收到超額警告後 owner 再次明確確認，才附上伺服器回傳的確認快照。
+  additionalProperties: false
+  required: [id, payerMemberId, payeeMemberId, amount, currencyCode, paidOn]
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: 建立前保留的 UUID；409 警告後確認重試沿用此 ID，結果未明以單筆 GET 查證。
+    payerMemberId: {type: string, format: uuid}
+    payeeMemberId: {type: string, format: uuid}
+    amount: {$ref: ./shared.yaml#/MoneyAmount}
+    currencyCode: {$ref: ./shared.yaml#/CurrencyCode}
+    paidOn: {$ref: ./shared.yaml#/DateOnly}
+    overpaymentConfirmation:
+      $ref: '#/OverpaymentConfirmation'
+OverpaymentWarning:
+  type: object
+  description: 尚未保存任何還款；owner 可取消，或確認後以相同請求與此快照重送。
+  additionalProperties: false
+  required: [code, message, confirmation]
+  properties:
+    code:
+      type: string
+      enum: [OVERPAYMENT_CONFIRMATION_REQUIRED]
+    message:
+      type: string
+      description: 可顯示的繁體中文超額與反向債權警告。
+    confirmation:
+      $ref: '#/OverpaymentConfirmation'

@@ -14,6 +14,30 @@ ExpenseId:
   schema:
     type: string
     format: uuid
+MemberId:
+  name: memberId
+  in: path
+  required: true
+  description: 指定旅行中的穩定成員識別；他人旅行或不屬此旅行均回 404。
+  schema:
+    type: string
+    format: uuid
+SettlementId:
+  name: settlementId
+  in: path
+  required: true
+  description: 已結清安排識別；結果未明時可用於查證。
+  schema:
+    type: string
+    format: uuid
+RepaymentId:
+  name: repaymentId
+  in: path
+  required: true
+  description: 獨立還款或結清實付的識別；結果未明時可用於查證。
+  schema:
+    type: string
+    format: uuid
 CategoryId:
   name: categoryId
   in: path

@@ -1,7 +1,7 @@
 Trip:
   type: object
   additionalProperties: false
-  required: [id, name, startDate, endDate, expenseCount, createdAt, updatedAt]
+  required: [id, name, startDate, endDate, expenseCount, ownerMemberId, simplifyDebts, accountingRevision, createdAt, updatedAt]
   properties:
     id:
       type: string
@@ -22,6 +22,17 @@ Trip:
       type: integer
       minimum: 0
       description: 此旅行目前已保存的支出總筆數，供清單卡與帳本標題顯示；不是當頁筆數。
+    ownerMemberId:
+      type: string
+      format: uuid
+      description: 本旅行 owner 的固定帳務成員 ID；不是帳號或權限授權。
+    simplifyDebts:
+      type: boolean
+      description: 此旅行保存的付款建議模式；不改寫支出或還款。
+    accountingRevision:
+      type: string
+      pattern: '^(?:0|[1-9][0-9]*)$'
+      description: 非負十進位整數字串；所有影響分帳的寫入後遞增，不使用 JS Number。
     createdAt:
       $ref: ./shared.yaml#/IsoTimestamp
     updatedAt:
@@ -68,6 +79,9 @@ UpdateTripRequest:
       format: date
       nullable: true
       description: 省略代表不變；null 代表清除。
+    simplifyDebts:
+      type: boolean
+      description: 省略代表不變；切換後增加帳務 revision，僅重建付款建議。
 TripList:
   type: object
   additionalProperties: false

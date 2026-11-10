@@ -1,0 +1,99 @@
+repayments:
+  parameters:
+    - $ref: ../components/parameters.yaml#/TripId
+  get:
+    tags: [repayments]
+    operationId: listRepayments
+    x-session-required: true
+    security: [{BetterAuthSession: []}]
+    summary: 列出旅行的實際還款與結清實付
+    description: 只供旅行 owner；依 paidOn、id 由新到舊。切換 Simplify Debts 或修正支出不改寫已發生的付款。
+    responses:
+      '200':
+        description: 全部旅行實付事實。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/repayments.yaml#/RepaymentList}
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '404':
+        description: 旅行不存在或不屬目前 owner。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+  post:
+    tags: [repayments]
+    operationId: createIndependentRepayment
+    x-session-required: true
+    security: [{BetterAuthSession: []}]
+    summary: 記錄獨立還款，可部分還款
+    description: 僅記錄同旅行兩位不同有效成員間的正數實付。只影響原幣別；保存後遞增 revision 並重算安排。超出目前同幣別兩端應付額時先回 409 警告與伺服器簽發的短效確認 token，不寫入；owner 取消則無效果。明確確認重送須含完全相同實付內容及警告快照；驗證 token 後，伺服器在旅行鎖內重算 revision、超額與反向關係，相符才保存，否則回版本衝突及新警告，不得以布林值跳過。確認超付可使收款人反向應付付款人。此操作不結清指定安排，也不寫成對結清差額。
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema: {$ref: ../components/schemas/repayments.yaml#/CreateRepaymentRequest}
+    responses:
+      '201':
+        description: 還款已保存。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/repayments.yaml#/Repayment}
+      '400':
+        description: 相同成員、非正數、成員停用、幣別、日期或本文格式不合法。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '403':
+        description: Origin 不可信。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '404':
+        description: 旅行或成員不存在、非本人或不屬此旅行。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '409':
+        description: 超額需 owner 再次確認（OVERPAYMENT_CONFIRMATION_REQUIRED）、帳務 revision/警告已變（ACCOUNTING_REVISION_CONFLICT）或 UUID 已存在（ID_CONFLICT）。
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: ../components/schemas/repayments.yaml#/OverpaymentWarning
+                - $ref: ../components/schemas/shared.yaml#/ApiError
+repayment:
+  parameters:
+    - $ref: ../components/parameters.yaml#/TripId
+    - $ref: ../components/parameters.yaml#/RepaymentId
+  get:
+    tags: [repayments]
+    operationId: getRepayment
+    x-session-required: true
+    security: [{BetterAuthSession: []}]
+    summary: 查證已保存的實付事實
+    description: 包含獨立還款與結清實付；暫時 404 不足以證明先前寫入未發生，不自動重送。
+    responses:
+      '200':
+        description: 實付紀錄。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/repayments.yaml#/Repayment}
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '404':
+        description: 旅行或實付不存在，或不屬目前 owner。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}

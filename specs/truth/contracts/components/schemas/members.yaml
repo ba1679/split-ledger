@@ -1,0 +1,59 @@
+TripMember:
+  type: object
+  additionalProperties: false
+  required: [id, tripId, role, name, isActive, createdAt, updatedAt]
+  properties:
+    id:
+      type: string
+      format: uuid
+    tripId:
+      type: string
+      format: uuid
+    role:
+      type: string
+      enum: [owner, companion]
+    name:
+      type: string
+      minLength: 1
+      description: 旅行內顯示名稱；去除前後空白，同旅行包含停用者及 owner 的 ASCII 英文不分大小寫名稱不得重複。
+    isActive:
+      type: boolean
+      description: owner 永遠為 true；停用同行者仍保留於清單與歷史計算。
+    createdAt:
+      $ref: ./shared.yaml#/IsoTimestamp
+    updatedAt:
+      $ref: ./shared.yaml#/IsoTimestamp
+MemberList:
+  type: object
+  additionalProperties: false
+  required: [items]
+  properties:
+    items:
+      type: array
+      description: 包含 owner、啟用及停用同行者；依 role owner 優先、nameKey、id 穩定排序。
+      items:
+        $ref: '#/TripMember'
+CreateMemberRequest:
+  type: object
+  additionalProperties: false
+  required: [id, name]
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: 建立前由客戶端保留的 UUID；結果未明時以單筆 GET 查證。
+    name:
+      type: string
+      minLength: 1
+UpdateMemberRequest:
+  type: object
+  additionalProperties: false
+  minProperties: 1
+  properties:
+    name:
+      type: string
+      minLength: 1
+      description: 僅同行者可修改；去除前後空白後檢查同旅行唯一性。
+    isActive:
+      type: boolean
+      description: 僅同行者可停用或重新啟用；停用不釋出名稱。

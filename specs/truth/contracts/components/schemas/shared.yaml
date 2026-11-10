@@ -12,6 +12,11 @@ ApiError:
         - CATEGORY_IN_USE
         - CATEGORY_NAME_CONFLICT
         - ID_CONFLICT
+        - MEMBER_NAME_CONFLICT
+        - MEMBER_IN_USE
+        - ACCOUNTING_REVISION_CONFLICT
+        - ARRANGEMENT_NOT_FOUND
+        - OVERPAYMENT_CONFIRMATION_REQUIRED
         - REQUEST_ORIGIN_REJECTED
         - INTERNAL_ERROR
     message:
@@ -25,7 +30,7 @@ ApiError:
       description: 可選，供支援與伺服器日誌對照，不包含敏感資訊。
   description: |-
     400：輸入驗證；401：未登入；403：寫入來源被拒；404：不存在或非本人（相同回應）。
-    409：分類使用中/重名/建立 UUID 衝突，以 code 區分，不回傳衝突資源。
+    409：分類/成員使用中或重名、建立 UUID 衝突、結算版本過期、付款安排已改變或需超額確認；以 code 區分，不回傳他人資源。
     500 INTERNAL_ERROR：非預期伺服器錯誤，訊息不包含 cookie、token、secret 或完整私人支出。
     網路逾時不是 HTTP 錯誤碼，也不能據此判斷是否已保存。
 DateOnly:
@@ -42,6 +47,26 @@ MoneyAmount:
     回應固定補足本筆保存的位數。未實際換幣別時沿用歷史 minorUnit，實際換幣別才採新目錄位數；沒有換匯。
   pattern: '^(?:0|[1-9][0-9]*)(?:\.[0-9]+)?$'
   example: '12.50'
+ExactAmount:
+  type: object
+  additionalProperties: false
+  required: [numerator, denominator, minorUnit]
+  properties:
+    numerator:
+      type: string
+      pattern: '^-?(?:0|[1-9][0-9]*)$'
+      description: 有號最小單位分子，十進位整數字串；零一律為 0。
+      example: '100'
+    denominator:
+      type: string
+      pattern: '^[1-9][0-9]*$'
+      description: 正整數分母十進位字串；分數約分，零一律使用 1。
+      example: '3'
+    minorUnit:
+      type: integer
+      minimum: 0
+      maximum: 4
+      description: 分子的歷史最小單位尺度；真實大單位值為 numerator / denominator / 10^minorUnit。顯示可用小數前綴加精確分數，不得提前取整。
 CurrencyCode:
   type: string
   pattern: '^[A-Z]{3}$'
