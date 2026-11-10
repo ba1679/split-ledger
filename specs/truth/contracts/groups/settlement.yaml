@@ -32,8 +32,8 @@ settlements:
     operationId: settleArrangement
     x-session-required: true
     security: [{BetterAuthSession: []}]
-    summary: 記錄正數實付並結清指定安排
-    description: 旅行鎖內重算並核對 revision、安排 key、兩端、幣別、模式及精確應付；版本或安排改變不寫入，要求刷新。任意有效正數實付均可結清，原子保存已結清快照、一筆 settlement 實付與兩筆零和調整；不選或存取整方式，也不因超付產生反向安排。成功後遞增 revision。
+    summary: 記錄安排的實付，足額結清或保留部分還款
+    description: 旅行鎖內重算並核對 revision、安排 key、兩端、幣別、模式及精確應付；版本或安排改變不寫入，要求刷新。仍欠至少一個現行最小貨幣單位時，只以預留repaymentId原子新增一筆independent實付，保留剩餘欠款，不新增settlement或差額調整；回應kind=partial。足額、超額與既有不足一個最小單位尾差處理，保存結清快照、一筆settlement實付及兩筆零和調整，不因超付產生反向安排。兩分支均只遞增一次revision。不改寫舊結清歷史。
     requestBody:
       required: true
       content:
@@ -41,10 +41,13 @@ settlements:
           schema: {$ref: ../components/schemas/settlement.yaml#/SettleArrangementRequest}
     responses:
       '201':
-        description: 指定安排已結清，回應不可變快照及實付與調整。
+        description: 完整結清回SettlementRecord；不足額回PartialArrangementPayment，原實付可用GET repayments/{repaymentId}查證，不得重送。
         content:
           application/json:
-            schema: {$ref: ../components/schemas/settlement.yaml#/SettlementRecord}
+            schema:
+              anyOf:
+                - {$ref: ../components/schemas/settlement.yaml#/SettlementRecord}
+                - {$ref: ../components/schemas/settlement.yaml#/PartialArrangementPayment}
       '400':
         description: 欄位、實付金額、日期、幣別或 Content-Type 不合法。
         content:

@@ -182,7 +182,9 @@ test('empty, offline, pending, unknown and confirmed-save feedback is visible an
   } finally {
     release();
   }
-  await expect(page.getByRole('status')).toHaveText('支出已保存');
+  await expect(page.getByRole('status').filter({ hasText: /^支出已保存$/ })).toHaveText(
+    '支出已保存',
+  );
 
   await page.unroute(`**/api/trips/${trip.id}/expenses`);
   await page.getByRole('link', { name: '記一筆', exact: true }).click();
@@ -204,7 +206,9 @@ test('empty, offline, pending, unknown and confirmed-save feedback is visible an
   await fits(page);
   await page.unroute(`**/api/trips/${trip.id}/expenses/*`);
   await page.getByRole('button', { name: '重新查證', exact: true }).click();
-  await expect(page.getByRole('status')).toHaveText('支出已保存');
+  await expect(page.getByRole('status').filter({ hasText: /^支出已保存$/ })).toHaveText(
+    '支出已保存',
+  );
   expect(
     (await world.db.query('SELECT item FROM expenses WHERE trip_id=$1 ORDER BY item', [trip.id]))
       .rows,

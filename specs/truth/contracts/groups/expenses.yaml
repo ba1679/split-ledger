@@ -217,6 +217,15 @@ totals:
   get:
     tags: [expenses]
     operationId: getTripTotals
+    parameters:
+      - name: scope
+        in: query
+        required: false
+        schema:
+          type: string
+          enum: [all, personal]
+          default: all
+        description: personal 僅加總固定 owner 成員實際參與分攤的精確份額；不含純代付、還款或結清調整。省略維持原旅行全部支出總額。
     x-session-required: true
     security:
       - BetterAuthSession: []
@@ -226,13 +235,16 @@ totals:
       按 currency_code,minor_unit 使用 SUM(bigint)，以 NUMERIC 整數字串接收，不轉 JS Number。
       同代碼若有不同歷史位數，用 BigInt 升到該幣別最大 minorUnit 再加總；如 12.3 + 1.23 = 13.53。
       群組總額可超過單筆 BIGINT 範圍。修改/刪除後讀取目前結果；沒有支出的幣別不列出。
+      scope=personal 時，在同一唯讀快照內讀取全旅行支出及分攤集合，以 BigInt 有理數逐筆加總 owner 份額，不使用分頁資料或逐筆取整；回傳 ExactAmount。owner 未參與的幣別不列出。
     responses:
       '200':
         description: 依幣別代碼升序的總額陣列；空旅行回空陣列。
         content:
           application/json:
             schema:
-              $ref: ../components/schemas/expenses.yaml#/TotalsResponse
+              anyOf:
+                - $ref: ../components/schemas/expenses.yaml#/TotalsResponse
+                - $ref: ../components/schemas/expenses.yaml#/PersonalTotalsResponse
       '401':
         description: 尚未登入。
         content:

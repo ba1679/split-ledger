@@ -22,6 +22,7 @@
 | MODIFY | `specs/truth/techstack.md` -> 試用部署／應用、IaC、資料庫、備份還原與驗收狀態 | 依 004 validation 記錄已完成部署、IaC 遷移、重部署保存及 9 表還原比對，區分使用者實機回報與 agent 驗證。 | 原文仍標待實作／待驗證；改為有日期的交付狀態，不宣稱重新查核目前線上或長期營運。 |
 | MODIFY | `specs/truth/techstack.md` -> 專案與執行環境／版本管理；資料與幣別處理／快照基準 | 更新工具版本及幣別快照已鎖定／封存的描述。 | 移除已完成 Setup 的未來式文字。 |
 | NOOP | `specs/truth/techstack.md` -> 前端、後端、測試與驗證／分端 BDD E2E、登入 | 已檢查既有 React/Fastify、各端 Playwright BDD E2E 與 Better Auth，本輪沿用。 | Phase 1B 沒有改判既有端、runner 或登入技術。 |
+| MODIFY | `specs/truth/techstack.md` -> 結清實付與差額、個人總花費 | 2026-11-11：只吸收不足一個最小單位的尾差；大額不足記獨立還款，個人消費依 owner 份額加總，實付預填且可改。 | 使用者截圖回饋及兩次明確選項確認；見 feedback-2026-11-11.md。 |
 
 ## /api-plan
 
@@ -42,6 +43,10 @@
 | ADD | `specs/truth/contracts/components/schemas/repayments.yaml` -> `Repayment`、`CreateRepaymentRequest`、`OverpaymentWarning/Confirmation` | 區分 independent 與 settlement 實付；保存原幣別、歷史位數、成員 ID 與日期；警告快照含 revision、超額、反向關係及綁定請求的短效確認 token。 | FR-028–033 與研究決策 5 要保留實付事實及防止確認前帳務變動，不能以布林欄位跳過警告。 |
 | ADD | `specs/truth/contracts/components/parameters.yaml` -> `MemberId`、`SettlementId`、`RepaymentId` | 新資源使用旅行範圍內 UUID 路徑識別，跨旅行或非本人資源回一致 404。 | FR-039 的 owner 隔離，以及未確認結果可用事前 UUID 單筆查證。 |
 | NOOP | `specs/truth/contracts/groups/account.yaml`、`categories.yaml`、`currencies.yaml`、`health.yaml` -> 既有操作 | 已檢查登入投影、分類、幣別目錄及健康檢查，維持原有操作與回應契約。 | Phase 1B 沿用 Better Auth owner session、跨旅行分類、固定幣別目錄及部署就緒邊界。 |
+| MODIFY | `specs/truth/contracts/groups/expenses.yaml` -> getTripTotals scope | 新增 personal 查詢，回 ExactAmount owner 份額；省略/all 維持舊總額回應。 | 使用者要求個人總花費，不能用分頁或代付總額。 |
+| ADD | `specs/truth/contracts/components/schemas/expenses.yaml` -> PersonalTotalsResponse | 依幣別的精確個人份額總額。 | 份額可能為分數，不能提前取整。 |
+| MODIFY | `specs/truth/contracts/groups/settlement.yaml` -> settleArrangement | 不足額只新增 independent 實付並回 partial；仍核對原安排與版本。 | 使用者確認 15,000 付 2,000 保留 13,000，僅免除不足一個最小單位尾差。 |
+| ADD | `specs/truth/contracts/components/schemas/settlement.yaml` -> PartialArrangementPayment | 新增部分還款回應與原 repaymentId 查證契約。 | 禁止將少付呈現為完整結清，未知結果不重送。 |
 
 ## /data-plan
 
@@ -58,6 +63,7 @@
 | ADD | `specs/truth/data/data-model.dbml` -> 成員／支出／還款／結清的複合 Ref 與歷史完整性 | 以 owner、trip、member 複合外鍵防止跨旅行引用；刪除僅限未引用同行者，已發生付款與調整不可連帶刪除。 | FR-004–005、FR-029、FR-038–041 的資料隔離與歷史保留。 |
 | MODIFY | `specs/truth/data/data-model.dbml` -> migration 與歷史幣別註記 | 新 migration 為既有旅行建立 owner 成員，舊支出回填 owner 付款及唯一 owner 分攤；原始金額與歷史 minor_unit 不變。 | FR-014–015 與研究決策 7；既有個人支出不得產生新債務。 |
 | NOOP | `specs/truth/data/data-model.dbml` -> `auth.*`、`categories`、`currencies` 基本結構；`specs/truth/data/data-model.dbdiagram` -> layout state | 已檢查登入、分類、幣別目錄及圖面配置，不改其既有基本結構或布局狀態。 | Phase 1B 沿用原登入與分類邊界；資料圖配置檔無表結構內容。 |
+| NOOP | `specs/truth/data/data-model.dbml` -> repayments、settlements、settlement_adjustments | 本次回饋沿用既有 independent 實付及完整結清模型，不新增 schema 或改寫舊資料。 | 部分還款不得建立 settlement/adjustments。 |
 
 ## /dsl-refine
 
@@ -308,3 +314,7 @@
 機械檢查：backend topology audit 19 features／553 steps、frontend 16 features／428 steps，兩端均 0 errors／0 warnings；新增24份feature已通過Cucumber parser，197個Example各恰一個When且沒有動作型And。這些是規格靜態檢查，不代表產品 E2E 已通過。前端 acceptance 覆蓋與非 BDD UI quality gate 見 `frontend-dsl-review.md`；`/tasks` 須另承接選單箭頭、radio/checkbox 間距、DateField 組成與手機／鍵盤的視覺及操作驗收，不能只採 feature 清單。
 
 本輪不修改產品程式、step definitions 或 tasks.md；不修改 HTML prototype。舊 owner section 的歷史記錄不重寫，最新可見文案／兩位小數規則以目前 spec.md、ui/ui-plan.md 與本輪前端 feature/DSL 為準；API/data 仍保留精確數值。
+| MODIFY | `specs/truth/features/backend/settlement/settlement-payments-and-adjustments.feature` -> 不足額實付、同模組 DSL | 將原應付100/3實付1關閉案例改為部分還款97/3，增加15000/2000案例及權威DB/API驗證句。 | 使用者明確變更少付語意，不保留舊行為的測試保護。 |
+| MODIFY | `specs/truth/features/frontend/settlement/settlement-payments-and-save-outcomes.feature` -> 實付預填與部分還款、同模組 DSL | 新增部分還款/遺失回應/未知查證及原額/剩餘額預填案例；舊留空改為可編輯預填。 | 使用者補充自動帶入未付額，並確認不足額與尾差規則。 |
+| MODIFY | `specs/truth/features/frontend/expenses/dsl.md`、`frontend/members/dsl.md` -> 保存後與跨裝置分攤驗證 | 總覽僅摘要；分攤UI改從原支出詳情讀取，保留相同API/DB完整驗證。 | 使用者要求總覽不列同行者，詳情仍可查看。 |
+| MODIFY | `specs/truth/features/backend/settlement/payment-history-reconstruction-and-transaction-consistency.feature` -> 完整結清併發與故障案例 | 完整結清競爭用應付33、實付33/34；調整故障用100三人分攤實付33，維持原有競態與原子回滾斷言。 | 大額少付改為部分還款後，原100只Amy分攤實付33不再是完整結清前置；另補部分還款競爭/回滾。 |

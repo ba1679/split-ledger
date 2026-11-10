@@ -170,3 +170,20 @@ TotalsResponse:
       description: 僅列出目前仍有支出的幣別；沒有支出則為空陣列。
       items:
         $ref: '#/CurrencyTotal'
+PersonalTotalsResponse:
+  type: object
+  additionalProperties: false
+  required: [totals]
+  description: scope=personal 的個人消費份額總額；不受付款人、獨立還款或結清差額影響。
+  properties:
+    totals:
+      type: array
+      items:
+        type: object
+        additionalProperties: false
+        required: [currencyCode, amount]
+        properties:
+          currencyCode:
+            $ref: ./shared.yaml#/CurrencyCode
+          amount:
+            $ref: ./shared.yaml#/ExactAmount

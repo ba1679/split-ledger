@@ -2,7 +2,7 @@
 
 ## Phase 1B 旅行分帳
 
-所有 Given 以隔離資料建立權威狀態；When 只有一次受測命令或查詢，寫入前擷取完整帳務快照，記錄回應與資源 ID，寫入成功才讀取落地資料；失敗保持來源。Then 依各列驗 DB 與 API，再讀僅作確認，不是第二個 Act。有理數 oracle 不共用受測計算函式；金額均依歷史 minorUnit 作 BigInt 交叉相乘，不使用浮點近似。
+所有 Given 以隔離資料建立權威狀態；When 只有一次受測命令或查詢，寫入前擷取完整帳務快照，記錄回應與資源 ID，寫入成功才讀取落地資料；不足額時只新增獨立實付並保留欠款，不建立結清/差額；失敗保持來源。Then 依各列驗 DB 與 API，再讀僅作確認，不是第二個 Act。有理數 oracle 不共用受測計算函式；金額均依歷史 minorUnit 作 BigInt 交叉相乘，不使用浮點近似。
 
 | DSL 句型 | Gherkin 參數 | Data Table 參數 | 預設參數 | StepDef 實作語意 |
 | --- | --- | --- | --- | --- |
@@ -21,7 +21,7 @@
 | `相同資料的結算安排可重現` | 無 | 不支援 | 無 | Then：用10個只讀GET作穩定性斷言，對照唯一Act回應；同revision/mode的balances、arrangements金額/端點/key與排序、計數及explanation逐欄相同；DB來源與revision未改。這些再讀只驗確定性，不進行第二命令。 |
 | `owner 已取得 Amy 向 Alice 的目前付款安排` | 無 | 不支援 | 無 | Given：從前序Given來源取得一次有效settlement快照，回寫Amy→Alice的arrangementKey、accountingRevision、debtor/creditor/currency/expectedAmount原始有理數；保存來源快照及預留settlementId/repaymentId。不輸入實付，不預先執行結清。 |
 | `owner 以 JPY "{實付}" 結清 Amy 向 Alice 的安排` | 實付:string，原樣送出，允許無效字串供拒絕案例。 | 不支援 | paidOn=2027-01-20；使用Given保留的結清與實付UUID。 | When：owner session+可信Origin一次POST /trips/{tripId}/settlements，送Given所見key/revision/兩端/currency/完整expectedAmount及paidAmount=實付；不得以33.33取代100/3快照或傳取整策略。保存before/reply及兩ID；成功應settlement/repayment/2adjustments原子落地，失敗均不寫入。 |
-| `該安排已由正數實付關閉` | 無 | 不支援 | 無 | Then：201 SettlementRecord與DB一致，arrangement_key/source_revision/obligation保留Given快照，repayment為kind=settlement與該settlementId一對一；GET record/repayment再讀實付金額、兩端、幣別、paidOn一致。最新settlement不再包含該筆精確未付或反向差額；其他安排仍按來源重建，不以實付是否等於應付阻擋。 |
+| `該安排已由正數實付關閉` | 無 | 不支援 | 無 | Then：201 SettlementRecord與DB一致，arrangement_key/source_revision/obligation保留Given快照，repayment為kind=settlement與該settlementId一對一；GET record/repayment再讀實付金額、兩端、幣別、paidOn一致。最新settlement不再包含該筆精確未付或反向差額；其他安排仍按來源重建，僅足額、超額或不足一個最小單位的尾差可關閉；可支付的欠款不得吸收。 |
 | `結清差額的兩位成員調整為：` | 無 | 必填恰兩列；成員:string、幣別:ISO code、調整:有號大單位有理數 string。 | 無 | Then：201 record.adjustments與DB settlement_adjustments恰兩筆，分別對應兩端、同幣別、值符合表格且精確相反總和0。獨立計算債務人=obligation−paid，債權人取負；一筆實付與一份settlement同交易落地，GET record再讀相同，不得用近似顯示值算差額。 |
 | `結清紀錄沒有取整方式欄位` | 無 | 不支援 | 無 | Then：201 response、DB schema/該settlement與repayment保存欄位及GET record沒有roundingMethod等策略資料；只保留obligation/實付/成對調整。不能以文字不顯示代替未持久化。 |
 | `該安排沒有反向付款或殘餘尾差` | 無 | 不支援 | 無 | Then：GET settlement指定兩端與幣別的本來源貢獻已歸零，不含原安排或由本次差額產生的反向安排；用DB實付+兩調整交叉相乘證明淨額歸零，不以JPY顯示0四捨五入掩蓋尾差；來源支出/原份額不變。 |
@@ -33,7 +33,7 @@
 
 ## Phase 1B 旅行分帳
 
-所有 Given 以隔離資料建立權威狀態；When 只有一次受測命令或查詢，寫入前擷取完整帳務快照，記錄回應與資源 ID，寫入成功才讀取落地資料；失敗保持來源。Then 依各列驗 DB 與 API，再讀僅作確認，不是第二個 Act。有理數 oracle 不共用受測計算函式；金額均依歷史 minorUnit 作 BigInt 交叉相乘，不使用浮點近似。
+所有 Given 以隔離資料建立權威狀態；When 只有一次受測命令或查詢，寫入前擷取完整帳務快照，記錄回應與資源 ID，寫入成功才讀取落地資料；不足額時只新增獨立實付並保留欠款，不建立結清/差額；失敗保持來源。Then 依各列驗 DB 與 API，再讀僅作確認，不是第二個 Act。有理數 oracle 不共用受測計算函式；金額均依歷史 minorUnit 作 BigInt 交叉相乘，不使用浮點近似。
 
 | DSL 句型 | Gherkin 參數 | Data Table 參數 | 預設參數 | StepDef 實作語意 |
 | --- | --- | --- | --- | --- |
@@ -49,13 +49,19 @@
 
 ## Phase 1B 旅行分帳
 
-所有 Given 以隔離資料建立權威狀態；When 只有一次受測命令或查詢，寫入前擷取完整帳務快照，記錄回應與資源 ID，寫入成功才讀取落地資料；失敗保持來源。Then 依各列驗 DB 與 API，再讀僅作確認，不是第二個 Act。有理數 oracle 不共用受測計算函式；金額均依歷史 minorUnit 作 BigInt 交叉相乘，不使用浮點近似。
+所有 Given 以隔離資料建立權威狀態；When 只有一次受測命令或查詢，寫入前擷取完整帳務快照，記錄回應與資源 ID，寫入成功才讀取落地資料；不足額時只新增獨立實付並保留欠款，不建立結清/差額；失敗保持來源。Then 依各列驗 DB 與 API，再讀僅作確認，不是第二個 Act。有理數 oracle 不共用受測計算函式；金額均依歷史 minorUnit 作 BigInt 交叉相乘，不使用浮點近似。
 
 | DSL 句型 | Gherkin 參數 | Data Table 參數 | 預設參數 | StepDef 實作語意 |
 | --- | --- | --- | --- | --- |
 | `旅行有既有實付與結清調整的分帳來源` | 無 | 不支援 | 無 | Given：建立JPY100由Alice付款、Alice/Amy/Bob均分，Amy已以33結清（obligation100/3、調整Amy+1/3 Alice−1/3），Bob另獨立還Alice10；另TWD300由Alice支付且只Bob分攤，無其他來源。DB確認兩實付、一結清、兩調整及原支出/份額已落地，保存完整不可變來源快照與獨立精確oracle。模式先關閉。 |
 | `最新實付後的直接與簡化安排皆依來源重建` | 無 | 不支援 | 無 | Then：PATCH200且GETsettlement為剛設定模式/同revision；JPY只Bob→Alice70/3、TWD只Bob→Alice300，Amy淨額精確0。依DB含實付/歷史兩調整重建；兩模式各案例用同source oracle（不在Then切模式）。原repayment/settlement/adjustment欄位不變，不可重新套用或忽略歷史差額。 |
-| `兩個裝置同時結清 Amy 向 Alice 的同一安排` | 無 | 不支援 | 兩個同owner有效session；同一key/revision/obligation，分別實付33與34，兩組不同預留UUID；paidOn=2027-01-20。 | When：一次並行結清事件，以Promise.all對POST /settlements送兩命令，不串接第二次業務流程；本列為後端受控整合測試；fixture內部同步屏障讓兩請求基於同revision在旅行列鎖競爭，記錄兩response/ID與before。不得事先挑勝者或更新落敗者輸入，不使用無界重試。 |
+| `兩個裝置同時結清 Amy 向 Alice 的同一安排` | 無 | 不支援 | JPY33由Alice支付且只Amy分攤；兩個同owner有效session；同一key/revision/obligation，分別實付33與34，兩組不同預留UUID；paidOn=2027-01-20。 | When：一次並行結清事件，以Promise.all對POST /settlements送兩命令，不串接第二次業務流程；本列為後端受控整合測試；fixture內部同步屏障讓兩請求基於同revision在旅行列鎖競爭，記錄兩response/ID與before。不得事先挑勝者或更新落敗者輸入，不使用無界重試。 |
 | `同一安排最多只保存一次完整結清` | 無 | 不支援 | 無 | Then：恰一個201，另一個409 ACCOUNTING_REVISION_CONFLICT或ARRANGEMENT_NOT_FOUND；DB只一settlement、一kind=settlement實付及兩精確相反adjustments，對應勝者UUID/paid。revision只增加一筆成功影響，落敗UUID無任何部分列；GET record/repayment/settlement一致且無未付/反向尾差，既有來源不變。 |
 | `結清交易在寫入部分調整後將發生錯誤` | 無 | 不支援 | 無 | Given：Given為後端整合測試專用：在隔離測試環境透過依賴注入的repository/transaction故障點，於settlement及repayment和第一筆adjustment寫入後拋出內部錯誤；不可新增正式環境公開故障端點、不能只mock成功回應。保存完整DB快照及相同有效安排輸入；不先執行受測結清。 |
 | `結清失敗不留下任何部分帳務紀錄` | 無 | 不支援 | 無 | Then：500 INTERNAL_ERROR不洩漏敏感欄位；DB交易回滾，預留settlementId/repaymentId及兩adjustments均不存在，revision與完整來源before一致。GETsettlement原精確應付仍在、GET record/repayment404；不得因第一筆調整落地而破壞零和。 |
+
+## 不足額實付
+
+| DSL 句型 | Gherkin 參數 | Data Table 參數 | 預設參數 | StepDef 實作語意 |
+| --- | --- | --- | --- | --- |
+| `該安排只記錄部分還款且剩餘應付為 JPY "{金額}"` | 金額:string，正整數或正分數 n/d，單位JPY | 不支援 | 應付/付款安排由前置Given提供 | Then：201回應kind=partial；以獨立BigInt有理數核對remainingAmount；DB恰增加一筆independent實付且使用預留repaymentId，原支出/分攤、既有settlement/adjustments逐欄不變，不能新建任何免除差額調整。GET settlement仍有Amy→Alice的指定剩餘應付；GET原repaymentId與回應實付逐欄相同。 |

@@ -91,8 +91,8 @@
 | `owner 將代付金額改為 JPY 800` | 無 | 不支援 | 無 | When：編輯代付支出金額800後保存一次，保留付款/分攤者；等待PATCH與兩種模式資料失效更新，保存新的revision。 |
 | `owner 保存共同支出修改` | 無 | 不支援 | 無 | When：提交已填修改一次，等待保存或結果未明狀態；保留原ID與草稿，不重送。 |
 | `點心各成員分攤金額皆顯示 "{顯示}" 且不附算式` | 顯示:string 幣別及格式化金額 | 不支援 | 無 | Then：比對每個被選分攤者的可見文字與accessible name均為指定顯示值；無省略號/循環小數/分數/括號算式/尚未取整，無「精確」「公平」文案。GET expense shares仍各為amount/n的ExactAmount且精確合計原金額，無餘數分配；付款人未選時不得多一份。 |
-| `點心已保存且三人各分攤 JPY 100/3` | 無 | 不支援 | 無 | Then：核對success與帳本點心JPY100；GET expense payer=Alice、shares恰Alice/Amy/Bob各100/3（minorUnit0），原日期分類不變；UI各JPY33.33、無分數或額外分配；request只一payer、集合三人；settlement反映同一最新來源。 |
-| `點心只有 Amy 與 Bob 各分攤 JPY 50 且 Alice 應收 JPY 100` | 無 | 不支援 | 無 | Then：畫面/API shares集合恰Amy/Bob各50、payer=Alice；settlement Alice100、Amy/Bob各-50、安排Amy/Bob各付Alice50且無自付。 |
+| `點心已保存且三人各分攤 JPY 100/3` | 無 | 不支援 | 無 | Then：核對success與帳本點心JPY100；總覽不呈現同行者明細，點入該支出唯讀詳情驗UI份額；GET expense payer=Alice、shares恰Alice/Amy/Bob各100/3（minorUnit0），原日期分類不變；UI各JPY33.33、無分數或額外分配；request只一payer、集合三人；settlement反映同一最新來源。 |
+| `點心只有 Amy 與 Bob 各分攤 JPY 50 且 Alice 應收 JPY 100` | 無 | 不支援 | 無 | Then：總覽僅顯示支出摘要，點入該支出唯讀詳情；畫面/API shares集合恰Amy/Bob各50、payer=Alice；settlement Alice100、Amy/Bob各-50、安排Amy/Bob各付Alice50且無自付。 |
 | `分攤欄提示至少選一人且帳務不變` | 無 | 不支援 | 無 | Then：檢查該欄有可讀修正訊息，草稿保留且無成功提示；API支出/份額/settlement與基準相等，監聽無有效新增寫入。 |
 | `付款欄提示選擇付款人且帳務不變` | 無 | 不支援 | 無 | Then：檢查該欄有可讀修正訊息，草稿保留且無成功提示；API支出/份額/settlement與基準相等，監聽無有效新增寫入。 |
 | `機票仍由 Alice 付款且只由 Alice 分攤並保留原始內容與統計` | 無 | 不支援 | 無 | Then：畫面仍顯示TWD8000與2027-01-15；GET expense payer=ownerMemberId、唯一share=owner且8000，原ID金額幣別日期分類及GET totals逐項等於舊基準，無成員債務。 |

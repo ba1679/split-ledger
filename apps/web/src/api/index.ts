@@ -1,9 +1,17 @@
+import type { ExactAmount } from '@split-ledger/shared';
+import type { OverpaymentConfirmation } from '../features/repayments/types.js';
+
+export type { TripMember } from '../features/members/types.js';
+
 export interface Account {
   id: string;
   name: string;
 }
 
 export interface Trip {
+  ownerMemberId: string;
+  simplifyDebts: boolean;
+  accountingRevision: string;
   id: string;
   name: string;
   startDate: string | null;
@@ -31,6 +39,8 @@ export interface CurrencyList {
 }
 
 export interface Expense {
+  payerMemberId: string;
+  shares: { memberId: string; amount: ExactAmount }[];
   id: string;
   tripId: string;
   item: string;
@@ -55,6 +65,11 @@ export interface CurrencyTotal {
   minorUnit: number;
 }
 
+export interface PersonalCurrencyTotal {
+  currencyCode: string;
+  amount: ExactAmount;
+}
+
 export interface ItemList<T> {
   items: T[];
   nextCursor?: string | null;
@@ -66,6 +81,7 @@ export class ApiError extends Error {
     readonly code: string,
     message: string,
     readonly field?: string,
+    readonly confirmation?: OverpaymentConfirmation,
   ) {
     super(message);
   }
@@ -79,6 +95,7 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
       code?: string;
       message?: string;
       field?: string;
+      confirmation?: OverpaymentConfirmation;
     } | null;
 
     if (response.status === 401 && path !== '/api/me')
@@ -89,6 +106,7 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
       error?.code ?? 'UNKNOWN_ERROR',
       error?.message ?? '暫時無法取得資料，請稍後再試。',
       error?.field,
+      error?.confirmation,
     );
   }
   if (response.status === 204) return undefined as T;

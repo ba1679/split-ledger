@@ -2,12 +2,21 @@ import { Button } from '../../components/ui/button.js';
 import React, { useState } from 'react';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import { apiRequest, type Trip, type ExpenseList, type CurrencyTotal } from '../../api/index.js';
+import {
+  apiRequest,
+  type Trip,
+  type ExpenseList,
+  type PersonalCurrencyTotal,
+  type TripMember,
+  type ItemList,
+} from '../../api/index.js';
 import { useSession } from '../auth/session.js';
 import { QueryState } from '../../components/QueryState.js';
 import { tripDates } from './Trips.js';
 import { TripForm } from './TripForm.js';
 import { displayAmount } from '../expenses/money.js';
+import { formatShareAmount } from '../expenses/ExpenseShares.js';
+import type { SettlementView } from '../settlement/types.js';
 import { Icon } from '../../components/Icon.js';
 
 export function TripLedger() {
@@ -31,10 +40,27 @@ export function TripLedger() {
     getNextPageParam: (page) => page.nextCursor ?? undefined,
   });
 
-  const totals = useQuery({
-    queryKey: ['account', account!.id, 'totals', tripId],
+  const members = useQuery({
+    queryKey: ['account', account!.id, 'members', tripId],
     queryFn: ({ signal }) =>
-      apiRequest<{ totals: CurrencyTotal[] }>(`/api/trips/${tripId}/totals`, { signal }),
+      apiRequest<ItemList<TripMember>>(`/api/trips/${tripId}/members`, { signal }),
+  });
+
+  const settlement = useQuery({
+    queryKey: ['account', account!.id, 'settlement', tripId, 'ledger'],
+    queryFn: ({ signal }) =>
+      apiRequest<SettlementView>(`/api/trips/${tripId}/settlement`, { signal }),
+  });
+
+  const totals = useQuery({
+    queryKey: ['account', account!.id, 'totals', tripId, 'personal'],
+    queryFn: ({ signal }) =>
+      apiRequest<{ totals: PersonalCurrencyTotal[] }>(
+        `/api/trips/${tripId}/totals?scope=personal`,
+        {
+          signal,
+        },
+      ),
   });
 
   const rows = [
@@ -85,6 +111,20 @@ export function TripLedger() {
           </Link>
         </Button>
       </header>
+      <nav aria-label="旅行內導覽" className="trip-navigation">
+        <Button asChild variant="outline">
+          <Link to={`/trips/${tripId}/members`}>
+            <Icon name="members" />
+            同行者
+          </Link>
+        </Button>
+        <Button asChild variant="outline">
+          <Link to={`/trips/${tripId}/settlement`}>
+            <Icon name="settlement" />
+            分帳結算
+          </Link>
+        </Button>
+      </nav>
       {(location.state as { message?: string } | null)?.message ? (
         <p className="feedback" role="status">
           {(location.state as { message: string }).message}
@@ -101,7 +141,7 @@ export function TripLedger() {
       ) : totals.data.totals.length ? (
         <>
           <div className="section-head">
-            <span>這趟旅行的花費 · 依幣別分開統計</span>
+            <span>個人總花費 · 依幣別分開統計</span>
           </div>
           <section className="totals" aria-label="分幣別總額">
             {totals.data.totals.map((total) => (
@@ -112,12 +152,49 @@ export function TripLedger() {
                 key={total.currencyCode}
               >
                 <div className="total-label">{total.currencyCode}</div>
-                <div className="total-value">{displayAmount(total.amount)}</div>
+                <div className="total-value">
+                  {displayAmount(formatShareAmount(total.amount, total.amount.minorUnit))}
+                </div>
                 <div className="currency-code">{total.currencyCode}</div>
               </section>
             ))}
           </section>
         </>
+      ) : null}
+      {members.data && settlement.data ? (
+        <section aria-label="成員淨額" className="balance-grid">
+          {[...new Set(settlement.data.balances.map((balance) => balance.currencyCode))].map(
+            (currency) => (
+              <div key={currency} className="settlement-panel">
+                <h2>{currency}</h2>
+                {members.data.items.map((member) => {
+                  const amount = settlement.data.balances.find(
+                    (balance) =>
+                      balance.memberId === member.id && balance.currencyCode === currency,
+                  )?.netAmount ?? { numerator: '0', denominator: '1', minorUnit: 0 };
+                  const sign = BigInt(amount.numerator);
+
+                  return (
+                    <div
+                      className="balance-row"
+                      key={member.id}
+                      role="group"
+                      aria-label={`${member.name} ${currency}`}
+                    >
+                      <span className="balance-person">
+                        <span>{member.name}</span>
+                        <span>{sign > 0n ? '應收' : sign < 0n ? '應付' : '已平衡'}</span>
+                      </span>
+                      <strong className={sign > 0n ? 'receivable' : undefined}>
+                        {currency} {formatShareAmount(amount)}
+                      </strong>
+                    </div>
+                  );
+                })}
+              </div>
+            ),
+          )}
+        </section>
       ) : null}
       {expenses.isPending || !expenses.data ? (
         <QueryState
@@ -159,10 +236,9 @@ export function TripLedger() {
                     {' · '}
                     <span>{expense.category?.name ?? '未分類'}</span>
                   </div>
-                </div>
+                </div>{' '}
                 <div className="row-amount">
-                  {displayAmount(expense.amount)}
-                  <small>{expense.currencyCode}</small>
+                  {expense.currencyCode} {displayAmount(expense.amount)}
                 </div>
                 <Icon name="arrow" />
               </Link>

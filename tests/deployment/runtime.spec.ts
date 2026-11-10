@@ -120,6 +120,10 @@ test('production serves assets and SPA pages without swallowing API or asset err
       '/trips',
       '/trips/test-trip',
       '/trips/test-trip/expenses/new',
+      '/trips/test-trip/members',
+      '/trips/test-trip/settlement',
+      '/trips/test-trip/settlements/new?arrangementKey=opaque%2Fkey',
+      '/trips/test-trip/repayments/new',
       '/categories',
     ]) {
       const page = await fetch(`${runtime.origin}${path}`, { headers: { accept: 'text/html' } });
@@ -127,6 +131,13 @@ test('production serves assets and SPA pages without swallowing API or asset err
       expect(page.status).toBe(200);
       expect(page.headers.get('content-type')).toContain('text/html');
       expect(await page.text()).toContain('<div id="root">');
+
+      const refreshed = await fetch(`${runtime.origin}${path}`, {
+        headers: { accept: 'text/html' },
+      });
+
+      expect(refreshed.status).toBe(200);
+      expect(await refreshed.text()).toContain('<div id="root">');
     }
     const html = await (await fetch(runtime.origin)).text();
     const assets = [...html.matchAll(/(?:src|href)="(\/assets\/[^"]+)"/g)].map(
@@ -148,6 +159,10 @@ test('production serves assets and SPA pages without swallowing API or asset err
       '/assets/missing.js',
       '/assets/missing',
       '/trips/missing.js',
+      '/trips/test-trip/settlements/unknown',
+      '/trips/test-trip/repayments/unknown',
+      '/trips/test-trip/settlement/unknown',
+      '/api/trips/test-trip/unknown',
     ]) {
       const missing = await fetch(`${runtime.origin}${path}`, { headers: { accept: 'text/html' } });
 
@@ -160,6 +175,17 @@ test('production serves assets and SPA pages without swallowing API or asset err
     });
 
     expect(post.status).not.toBe(200);
+    for (const path of ['members', 'settlement', 'settlements/new', 'repayments/new']) {
+      const url = `${runtime.origin}/trips/test-trip/${path}`;
+      const json = await fetch(url, { headers: { accept: 'application/json' } });
+
+      expect(json.status).toBe(404);
+      expect(json.headers.get('content-type')).not.toContain('text/html');
+      const head = await fetch(url, { method: 'HEAD', headers: { accept: 'text/html' } });
+
+      expect(head.status).toBe(200);
+      expect(await head.text()).toBe('');
+    }
     expect((await fetch(`${runtime.origin}/api/me`)).status).toBe(401);
   } finally {
     await runtime.stop();

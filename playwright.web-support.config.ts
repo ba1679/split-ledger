@@ -7,6 +7,7 @@ export default defineConfig({
     'expense-form.spec.ts',
     'save-outcomes.spec.ts',
     'categories.spec.ts',
+    '**/splitting/**/*.spec.ts',
   ],
   workers: 2,
   timeout: 15000,

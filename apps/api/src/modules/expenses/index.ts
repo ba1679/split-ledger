@@ -1,13 +1,26 @@
 import { Type } from '@sinclair/typebox';
 import type { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 import type { FastifyInstance } from 'fastify';
-import { and, desc, eq, sql } from 'drizzle-orm';
-import { combineMoney, formatMoney, parseMoney, rescaleMoney } from '@split-ledger/shared';
+import { and, desc, eq, inArray, sql } from 'drizzle-orm';
+import {
+  combineMoney,
+  formatMoney,
+  parseMoney,
+  rescaleMoney,
+  rational,
+  exactAmount,
+} from '@split-ledger/shared';
 import type { Database } from '../../db/index.js';
-import { expenses, categories, trips, currencies } from '../../db/schema.js';
+import { expenses, expenseShares, categories, tripMembers, currencies } from '../../db/schema.js';
 import { Uuid, Timestamp, ErrorResponse, HttpError, invalid, notFound } from '../../http.js';
+import {
+  requireOwnedTrip as requireTrip,
+  advanceAccountingRevision,
+} from '../splitting/trip-scope.js';
+import { ExactAmountSchema } from '../splitting/http-schema.js';
 import { decodeExpenseCursor, encodeExpenseCursor } from '../../pagination.js';
 import { requireUser, type Auth, type AuthConfig } from '../auth/index.js';
+import { personalTotals } from './personal-totals.js';
 
 const TripParams = Type.Object({ tripId: Uuid }, { additionalProperties: false });
 const Params = Type.Object({ tripId: Uuid, expenseId: Uuid }, { additionalProperties: false });
@@ -23,6 +36,8 @@ const Create = Type.Object(
     currencyCode: CurrencyCode,
     spentOn: SpentOn,
     categoryId: Type.Optional(CategoryId),
+    payerMemberId: Type.Optional(Uuid),
+    shareMemberIds: Type.Optional(Type.Array(Uuid, { minItems: 1, uniqueItems: true })),
   },
   { additionalProperties: false },
 );
@@ -33,6 +48,8 @@ const Patch = Type.Object(
     currencyCode: Type.Optional(CurrencyCode),
     spentOn: Type.Optional(SpentOn),
     categoryId: Type.Optional(CategoryId),
+    payerMemberId: Type.Optional(Uuid),
+    shareMemberIds: Type.Optional(Type.Array(Uuid, { minItems: 1, uniqueItems: true })),
   },
   { additionalProperties: false, minProperties: 1 },
 );
@@ -56,6 +73,11 @@ const Expense = Type.Object(
       Type.Object({ id: Uuid, name: Type.String() }, { additionalProperties: false }),
       Type.Null(),
     ]),
+    payerMemberId: Uuid,
+    shares: Type.Array(
+      Type.Object({ memberId: Uuid, amount: ExactAmountSchema }, { additionalProperties: false }),
+      { minItems: 1 },
+    ),
     createdAt: Timestamp,
     updatedAt: Timestamp,
   },
@@ -76,7 +98,22 @@ const Totals = Type.Object(
   },
   { additionalProperties: false },
 );
+const PersonalTotals = Type.Object(
+  {
+    totals: Type.Array(
+      Type.Object(
+        { currencyCode: CurrencyCode, amount: ExactAmountSchema },
+        { additionalProperties: false },
+      ),
+    ),
+  },
+  { additionalProperties: false },
+);
 const projection = {
+  payerMemberId: expenses.payerMemberId,
+  shareMemberIds: sql<
+    string[]
+  >`ARRAY(SELECT member_id FROM expense_shares WHERE owner_id=${expenses.ownerId} AND trip_id=${expenses.tripId} AND expense_id=${expenses.id} ORDER BY member_id)`,
   id: expenses.id,
   tripId: expenses.tripId,
   item: expenses.item,
@@ -94,6 +131,8 @@ const categoryJoin = and(
   eq(categories.id, expenses.categoryId),
 );
 type ExpenseRow = {
+  payerMemberId: string;
+  shareMemberIds: string[];
   id: string;
   tripId: string;
   item: string;
@@ -108,11 +147,15 @@ type ExpenseRow = {
 };
 
 function view(row: ExpenseRow) {
-  const { amountMinor, categoryId, categoryName, ...rest } = row;
+  const { amountMinor, categoryId, categoryName, shareMemberIds, ...rest } = row;
 
   return {
     ...rest,
     amount: formatMoney(amountMinor, row.minorUnit),
+    shares: shareMemberIds.map((memberId) => ({
+      memberId,
+      amount: exactAmount(rational(amountMinor, BigInt(shareMemberIds.length)), row.minorUnit),
+    })),
     category: categoryId ? { id: categoryId, name: categoryName! } : null,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
@@ -138,21 +181,6 @@ async function readExpense(
   if (!row) throw notFound();
 
   return view(row);
-}
-
-async function requireTrip(
-  db: Pick<Database, 'select'>,
-  ownerId: string,
-  tripId: string,
-  lock = false,
-) {
-  const query = db
-    .select({ id: trips.id })
-    .from(trips)
-    .where(and(eq(trips.ownerId, ownerId), eq(trips.id, tripId)));
-  const [trip] = await (lock ? query.for('key share') : query);
-
-  if (!trip) throw notFound();
 }
 
 async function requireCategory(
@@ -293,7 +321,15 @@ export function registerExpenseRoutes(
     {
       schema: {
         params: TripParams,
-        response: { 200: Totals, 401: ErrorResponse, 404: ErrorResponse },
+        querystring: Type.Object(
+          { scope: Type.Optional(Type.Union([Type.Literal('all'), Type.Literal('personal')])) },
+          { additionalProperties: false },
+        ),
+        response: {
+          200: Type.Union([Totals, PersonalTotals]),
+          401: ErrorResponse,
+          404: ErrorResponse,
+        },
       },
     },
     async (request, reply) => {
@@ -302,6 +338,32 @@ export function registerExpenseRoutes(
       return db.transaction(
         async (tx) => {
           await requireTrip(tx, user.id, request.params.tripId);
+          if (request.query.scope === 'personal') {
+            const [member] = await tx
+              .select({ id: tripMembers.id })
+              .from(tripMembers)
+              .where(
+                and(
+                  eq(tripMembers.ownerId, user.id),
+                  eq(tripMembers.tripId, request.params.tripId),
+                  eq(tripMembers.role, 'owner'),
+                ),
+              );
+            if (!member) throw notFound();
+            const sources = await tx
+              .select({
+                currencyCode: expenses.currencyCode,
+                minorUnit: expenses.minorUnit,
+                amountMinor: expenses.amountMinor,
+                shareMemberIds: projection.shareMemberIds,
+              })
+              .from(expenses)
+              .where(
+                and(eq(expenses.ownerId, user.id), eq(expenses.tripId, request.params.tripId)),
+              );
+
+            return { totals: personalTotals(sources, member.id) };
+          }
           const rows = await tx
             .select({
               currencyCode: expenses.currencyCode,
@@ -342,8 +404,36 @@ export function registerExpenseRoutes(
     async (request, reply) => {
       const user = await requireUser(auth, request, reply);
       const input = request.body;
+      if ((input.payerMemberId === undefined) !== (input.shareMemberIds === undefined))
+        throw invalid('請同時選擇付款人與分攤成員。');
       const saved = await db.transaction(async (tx) => {
         await requireTrip(tx, user.id, request.params.tripId, true);
+        const [owner] = await tx
+          .select({ id: tripMembers.id })
+          .from(tripMembers)
+          .where(
+            and(
+              eq(tripMembers.ownerId, user.id),
+              eq(tripMembers.tripId, request.params.tripId),
+              eq(tripMembers.role, 'owner'),
+            ),
+          );
+        if (!owner) throw notFound();
+        const payerMemberId = input.payerMemberId ?? owner.id;
+        const shareMemberIds = input.shareMemberIds ?? [owner.id];
+        const memberIds = [...new Set([payerMemberId, ...shareMemberIds])];
+        const members = await tx
+          .select()
+          .from(tripMembers)
+          .where(
+            and(
+              eq(tripMembers.ownerId, user.id),
+              eq(tripMembers.tripId, request.params.tripId),
+              inArray(tripMembers.id, memberIds),
+            ),
+          );
+        if (members.length !== memberIds.length) throw notFound();
+        if (members.some((member) => !member.isActive)) throw invalid('請選擇啟用的成員。');
         const categoryId = input.categoryId ?? null;
 
         await requireCategory(tx, user.id, categoryId);
@@ -356,6 +446,7 @@ export function registerExpenseRoutes(
             ownerId: user.id,
             tripId: request.params.tripId,
             categoryId,
+            payerMemberId,
             item: validItem(input.item),
             amountMinor,
             minorUnit,
@@ -367,6 +458,16 @@ export function registerExpenseRoutes(
 
         if (!created)
           throw new HttpError(409, 'ID_CONFLICT', '這次建立的識別碼已被使用，請重新確認。');
+
+        await tx.insert(expenseShares).values(
+          shareMemberIds.map((memberId) => ({
+            ownerId: user.id,
+            tripId: request.params.tripId,
+            expenseId: created.id,
+            memberId,
+          })),
+        );
+        await advanceAccountingRevision(tx, user.id, request.params.tripId);
 
         return readExpense(tx, user.id, request.params.tripId, created.id);
       });
@@ -386,7 +487,10 @@ export function registerExpenseRoutes(
     async (request, reply) => {
       const user = await requireUser(auth, request, reply);
 
-      return readExpense(db, user.id, request.params.tripId, request.params.expenseId);
+      return db.transaction(
+        (tx) => readExpense(tx, user.id, request.params.tripId, request.params.expenseId),
+        { isolationLevel: 'repeatable read', accessMode: 'read only' },
+      );
     },
   );
 
@@ -410,6 +514,7 @@ export function registerExpenseRoutes(
       const input = request.body;
 
       return db.transaction(async (tx) => {
+        await requireTrip(tx, user.id, request.params.tripId, true);
         const owner = and(
           eq(expenses.ownerId, user.id),
           eq(expenses.tripId, request.params.tripId),
@@ -418,6 +523,28 @@ export function registerExpenseRoutes(
         const [prior] = await tx.select().from(expenses).where(owner).for('update');
 
         if (!prior) throw notFound();
+
+        // Only explicitly supplied references need to be active; omitted historical ones survive.
+        const memberIds = [
+          ...new Set([
+            ...(input.payerMemberId === undefined ? [] : [input.payerMemberId]),
+            ...(input.shareMemberIds ?? []),
+          ]),
+        ];
+        if (memberIds.length > 0) {
+          const members = await tx
+            .select({ id: tripMembers.id, isActive: tripMembers.isActive })
+            .from(tripMembers)
+            .where(
+              and(
+                eq(tripMembers.ownerId, user.id),
+                eq(tripMembers.tripId, request.params.tripId),
+                inArray(tripMembers.id, memberIds),
+              ),
+            );
+          if (members.length !== memberIds.length) throw notFound();
+          if (members.some((member) => !member.isActive)) throw invalid('請選擇啟用的成員。');
+        }
 
         const categoryId = input.categoryId === undefined ? prior.categoryId : input.categoryId;
 
@@ -444,9 +571,32 @@ export function registerExpenseRoutes(
             currencyCode,
             minorUnit,
             amountMinor,
+            payerMemberId: input.payerMemberId ?? prior.payerMemberId,
             updatedAt: new Date(),
           })
           .where(owner);
+
+        if (input.shareMemberIds !== undefined) {
+          await tx
+            .delete(expenseShares)
+            .where(
+              and(
+                eq(expenseShares.ownerId, user.id),
+                eq(expenseShares.tripId, request.params.tripId),
+                eq(expenseShares.expenseId, request.params.expenseId),
+              ),
+            );
+          await tx.insert(expenseShares).values(
+            input.shareMemberIds.map((memberId) => ({
+              ownerId: user.id,
+              tripId: request.params.tripId,
+              expenseId: request.params.expenseId,
+              memberId,
+            })),
+          );
+        }
+
+        await advanceAccountingRevision(tx, user.id, request.params.tripId);
 
         return readExpense(tx, user.id, request.params.tripId, request.params.expenseId);
       });
@@ -469,18 +619,23 @@ export function registerExpenseRoutes(
     },
     async (request, reply) => {
       const user = await requireUser(auth, request, reply);
-      const [removed] = await db
-        .delete(expenses)
-        .where(
-          and(
-            eq(expenses.ownerId, user.id),
-            eq(expenses.tripId, request.params.tripId),
-            eq(expenses.id, request.params.expenseId),
-          ),
-        )
-        .returning({ id: expenses.id });
+      await db.transaction(async (tx) => {
+        await requireTrip(tx, user.id, request.params.tripId, true);
+        const [removed] = await tx
+          .delete(expenses)
+          .where(
+            and(
+              eq(expenses.ownerId, user.id),
+              eq(expenses.tripId, request.params.tripId),
+              eq(expenses.id, request.params.expenseId),
+            ),
+          )
+          .returning({ id: expenses.id });
 
-      if (!removed) throw notFound();
+        if (!removed) throw notFound();
+
+        await advanceAccountingRevision(tx, user.id, request.params.tripId);
+      });
 
       return reply.code(204).send(null);
     },

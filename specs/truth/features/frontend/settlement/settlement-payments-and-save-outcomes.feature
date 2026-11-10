@@ -36,13 +36,13 @@ Feature: 實付結清與保存結果
       When owner 輸入實付 JPY 700 並結清
       Then Amy 的安排已關閉且保存實付 JPY 700 與原應付 JPY 600
 
-  Rule: 結清表單不替付款人決定實付
-    Example: 未填實付金額
+  Rule: 結清表單預填未付金額且保留編輯能力
+    Example: 三人均分後自動帶入可支付金額
       Given 分帳旅行已有以下支出：
         | 項目 | 幣別 | 金額 | 付款人 | 分攤者 |
         | 點心 | JPY | 100 | Alice | Alice、Amy、Bob |
       When owner 開啟 Amy 支付 Alice 的實付結清表單
-      Then 應付顯示 JPY 33.33 而實付留空且沒有取整方式選擇
+      Then 應付顯示 JPY 33.33 而實付預填 33 且沒有取整方式選擇
 
   Rule: 結清非正數不得保存
     Example: 實付零元
@@ -82,3 +82,46 @@ Feature: 實付結清與保存結果
       And 結清成功回應遺失且原結果暫不可查證
       When owner 輸入實付 JPY 33 並結清
       Then 畫面保留實付草稿並提示結清結果尚未確認
+
+  Rule: 不足額實付記錄部分還款且保留欠款
+    Example: 應付15000只付2000
+      Given 分帳旅行已有以下支出：
+        | 項目 | 幣別 | 金額 | 付款人 | 分攤者 |
+        | 午餐 | JPY | 15000 | Alice | Amy |
+      And owner 已開啟 Amy 支付 Alice 的實付結清表單
+      When owner 保存實付 JPY 2000 的部分還款
+      Then 畫面顯示實付 JPY 2000 且剩餘 JPY 13000 尚未結清
+
+    Example: 部分還款已保存但回應遺失
+      Given 分帳旅行已有以下支出：
+        | 項目 | 幣別 | 金額 | 付款人 | 分攤者 |
+        | 午餐 | JPY | 15000 | Alice | Amy |
+      And owner 已開啟 Amy 支付 Alice 的實付結清表單
+      And 部分還款成功回應遺失且查證"可用"
+      When owner 保存實付 JPY 2000 的部分還款
+      Then 畫面顯示實付 JPY 2000 且剩餘 JPY 13000 尚未結清
+
+    Example: 部分還款回應與查證暫不可用
+      Given 分帳旅行已有以下支出：
+        | 項目 | 幣別 | 金額 | 付款人 | 分攤者 |
+        | 午餐 | JPY | 15000 | Alice | Amy |
+      And owner 已開啟 Amy 支付 Alice 的實付結清表單
+      And 部分還款成功回應遺失且查證"暫不可用"
+      When owner 保存實付 JPY 2000 的部分還款
+      Then 部分還款草稿保留且結果尚未確認
+
+  Rule: 重新開啟表單帶入目前尚未支付的金額
+    Example: 原應付15000
+      Given 分帳旅行已有以下支出：
+        | 項目 | 幣別 | 金額 | 付款人 | 分攤者 |
+        | 午餐 | JPY | 15000 | Alice | Amy |
+      When owner 開啟目前 Amy 支付 Alice 的實付表單
+      Then 實付欄預填 JPY 15000 且可修改
+
+    Example: 已還2000後只帶入剩餘13000
+      Given 分帳旅行已有以下支出：
+        | 項目 | 幣別 | 金額 | 付款人 | 分攤者 |
+        | 午餐 | JPY | 15000 | Alice | Amy |
+      And 分帳旅行已有 Amy 支付 Alice JPY 2000 的獨立還款
+      When owner 開啟目前 Amy 支付 Alice 的實付表單
+      Then 實付欄預填 JPY 13000 且可修改

@@ -21,7 +21,7 @@ Feature: 結算來源與結清交易一致性
     Example: 兩個裝置依同一安排分別輸入33與34
       Given owner 的分帳旅行已有下列支出：
         | 項目 | 幣別 | 金額 | 付款人 | 分攤者 |
-        | 午餐 | JPY | 100 | Alice | Amy |
+        | 午餐 | JPY | 33 | Alice | Amy |
       And owner 已取得 Amy 向 Alice 的目前付款安排
       When 兩個裝置同時結清 Amy 向 Alice 的同一安排
       Then 同一安排最多只保存一次完整結清
@@ -30,7 +30,7 @@ Feature: 結算來源與結清交易一致性
     Example: 寫完第一筆調整後故障
       Given owner 的分帳旅行已有下列支出：
         | 項目 | 幣別 | 金額 | 付款人 | 分攤者 |
-        | 午餐 | JPY | 100 | Alice | Amy |
+        | 午餐 | JPY | 100 | Alice | Alice、Amy、Bob |
       And owner 已取得 Amy 向 Alice 的目前付款安排
       And 結清交易在寫入部分調整後將發生錯誤
       When owner 以 JPY "33" 結清 Amy 向 Alice 的安排

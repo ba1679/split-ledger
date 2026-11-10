@@ -52,14 +52,14 @@ SettlementView:
       description: 不多於 directArrangementCount；簡化關閉時兩者相同。
 SettleArrangementRequest:
   type: object
-  description: owner 對目前安排輸入正數實付並按結清；expectedAmount 是所見精確應付快照，伺服器須在旅行鎖內重新核對。任意有效正數實付皆可結清，不傳取整方式。
+  description: owner 對目前安排輸入正數實付；expectedAmount 是所見精確應付快照，伺服器須在旅行鎖內重新核對。不足額保留可支付欠款並記錄部分還款，不能自動免除；不傳取整方式。
   additionalProperties: false
   required: [id, repaymentId, arrangementKey, accountingRevision, debtorMemberId, creditorMemberId, currencyCode, expectedAmount, paidAmount, paidOn]
   properties:
     id:
       type: string
       format: uuid
-      description: 預先保留的結清 UUID；結果未明時以單筆 GET 查證。
+      description: 預先保留的結清 UUID；完整結清結果未明時以單筆 GET 查證。不足額分支不建立該快照，改用原 repaymentId 查證實付。
     repaymentId:
       type: string
       format: uuid
@@ -84,6 +84,16 @@ SettlementAdjustment:
     memberId: {type: string, format: uuid}
     currencyCode: {$ref: ./shared.yaml#/CurrencyCode}
     amount: {$ref: ./shared.yaml#/ExactAmount}
+PartialArrangementPayment:
+  type: object
+  additionalProperties: false
+  required: [kind, repayment, remainingAmount, accountingRevision]
+  description: 指定安排實付不足，只記錄independent實付；不得建立結清快照或差額調整。查證使用原預留repaymentId。
+  properties:
+    kind: {type: string, enum: [partial]}
+    repayment: {$ref: ./repayments.yaml#/Repayment}
+    remainingAmount: {$ref: ./shared.yaml#/ExactAmount}
+    accountingRevision: {type: string, pattern: '^(?:0|[1-9][0-9]*)$'}
 SettlementRecord:
   type: object
   description: 不可變結清快照；obligation 保留當時的精確安排，後續來源修改不重寫。
