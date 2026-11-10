@@ -1,13 +1,15 @@
-Project "travel_ledger_phase_1a" {
+Project "travel_ledger_phase_1b" {
   database_type: "PostgreSQL"
   Note: '''
-  個人旅行記帳的目前完整持久化模型。auth schema 的四張表由固定版本 Better Auth
+  個人與 owner 管理旅行分帳的目前完整持久化模型。auth schema 的四張表由固定版本 Better Auth
   及 Drizzle adapter 產生並管理；業務表由應用 migration 管理。業務 UUID 由客戶端
   在建立時提供，owner_id 一律由伺服器驗證後的 session 寫入；所有查詢仍須按 owner 篩選。
   本模型是規劃，不是已執行的 migration；SQL 特有限制見各表 Note 與檔尾註解。
   名稱/項目先依 ECMAScript String.trim() 去首尾空白，再驗證非空。
   created_at 用資料庫時鐘；updated_at 在同一次更新中寫入，兩者皆為 timestamptz。
   count 與清單以同一 SQL 或一致性 snapshot 讀取；聚合值不得轉成浮點金額。
+  公平份額由支出金額與分攤成員數重建；淨額與付款安排由目前支出、實際還款及
+  歷史結清差額重建，不持久化衍生總額。所有分帳寫入由旅行列鎖及帳務 revision 序列化。
   '''
 }
 
@@ -89,6 +91,8 @@ Table trips {
   name text [not null, note: '去除前後空白後非空']
   start_date date [null]
   end_date date [null]
+  simplify_debts boolean [not null, default: false, note: '只改變衍生付款建議，不改寫帳務來源']
+  accounting_revision bigint [not null, default: 0, note: '所有影響分帳來源或建議的寫入後遞增']
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
 
@@ -103,6 +107,43 @@ Table trips {
   PATCH 在交易中鎖定本人旅行（SELECT FOR UPDATE），合併新舊日期後驗證再更新；
   CHECK 違反（23514）回 400 VALIDATION_ERROR，原資料不變。
   expenseCount 從 expenses 批次計算；列表索引配合 owner、created_at、id，不逐列發 SQL 計數。
+  CHECK accounting_revision >= 0。旅行 owner 是唯一具有讀寫權的登入使用者；
+  trip_members 的 owner 成員只是可付款、可分攤的帳務身分，不授予同行者登入權。
+  所有影響分帳的寫入先由 session 確認 owner，在 READ COMMITTED 交易中鎖旅行 FOR UPDATE，
+  依旅行→子資源的順序驗證與更新後遞增 revision；多查詢結算讀取使用 REPEATABLE READ 唯讀快照。
+  '''
+}
+
+Enum trip_member_role {
+  owner
+  companion
+}
+
+Table trip_members {
+  id uuid [pk, not null, note: '穩定帳務識別；改名與停用不改 ID']
+  owner_id text [not null]
+  trip_id uuid [not null]
+  role trip_member_role [not null]
+  name text [not null, note: '建立當時的旅行內名稱；Google profile 後續變動不會自動改名']
+  name_key text [not null, note: 'generated stored；ASCII A-Z 轉小寫，COLLATE C']
+  is_active boolean [not null, default: true]
+  created_at timestamptz [not null]
+  updated_at timestamptz [not null]
+
+  Indexes {
+    (owner_id, trip_id, id) [unique, name: 'trip_members_owner_trip_id_uq']
+    (trip_id, name_key) [unique, name: 'trip_members_trip_name_key_uq']
+    (owner_id, trip_id, role) [name: 'trip_members_owner_trip_role_idx']
+  }
+
+  Note: '''
+  CHECK name = app_trim(name) AND char_length(name) > 0；name_key 與 categories.name_key
+  使用同一 generated/ASCII/C collation 策略。唯一鍵不過濾停用成員，owner 也佔用名稱。
+  SQL partial UNIQUE (trip_id) WHERE role = 'owner' 保證每趟至多一個 owner；建立旅行及 migration
+  在同一交易中建立一個 owner 成員，保證至少一個。owner 成員不得停用、刪除或更改 role；
+  同行者曾被任何支出、分攤、還款、結清或調整引用時由 FK RESTRICT 禁止實體刪除，改為停用。
+  停用者仍參與歷史計算；新支出、新還款及修改支出不得新增停用者引用，重新啟用後可選。
+  同行者名稱更改只變顯示名稱，不以名稱建立帳務關聯；不同旅行可重名。
   '''
 }
 
@@ -144,7 +185,8 @@ Table currencies {
   快照 SHA-256：33139b438657d1cee116ba737807ea71d19d6de4b90f799a09c56f0cc6a1b0ff。
   初始快照 2026-09-17 共 165 個可選代碼；可選列的 snapshot_date 必須一致，否則匯入/啟動驗證失敗。
   更新快照以單一交易封存來源、更新可選條目並將退役代碼標不可選；本版無自動更新工作。
-  保留舊代碼外鍵與每筆支出的歷史位數，不重解讀舊金額。165 列直接掃描，不另加布林索引。
+  保留舊代碼外鍵與每筆支出、還款及結清快照的歷史位數，不重解讀舊金額。
+  165 列直接掃描，不另加布林索引。
   '''
 }
 
@@ -152,6 +194,7 @@ Table expenses {
   id uuid [pk, not null, note: '客戶端在建立請求產生；全系統唯一']
   owner_id text [not null, note: '冗餘於 trip 但用於複合外鍵隔離及查詢']
   trip_id uuid [not null]
+  payer_member_id uuid [not null, note: '同旅行成員；付款人可不在分攤集合中']
   category_id uuid [null]
   item text [not null, note: '去除前後空白後非空']
   amount_minor bigint [not null, note: '正整數最小貨幣單位；單筆 <= 9223372036854775807']
@@ -162,6 +205,7 @@ Table expenses {
   updated_at timestamptz [not null]
 
   Indexes {
+    (owner_id, trip_id, id) [unique, name: 'expenses_owner_trip_id_uq']
     (owner_id, trip_id, spent_on, id) [name: 'expenses_owner_trip_date_id_idx']
     (owner_id, category_id) [name: 'expenses_owner_category_idx']
   }
@@ -176,6 +220,118 @@ Table expenses {
   回 NUMERIC 整數字串，後端用 BigInt 升到同幣別最大位數再加總。總額可超過單筆 BIGINT 範圍。
   (owner_id,trip_id,spent_on,id) 支援列表及游標；(owner_id,category_id) 支援使用筆數與刪除 FK 檢查。
   實作後以 EXPLAIN (ANALYZE, BUFFERS) 檢查索引效益，不另建摘要或每欄索引。
+  分攤者由 expense_shares 的成員集合表示，每筆支出須至少一人，且不得重複；
+  每人份額在同幣別同歷史 minor_unit 下精確為 amount_minor / 分攤者數。
+  支出與分攤者集合在同一交易中新增或完整取代；刪除支出時僅刪除其分攤關聯。
+  修改或刪除支出不刪除已發生的還款、結清及差額調整。
+  '''
+}
+
+Table expense_shares {
+  owner_id text [not null]
+  trip_id uuid [not null]
+  expense_id uuid [not null]
+  member_id uuid [not null]
+
+  Indexes {
+    (expense_id, member_id) [pk, name: 'expense_shares_pk']
+    (owner_id, trip_id, member_id) [name: 'expense_shares_owner_trip_member_idx']
+  }
+
+  Note: '''
+  只保存集合，不保存經取整的份額或分數。須以交易及延遲檢查／等價寫入驗證
+  保證每筆存活支出至少一名分攤者。payer_member_id 不要求出現在本集合。
+  刪除支出時 CASCADE 刪除此集合；刪除成員時 RESTRICT，保護歷史引用。
+  '''
+}
+
+Enum payment_record_kind {
+  independent
+  settlement
+}
+
+Table settlements {
+  id uuid [pk, not null]
+  owner_id text [not null]
+  trip_id uuid [not null]
+  debtor_member_id uuid [not null]
+  creditor_member_id uuid [not null]
+  currency_code char(3) [not null]
+  obligation_numerator numeric [not null, note: '結清當時精確應付額，在 obligation_minor_unit 尺度的整數分子']
+  obligation_denominator numeric [not null, note: '正整數分母']
+  obligation_minor_unit smallint [not null, note: '精確應付額的歷史尺度']
+  arrangement_key text [not null, note: '結清當時的確定性安排識別，包含來源 revision 與模式']
+  source_revision bigint [not null, note: '經寫入交易核對過的付款安排來源版本']
+  simplify_debts boolean [not null, note: '當時的建議模式，不控制後續重算']
+  created_at timestamptz [not null]
+
+  Indexes {
+    (owner_id, trip_id, arrangement_key) [unique, name: 'settlements_arrangement_key_uq']
+    (owner_id, trip_id, source_revision, debtor_member_id, creditor_member_id, currency_code) [name: 'settlements_source_idx']
+    (owner_id, trip_id, id) [unique, name: 'settlements_owner_trip_id_uq']
+  }
+
+  Note: '''
+  不可變的已結清安排快照；CHECK debtor <> creditor、分子 > 0、分母 > 0 且皆為整數、
+  minor_unit BETWEEN 0 AND 4、source_revision >= 0。結清時帶安排識別及 revision，
+  旅行列鎖內重算並核對成員、幣別、模式和精確應付額，才建立本列、實付與兩筆調整，
+  並遞增旅行 revision。若版本過期，不寫入任何結清資料。快照不因後續支出修正重新套用。
+  狀態以此不可變紀錄表示已結清，不能將實付金額與公平應付額差異視為未付或反向債權。
+  '''
+}
+
+Table repayments {
+  id uuid [pk, not null, note: '建立前產生的穩定 UUID；回應未明時可查證，避免盲目重送']
+  owner_id text [not null]
+  trip_id uuid [not null]
+  payer_member_id uuid [not null]
+  payee_member_id uuid [not null]
+  amount_minor bigint [not null, note: '正整數實付金額，為當時幣別最小單位']
+  currency_code char(3) [not null]
+  minor_unit smallint [not null, note: '實付時採用的幣別位數快照']
+  paid_on date [not null]
+  kind payment_record_kind [not null]
+  settlement_id uuid [null, unique, note: '結清實付必有；獨立部分還款必為 NULL']
+  created_at timestamptz [not null]
+
+  Indexes {
+    (owner_id, trip_id, id) [unique, name: 'repayments_owner_trip_id_uq']
+    (owner_id, trip_id, paid_on, id) [name: 'repayments_owner_trip_date_id_idx']
+  }
+
+  Note: '''
+  CHECK amount_minor > 0、minor_unit BETWEEN 0 AND 4、payer <> payee，
+  kind = settlement 當且僅當 settlement_id 非 NULL。兩端必屬同一旅行且寫入時有效。
+  獨立還款可部分還款、多次還款；超過當前應付時，在旅行鎖內重算警告額及反向債權，
+  僅在 owner 明確確認相同 revision/結果後保存。獨立超付可產生反向債權。
+  結清實付與 settlements 一對一，且兩端、幣別一致；其差額由兩筆調整吸收，
+  不按精確應付額自動取整，也不儲存取整選擇。任何還款均作為實際事實保留，
+  不因 Simplify Debts 切換或來源支出修改/刪除而改寫。
+  '''
+}
+
+Table settlement_adjustments {
+  settlement_id uuid [not null]
+  owner_id text [not null]
+  trip_id uuid [not null]
+  member_id uuid [not null]
+  currency_code char(3) [not null]
+  numerator numeric [not null, note: '有號整數分子；正數增加該成員淨額']
+  denominator numeric [not null, note: '正整數分母']
+  minor_unit smallint [not null, note: '差額分數的歷史尺度']
+
+  Indexes {
+    (settlement_id, member_id) [pk, name: 'settlement_adjustments_pk']
+    (owner_id, trip_id, member_id, currency_code) [name: 'settlement_adjustments_member_currency_idx']
+  }
+
+  Note: '''
+  每次結清恰有付款人與收款人兩筆不可變調整，與一筆實付原子寫入；
+  CHECK 分母 > 0、分子與分母均為整數、minor_unit BETWEEN 0 AND 4。
+  將實付轉到 obligation_minor_unit 或更高共同尺度後，付款人的調整 = 精確應付 − 實付；
+  收款人的調整 = 實付 − 精確應付，兩筆精確總和為零。若差額為零仍保留兩筆零調整，
+  便於稽核一對一完整性。DB deferred constraint trigger／等價交易驗證保證兩筆、
+  成員與 settlements 兩端一致、幣別一致及精確相反；不存或推論取整方式。
   '''
 }
 
@@ -183,14 +339,37 @@ Ref: auth.session.user_id > auth.user.id [delete: cascade]
 Ref: auth.account.user_id > auth.user.id [delete: cascade]
 Ref: trips.owner_id > auth.user.id [delete: restrict]
 Ref: categories.owner_id > auth.user.id [delete: restrict]
+Ref: trip_members.(owner_id, trip_id) > trips.(owner_id, id) [delete: restrict]
 Ref: expenses.(owner_id, trip_id) > trips.(owner_id, id) [delete: restrict]
 Ref: expenses.(owner_id, category_id) > categories.(owner_id, id) [delete: restrict]
+Ref: expenses.(owner_id, trip_id, payer_member_id) > trip_members.(owner_id, trip_id, id) [delete: restrict]
 Ref: expenses.currency_code > currencies.code [delete: restrict]
+Ref: expense_shares.(owner_id, trip_id, expense_id) > expenses.(owner_id, trip_id, id) [delete: cascade]
+Ref: expense_shares.(owner_id, trip_id, member_id) > trip_members.(owner_id, trip_id, id) [delete: restrict]
+Ref: settlements.(owner_id, trip_id) > trips.(owner_id, id) [delete: restrict]
+Ref: settlements.(owner_id, trip_id, debtor_member_id) > trip_members.(owner_id, trip_id, id) [delete: restrict]
+Ref: settlements.(owner_id, trip_id, creditor_member_id) > trip_members.(owner_id, trip_id, id) [delete: restrict]
+Ref: settlements.currency_code > currencies.code [delete: restrict]
+Ref: repayments.(owner_id, trip_id) > trips.(owner_id, id) [delete: restrict]
+Ref: repayments.(owner_id, trip_id, payer_member_id) > trip_members.(owner_id, trip_id, id) [delete: restrict]
+Ref: repayments.(owner_id, trip_id, payee_member_id) > trip_members.(owner_id, trip_id, id) [delete: restrict]
+Ref: repayments.(owner_id, trip_id, settlement_id) > settlements.(owner_id, trip_id, id) [delete: restrict]
+Ref: repayments.currency_code > currencies.code [delete: restrict]
+Ref: settlement_adjustments.(owner_id, trip_id, settlement_id) > settlements.(owner_id, trip_id, id) [delete: restrict]
+Ref: settlement_adjustments.(owner_id, trip_id, member_id) > trip_members.(owner_id, trip_id, id) [delete: restrict]
+Ref: settlement_adjustments.currency_code > currencies.code [delete: restrict]
 
 // Migration 補充（DBML Note 不會自動產生 generated/collation/function DDL）：
 // app_trim(text) = btrim(value, U&'\0009\000A\000B\000C\000D\0020\00A0\1680\2000\2001\2002\2003\2004\2005\2006\2007\2008\2009\200A\2028\2029\202F\205F\3000\FEFF')。
 // 以 IMMUTABLE SQL function 實作；不可只用預設 btrim（只去一般空格）。
-// trips.name/expenses.item：CHECK (value = app_trim(value) AND char_length(value) > 0)。
+// trips.name/expenses.item/trip_members.name：CHECK (value = app_trim(value) AND char_length(value) > 0)。
 // categories.name：CHECK (name = app_trim(name) AND char_length(name) BETWEEN 1 AND 30)。
-// Setup 必須補齊各表 Note 的 CHECK、generated name_key、C collation，再驗證 migration。
-// 回歸涵蓋 trim/emoji/ASCII 重名、跨 owner FK、分類刪除競爭、PATCH 與多幣別精確加總。
+// 新增 migration，不改已套用檔：每趟旅行建立唯一 owner 成員；每筆舊支出回填 owner payer 與唯一 owner share，
+// 再補 payer NOT NULL、同旅行複合 FK 與各項約束。原始金額、minor_unit、幣別、日期、分類與統計不變。
+// 啟用新程式前完成 migration，並停止舊程式寫入，避免舊版新增支出缺少分攤集合。
+// Setup 必須補齊各表 Note 的 CHECK、generated name_key、C collation、partial UNIQUE 與延遲完整性檢查，
+// 特別驗證 settlement 與 repayment 一對一、兩筆零和調整及每筆存活支出的非空分攤集合。
+// 帳務按 currency_code 先將各歷史 minor_unit 精確升至同幣別共同尺度，再以 BigInt 有理數計算；
+// NUMERIC 欄位只存整數分子/分母，不以 SQL 除法持久化有限小數；不同幣別不可相加或抵銷。
+// 回歸涵蓋 trim/emoji/ASCII 重名、停用名稱保留、跨 owner/trip FK、分類刪除競爭、
+// PATCH 與多幣別精確加總、舊支出回填、結清/還款競態、實付差額及獨立超額反轉。

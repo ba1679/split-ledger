@@ -1,6 +1,6 @@
 # 技術堆疊總覽：旅行記帳與分帳工具
 
-截至 2026-11-06 的採用技術。前後端、共用套件與測試已在工作區實作，套件版本由 package.json 與 pnpm lockfile 固定；本清單不代表已正式部署。
+截至 2026-11-10 的採用技術。既有前後端、共用套件與測試已在工作區實作，版本由 package.json 與 pnpm lockfile 固定；Phase 1B 下列分帳方向已選定但尚未實作。
 
 ## 技術堆疊總覽
 
@@ -11,7 +11,7 @@
 | 程式語言 | TypeScript strict mode | 前後端及共用純函式 |
 | 執行環境 | Node.js 24 LTS | API、工具及測試 |
 | Monorepo | pnpm workspace | apps/web、apps/api 與必要的 packages/shared |
-| 版本管理 | 固定工具版本、pnpm lockfile | 可重現安裝；Setup 鎖定相容套件版本 |
+| 版本管理 | 固定工具版本、pnpm lockfile | 已鎖定相容套件版本，支援可重現安裝 |
 
 ### 前端
 
@@ -20,19 +20,20 @@
 | UI | React + TypeScript | 旅行、支出與分類的互動介面 |
 | 建置與路由 | Vite、React Router | SPA 開發、建置及頁面導航 |
 | 伺服器資料 | TanStack Query + fetch | API 查詢、mutation、快取、載入/錯誤與變更後失效；登出清除帳號快取 |
-| 局部狀態與樣式 | React 狀態、CSS | 表單草稿及響應式介面 |
+| 局部狀態與樣式 | React 狀態、Tailwind CSS、CSS 自訂屬性及必要的客製 CSS | 表單草稿、共用設計值及響應式介面 |
 | 裝置偏好 | localStorage | 保存上次選擇的可用分類；不得保存登入 secret |
-| 對外組成 | 同 origin 的網頁及 /api | 開發代理及正式反向代理；後端獨立執行 |
+| 對外組成 | 同 origin 的網頁及 /api | 開發由 Vite 代理；試用部署由 Fastify 同時提供靜態網頁與 API |
 
-### 前端樣式遷移決策（尚未實作）
+### 前端設計系統（已完成遷移）
 
 | 類別 | 採用技術 | 用途 |
 | --- | --- | --- |
-| 樣式與設計值 | Tailwind CSS、CSS 自訂屬性、Vite 整合 | 以語意設計值與共用樣式逐步遷移現有介面；示範先確認 |
-| 共用元件 | shadcn/ui 按需引入的本地元件 | 對齊既有外觀與互動，逐項驗證行為及無障礙 |
-| 圖示 | lucide-react | 逐步取代自行繪製的圖示，統一樣式與語意 |
+| 樣式與設計值 | Tailwind CSS、CSS 自訂屬性、Vite 整合 | design-system.css 集中品牌值，styles/index.css 載入必要頁面與元件 CSS |
+| 共用元件 | shadcn/ui 本地 Button、Input | 已用於登入、旅行、支出、分類及共用操作 |
+| 客製互動 | FormDialog、DateField、SearchCombo | 因核心互動客製需求採自製，內部組合共用 Input 與圖示 |
+| 圖示 | lucide-react | 現有介面已使用套件圖示，自行繪製圖示已移除 |
 
-上述為本輪選定的遷移方向，尚未安裝或驗證；現行實作仍為前述 CSS。套件版本與相容性待實作確認，示範經使用者確認後才遷移其餘介面。
+設計系統已於 2026-11-09 完成遷移與 Chromium 行為、鍵盤、響應式及基本無障礙自動檢查；不維護截圖式視覺回歸。完整人工輔助工具檢查仍待驗證。後續部署驗證另完成 Linux WebKit 回歸，手機操作由使用者回報通過。
 
 ### 後端
 
@@ -51,10 +52,24 @@
 | 資料庫 | PostgreSQL 18 | 帳號、旅行、支出、分類與 session 持久化 |
 | 資料存取 | Drizzle ORM、node-postgres | 型別化 SQL 查詢 |
 | 結構變更 | Drizzle Kit、SQL migrations | 可 review 及重建的 schema 歷史 |
-| 金額 | 最小單位整數、BigInt、PostgreSQL BIGINT | 精確加總；API 使用十進位字串並驗證範圍 |
+| 原始與實付金額 | 最小單位整數、BigInt、PostgreSQL BIGINT | 保留原始金額；API 使用十進位字串並驗證範圍 |
 | 幣別 | SIX ISO 4217 List One 固定快照 | 代碼與小數位數；數字 minor unit 條目，排除 N.A. |
-| 快照基準 | 發布 2026-09-17，取樣 2026-11-04 | 178 個唯一代碼中 165 個具數字 minor unit；Setup 封存資料及來源 |
+| 快照基準 | 發布 2026-09-17，取樣 2026-11-04 | 已封存資料及來源；178 個唯一代碼中 165 個具數字 minor unit |
 | 日期 | 日期字串與 PostgreSQL DATE | 支出及旅行日曆日期；新增支出預設裝置當地日期 |
+
+### Phase 1B 分帳決策（已選定，尚未實作）
+
+| 類別 | 採用技術 | 用途 |
+| --- | --- | --- |
+| 精確分攤 | TypeScript BigInt 約分有理數、packages/shared | 分子分母精確運算與有號淨額；不以有限小數取代循環份額 |
+| 分數持久化與傳輸 | PostgreSQL NUMERIC 整數分子分母、十進位字串 | 保存結算調整；原始支出與成員集合重建份額；不以 SQL 除法生成近似權威值 |
+| 債務簡化 | 直接債務圖、確定性淨額貪婪配對、筆數比較回退 | 每幣別保留淨額，付款筆數不增加；穩定 ID 排序，未宣稱全域最少 |
+| 安排說明 | 後端確定性文字模板 | 三句內說明改道及筆數變化 |
+| 結清實付與差額 | 正數實付金額、精確有理數差額、還款與成對調整原子寫入 | 介面顯示公平份額；付款人自行決定實付額，不選取整方式；結清後不因差額反轉債務，維持全體零和 |
+| 寫入一致性 | 旅行列 FOR UPDATE、READ COMMITTED、帳務 revision | 同旅行寫入序列化；結清核對安排版本，獨立部分還款的超額確認核對最新版本 |
+| 結算讀取 | REPEATABLE READ read-only snapshot | 同一份來源快照重建分攤、淨額與兩種安排 |
+| 成員名稱 | 旅行成員統一命名空間、trim、ASCII 不分大小寫名稱鍵與唯一鍵 | owner 及啟用/停用同行者不重名；穩定 ID 關聯 |
+| 資料演進 | 新增 SQL migration、既有 checksum/advisory lock | 回填 owner 成員與既有單人分攤，不改歷史金額 |
 
 ### 測試與驗證
 
@@ -78,14 +93,17 @@
 | 資料庫環境 | Docker Compose | 開發及測試 PostgreSQL；資料隔離 |
 | 開發入口 | pnpm scripts | 啟動 web/api、驗證及測試；lint:fix 修正空行、format 整理排版、format:check 檢查格式 |
 
-### 試用部署決策（尚未實作或驗證）
+### 試用部署（2026-11-09 已完成部署與驗收）
 
 | 類別 | 採用技術 | 用途 |
 | --- | --- | --- |
 | 試用平台 | Railway 免費試用、Railway HTTPS 網址 | 兩人以測試資料驗證；不代表正式營運或保證免費持續運行 |
-| 應用部署 | Node.js 24、Fastify 提供 Vite 靜態產物及同 origin `/api` | 單一公開服務；建置、SPA fallback 與正式啟動待驗證 |
-| 試用資料庫 | Railway PostgreSQL 18、持久 volume、私有連線 | 測試資料持久化；重新部署及連線待驗證 |
-| 試用資料還原 | PostgreSQL 邏輯備份與隔離還原驗證 | 測試資料保護與還原演練；正式環境另行規劃 |
+| 應用部署 | Node.js 24、Fastify 提供 Vite 靜態產物及同 origin `/api` | 單一公開服務；啟動、SPA fallback、HTTPS、靜態資源及健康檢查已驗證 |
+| 部署設定 | Railway SDK 3.16.0、`.railway/railway.ts`、CLI plan/apply | 已從 railway.json 遷移並套用；app partial 管理應用設定，變數由平台管理 |
+| 試用資料庫 | Railway PostgreSQL 18、持久 volume、私有連線 | 已驗證重新部署後測試帳本與支出保存 |
+| 試用資料還原 | PostgreSQL 18 pg_dump／pg_restore | 已完成卷外備份與本機隔離還原，9 張表完整內容比對一致 |
+
+真實 Google 登入、兩帳號與 iOS Safari 手機記帳由使用者回報通過；未獨立擷取線上 session cookie 或跨帳號 API trace。上述為 2026-11-09 的交付證據，未重新查核目前線上狀態、試用餘額或到期情況；長期容量、費用及實際到期行為仍未驗證。
 
 
 ## 本次開發不引入的技術
@@ -95,6 +113,7 @@
 - 即時匯率服務、瀏覽器浮點金額運算：本版保留原幣別，使用精確金額表示。
 - Redux Toolkit / RTK Query 與 SSR 框架：伺服器資料由 TanStack Query 管理，局部狀態由 React 管理；後續依需求評估 Redux。
 - 共編基礎設施及離線同步：後續產品階段再評估。
+- Phase 1B 不引入浮點分攤、有限小數作權威份額、全域最少轉帳求解器或生成式 AI 結算說明服務。
 
 
-正式部署供應商尚未確定；正式使用前需落實 HTTPS、資料備份/還原、OAuth 正式設定及 migration 發布流程。
+Railway 為已驗證的試用平台，正式營運供應商與長期維運方案尚未確定；正式使用前仍需規劃長期備份、費用與容量、到期處置及正式 OAuth／migration 發布管理。
