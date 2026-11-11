@@ -7,9 +7,17 @@ import { createAuth, registerAuthRoutes } from './modules/auth/index.js';
 import { registerTripRoutes } from './modules/trips/index.js';
 import { registerCategoryRoutes } from './modules/categories/index.js';
 import { registerExpenseRoutes } from './modules/expenses/index.js';
+import { registerSettlementReadRoutes } from './modules/settlement/read.js';
+import { registerSettlementCreateRoute } from './modules/settlement/create.js';
+import { registerSettlementRecordRoute } from './modules/settlement/record.js';
+import { registerRepaymentCreateRoute } from './modules/repayments/create.js';
+import { registerRepaymentReadRoutes } from './modules/repayments/read.js';
+import { registerMemberRoutes } from './modules/members/index.js';
 import { checkOrigin, HttpError, invalid } from './http.js';
+import type { SplittingHooks } from './modules/splitting/dependencies.js';
 
 export interface AppOptions {
+  splittingHooks?: SplittingHooks;
   staticRoot?: string;
   pool?: pg.Pool;
   appOrigin?: string;
@@ -130,9 +138,10 @@ export function buildApp(options: AppOptions = {}) {
       } catch {
         return reply.code(404).send({ message: 'Not Found' });
       }
-      const page = /^(?:\/|\/categories\/?|\/trips(?:\/[^/.]+(?:\/expenses\/[^/.]+)?)?\/?)$/.test(
-        path,
-      );
+      const page =
+        /^(?:\/|\/categories\/?|\/trips(?:\/[^/.]+(?:\/(?:expenses\/[^/.]+|members|settlement|settlements\/new|repayments\/new))?)?\/?)$/.test(
+          path,
+        );
 
       if (
         ['GET', 'HEAD'].includes(request.method) &&
@@ -151,6 +160,24 @@ export function buildApp(options: AppOptions = {}) {
   registerCurrencyRoutes(app, db);
   registerAuthRoutes(app, auth, authConfig);
   registerTripRoutes(app, db, auth, authConfig);
+  registerMemberRoutes(app, db, auth);
+  registerSettlementReadRoutes({ app, db, auth, config: authConfig });
+  registerSettlementRecordRoute({ app, db, auth, config: authConfig });
+  registerSettlementCreateRoute({
+    app,
+    db,
+    auth,
+    config: authConfig,
+    hooks: options.splittingHooks,
+  });
+  registerRepaymentReadRoutes({ app, db, auth, config: authConfig });
+  registerRepaymentCreateRoute({
+    app,
+    db,
+    auth,
+    config: authConfig,
+    hooks: options.splittingHooks,
+  });
   registerCategoryRoutes(app, db, auth);
   registerExpenseRoutes(app, db, auth, authConfig);
 

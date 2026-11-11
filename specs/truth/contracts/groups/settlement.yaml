@@ -1,0 +1,102 @@
+settlement:
+  parameters:
+    - $ref: ../components/parameters.yaml#/TripId
+  get:
+    tags: [settlement]
+    operationId: getTripSettlement
+    x-session-required: true
+    security: [{BetterAuthSession: []}]
+    summary: 查看分幣別精確餘額與付款安排
+    description: 只供旅行 owner；在一致性快照中從現有支出、分攤集合、所有實付及歷史結清調整重建。關閉簡化時保留直接關係並可同對互抵；開啟時按每幣別淨額確定性配對且筆數不得增加。切換模式不改寫來源。
+    responses:
+      '200':
+        description: 同一帳務 revision 的餘額、安排及三句內說明。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/settlement.yaml#/SettlementView}
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '404':
+        description: 旅行不存在或不屬於目前帳號。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+settlements:
+  parameters:
+    - $ref: ../components/parameters.yaml#/TripId
+  post:
+    tags: [settlement]
+    operationId: settleArrangement
+    x-session-required: true
+    security: [{BetterAuthSession: []}]
+    summary: 記錄安排的實付，足額結清或保留部分還款
+    description: 旅行鎖內重算並核對 revision、安排 key、兩端、幣別、模式及精確應付；版本或安排改變不寫入，要求刷新。仍欠至少一個現行最小貨幣單位時，只以預留repaymentId原子新增一筆independent實付，保留剩餘欠款，不新增settlement或差額調整；回應kind=partial。足額、超額與既有不足一個最小單位尾差處理，保存結清快照、一筆settlement實付及兩筆零和調整，不因超付產生反向安排。兩分支均只遞增一次revision。不改寫舊結清歷史。
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema: {$ref: ../components/schemas/settlement.yaml#/SettleArrangementRequest}
+    responses:
+      '201':
+        description: 完整結清回SettlementRecord；不足額回PartialArrangementPayment，原實付可用GET repayments/{repaymentId}查證，不得重送。
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - {$ref: ../components/schemas/settlement.yaml#/SettlementRecord}
+                - {$ref: ../components/schemas/settlement.yaml#/PartialArrangementPayment}
+      '400':
+        description: 欄位、實付金額、日期、幣別或 Content-Type 不合法。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '403':
+        description: Origin 不可信。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '404':
+        description: 旅行或兩端成員不存在、非本人或不屬此旅行。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '409':
+        description: revision 過期、安排已變/已結清、結清或還款 UUID 衝突；code 分別為 ACCOUNTING_REVISION_CONFLICT、ARRANGEMENT_NOT_FOUND、ID_CONFLICT。刷新結算後再操作。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+settlementRecord:
+  parameters:
+    - $ref: ../components/parameters.yaml#/TripId
+    - $ref: ../components/parameters.yaml#/SettlementId
+  get:
+    tags: [settlement]
+    operationId: getSettlementRecord
+    x-session-required: true
+    security: [{BetterAuthSession: []}]
+    summary: 查證已保存的結清與實付結果
+    description: 僅回傳此旅行 owner 的不可變結清；暫時 404 不足以證明先前寫入未發生，不自動重送。
+    responses:
+      '200':
+        description: 已保存的結清快照。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/settlement.yaml#/SettlementRecord}
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '404':
+        description: 結清或旅行不存在，或不屬目前 owner。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}

@@ -1,0 +1,120 @@
+MemberBalance:
+  type: object
+  description: 成員在單一幣別的精確淨額；正數應收、負數應付、零已平衡。同幣別全體成員淨額精確總和為零。
+  additionalProperties: false
+  required: [memberId, currencyCode, netAmount]
+  properties:
+    memberId: {type: string, format: uuid}
+    currencyCode: {$ref: ./shared.yaml#/CurrencyCode}
+    netAmount:
+      $ref: ./shared.yaml#/ExactAmount
+PaymentArrangement:
+  type: object
+  description: 尚未取整的正數精確公平付款建議；不是已發生實付。
+  additionalProperties: false
+  required: [key, debtorMemberId, creditorMemberId, currencyCode, amount]
+  properties:
+    key:
+      type: string
+      minLength: 1
+      description: 由 mode、accountingRevision、幣別與確定性安排排序生成的不透明識別；結清時必須原樣回傳。不可跨 revision 沿用。
+    debtorMemberId: {type: string, format: uuid}
+    creditorMemberId: {type: string, format: uuid}
+    currencyCode: {$ref: ./shared.yaml#/CurrencyCode}
+    amount:
+      $ref: ./shared.yaml#/ExactAmount
+SettlementView:
+  type: object
+  additionalProperties: false
+  required: [accountingRevision, simplifyDebts, balances, arrangements, explanation, directArrangementCount, suggestedArrangementCount]
+  properties:
+    accountingRevision:
+      type: string
+      pattern: '^(?:0|[1-9][0-9]*)$'
+      description: 同一一致性來源快照的旅行帳務版本。
+    simplifyDebts:
+      type: boolean
+    balances:
+      type: array
+      description: 依幣別、成員 ID 穩定排序；可含精確零淨額。不同幣別不換算。
+      items: {$ref: '#/MemberBalance'}
+    arrangements:
+      type: array
+      description: 依幣別、付款人成員 ID、收款人成員 ID 穩定排序；已結清安排不再列入。
+      items: {$ref: '#/PaymentArrangement'}
+    explanation:
+      type: string
+      description: 後端確定性模板生成、至多三句；簡化有改道時說明關係與筆數，未改道時明說無需改道，並說明淨額及原始紀錄未改。
+    directArrangementCount: {type: integer, minimum: 0}
+    suggestedArrangementCount:
+      type: integer
+      minimum: 0
+      description: 不多於 directArrangementCount；簡化關閉時兩者相同。
+SettleArrangementRequest:
+  type: object
+  description: owner 對目前安排輸入正數實付；expectedAmount 是所見精確應付快照，伺服器須在旅行鎖內重新核對。不足額保留可支付欠款並記錄部分還款，不能自動免除；不傳取整方式。
+  additionalProperties: false
+  required: [id, repaymentId, arrangementKey, accountingRevision, debtorMemberId, creditorMemberId, currencyCode, expectedAmount, paidAmount, paidOn]
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: 預先保留的結清 UUID；完整結清結果未明時以單筆 GET 查證。不足額分支不建立該快照，改用原 repaymentId 查證實付。
+    repaymentId:
+      type: string
+      format: uuid
+      description: 預先保留的一對一實付 UUID；結果未明時以單筆 GET 查證。
+    arrangementKey: {type: string, minLength: 1}
+    accountingRevision:
+      type: string
+      pattern: '^(?:0|[1-9][0-9]*)$'
+    debtorMemberId: {type: string, format: uuid}
+    creditorMemberId: {type: string, format: uuid}
+    currencyCode: {$ref: ./shared.yaml#/CurrencyCode}
+    expectedAmount:
+      $ref: ./shared.yaml#/ExactAmount
+    paidAmount:
+      $ref: ./shared.yaml#/MoneyAmount
+    paidOn: {$ref: ./shared.yaml#/DateOnly}
+SettlementAdjustment:
+  type: object
+  additionalProperties: false
+  required: [memberId, currencyCode, amount]
+  properties:
+    memberId: {type: string, format: uuid}
+    currencyCode: {$ref: ./shared.yaml#/CurrencyCode}
+    amount: {$ref: ./shared.yaml#/ExactAmount}
+PartialArrangementPayment:
+  type: object
+  additionalProperties: false
+  required: [kind, repayment, remainingAmount, accountingRevision]
+  description: 指定安排實付不足，只記錄independent實付；不得建立結清快照或差額調整。查證使用原預留repaymentId。
+  properties:
+    kind: {type: string, enum: [partial]}
+    repayment: {$ref: ./repayments.yaml#/Repayment}
+    remainingAmount: {$ref: ./shared.yaml#/ExactAmount}
+    accountingRevision: {type: string, pattern: '^(?:0|[1-9][0-9]*)$'}
+SettlementRecord:
+  type: object
+  description: 不可變結清快照；obligation 保留當時的精確安排，後續來源修改不重寫。
+  additionalProperties: false
+  required: [id, tripId, arrangementKey, sourceRevision, simplifyDebts, debtorMemberId, creditorMemberId, currencyCode, obligation, repayment, adjustments, createdAt]
+  properties:
+    id: {type: string, format: uuid}
+    tripId: {type: string, format: uuid}
+    arrangementKey: {type: string}
+    sourceRevision: {type: string, pattern: '^(?:0|[1-9][0-9]*)$'}
+    simplifyDebts: {type: boolean}
+    debtorMemberId: {type: string, format: uuid}
+    creditorMemberId: {type: string, format: uuid}
+    currencyCode: {$ref: ./shared.yaml#/CurrencyCode}
+    obligation:
+      $ref: ./shared.yaml#/ExactAmount
+    repayment: {$ref: ./repayments.yaml#/Repayment}
+    adjustments:
+      type: array
+      minItems: 2
+      maxItems: 2
+      description: 債務人與債權人各一筆，精確相反，總和為零；債務人調整=精確應付−實付。即使零差額也保留兩筆零調整。
+      items: {$ref: '#/SettlementAdjustment'}
+    createdAt: {$ref: ./shared.yaml#/IsoTimestamp}

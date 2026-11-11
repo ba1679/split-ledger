@@ -72,3 +72,39 @@
 | `表單幣別顯示 "USD" 且金額最多兩位小數` | 無；具體值固定於句型 | 不支援 | 無 | USD 已選；允許 12.50，阻擋第三位小數；無新增支出請求。以 GET /api/trips/{tripId}/expenses 與 /totals 核對後端；金額保持原幣別精度。 |
 | `金額仍為 12.50` | 無；具體值固定於句型 | 不支援 | 無 | input value 精確為 12.50，無第三位小數；無新增支出請求。以 GET /api/trips/{tripId}/expenses 與 /totals 核對後端；金額保持原幣別精度。 |
 | `使用者在新增支出表單選擇 TWD 且金額為 100` | 無 | 不支援 | 無 | 使用隔離帳號與旅行開啟新增支出表單，選擇 TWD 並輸入 100；目錄仍回傳 minorUnit=2，等待表單就緒。 |
+
+## 005 新增契約
+
+以下每列以既有 Playwright BDD fixture、page object 與真實 API/隔離資料庫實作。固定場景常數即句內明示值；所有 Then 不執行新的受測操作，API 再讀屬只讀權威查核。MoneyAmount 以字串解析，ExactAmount 用 BigInt 有理數，不用浮點或畫面值重算。fixture 所有名稱映射到同旅行穩定 UUID；未標示的可選值為 null，不自行擴張業務。
+
+| DSL 句型 | Gherkin 參數 | Data Table 參數 | 預設參數 | Playwright BDD 實作語意 |
+| --- | --- | --- | --- | --- |
+| `owner 已填共同支出點心 JPY 100、付款 Alice、分攤 {成員集合}` | 成員集合:string 以「、」分隔有效成員名 | 不支援 | 日期=2027-03-11；分類=null。 | Given：fixture 建立Alice/Amy/Bob旅行，開新增支出表單，填點心100 JPY與日期並選Alice付款和指定集合；保存前權威快照。 |
+| `owner 已填共同支出點心但未選任何分攤者` | 無 | 不支援 | 無 | Given：fixture建Alice/Amy/Bob並開表單填合法點心JPY100，清空分攤者；其餘必要欄合法，保存API快照。 |
+| `owner 已填共同支出點心但未選付款人` | 無 | 不支援 | 無 | Given：fixture建Alice/Amy/Bob並開表單填合法點心JPY100，清空付款人；其餘必要欄合法，保存API快照。 |
+| `Phase 1A 已有 2027-01-15 的 TWD 8000 機票` | 無 | 不支援 | 無 | Given：使用舊版資料fixture及正式migration建立機票；保存原ID、金額、幣別、日期、分類與統計基準；owner為Alice，等待新程式可讀。不得直接假造遷移結果。 |
+| `共同支出晚餐修改已填 JPY 200 且保存回應遺失與查證暫不可用` | 無 | 不支援 | 無 | Given：建立Alice付款JPY300由三人分攤的晚餐，開修改表單填200；代理丟棄PATCH成功回應且阻斷查證，保留原已確認餘額/安排，記錄真實權威新值但不交給UI。 |
+| `owner 查看支出 "{項目}" 的分攤` | 項目:string 唯一支出名 | 不支援 | 無 | When：開指定支出詳情，等待GET expense與成員名單；保存ExactAmount回應供斷言。 |
+| `owner 保存共同支出` | 無 | 不支援 | 無 | When：在已填表單提交一次，等待建立結果與權威query更新；記錄請求payload及預留expense ID，不樂觀提交餘額。 |
+| `owner 將晚餐改為 JPY 200、付款 Amy、分攤 Amy、Bob` | 無 | 不支援 | 無 | When：開晚餐編輯表單填JPY200，選Amy付款及Amy/Bob分攤後保存一次；等待PATCH成功與帳本/結算invalidate完成，使用新的相同revision結果。 |
+| `owner 刪除共同支出晚餐` | 無 | 不支援 | 無 | When：開晚餐刪除確認並確認一次，等待DELETE與帳本/結算更新。 |
+| `owner 將代付金額改為 JPY 800` | 無 | 不支援 | 無 | When：編輯代付支出金額800後保存一次，保留付款/分攤者；等待PATCH與兩種模式資料失效更新，保存新的revision。 |
+| `owner 保存共同支出修改` | 無 | 不支援 | 無 | When：提交已填修改一次，等待保存或結果未明狀態；保留原ID與草稿，不重送。 |
+| `點心各成員分攤金額皆顯示 "{顯示}" 且不附算式` | 顯示:string 幣別及格式化金額 | 不支援 | 無 | Then：比對每個被選分攤者的可見文字與accessible name均為指定顯示值；無省略號/循環小數/分數/括號算式/尚未取整，無「精確」「公平」文案。GET expense shares仍各為amount/n的ExactAmount且精確合計原金額，無餘數分配；付款人未選時不得多一份。 |
+| `點心已保存且三人各分攤 JPY 100/3` | 無 | 不支援 | 無 | Then：核對success與帳本點心JPY100；總覽不呈現同行者明細，點入該支出唯讀詳情驗UI份額；GET expense payer=Alice、shares恰Alice/Amy/Bob各100/3（minorUnit0），原日期分類不變；UI各JPY33.33、無分數或額外分配；request只一payer、集合三人；settlement反映同一最新來源。 |
+| `點心只有 Amy 與 Bob 各分攤 JPY 50 且 Alice 應收 JPY 100` | 無 | 不支援 | 無 | Then：總覽僅顯示支出摘要，點入該支出唯讀詳情；畫面/API shares集合恰Amy/Bob各50、payer=Alice；settlement Alice100、Amy/Bob各-50、安排Amy/Bob各付Alice50且無自付。 |
+| `分攤欄提示至少選一人且帳務不變` | 無 | 不支援 | 無 | Then：檢查該欄有可讀修正訊息，草稿保留且無成功提示；API支出/份額/settlement與基準相等，監聽無有效新增寫入。 |
+| `付款欄提示選擇付款人且帳務不變` | 無 | 不支援 | 無 | Then：檢查該欄有可讀修正訊息，草稿保留且無成功提示；API支出/份額/settlement與基準相等，監聽無有效新增寫入。 |
+| `機票仍由 Alice 付款且只由 Alice 分攤並保留原始內容與統計` | 無 | 不支援 | 無 | Then：畫面仍顯示TWD8000與2027-01-15；GET expense payer=ownerMemberId、唯一share=owner且8000，原ID金額幣別日期分類及GET totals逐項等於舊基準，無成員債務。 |
+| `晚餐不再出現且沒有晚餐造成的分攤與付款安排` | 無 | 不支援 | 無 | Then：清單無晚餐、GET expense=404；此唯一支出的shares消失，settlement成員皆0或不再有該幣別，arrangements空，不殘留舊payer/份額。 |
+| `已保存的 JPY 400 還款仍存在且 Amy 剩餘應付 Alice JPY 400` | 無 | 不支援 | 無 | Then：核對GET repayment原ID、兩端、JPY400與paidOn未變；GET expense=800而非1000；前端刷新settlement顯示Amy→Alice JPY400，原TWD300不變。兩種模式均從新來源重建；不得重用舊JPY600結果。 |
+| `修改草稿保留且未宣稱支出與分帳已更新` | 無 | 不支援 | 無 | Then：UI草稿200保留並提示結果尚未確認，無更新成功/已完成重算；舊已確認餘額標記為舊資料而非新結果；監聽只原PATCH一次，原ID查證暫404/不可用也不以成功或未寫入推論。 |
+| `owner 已開啟支出日期日曆且焦點在 2027-03-11` | 無 | 不支援 | viewport以桌面與375px手機各跑；沿用DateField，不以原生日期對話框代替。 | Given：使用owner fixture建立合法旅行與Alice/Amy成員，開支出表單，DateField填2027-03-11並開自訂日曆，焦點定位當日；確認沒有提交寫入。 |
+
+## 歷史結清保護
+
+| DSL 句型 | Gherkin 參數 | Data Table 參數 | 預設參數 | Playwright BDD 實作語意 |
+| --- | --- | --- | --- | --- |
+| `owner 將點心金額改為 JPY 200` | 無 | 不支援 | 無 | When：打開點心修改表單填200提交一次；等待PATCH成功及settlement/repayments失效刷新，保存新revision；不另外結清或改寫實付。 |
+| `owner 刪除共同支出點心` | 無 | 不支援 | 無 | When：在點心刪除確認中確認一次，等待DELETE與帳本/結算刷新；只刪來源，不發實付刪除請求。 |
+| `原結清與差額調整仍保留原值且實付仍顯示 JPY 33` | 無 | 不支援 | 原結清obligation=100/3、Amy實付33、Amy調整+1/3、Alice調整-1/3。 | Then：畫面歷史實付仍顯示Amy→Alice JPY33與原paidOn；GET原settlementId所有不可變欄位逐項等於Given保存快照，兩筆調整及repayment ID/金額/兩端/日期均不變。最新淨額由案例的獨立DataTable斷言承接，不在本句依動作推測oracle。 |

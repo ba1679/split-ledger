@@ -1,0 +1,51 @@
+.settle-page {
+  display: grid;
+  gap: 24px;
+}
+.settle-page > .back,
+.settle-page .page-head {
+  margin: 0;
+}
+.settle-page form {
+  display: grid;
+  gap: 24px;
+}
+.settle-page fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.settle-due {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: var(--ds-card-radius);
+  padding: var(--ds-card-padding);
+}
+.settle-due p {
+  color: var(--muted);
+  margin: 0 0 20px;
+}
+.settle-due h2 {
+  font: 500 22px/1.5 var(--serif);
+  margin: 0;
+}
+.settle-due strong {
+  display: block;
+  font: 500 30px/1.5 var(--serif);
+  color: var(--green);
+  margin-top: 20px;
+}
+.settle-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.settle-unknown {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--ds-card-radius);
+}
+.settle-unknown p {
+  margin-top: 0;
+}

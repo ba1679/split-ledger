@@ -2,10 +2,10 @@
 # 修改本來源及 groups/components，預覽檔不手動維護。
 openapi: 3.0.3
 info:
-  title: 旅帳 Phase 1A API
-  version: 0.1.0
+  title: 旅帳 Phase 1B API
+  version: 0.2.0
   description: |-
-    個人旅行記帳 API；此文件與 groups/components 是唯一可維護來源。
+    Owner 管理的旅行記帳與分帳 API；此文件與 groups/components 是唯一可維護來源。
 
     登入與權限
     - Google OAuth、session 續期與登出由 Better Auth /api/auth/* 管理，僅開 Google provider。
@@ -24,6 +24,13 @@ info:
     - 畫面保留草稿與原 UUID，顯示「保存結果尚未確認」及重新整理入口，不自動重送或產生新 UUID。這不是 exactly-once 保證。
     - PATCH/DELETE 結果不明也先重新讀取資源/統計；不先宣稱成功或失敗。
 
+    分帳與一致性
+    - 同行者只是旅行內帳務成員，沒有登入或讀取權限；所有新端點均檢查目前 session 的旅行 owner。
+    - owner 也有穩定的旅行成員 ID；同旅行成員名稱去首尾空白並以 ASCII 英文不分大小寫比對，停用者仍佔用名稱。
+    - 原始及實付金額沿用十進位大單位字串；公平份額、淨額、安排與差額用已約分的分子/分母十進位字串及歷史 minorUnit 表示，禁止浮點近似。
+    - 所有影響帳務的寫入在旅行鎖內遞增 accountingRevision；結算讀取使用一致來源快照。
+    - 結清需比對安排識別及 revision，保存正數實付與成對差額；獨立還款的超額需先取得警告並明確確認。兩者均不收或存取整方式。
+
     金額與日期的格式見各 schema；目前是規劃契約，尚未實作服務。
 servers:
   - url: /
@@ -32,9 +39,15 @@ tags:
   - name: account
     description: 登入後的最小使用者投影
   - name: trips
-    description: 個人旅行帳本
+    description: Owner 的旅行帳本及分帳設定
   - name: expenses
-    description: 個人支出與分幣別統計
+    description: 個人與共同支出及分幣別統計
+  - name: members
+    description: 旅行內 owner 與同行者帳務身分
+  - name: settlement
+    description: 精確餘額、付款安排與實付結清
+  - name: repayments
+    description: 獨立部分還款與超額確認
   - name: categories
     description: 跨旅行共用的個人分類
   - name: currencies
@@ -56,6 +69,20 @@ paths:
     $ref: ./groups/expenses.yaml#/expense
   /api/trips/{tripId}/totals:
     $ref: ./groups/expenses.yaml#/totals
+  /api/trips/{tripId}/members:
+    $ref: ./groups/members.yaml#/members
+  /api/trips/{tripId}/members/{memberId}:
+    $ref: ./groups/members.yaml#/member
+  /api/trips/{tripId}/settlement:
+    $ref: ./groups/settlement.yaml#/settlement
+  /api/trips/{tripId}/settlements:
+    $ref: ./groups/settlement.yaml#/settlements
+  /api/trips/{tripId}/settlements/{settlementId}:
+    $ref: ./groups/settlement.yaml#/settlementRecord
+  /api/trips/{tripId}/repayments:
+    $ref: ./groups/repayments.yaml#/repayments
+  /api/trips/{tripId}/repayments/{repaymentId}:
+    $ref: ./groups/repayments.yaml#/repayment
   /api/categories:
     $ref: ./groups/categories.yaml#/categories
   /api/categories/{categoryId}:
@@ -71,6 +98,12 @@ components:
       $ref: ./components/parameters.yaml#/TripId
     ExpenseId:
       $ref: ./components/parameters.yaml#/ExpenseId
+    MemberId:
+      $ref: ./components/parameters.yaml#/MemberId
+    SettlementId:
+      $ref: ./components/parameters.yaml#/SettlementId
+    RepaymentId:
+      $ref: ./components/parameters.yaml#/RepaymentId
     CategoryId:
       $ref: ./components/parameters.yaml#/CategoryId
     PageLimit:
@@ -84,6 +117,8 @@ components:
       $ref: ./components/schemas/shared.yaml#/DateOnly
     MoneyAmount:
       $ref: ./components/schemas/shared.yaml#/MoneyAmount
+    ExactAmount:
+      $ref: ./components/schemas/shared.yaml#/ExactAmount
     CurrencyCode:
       $ref: ./components/schemas/shared.yaml#/CurrencyCode
     Me:
@@ -92,6 +127,12 @@ components:
       $ref: ./components/schemas/trips.yaml#/Trip
     Expense:
       $ref: ./components/schemas/expenses.yaml#/Expense
+    TripMember:
+      $ref: ./components/schemas/members.yaml#/TripMember
+    SettlementView:
+      $ref: ./components/schemas/settlement.yaml#/SettlementView
+    Repayment:
+      $ref: ./components/schemas/repayments.yaml#/Repayment
     Category:
       $ref: ./components/schemas/categories.yaml#/Category
     Currency:

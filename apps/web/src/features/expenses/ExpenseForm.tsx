@@ -12,6 +12,7 @@ import {
   type Expense,
   type Category,
   type ItemList,
+  type TripMember,
 } from '../../api/index.js';
 import { DateField } from '../../components/DateField.js';
 import { dateOnly, localToday, parseDate } from '../../components/date.js';
@@ -20,6 +21,7 @@ import { SearchCombo } from '../../components/SearchCombo.js';
 import { FormDialog } from '../../components/FormDialog.js';
 import { useSession } from '../auth/session.js';
 import { displayAmount } from './money.js';
+import { ExpenseShares, formatShareAmount } from './ExpenseShares.js';
 import {
   definitelyRejected,
   OfflineWrite,
@@ -32,10 +34,23 @@ import {
 } from './save-outcome.js';
 import { readCategoryPreference, saveCategoryPreference } from '../categories/preference.js';
 import { Icon } from '../../components/Icon.js';
+import { readCurrencyPreference, saveCurrencyPreference } from './currency-preference.js';
 
-type FieldErrors = Partial<Record<'item' | 'currency' | 'amount' | 'date', string>>;
+type FieldErrors = Partial<
+  Record<'item' | 'currency' | 'amount' | 'date' | 'payerMemberId' | 'shareMemberIds', string>
+>;
 
-export function ExpenseForm() {
+export interface ExpenseDraft {
+  item: string;
+  amount: string;
+  currencyCode: string;
+  spentOn: string;
+  categoryId: string | null;
+  payerMemberId: string | null;
+  shareMemberIds: string[];
+}
+
+export function ExpenseForm({ initialDraft }: { initialDraft?: ExpenseDraft } = {}) {
   const { tripId, expenseId } = useParams(),
     { account } = useSession();
   const trip = useQuery({
@@ -73,6 +88,7 @@ export function ExpenseForm() {
       key={`${account!.id}:${tripId}:${expenseId ?? 'new'}`}
       trip={trip.data}
       expense={expense.data}
+      initialDraft={initialDraft}
       readError={trip.error ?? expense.error}
     />
   );
@@ -82,8 +98,10 @@ function ExpenseEditor({
   trip,
   expense,
   readError,
+  initialDraft,
 }: {
   trip: Trip;
+  initialDraft?: ExpenseDraft;
   expense?: Expense;
   readError: Error | null;
 }) {
@@ -97,11 +115,17 @@ function ExpenseEditor({
     amountInput = useRef<HTMLInputElement>(null),
     writing = useRef(false);
   const [id] = useState(() => expense?.id ?? crypto.randomUUID());
-  const [item, setItem] = useState(expense?.item ?? ''),
-    [currency, setCurrency] = useState(expense?.currencyCode ?? 'JPY'),
-    [amount, setAmount] = useState(expense?.amount ?? '');
+  const [item, setItem] = useState(expense?.item ?? initialDraft?.item ?? ''),
+    [currency, setCurrency] = useState(
+      () =>
+        expense?.currencyCode ??
+        initialDraft?.currencyCode ??
+        readCurrencyPreference(account!.id, tripId) ??
+        'JPY',
+    ),
+    [amount, setAmount] = useState(expense?.amount ?? initialDraft?.amount ?? '');
   const [categoryChoice, setCategory] = useState<string | null>(
-    expense ? (expense.category?.id ?? '') : null,
+    expense ? (expense.category?.id ?? '') : initialDraft ? (initialDraft.categoryId ?? '') : null,
   );
   const [preferredCategory] = useState(() => readCategoryPreference(account!.id));
   const [submittedCategory, setSubmittedCategory] = useState<{
@@ -109,8 +133,22 @@ function ExpenseEditor({
     label: string;
   } | null>(null);
   const [date, setDate] = useState(() =>
-    (expense?.spentOn ?? dateOnly(localToday())).replaceAll('-', '/'),
+    (expense?.spentOn ?? initialDraft?.spentOn ?? dateOnly(localToday())).replaceAll('-', '/'),
   );
+  const [payerMemberId, setPayerMemberId] = useState<string | null>(
+    () =>
+      expense?.payerMemberId ?? (initialDraft ? initialDraft.payerMemberId : trip.ownerMemberId),
+  );
+  const [shareMemberIds, setShareMemberIds] = useState<string[]>(
+    () =>
+      expense?.shares.map((share) => share.memberId) ??
+      initialDraft?.shareMemberIds ?? [trip.ownerMemberId],
+  );
+  const members = useQuery({
+    queryKey: ['account', account!.id, 'members', tripId],
+    queryFn: ({ signal }) =>
+      apiRequest<ItemList<TripMember>>(`/api/trips/${tripId}/members`, { signal }),
+  });
   const [errors, setErrors] = useState<FieldErrors>({}),
     [saveError, setSaveError] = useState('');
   const [deleting, setDeleting] = useState(false);
@@ -171,7 +209,16 @@ function ExpenseEditor({
 
   async function saved(message: string) {
     await Promise.all(
-      ['trip', 'trips', 'expense', 'expenses', 'totals', 'categories'].map((resource) =>
+      [
+        'trip',
+        'trips',
+        'expense',
+        'expenses',
+        'totals',
+        'categories',
+        'settlement',
+        'repayments',
+      ].map((resource) =>
         client.invalidateQueries({ queryKey: ['account', account!.id, resource] }),
       ),
     );
@@ -192,6 +239,8 @@ function ExpenseEditor({
         minorUnit: precision!,
         amountMinor: parseMoney(amount, precision!).toString(),
         categoryId: category || null,
+        payerMemberId: payerMemberId!,
+        shareMemberIds: [...shareMemberIds],
       };
       const payload = {
         item: item.trim(),
@@ -200,6 +249,15 @@ function ExpenseEditor({
         ...(!expense || amount !== expense.amount ? { amount } : {}),
         ...(!expense || currency !== expense.currencyCode ? { currencyCode: currency } : {}),
         ...(!expense ? { id } : {}),
+        ...(!expense || payerMemberId !== expense.payerMemberId ? { payerMemberId } : {}),
+        ...(!expense ||
+        [...shareMemberIds].sort().join() !==
+          expense.shares
+            .map((share) => share.memberId)
+            .sort()
+            .join()
+          ? { shareMemberIds }
+          : {}),
       };
 
       try {
@@ -233,7 +291,9 @@ function ExpenseEditor({
               ? 'date'
               : error.field;
 
-        if (['item', 'currency', 'amount', 'date'].includes(field))
+        if (
+          ['item', 'currency', 'amount', 'date', 'payerMemberId', 'shareMemberIds'].includes(field)
+        )
           setErrors((previous) => ({ ...previous, [field]: error.message }));
       }
     },
@@ -317,6 +377,8 @@ function ExpenseEditor({
     } catch {
       validation.amount = '請輸入符合幣別位數且大於零的正數金額。';
     }
+    if (!payerMemberId) validation.payerMemberId = '請選擇付款人。';
+    if (!shareMemberIds.length) validation.shareMemberIds = '請至少選擇一位分攤者。';
     const parsed = parseDate(date);
 
     if (!parsed) validation.date = '請輸入有效的支出日期，例如 2027/03/11。';
@@ -349,10 +411,9 @@ function ExpenseEditor({
       </Link>
       <header className="page-head">
         <div>
-          <div className="eyebrow">LITTLE DETAILS, WELL KEPT</div>
-          <h1>{expense ? '編輯這筆花費' : '記下這一刻的花費。'}</h1>
+          <h1>{expense ? '編輯這筆花費' : '記下這筆花費'}</h1>
           <p className="muted">
-            {expense ? '修正紀錄，讓帳本更準確。' : '每一筆小事，都是旅程的一部分。'}
+            {expense ? '修正紀錄，讓帳本更準確。' : '先記錄誰付了錢，再選這筆要由誰平均分攤。'}
           </p>
         </div>
       </header>
@@ -361,7 +422,7 @@ function ExpenseEditor({
           暫時無法更新已保存資料，請保留草稿後再試。
         </p>
       ) : null}
-      <form className="form-panel" noValidate onSubmit={submit}>
+      <form className="form-panel expense-form" data-command-id={id} noValidate onSubmit={submit}>
         <fieldset disabled={busy || Boolean(unconfirmed)}>
           <div className="field">
             <label htmlFor={itemId}>支出項目</label>
@@ -379,107 +440,110 @@ function ExpenseEditor({
               {errors.item}
             </p>
           </div>
-          <SearchCombo
-            label="幣別"
-            value={currency}
-            options={currencyOptions}
-            onChange={(value) => {
-              setCurrency(value);
-              const nextPrecision =
-                expense?.currencyCode === value
-                  ? expense.minorUnit
-                  : currencies.data?.items.find((option) => option.code === value)?.minorUnit;
-              const nextDigits = value === 'TWD' ? 0 : nextPrecision;
-              const unchanged = expense?.currencyCode === value && expense.amount === amount;
-              const incompatible =
-                !unchanged &&
-                value &&
-                amount &&
-                nextDigits !== undefined &&
-                !(
-                  nextDigits === 0 ? /^\d*$/ : new RegExp(`^\\d*(?:\\.\\d{0,${nextDigits}})?$`)
-                ).test(amount);
+          <div className="expense-money two-col">
+            <div className="field">
+              <label htmlFor={amountId}>金額</label>
+              <Input
+                id={amountId}
+                ref={amountInput}
+                className="money-input"
+                inputMode={digits === 0 ? 'numeric' : 'decimal'}
+                autoComplete="off"
+                placeholder="0"
+                value={amount}
+                aria-describedby={`${amountId}-hint ${amountId}-error`}
+                aria-invalid={Boolean(errors.amount)}
+                required
+                onChange={(event) => {
+                  const next = event.target.value;
 
-              setErrors((previous) => ({
-                ...previous,
-                currency: undefined,
-                amount: incompatible ? '目前金額不符合新幣別的小數位數，請手動修正。' : undefined,
-              }));
-            }}
-            error={errors.currency}
-            disabled={currencies.isPending || Boolean(currencies.error)}
-          />
-          {currencies.error ? (
-            <p className="error" role="alert">
-              無法取得幣別目錄，請保留草稿。
-              <Button
-                variant="ghost"
-                className="text-btn"
-                type="button"
-                onClick={() => {
-                  void currencies.refetch();
+                  if (accepted(next) || removesCharacters(next)) {
+                    setAmount(next);
+                    setErrors((previous) => ({
+                      ...previous,
+                      amount: accepted(next)
+                        ? undefined
+                        : '目前金額不符合新幣別的小數位數，請手動修正。',
+                    }));
+                  } else
+                    setErrors((previous) => ({
+                      ...previous,
+                      amount: '請輸入符合幣別位數的正數金額。',
+                    }));
                 }}
-              >
-                重新取得幣別
-              </Button>
-            </p>
-          ) : null}
-          <div className="field">
-            <label htmlFor={amountId}>金額</label>
-            <Input
-              id={amountId}
-              ref={amountInput}
-              className="money-input"
-              inputMode={digits === 0 ? 'numeric' : 'decimal'}
-              autoComplete="off"
-              placeholder="0"
-              value={amount}
-              aria-describedby={`${amountId}-hint ${amountId}-error`}
-              aria-invalid={Boolean(errors.amount)}
-              required
-              onChange={(event) => {
-                const next = event.target.value;
+                onPaste={(event) => {
+                  const input = event.currentTarget;
+                  const next =
+                    amount.slice(0, input.selectionStart ?? 0) +
+                    event.clipboardData.getData('text') +
+                    amount.slice(input.selectionEnd ?? amount.length);
 
-                if (accepted(next) || removesCharacters(next)) {
-                  setAmount(next);
-                  setErrors((previous) => ({
-                    ...previous,
-                    amount: accepted(next)
-                      ? undefined
-                      : '目前金額不符合新幣別的小數位數，請手動修正。',
-                  }));
-                } else
-                  setErrors((previous) => ({
-                    ...previous,
-                    amount: '請輸入符合幣別位數的正數金額。',
-                  }));
-              }}
-              onPaste={(event) => {
-                const input = event.currentTarget;
-                const next =
-                  amount.slice(0, input.selectionStart ?? 0) +
-                  event.clipboardData.getData('text') +
-                  amount.slice(input.selectionEnd ?? amount.length);
+                  if (!accepted(next)) {
+                    event.preventDefault();
+                    setErrors((previous) => ({
+                      ...previous,
+                      amount: '貼上的金額不符合幣別位數，已保留原值。',
+                    }));
+                  }
+                }}
+              />
+              <p id={`${amountId}-hint`} className="field-hint">
+                {digits === undefined
+                  ? '請先選擇幣別。'
+                  : digits
+                    ? `${currency} 最多 ${digits} 位小數`
+                    : `${currency} 使用整數金額`}
+              </p>
+              <p id={`${amountId}-error`} className="error" role="status">
+                {errors.amount}
+              </p>
+            </div>
+            <SearchCombo
+              label="幣別"
+              value={currency}
+              options={currencyOptions}
+              onSelect={(value) => saveCurrencyPreference(account!.id, tripId, value)}
+              onChange={(value) => {
+                setCurrency(value);
+                const nextPrecision =
+                  expense?.currencyCode === value
+                    ? expense.minorUnit
+                    : currencies.data?.items.find((option) => option.code === value)?.minorUnit;
+                const nextDigits = value === 'TWD' ? 0 : nextPrecision;
+                const unchanged = expense?.currencyCode === value && expense.amount === amount;
+                const incompatible =
+                  !unchanged &&
+                  value &&
+                  amount &&
+                  nextDigits !== undefined &&
+                  !(
+                    nextDigits === 0 ? /^\d*$/ : new RegExp(`^\\d*(?:\\.\\d{0,${nextDigits}})?$`)
+                  ).test(amount);
 
-                if (!accepted(next)) {
-                  event.preventDefault();
-                  setErrors((previous) => ({
-                    ...previous,
-                    amount: '貼上的金額不符合幣別位數，已保留原值。',
-                  }));
-                }
+                setErrors((previous) => ({
+                  ...previous,
+                  currency: undefined,
+                  amount: incompatible ? '目前金額不符合新幣別的小數位數，請手動修正。' : undefined,
+                }));
               }}
+              error={errors.currency}
+              disabled={currencies.isPending || Boolean(currencies.error)}
             />
-            <p id={`${amountId}-hint`} className="field-hint">
-              {digits === undefined
-                ? '請先選擇幣別。'
-                : digits
-                  ? `${currency} 最多 ${digits} 位小數`
-                  : `${currency} 使用整數金額`}
-            </p>
-            <p id={`${amountId}-error`} className="error" role="status">
-              {errors.amount}
-            </p>
+            {currencies.error ? (
+              <p className="error" role="alert">
+                無法取得幣別目錄，請保留草稿。
+                <Button
+                  variant="ghost"
+                  className="text-btn"
+                  type="button"
+                  onClick={() => {
+                    void currencies.refetch();
+                  }}
+                >
+                  重新取得幣別
+                </Button>
+              </p>
+            ) : null}
           </div>
           <div className="two-col">
             <DateField label="支出日期" value={date} onChange={setDate} error={errors.date} />
@@ -510,6 +574,107 @@ function ExpenseEditor({
               ) : null}
             </div>
           </div>
+          {members.data ? (
+            <div className="expense-sharing">
+              <fieldset
+                className="member-picker"
+                aria-describedby={errors.payerMemberId ? `${itemId}-payer-error` : undefined}
+              >
+                <legend>誰付款？</legend>
+                <div className="member-choices">
+                  {members.data.items
+                    .filter((member) => member.isActive || member.id === expense?.payerMemberId)
+                    .map((member) => (
+                      <label key={member.id} className="member-choice">
+                        <input
+                          type="radio"
+                          name={`${id}-payer`}
+                          value={member.id}
+                          checked={payerMemberId === member.id}
+                          disabled={!member.isActive}
+                          onChange={() => setPayerMemberId(member.id)}
+                          aria-invalid={Boolean(errors.payerMemberId)}
+                        />
+                        <span>{member.name}</span>
+                      </label>
+                    ))}
+                </div>
+                <p id={`${itemId}-payer-error`} className="error" role="alert">
+                  {errors.payerMemberId}
+                </p>
+              </fieldset>
+              <fieldset
+                className="member-picker"
+                aria-describedby={errors.shareMemberIds ? `${itemId}-shares-error` : undefined}
+              >
+                <legend>誰一起平均分攤？</legend>
+                <div className="member-choices">
+                  {members.data.items
+                    .filter(
+                      (member) =>
+                        member.isActive ||
+                        expense?.shares.some((share) => share.memberId === member.id),
+                    )
+                    .map((member) => (
+                      <label key={member.id} className="member-choice">
+                        <input
+                          type="checkbox"
+                          value={member.id}
+                          checked={shareMemberIds.includes(member.id)}
+                          disabled={!member.isActive}
+                          onChange={(event) =>
+                            setShareMemberIds((previous) =>
+                              event.target.checked
+                                ? [...previous, member.id]
+                                : previous.filter((value) => value !== member.id),
+                            )
+                          }
+                          aria-invalid={Boolean(errors.shareMemberIds)}
+                        />
+                        <span>{member.name}</span>
+                      </label>
+                    ))}
+                </div>
+                <p id={`${itemId}-shares-error`} className="error" role="alert">
+                  {errors.shareMemberIds}
+                </p>
+              </fieldset>
+              <p className="field-hint">付款人可以不參與分攤。</p>
+              {shareMemberIds.length && precision !== undefined
+                ? (() => {
+                    try {
+                      const display = `${currency} ${formatShareAmount({ numerator: parseMoney(amount, precision).toString(), denominator: String(shareMemberIds.length), minorUnit: precision })}`;
+
+                      return (
+                        <div className="share-preview">
+                          <div>
+                            每人分攤
+                            <p className="field-hint">
+                              {members.data.items
+                                .filter((member) => shareMemberIds.includes(member.id))
+                                .map((member) => member.name)
+                                .join('、')}
+                            </p>
+                          </div>
+                          <output aria-label={display}>{display}</output>
+                        </div>
+                      );
+                    } catch {
+                      return null;
+                    }
+                  })()
+                : null}
+              {expense ? <ExpenseShares expense={expense} members={members.data.items} /> : null}
+            </div>
+          ) : (
+            <QueryState
+              pending={members.isPending}
+              error={members.error}
+              retry={() => {
+                void members.refetch();
+              }}
+            />
+          )}
         </fieldset>
         <p className="error" role="alert">
           {saveError}
@@ -551,6 +716,8 @@ function ExpenseEditor({
               busy ||
               Boolean(unconfirmed) ||
               awaitingPreference ||
+              members.isPending ||
+              Boolean(members.error) ||
               currencies.isPending ||
               Boolean(currencies.error)
             }

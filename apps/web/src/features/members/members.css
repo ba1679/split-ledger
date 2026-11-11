@@ -1,0 +1,83 @@
+.member-add-panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--ds-card-radius);
+  padding: var(--ds-card-padding);
+  margin-bottom: 28px;
+}
+.member-add-panel h2 {
+  margin-top: 0;
+}
+.member-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 28px;
+}
+.member-list > li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid var(--line);
+  padding: 20px 0;
+}
+.member-person {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.member-person > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.member-person p {
+  margin: 4px 0 0;
+  font-size: 13px;
+}
+.member-avatar {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--soft);
+  color: var(--green);
+  display: grid;
+  place-items: center;
+}
+.member-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.member-actions .ds-button {
+  min-height: 44px;
+}
+.member-balance {
+  font-variant-numeric: tabular-nums;
+}
+.member-unknown {
+  padding: 16px;
+  background: var(--warning-surface);
+  margin-bottom: 16px;
+  border-radius: 8px;
+}
+@media (max-width: 600px) {
+  .member-list > li {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .member-actions {
+    width: 100%;
+    padding-left: 56px;
+  }
+}
+
+.member-rename-panel {
+  display: grid;
+  gap: 12px;
+}
+.member-rename-panel > .ds-button {
+  justify-self: start;
+}

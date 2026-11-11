@@ -43,11 +43,14 @@ expenses:
     x-session-required: true
     security:
       - BetterAuthSession: []
-    summary: 記錄個人支出
+    summary: 記錄個人或共同支出
     description: |
       項目、正數金額、幣別、日期必填；分類選填。支出日期可在旅行日期之外。
       日期預設由裝置填入，API 不推測使用者時區。金額依指定幣別位數精確驗證，
-      不接受靜默修正。用戶端產生 UUID 並在結果未確認時保留用於查證。
+      不接受靜默修正。共同支出須同時提供 payerMemberId 與非空、無重複的 shareMemberIds；
+      兩者均省略時沿用 Phase 1A 個人支出請求，解讀為 owner 付款、僅 owner 分攤。
+      指定成員必須同旅行且啟用，付款人可不參與分攤。用戶端產生 UUID 並在結果未確認時保留用於查證。
+      成功後帳務 revision 遞增，分攤份額與安排從最新來源精確重算。
     requestBody:
       required: true
       content:
@@ -62,7 +65,7 @@ expenses:
             schema:
               $ref: ../components/schemas/expenses.yaml#/Expense
       '400':
-        description: 欄位、日期、金額、幣別、位數或 Content-Type 不合法；code=VALIDATION_ERROR。
+        description: 欄位、日期、金額、幣別、位數、無效/停用成員或 Content-Type 不合法；code=VALIDATION_ERROR。
         content:
           application/json:
             schema:
@@ -74,7 +77,7 @@ expenses:
             schema:
               $ref: ../components/schemas/shared.yaml#/ApiError
       '404':
-        description: 旅行或指定分類不存在或不屬於目前帳號；不揭露他人資源。
+        description: 旅行、指定分類或指定成員不存在或不屬於目前帳號/旅行；不揭露他人資源。
         content:
           application/json:
             schema:
@@ -133,6 +136,9 @@ expense:
       僅改項目/日期/分類不重解讀金額；幣別未變、只改金額時仍用本筆歷史 minorUnit。
       實際改幣別才採新目錄位數；未傳新金額則沿用原大單位數值，不換算、不四捨五入；不合新位數則拒絕。
       成功後從權威支出資料重算各受影響幣別總額、旅行筆數與分類使用筆數。
+      payerMemberId 省略保留原付款人，shareMemberIds 省略保留原集合；明確提供分攤者時完整取代。
+      新指定的成員須同旅行且啟用；僅改其他欄位時可保留既有停用成員歷史關聯。
+      支出及分攤集合在旅行鎖內原子修改並遞增 revision；原有還款與結清事實不改寫。
     requestBody:
       required: true
       content:
@@ -159,7 +165,7 @@ expense:
             schema:
               $ref: ../components/schemas/shared.yaml#/ApiError
       '404':
-        description: 旅行、支出或新分類不存在或不屬於目前帳號。
+        description: 旅行、支出、新分類或新指定成員不存在或不屬目前帳號/旅行。
         content:
           application/json:
             schema:
@@ -177,7 +183,7 @@ expense:
     security:
       - BetterAuthSession: []
     summary: 刪除單筆支出
-    description: 成功後支出不再列出，也不計入任何幣別總額；重複刪除回 404。
+    description: 成功後支出及其分攤貢獻不再列出或計入總額、餘額與安排；已發生的還款與結清歷史保留，旅行帳務 revision 遞增。重複刪除回 404。
     responses:
       '204':
         description: 刪除成功，無回應本文。
@@ -211,6 +217,15 @@ totals:
   get:
     tags: [expenses]
     operationId: getTripTotals
+    parameters:
+      - name: scope
+        in: query
+        required: false
+        schema:
+          type: string
+          enum: [all, personal]
+          default: all
+        description: personal 僅加總固定 owner 成員實際參與分攤的精確份額；不含純代付、還款或結清調整。省略維持原旅行全部支出總額。
     x-session-required: true
     security:
       - BetterAuthSession: []
@@ -220,13 +235,16 @@ totals:
       按 currency_code,minor_unit 使用 SUM(bigint)，以 NUMERIC 整數字串接收，不轉 JS Number。
       同代碼若有不同歷史位數，用 BigInt 升到該幣別最大 minorUnit 再加總；如 12.3 + 1.23 = 13.53。
       群組總額可超過單筆 BIGINT 範圍。修改/刪除後讀取目前結果；沒有支出的幣別不列出。
+      scope=personal 時，在同一唯讀快照內讀取全旅行支出及分攤集合，以 BigInt 有理數逐筆加總 owner 份額，不使用分頁資料或逐筆取整；回傳 ExactAmount。owner 未參與的幣別不列出。
     responses:
       '200':
         description: 依幣別代碼升序的總額陣列；空旅行回空陣列。
         content:
           application/json:
             schema:
-              $ref: ../components/schemas/expenses.yaml#/TotalsResponse
+              anyOf:
+                - $ref: ../components/schemas/expenses.yaml#/TotalsResponse
+                - $ref: ../components/schemas/expenses.yaml#/PersonalTotalsResponse
       '401':
         description: 尚未登入。
         content:

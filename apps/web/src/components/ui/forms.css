@@ -16,6 +16,22 @@
   margin-bottom: 24px;
   min-width: 0;
 }
+.native-select {
+  position: relative;
+  min-width: 0;
+}
+.native-select > select {
+  appearance: none;
+  padding-right: 44px;
+}
+.native-select > svg {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--green);
+}
 .field label {
   display: block;
   font-size: 14px;

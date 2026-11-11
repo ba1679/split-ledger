@@ -1,3 +1,18 @@
+export type {
+  ExactAmount,
+  Rational,
+  SplittingCurrency,
+  SplittingMember,
+  SharedExpenseInput,
+  RepaymentInput,
+  SettlementAdjustmentInput,
+  MemberBalance,
+  PaymentArrangement,
+  SplittingInput,
+  SplittingResult,
+  CalculateSplitting,
+} from './splitting.js';
+
 export const MAX_AMOUNT_MINOR = 9223372036854775807n;
 
 function checkUnit(minorUnit: number) {
@@ -76,3 +91,9 @@ export function combineMoney(
       amount: formatMoney(row.amount, row.unit),
     }));
 }
+
+export { calculateSplitting } from './splitting.js';
+
+export { rational, addRational, negateRational, exactAmount } from './rational.js';
+
+export { classifyArrangementPayment, prefillArrangementPayment } from './arrangement-payment.js';

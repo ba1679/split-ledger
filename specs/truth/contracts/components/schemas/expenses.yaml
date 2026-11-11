@@ -1,7 +1,7 @@
 Expense:
   type: object
   additionalProperties: false
-  required: [id, tripId, item, amount, currencyCode, minorUnit, spentOn, category, createdAt, updatedAt]
+  required: [id, tripId, item, amount, currencyCode, minorUnit, spentOn, category, payerMemberId, shares, createdAt, updatedAt]
   properties:
     id:
       type: string
@@ -24,6 +24,16 @@ Expense:
       description: 建立或修改此筆金額時採用的幣別小數位數，歷史資料不隨目錄更新而重算。
     spentOn:
       $ref: ./shared.yaml#/DateOnly
+    payerMemberId:
+      type: string
+      format: uuid
+      description: 同旅行的穩定付款人成員 ID；Phase 1A 舊支出回填為 owner 成員。
+    shares:
+      type: array
+      minItems: 1
+      description: 依 memberId 升序，所有分攤者精確平均；Phase 1A 舊支出只有 owner。
+      items:
+        $ref: '#/ExpenseShare'
     category:
       type: object
       nullable: true
@@ -40,6 +50,16 @@ Expense:
       $ref: ./shared.yaml#/IsoTimestamp
     updatedAt:
       $ref: ./shared.yaml#/IsoTimestamp
+ExpenseShare:
+  type: object
+  additionalProperties: false
+  required: [memberId, amount]
+  properties:
+    memberId:
+      type: string
+      format: uuid
+    amount:
+      $ref: ./shared.yaml#/ExactAmount
 CreateExpenseRequest:
   type: object
   additionalProperties: false
@@ -64,6 +84,18 @@ CreateExpenseRequest:
       format: uuid
       nullable: true
       description: 省略或 null 均為未分類；必須屬於目前帳號。
+    payerMemberId:
+      type: string
+      format: uuid
+      description: 共同支出須與 shareMemberIds 同時提供；兩者同時省略時相容舊個人支出請求，解讀為 owner 付款、僅 owner 分攤。
+    shareMemberIds:
+      type: array
+      minItems: 1
+      uniqueItems: true
+      items:
+        type: string
+        format: uuid
+      description: 至少一位同旅行有效成員；共同支出須與 payerMemberId 同時提供。付款人可以不在其中。
 UpdateExpenseRequest:
   type: object
   additionalProperties: false
@@ -84,6 +116,18 @@ UpdateExpenseRequest:
       format: uuid
       nullable: true
       description: 省略不變；null 清除分類。新分類須屬於目前帳號。
+    payerMemberId:
+      type: string
+      format: uuid
+      description: 省略保留原付款人；明確提供時必須是同旅行有效成員。
+    shareMemberIds:
+      type: array
+      minItems: 1
+      uniqueItems: true
+      items:
+        type: string
+        format: uuid
+      description: 省略保留原集合；提供時完整取代，成員都必須有效。僅改既有支出的其他欄位可保留已停用成員歷史關聯。
 ExpenseList:
   type: object
   additionalProperties: false
@@ -126,3 +170,20 @@ TotalsResponse:
       description: 僅列出目前仍有支出的幣別；沒有支出則為空陣列。
       items:
         $ref: '#/CurrencyTotal'
+PersonalTotalsResponse:
+  type: object
+  additionalProperties: false
+  required: [totals]
+  description: scope=personal 的個人消費份額總額；不受付款人、獨立還款或結清差額影響。
+  properties:
+    totals:
+      type: array
+      items:
+        type: object
+        additionalProperties: false
+        required: [currencyCode, amount]
+        properties:
+          currencyCode:
+            $ref: ./shared.yaml#/CurrencyCode
+          amount:
+            $ref: ./shared.yaml#/ExactAmount

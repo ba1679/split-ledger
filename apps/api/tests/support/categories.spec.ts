@@ -83,9 +83,21 @@ test('category deletion waits for a concurrent expense reference and preserves b
 
   try {
     await client.query('BEGIN');
+    const members = await client.query<{ id: string }>(
+      "SELECT id FROM trip_members WHERE owner_id=$1 AND trip_id=$2 AND role='owner'",
+      [user.id, trip.id],
+    );
+
+    expect(members.rows).toHaveLength(1);
+    const memberId = members.rows[0]!.id;
+
     await client.query(
-      'INSERT INTO expenses(id,owner_id,trip_id,category_id,item,amount_minor,currency_code,minor_unit,spent_on) VALUES($1,$2,$3,$4,$5,100,$6,0,$7)',
-      [expenseId, user.id, trip.id, category.id, '午餐', 'JPY', '2027-03-11'],
+      'INSERT INTO expenses(id,owner_id,trip_id,category_id,item,amount_minor,currency_code,minor_unit,spent_on,payer_member_id) VALUES($1,$2,$3,$4,$5,100,$6,0,$7,$8)',
+      [expenseId, user.id, trip.id, category.id, '午餐', 'JPY', '2027-03-11', memberId],
+    );
+    await client.query(
+      'INSERT INTO expense_shares(owner_id,trip_id,expense_id,member_id) VALUES($1,$2,$3,$4)',
+      [user.id, trip.id, expenseId, memberId],
     );
     deletion = world.api.delete(`/api/categories/${category.id}`, {
       headers: { cookie: user.cookie, origin: world.get('webOrigin') },
