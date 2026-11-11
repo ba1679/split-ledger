@@ -34,6 +34,7 @@ import {
 } from './save-outcome.js';
 import { readCategoryPreference, saveCategoryPreference } from '../categories/preference.js';
 import { Icon } from '../../components/Icon.js';
+import { readCurrencyPreference, saveCurrencyPreference } from './currency-preference.js';
 
 type FieldErrors = Partial<
   Record<'item' | 'currency' | 'amount' | 'date' | 'payerMemberId' | 'shareMemberIds', string>
@@ -116,7 +117,11 @@ function ExpenseEditor({
   const [id] = useState(() => expense?.id ?? crypto.randomUUID());
   const [item, setItem] = useState(expense?.item ?? initialDraft?.item ?? ''),
     [currency, setCurrency] = useState(
-      expense?.currencyCode ?? initialDraft?.currencyCode ?? 'JPY',
+      () =>
+        expense?.currencyCode ??
+        initialDraft?.currencyCode ??
+        readCurrencyPreference(account!.id, tripId) ??
+        'JPY',
     ),
     [amount, setAmount] = useState(expense?.amount ?? initialDraft?.amount ?? '');
   const [categoryChoice, setCategory] = useState<string | null>(
@@ -497,6 +502,7 @@ function ExpenseEditor({
               label="幣別"
               value={currency}
               options={currencyOptions}
+              onSelect={(value) => saveCurrencyPreference(account!.id, tripId, value)}
               onChange={(value) => {
                 setCurrency(value);
                 const nextPrecision =
