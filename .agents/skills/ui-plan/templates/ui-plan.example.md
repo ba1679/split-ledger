@@ -1,11 +1,42 @@
-# 前端 / UI 與靜態雛形規劃
+# 前端 / UI 設計與可操作雛形規劃
 
 ## 介面範圍
 
 - 目標系統介面：`前端商品瀏覽、購物車與結帳介面`
 - 需求來源：`使用者故事 1 至 4、FR-002、FR-005、FR-011、FR-014 與 NFR-003`
 - 上游依據：`spec.md、research.md、techstack.md、plan.md Wave 1`
-- 產出順序：`先定稿 ui/ui-plan.md，再依這份 plan 產出 ui/*.html 靜態雛形。`
+- 產出順序：`UI plan → shop.pen 與預覽 → 開發者確認 design-v1 → prototype 與同步檢查 → 下游。`
+
+## 設計交付與開發者確認
+
+- 設計檔與固定版本：`ui/shop.pen；design-v1；實際交付時填入檔案 SHA256 或固定 commit`
+- 桌機／手機尺寸及預覽：`1280×900、375×812；ui/design-previews/ 下各主畫面與關鍵狀態`
+- 確認狀態：`pending`
+- 確認者、日期、原回覆或引用與範圍：`尚未取得；本例為交付設計等待確認的狀態，不能視為已批准`
+- 重大待決事項及受阻下游：`prototype、依賴這批設計的前端 DSL／tasks／實作均待確認；以下雛形路徑是規劃，尚未產出`
+
+<!-- 狀態使用 pending／changes-requested／approved；沒有回覆時不填造確認證據。只有批准有效後才製作 prototype。 -->
+
+## 畫面交接索引與同步狀態
+
+| 畫面／狀態 ID        | 資訊責任與區塊順序                               | .pen frame／預覽／尺寸與資料                                                                             | Prototype 路徑／狀態入口                 | 正式路由／元件                    | Feature／tasks                 | 設計／prototype／實作版本與同步狀態    |
+| -------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------- | ---------------------------------------- | --------------------------------- | ------------------------------ | -------------------------------------- |
+| catalog/normal       | 搜尋 → 分類 → 商品卡；完整規格與配送資訊在詳情頁 | shop.pen：catalog-desktop、catalog-mobile；預覽 catalog-desktop.png、catalog-mobile.png；同一組 8 件商品 | 規劃 ui/index.html?state=normal          | 規劃 /products；CatalogPage       | 商品瀏覽 feature；tasks 待綁定 | design-v1／尚未產出／尚未產出；pending |
+| product/normal       | 商品圖片 → 價格 → 規格 → 加入購物車              | shop.pen：product-desktop、product-mobile；預覽同名 PNG；1280px／375px、同一組商品                       | 規劃 ui/product-detail.html?state=normal | 規劃 /products/:id；ProductDetail | 對應 feature；tasks 待綁定     | design-v1／尚未產出／尚未產出；pending |
+| checkout/normal      | 購物車 → 配送 → 付款 → 訂單金額 → 送出           | shop.pen：checkout-desktop、checkout-mobile；預覽同名 PNG；1280px／375px、同一組商品                     | 規劃 ui/checkout.html?state=normal       | 規劃 /checkout；Checkout          | 對應 feature；tasks 待綁定     | design-v1／尚未產出／尚未產出；pending |
+| order/success        | 成功狀態 → 訂單摘要 → 查詢／繼續購物             | shop.pen：success-desktop、success-mobile；預覽同名 PNG；1280px／375px、同一組商品                       | 規劃 ui/order-success.html?state=success | 規劃 /orders/:id；OrderResult     | 對應 feature；tasks 待綁定     | design-v1／尚未產出／尚未產出；pending |
+| catalog/empty        | 保留搜尋與清除條件入口，顯示無結果               | shop.pen：catalog-empty-desktop、catalog-empty-mobile；預覽同名 PNG；1280px／375px、同一組商品           | 規劃 ui/index.html?state=empty           | 規劃 /products；CatalogPage       | 對應 feature；tasks 待綁定     | design-v1／尚未產出／尚未產出；pending |
+| catalog/loading      | 商品卡共用載入元件，保留列表結構                 | shop.pen：catalog-loading-component；預覽同名 PNG；1280px／375px、同一組商品                             | 規劃 ui/index.html?state=loading         | 規劃 /products；CatalogPage       | 對應 feature；tasks 待綁定     | design-v1／尚未產出／尚未產出；pending |
+| catalog/error        | 保留搜尋、顯示讀取錯誤與重試                     | shop.pen：catalog-error-desktop、catalog-error-mobile；預覽同名 PNG；1280px／375px、同一組商品           | 規劃 ui/index.html?state=error           | 規劃 /products；CatalogPage       | 對應 feature；tasks 待綁定     | design-v1／尚未產出／尚未產出；pending |
+| catalog/long-name    | 長名稱自然換行，商品價格與入口可讀               | shop.pen：catalog-long-desktop、catalog-long-mobile；預覽同名 PNG；1280px／375px、同一組商品             | 規劃 ui/index.html?state=long-name       | 規劃 /products；CatalogPage       | 對應 feature；tasks 待綁定     | design-v1／尚未產出／尚未產出；pending |
+| checkout/invalid     | 欄位就近錯誤並保留輸入                           | shop.pen：checkout-invalid-desktop、checkout-invalid-mobile；預覽同名 PNG；1280px／375px、同一組商品     | 規劃 ui/checkout.html?state=invalid      | 規劃 /checkout；Checkout          | 對應 feature；tasks 待綁定     | design-v1／尚未產出／尚未產出；pending |
+| checkout/confirm     | 確認訂單摘要並可取消返回                         | shop.pen：checkout-confirm-desktop、checkout-confirm-mobile；預覽同名 PNG；1280px／375px、同一組商品     | 規劃 ui/checkout.html?state=confirm      | 規劃 /checkout；Checkout          | 對應 feature；tasks 待綁定     | design-v1／尚未產出／尚未產出；pending |
+| checkout/unconfirmed | 保留訂單意圖，顯示查證入口                       | shop.pen：checkout-unknown-desktop、checkout-unknown-mobile；預覽同名 PNG；1280px／375px、同一組商品     | 規劃 ui/checkout.html?state=unconfirmed  | 規劃 /checkout；Checkout          | 對應 feature；tasks 待綁定     | design-v1／尚未產出／尚未產出；pending |
+
+- 共用元件與響應式規則：`商品卡採共用字級／間距；桌機多欄、手機單欄，中間寬度依可用寬度換欄`
+- 關鍵狀態覆蓋及可共用／不適用理由：`四個主畫面各有桌機／手機 frame；catalog 的空白、載入／讀取錯誤、長商品名，以及 checkout 的欄位錯誤、確認、結果未明以補充 frame 呈現；重複 loading 使用同元件規則`
+- 需要明確確認的設計變更與 AI 可自主適配範圍：`AI 可適配換行與高度；改商品區塊順序或結帳 CTA 位置須更新設計並重新確認`
+- 舊產物／未同步項目與處理：`尚未製作 prototype；舊示意如存在須標歷史版本並移除下游參照`
 
 ## 視覺方向
 
@@ -85,3 +116,15 @@
 - 對後端契約的依賴：`商品列表查詢、商品詳情、庫存狀態、購物車同步、優惠試算、訂單送出與付款錯誤事件。`
 - 驗收重點：`從瀏覽商品到完成一次下單的流程必須連續且可理解，且不得暴露不必要的付款或後端內部資訊。`
 
+## 同步檢查、差異與交接
+
+- 本例進度：design-v1 已交付、pending；等待開發者確認，prototype 尚未製作。
+- 確認後操作計畫：商品列表 → 詳情 → 結帳 → 結果；另演示取消、欄位錯誤與結果未明；使用假資料，不驗證真實扣款。
+- 比對計畫：同一組商品與金額、1280px／375px，各畫面及關鍵狀態；證據連至 validation.md。
+
+| 畫面／版本               | 設計預期       | 實際呈現／截圖   | 差異與影響 | 處理結果／確認依據           |
+| ------------------------ | -------------- | ---------------- | ---------- | ---------------------------- |
+| catalog/normal design-v1 | 手機單欄商品卡 | prototype 未產出 | 待比對     | 批准後製作並驗證，不宣告同步 |
+
+- 下一 checkpoint：收到 design-v1 明確確認後製作 prototype；同步通過再交付前端 DSL。
+- 續跑資訊：handoff.md 記錄版本、批准、受阻範圍與下一入口。

@@ -10,9 +10,9 @@
 - 這個例子是好的，因為 `index.html` 本身就是產品入口，而不是額外的導覽文件。
 
 ```md
-ui/index.html           -> 商品列表入口畫面
-ui/product-detail.html  -> 商品詳情畫面
-ui/checkout.html        -> 購物車與結帳畫面
+ui/index.html -> 商品列表入口畫面
+ui/product-detail.html -> 商品詳情畫面
+ui/checkout.html -> 購物車與結帳畫面
 ```
 
 ## Bad Example
@@ -21,6 +21,7 @@ ui/checkout.html        -> 購物車與結帳畫面
 
 ```md
 ui/index.html
+
 - Link: product-detail.html
 - Link: checkout.html
 - Link: order-success.html
@@ -39,6 +40,7 @@ ui/index.html
 
 ```md
 流程覆蓋：
+
 1. 瀏覽或搜尋商品
 2. 查看商品詳情與規格
 3. 確認購物車與結帳資訊
@@ -51,6 +53,7 @@ ui/index.html
 
 ```md
 流程覆蓋：
+
 1. 只做一個訂單成功頁
 2. 沒有入口
 3. 沒有瀏覽、加入購物車或結帳流程
@@ -58,7 +61,7 @@ ui/index.html
 
 # Rule 3 - 靜態雛形仍必須可操作，並以假資料模擬真實互動
 
-- Level: `SHOULD`
+- Level: `MUST`
 - 雖然雛形不連真實後端，仍應提供可點擊按鈕、可切頁導覽、表單輸入與以假資料呈現的狀態切換，讓使用者能感受真實產品節奏。
 - 可用前端假資料、前端條件切換或簡單 JavaScript 模擬購物車狀態、錯誤提示與送單變化。
 - 不應只交付靜態截圖式頁面，讓 reviewer 無法操作或感受互動。

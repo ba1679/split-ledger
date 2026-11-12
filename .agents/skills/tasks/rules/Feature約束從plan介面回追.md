@@ -7,7 +7,7 @@
   2. 到 `plan.md`「系統介面的盤點」找涵蓋這條路徑的系統介面。
   3. 看該介面在 Wave 裡交給哪個 planner（`/ui-plan`、`/api-plan`、`/data-plan`；techstack 對 `/technical-research`）。
   4. 把那個 planner **現在已產出、且約束這個模組** 的檔列入 `Shared Must Read`，並寫到具體部位。
-  5. 只綁這個模組。不得把全部 `ui/*.html`、全部 api group 或整份 `data-model.dbml` 塞進每一個 Feature phase。
+  5. 綁定實際受影響的畫面與共享導航／元件，允許跨模組；從畫面索引取得 frame／預覽、prototype 及有效設計批准版本。不得只按 feature 資料夾挑主畫面，也不得把全部 UI、API 或資料模型塞進每一個 phase。
 - truth 產物用同份 `truth-delta.md` 的 `/api-plan`、`/data-plan`、`/technical-research` 列，對到這個模組。
 - plan-side 產物（路徑不在 `specs/truth/**`）用該 planner 自己的 plan 點名，例如 `ui/ui-plan.md` 該畫面的「對應雛形檔案」。
 - 不得為個別技術（MUI、CSS、雛形檔名）另開規則。Foundational 仍可空白；這條只約束 Feature phase。
@@ -22,6 +22,7 @@ plan.md 對到 `現場三畫面 UI 介面`，planner 是 `/ui-plan`。
 ui/ui-plan.md 寫工位終端對應 `ui/index.html`。
 
 **Shared Must Read**:
+
 - `specs/truth/features/frontend/工位終端/登入操作與動態表單.feature` -> Feature 全文
 - `specs/truth/features/frontend/工位終端/dsl.md` -> 本檔 Given／When／Then
 - `truth-delta.md` -> 該 /dsl-refine 列
@@ -35,14 +36,15 @@ ui/ui-plan.md 寫工位終端對應 `ui/index.html`。
 
 ```md
 **Shared Must Read**:
+
 - feature / dsl / truth-delta
-（plan.md 有 UI 介面，ui/index.html 也在，但不列）
+  （plan.md 有 UI 介面，ui/index.html 也在，但不列）
 ```
 
 # Rule 2 - 回追點名的產物不存在時必須停止並回交該 planner
 
 - Level: `MUST`
-- 回追點名的檔不存在、`plan.md` 找不到涵蓋該路徑的系統介面、或 planner plan 沒有對應列：停止這個介面的 Feature phase，回交該 planner。
+- 回追點名的檔不存在、`plan.md` 找不到涵蓋該路徑的系統介面、planner plan 沒有對應列，或 UI 設計未獲開發者確認／prototype 未同步：停止受影響的 Feature phase，回交該 planner。
 - 不得把 Goal 改成「畫面可空白」或「先不綁產物」後繼續輸出 `[BDD-GREEN]`。
 - Foundational 的「畫面可空白」不得拿來覆蓋 Feature phase。
 - 回交對象依缺失產物決定：缺雛形或 `ui-plan.md` 回交 `/ui-plan`；缺契約回交 `/api-plan`；缺資料模型回交 `/data-plan`；缺 techstack 回交 `/technical-research`。
@@ -74,6 +76,7 @@ ui/ui-plan.md 寫工位終端對應 `ui/index.html`，但該檔不存在。
 - 這題的 `Read` 是本輪用到的該家族 plan-side 產物，以及已實作的對應產品面。
 - 通過條件是產品對齊該 plan-side 產物。`Test Scope` 全綠不能代替。這題不改 truth、不加 feature、不重跑 GREEN 當通過條件。
 - 本輪沒有 plan-side 產物，整題省略。不得發明新 marker。
+- UI 另在各畫面完成條件納入比對證據，於第一個代表畫面完成後安排桌機／手機比對 checkpoint，後續套用同版型的 tasks 明列依賴；這些不另算每個 feature 的家族 gate。最終 UI gate 逐項核對設計、prototype、產品版本及差異，不以控制項尺寸通過取代視覺對齊。
 
 ## Good Example
 
@@ -85,6 +88,7 @@ ui/ui-plan.md 寫工位終端對應 `ui/index.html`，但該檔不存在。
 ## Phase 4R: UI quality gate
 
 **Read**:
+
 - `ui/ui-plan.md` -> 視覺方向
 - `ui/index.html`、`ui/status-board.html`、`ui/settings.html`
 - `frontend/src/pages/`

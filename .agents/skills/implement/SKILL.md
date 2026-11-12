@@ -1,6 +1,6 @@
 ---
 name: implement
-description: 根據 plan package 的 `tasks.md`，以 don't stop until deliver / One-Shot 執行已解鎖 task。一輪恰好 1 個 task 或 Parallel Hint 批次；驗證後立刻回寫 `[X]` 再繼續，直到交付。不能跳步驟。
+description: 根據 plan package 的 tasks.md 逐筆驗證、回寫並續跑至交付；支援 16GB 低記憶體模式，保留獨立審查與完整回歸。
 disable-model-invocation: true
 ---
 
@@ -10,13 +10,13 @@ disable-model-invocation: true
 
 ## Operating Principles
 
-- by default 就是 don't stop until deliver / One-Shot：從第一個已解鎖 task 做到目標 plan 全部 `[X]`。使用者不必再寫這句。
-- One-Shot 的一輪任務集恰好是 1 個已解鎖 task；有 `Parallel Hint` 時改為 Hint 列出的 `[P]` 批次。One-Shot 不是把後面的序列 task 一次攤開。
+- 預設持續推進已授權範圍直到交付；One-Shot 保留逐筆驗證回寫，但到指定 session checkpoint 應交接，不要求同一 chat 完成整個 plan。
+- One-Shot 的一輪任務集依資源模式與 Dependencies 收斂；低記憶體模式逐筆處理 `Parallel Hint` 內的 task，保留整批 review 關卡。
 - 做完一個任務集就驗證，立刻回寫 `tasks.md` 的 `[X]`，再重算下一筆。未回寫不得開下一個任務集。
 - 嚴格執行不能跳步驟。`don't stop until deliver` 不是跳步驟的許可。
 - Feature phase 仍序列。`[BDD-GREEN]`、`[BDD-REFACTOR]` 才委派 `/bdd`，並把該 phase 的 `Test Scope` 當範疇。
-- Phase 3 的 `[BDD-ALIGN]`、`[BDD-REMOVE]`、`[BDD-RED]` 不委派 `/bdd`；由 subagent 讀 `dsl.md` 該列的 `StepDef 實作語意` 寫測試層。
-- Phase 3 review 通過前，不得進入 Feature Green。
+- Phase 3 的 `[BDD-ALIGN]`、`[BDD-REMOVE]`、`[BDD-RED]` 不委派 `/bdd`；實作者讀 `dsl.md` 該列的 `StepDef 實作語意` 寫測試層。
+- Phase 3 review 通過前，不得進入依賴該 review 的 Feature Green；只有 tasks 明確分波時按波解鎖，未分波仍按原全批關卡。
 - 全部 tasks `[X]` 後詢問是否 git commit；不得自動 commit。
 
 # SOP
@@ -24,9 +24,11 @@ disable-model-invocation: true
 ## Phase 1 -- 對齊 plan 並啟動 One-Shot
 
 1. READ 讀取使用者需求、目標 plan package、`tasks.md`、`truth-delta.md` 與目前 task 完成狀態，確認指定範圍（若有）與 One-Shot 起點。
-2. READ 讀取 `rules/任務選取與連續續跑判準.md`，確認已解鎖 task 的選取、One-Shot 與停止條件。
-3. READ 讀取 `rules/TruthDelta測試對齊與BDD委派判準.md`，確認 ADD / MODIFY / DELETE 的執行策略，以及哪些 marker 才委派 `/bdd`。
-4. THINK 依已讀任務與判準收斂 One-Shot 起點、是否命中 `Parallel Hint`、所屬 phase；預設做到交付，不停在第一筆。
+2. READ 讀取 `../shared/low-memory-execution.md`，選定資源模式、記錄基線與可用回收能力，建立傳給下游的資源契約。
+3. READ 讀取 `../shared/session-handoff.md`，恢復時核對 `handoff.md` 與實際狀態；若本輪有 UI 影響再讀取 `../shared/ui-delivery.md` 與畫面索引，確認 `.pen` 開發者批准有效、prototype 同步與代表畫面 checkpoint。舊 tasks 缺少這些前置時回交 `/tasks`／`/ui-plan`，不得沿舊 `[X]` 推定已批准。
+4. READ 讀取 `rules/任務選取與連續續跑判準.md`，確認已解鎖 task 的選取、One-Shot 與停止條件。
+5. READ 讀取 `rules/TruthDelta測試對齊與BDD委派判準.md`，確認 ADD / MODIFY / DELETE 的執行策略，以及哪些 marker 才委派 `/bdd`。
+6. THINK 依已讀任務、資源契約與判準收斂 One-Shot 起點、是否命中 `Parallel Hint`、所屬 phase 與本次 session checkpoint；只選前置關卡已通過的工作。
 
 ## Phase 2 -- 補強 repo hygiene 與執行前置
 
@@ -39,8 +41,9 @@ disable-model-invocation: true
 1. READ 讀取 `rules/嚴格禁止跳步驟判準.md` 與 `rules/平行執行與檔案衝突判準.md`，確認本輪任務集邊界。
 2. READ 若 `tasks.md` 當前 phase 含 `Parallel Hint`，讀取 `rules/ParallelHint平行Subagent與衝突Merge判準.md`。
 3. READ 若遇到 `[USER-CONFIRM]`，讀取 `rules/user-confirmation-gate.md`；關卡未通過時依賴它的任務不得解鎖。
-4. THINK 收斂本輪任務集：有 `Parallel Hint` 則為 Hint 列出的 `[P]` 批次；否則恰好 1 個已解鎖 task。
-5. THINK 收斂執行模式：Setup 與 Foundational 直接實作並停在該則「只做／不做」；Phase 3 的 ALIGN / REMOVE / RED 走 subagent 測試層；review 走 review 迴圈；`[BDD-GREEN]` / `[BDD-REFACTOR]` 委派 `/bdd`；`[CODE-REMOVE]`、`[REGRESSION]` 直接實作或直接驗證。
+4. THINK 依資源契約收斂本輪任務集：低記憶體模式恰好 1 個已解鎖 task；其他模式才在預算內收取 `Parallel Hint` 批次。
+5. THINK 收斂執行模式與實作者／審查者：Setup 與 Foundational 直接實作並停在該則「只做／不做」；Phase 3 的 ALIGN / REMOVE / RED 僅寫測試層；review 交由未實作受審改動的審查者；`[BDD-GREEN]` / `[BDD-REFACTOR]` 呼叫 `/bdd`；`[CODE-REMOVE]`、`[REGRESSION]` 直接實作或直接驗證。
+6. THINK 在派工或啟動測試前核對資源檢查點，確認沒有未回收程序、壓力告警或超出預算的工作。
 
 ## Phase 4 -- 載入精確參照並執行
 
@@ -48,14 +51,16 @@ disable-model-invocation: true
 2. READ 依當前任務集的精確參照載入必要 plan artifacts、truth feature、同模組 DSL、實際列出的介面根共用 DSL rows 與既有自動化測試落點；不得掃描或預讀其他模組 DSL。
 3. READ 若本輪修改受憲法治理的 artifact 或與 truth specs 發生衝突，讀取 `.agents/constitution/CONSTITUTION.md`、`.agents/constitution/shared.md` 與對應憲法檔。
 4. READ 讀取 `rules/自主決策與阻塞處理判準.md`，確認規格缺口、局部矛盾或環境阻礙時的決策優先序。
-5. DELEGATE 若本輪是 `Parallel Hint` 批次，為每個 `[P]` task 派出獨立 subagent，prompt 指向該 plan `tasks.md` 的對應任務；全部回來後執行 review 迴圈。
-6. DELEGATE 若本輪是 `[BDD-GREEN]` 或 `[BDD-REFACTOR]`，呼叫 `/bdd` 的單一 requested step，傳入 `Test Scope`、action、truth rows、模組 DSL 與實際使用的共用 DSL rows。
+5. WRITE 若本輪是 Phase 3 測試層 task，依已選派工方式直接實作或交給既有工作者；每筆驗證、回寫後才處理下一筆，整批完成後執行獨立 review 迴圈。
+6. DELEGATE 若本輪是 `[BDD-GREEN]` 或 `[BDD-REFACTOR]`，在目前 agent 載入 `/bdd` 或交給預算內的既有工作者執行單一 requested step，傳入 `Test Scope`、action、truth rows、模組 DSL、實際使用的共用 DSL rows、資源契約，以及受影響畫面參照／批准版本／同步狀態與 checkpoint；呼叫 skill 不代表建立新 agent。
 7. WRITE 若 task 為 `[USER-CONFIRM]`，依關卡規則展示並等待明確確認；否則若 task 不帶上述 marker，依 task marker 完成本輪所需的程式、設定、文件或測試變更；不得越出本輪任務與 phase boundary。
 
 ## Phase 5 -- 驗證、回寫、繼續 One-Shot 直到交付
 
 1. READ 讀取 `rules/完成定義-驗證與回寫判準.md`，確認 task 完成條件與回寫條件。
 2. THINK 依 task 類型收斂最直接的驗證方式。
-3. WRITE 在本輪任務集的實作與驗證都完成後，立即將對應 task 改寫為 `[X]`，並保留其他 task 狀態不變。
-4. THINK 重新計算是否仍存在已解鎖且屬於本次範圍的未完成 task；若有，返回 Phase 3。這是 One-Shot 預設，不是可選。
-5. WRITE 若目標 plan package 全部 tasks 已 `[X]` 且驗證通過，向使用者回報本次 plan 已交付，並詢問是否用 git commit deliver；未取得使用者同意前不得 commit。
+3. READ 若 task 影響 UI，核對逐畫面差異紀錄及有效版本，代表畫面 checkpoint 通過後才解鎖其依賴；最終 UI gate 由獨立審查者核對跨畫面與完整流程。行為全綠不能替代設計比對。
+4. WRITE 在本輪任務集的實作與驗證都完成後，立即將對應 task 改寫為 `[X]`，並保留其他 task 狀態不變。
+5. WRITE 完成本輪程序回收與資源檢查點，更新驗證證據與 `handoff.md`；到指定 session checkpoint、開發者待確認或資源受阻時保存進度、回報續跑指示並結束本輪，未驗證項目維持 `[ ]`。
+6. THINK 未到交接點且資源檢查通過時，重新計算下一個已解鎖 task；若有，返回 Phase 3。整批 review、UI 同步／批准／差異收斂與交付完整回歸尚未通過時，不得宣稱 plan 完成。
+7. WRITE 若目標 plan package 全部 tasks 已 `[X]` 且要求的完整回歸通過，向使用者回報本次 plan 已交付，並詢問是否用 git commit deliver；未取得使用者同意前不得 commit。

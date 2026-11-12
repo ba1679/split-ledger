@@ -1,11 +1,32 @@
-# 前端 / UI 與靜態雛形規劃
+# 前端 / UI 設計與可操作雛形規劃
 
 ## 介面範圍
 
 - 目標系統介面：`{{UI_INTERFACE_NAME}}`
 - 需求來源：`{{REQUIREMENT_SCOPE}}`
 - 上游依據：`{{UPSTREAM_ARTIFACTS}}`
-- 產出順序：`{{OUTPUT_SEQUENCE}}`
+- 產出順序：UI plan → `.pen` 與預覽 → 開發者明確確認 → prototype 與同步檢查 → 下游。
+
+## 設計交付與開發者確認
+
+- 設計檔與固定版本：`{{DESIGN_PATH_AND_VERSION}}`
+- 桌機／手機尺寸及預覽：`{{VIEWPORTS_AND_PREVIEWS}}`
+- 確認狀態：`{{DESIGN_APPROVAL_STATUS}}`
+- 確認者、日期、原回覆或引用與範圍：`{{DESIGN_APPROVAL_EVIDENCE}}`
+- 重大待決事項及受阻下游：`{{BLOCKED_UI_SCOPE}}`
+
+<!-- 狀態使用 pending／changes-requested／approved；沒有回覆時不填造確認證據。只有批准有效後才製作 prototype。 -->
+
+## 畫面交接索引與同步狀態
+
+| 畫面／狀態 ID       | 資訊責任與區塊順序            | .pen frame／預覽／尺寸與資料 | Prototype 路徑／狀態入口  | 正式路由／元件            | Feature／tasks            | 設計／prototype／實作版本與同步狀態 |
+| ------------------- | ----------------------------- | ---------------------------- | ------------------------- | ------------------------- | ------------------------- | ----------------------------------- |
+| {{SCREEN_STATE_ID}} | {{SCREEN_INFORMATION_LAYOUT}} | {{DESIGN_FRAME_REFERENCE}}   | {{PROTOTYPE_STATE_ENTRY}} | {{PRODUCT_SCREEN_TARGET}} | {{FEATURE_TASK_BINDINGS}} | {{UI_VERSION_SYNC_STATUS}}          |
+
+- 共用元件與響應式規則：`{{SHARED_VISUAL_RESPONSIVE_RULES}}`
+- 關鍵狀態覆蓋及可共用／不適用理由：`{{STATE_COVERAGE}}`
+- 需要明確確認的設計變更與 AI 可自主適配範圍：`{{DESIGN_CHANGE_BOUNDARY}}`
+- 舊產物／未同步項目與處理：`{{STALE_ARTIFACT_DISPOSITION}}`
 
 ## 視覺方向
 
@@ -89,3 +110,15 @@
 - 共用元件或區塊：`{{SHARED_COMPONENTS}}`
 - 對後端契約的依賴：`{{API_DEPENDENCIES}}`
 - 驗收重點：`{{ACCEPTANCE_FOCUS}}`
+
+## 同步檢查、差異與交接
+
+- 已操作旅程與模擬限制：`{{PROTOTYPE_FLOW_EVIDENCE}}`
+- 比對版本、資料、尺寸與證據位置：`{{UI_COMPARISON_EVIDENCE}}`
+
+| 畫面／版本                    | 設計預期               | 實際呈現／截圖             | 差異與影響            | 處理結果／確認依據        |
+| ----------------------------- | ---------------------- | -------------------------- | --------------------- | ------------------------- |
+| {{COMPARISON_SCREEN_VERSION}} | {{DESIGN_EXPECTATION}} | {{ACTUAL_SCREEN_EVIDENCE}} | {{DIFFERENCE_IMPACT}} | {{DIFFERENCE_RESOLUTION}} |
+
+- 下一 checkpoint 與受阻依賴：`{{NEXT_UI_CHECKPOINT}}`
+- 續跑資訊：`handoff.md`，記錄版本、批准、受阻範圍與下一入口。

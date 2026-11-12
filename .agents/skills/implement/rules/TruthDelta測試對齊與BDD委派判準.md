@@ -77,10 +77,10 @@ Phase 4C REGRESSION: 跑 Test Scope
 
 - Level: `MUST`
 - `/implement` 只在 `[BDD-GREEN]` 或 `[BDD-REFACTOR]` 呼叫 `/bdd`。
-- 呼叫時必須明確提供 `Test Scope`、truth delta action、affected truth rows、同模組 `dsl.md`、該 feature 實際使用的介面根共用 DSL rows 與 requested step。
+- 呼叫時必須明確提供 `Test Scope`、truth delta action、affected truth rows、同模組 `dsl.md`、該 feature 實際使用的介面根共用 DSL rows、requested step 與目前資源契約。
 - 若該 feature 沒有使用介面根共用 DSL row，必須明示「無」。
 - `/implement` 只傳遞 `tasks.md` 已綁定的精確 DSL 參照，不重新判斷句型應屬模組或共用。
-- Phase 3 的 `[BDD-ALIGN]`、`[BDD-REMOVE]`、`[BDD-RED]` 不委派 `/bdd`。
+- skill 呼叫沿用目前 agent 或資源預算內的既有工作者；測試執行不因此增加巢狀代理。Phase 3 的 `[BDD-ALIGN]`、`[BDD-REMOVE]`、`[BDD-RED]` 不委派 `/bdd`。
 
 ## Good Example
 
@@ -88,6 +88,7 @@ Phase 4C REGRESSION: 跑 Test Scope
 
 ```md
 呼叫 /bdd
+
 - requested step: green
 - Test Scope: `specs/truth/features/backend/房間聊天/單人等待與空白訊息拒絕.feature`
 - action: ADD
