@@ -5,6 +5,7 @@
 - 處理路徑：優化既有 skill chain。
 - 目標：`ui-plan`、`dsl-refine`、`tasks`、`bdd`、`implement` 及其實際引用規則／模板。
 - 來源：low-memory 分支的 skill commit `f69fffdb9379485191322d6b5fe07925bfca9a66`，只移植 `.agents/skills/**` 改動，未合併該分支的產品變更。
+- 分支整合：後續將 `origin/codex/low-memory-skill-mode` 合併回 main，保留已整合補強的 skills 與 main 完整 005 產品版本，避免分支內較早的中間實作回退；另保留遠端 `low-memory-execution-plan.md` 作原始工程紀錄。合併後核對產品／測試／spec 檔案相對合併前 HEAD 無差異。
 
 ## 根因與已確認決策
 
