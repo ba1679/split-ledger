@@ -6,7 +6,7 @@ categories:
     security:
       - BetterAuthSession: []
     summary: 列出自己的跨旅行分類與使用筆數
-    description: 只包含目前帳號的分類；usageCount 計算所有本人旅行中目前仍引用的支出。
+    description: 只包含目前帳號的分類；usageCount 計算本人 active 與垃圾桶旅行中目前仍引用的支出，purge 後不計入。
     responses:
       '200':
         description: 分類清單，按名稱與 id 升序；無分類則為空陣列。

@@ -24,6 +24,12 @@ settlement:
         content:
           application/json:
             schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '409':
+        description: 本人旅行在垃圾桶；code=TRIP_TRASHED。普通子資源不可用 404 偽裝操作成功。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
 settlements:
   parameters:
     - $ref: ../components/parameters.yaml#/TripId
@@ -69,7 +75,7 @@ settlements:
           application/json:
             schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
       '409':
-        description: revision 過期、安排已變/已結清、結清或還款 UUID 衝突；code 分別為 ACCOUNTING_REVISION_CONFLICT、ARRANGEMENT_NOT_FOUND、ID_CONFLICT。刷新結算後再操作。
+        description: revision 過期、安排已變/已結清、結清或還款 UUID 衝突；code 分別為 ACCOUNTING_REVISION_CONFLICT、ARRANGEMENT_NOT_FOUND、ID_CONFLICT。刷新結算後再操作；本人垃圾桶旅行回 code=TRIP_TRASHED。
         content:
           application/json:
             schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
@@ -100,3 +106,9 @@ settlementRecord:
         content:
           application/json:
             schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '409':
+        description: 本人旅行在垃圾桶；code=TRIP_TRASHED。普通子資源不可用 404 偽裝操作成功。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
