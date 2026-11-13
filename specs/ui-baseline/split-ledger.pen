@@ -13454,6 +13454,528 @@
           "fontWeight": "normal"
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "UBNEL",
+      "x": 3632,
+      "y": -220,
+      "name": "div",
+      "context": "div",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "#f6f6f0",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "dcJ6f",
+          "name": "main",
+          "context": "AppShell - main",
+          "width": "fill_container",
+          "height": 462.58,
+          "layout": "vertical",
+          "padding": [
+            31,
+            20,
+            110,
+            20
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "Pg9nG",
+              "name": "Failed to fetch",
+              "context": "p",
+              "fill": "#a83232",
+              "content": "Failed to fetch",
+              "lineHeight": 1.6,
+              "fontFamily": "Noto Sans TC",
+              "fontSize": 13,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "u3uBe",
+              "name": "a",
+              "context": "Link - a",
+              "height": 68,
+              "gap": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "LHwPg",
+                  "name": "svg",
+                  "context": "ChevronLeft - svg",
+                  "clip": true,
+                  "width": 20,
+                  "height": 20,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "path",
+                      "id": "Yf9Vd",
+                      "x": 7.5,
+                      "y": 5,
+                      "geometry": "M4.75 9.5l-4.75-4.75 4.75-4.75",
+                      "width": 5,
+                      "height": 10,
+                      "stroke": "#5B6B64",
+                      "strokeWidth": 1.3333333333333333,
+                      "strokeLinejoin": "round",
+                      "strokeLinecap": "round"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "n9RE3m",
+                  "name": "我的旅行",
+                  "context": "span",
+                  "fill": "#5b6b64",
+                  "content": "我的旅行",
+                  "lineHeight": 1.6,
+                  "fontFamily": "Noto Sans TC",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "j36wZ3",
+              "name": "div",
+              "context": "QueryState - div",
+              "width": "fill_container",
+              "height": 232.78,
+              "fill": "#ffffff",
+              "cornerRadius": 10,
+              "stroke": "#dce3dc",
+              "strokeWidth": 1,
+              "strokeAlignment": "inner",
+              "layout": "vertical",
+              "padding": [
+                33,
+                19
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "o9ZqW7",
+                  "name": "暫時無法取得帳本",
+                  "context": "h2",
+                  "fill": "#192e29",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "暫時無法取得帳本",
+                  "lineHeight": 1.6,
+                  "textAlign": "center",
+                  "fontFamily": "Noto Sans TC",
+                  "fontSize": 22,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "frame",
+                  "id": "nLu4b",
+                  "name": "spacer",
+                  "width": "fill_container",
+                  "height": 11.99,
+                  "layout": "none"
+                },
+                {
+                  "type": "text",
+                  "id": "WevcK",
+                  "name": "請檢查連線後重新嘗試，你已保存的資料不會因此改變。",
+                  "context": "p",
+                  "fill": "#5b6b64",
+                  "textGrowth": "fixed-width-height",
+                  "width": "fill_container",
+                  "height": 51.19,
+                  "content": "請檢查連線後重新嘗試，你已保存的資料不會因此改變。",
+                  "lineHeight": 1.6,
+                  "textAlign": "center",
+                  "fontFamily": "Noto Sans TC",
+                  "fontSize": 16,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "Q0zRr",
+                  "name": "spacer",
+                  "width": "fill_container",
+                  "height": 22,
+                  "layout": "none"
+                },
+                {
+                  "type": "frame",
+                  "id": "tL1Nq",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "r16hv",
+                      "name": "重新嘗試",
+                      "context": "Button - button",
+                      "width": 100,
+                      "height": 46.4,
+                      "fill": "#245c49",
+                      "cornerRadius": 7,
+                      "stroke": "#245c49",
+                      "strokeWidth": 1,
+                      "strokeAlignment": "inner",
+                      "layout": "vertical",
+                      "padding": [
+                        11,
+                        21
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "TWnze",
+                          "fill": "#ffffff",
+                          "content": "重新嘗試",
+                          "lineHeight": 1.6,
+                          "textAlign": "center",
+                          "fontFamily": "Noto Sans TC",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "lAEuC",
+          "layoutPosition": "absolute",
+          "x": 0,
+          "y": 779,
+          "name": "nav",
+          "context": "Navigation - nav",
+          "fill": "#ffffffed",
+          "stroke": "#dce3dc",
+          "strokeWidth": {
+            "top": 1
+          },
+          "strokeAlignment": "inner",
+          "padding": [
+            9,
+            12,
+            8,
+            12
+          ],
+          "justifyContent": "space_around",
+          "children": [
+            {
+              "type": "frame",
+              "id": "V5Uy9L",
+              "name": "div",
+              "context": "div",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "e6THS",
+                  "name": "a",
+                  "context": "Link - a",
+                  "width": 70.8,
+                  "height": 48,
+                  "layout": "vertical",
+                  "padding": 4,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "FQvzS",
+                      "name": "svg",
+                      "context": "BriefcaseBusiness - svg",
+                      "clip": true,
+                      "width": 20,
+                      "height": 20,
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "path",
+                          "id": "MJnTx",
+                          "x": 1.6666667084944875,
+                          "y": 1.6666667084944875,
+                          "geometry": "M7.91667 7.91667l0.00791 0m3.15875-4.75l0-1.58334c0-0.87445-0.70888-1.58333-1.58333-1.58333l-3.16667 0c-0.87445 0-1.58333 0.70888-1.58333 1.58333l0 1.58334m11.08333 5.54166c-4.80173 3.17015-11.0316 3.17015-15.83333 0",
+                          "width": 16.666667963329115,
+                          "height": 11.669416553095767,
+                          "stroke": "#245C49",
+                          "strokeWidth": 1.3333333333333333,
+                          "strokeLinejoin": "round",
+                          "strokeLinecap": "round"
+                        },
+                        {
+                          "type": "rectangle",
+                          "cornerRadius": 1.6666666666666665,
+                          "id": "gtXNf",
+                          "x": 1.6666666666666665,
+                          "y": 5,
+                          "width": 16.666666666666664,
+                          "height": 11.666666666666664,
+                          "stroke": "#245C49",
+                          "strokeWidth": 1.3333333333333333,
+                          "strokeLinejoin": "round",
+                          "strokeLinecap": "round"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "lDDgg",
+                      "name": "我的旅行",
+                      "context": "span",
+                      "fill": "#245c49",
+                      "content": "我的旅行",
+                      "lineHeight": 1.6,
+                      "fontFamily": "Noto Sans TC",
+                      "fontSize": 11,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "f8Li4B",
+                  "name": "div",
+                  "context": "div",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "bWyDO",
+                      "name": "a",
+                      "context": "Link - a",
+                      "width": 70.8,
+                      "height": 48,
+                      "layout": "vertical",
+                      "padding": 4,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "UTNj3",
+                          "name": "svg",
+                          "context": "Users - svg",
+                          "clip": true,
+                          "width": 20,
+                          "height": 20,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "path",
+                              "id": "U9sjMO",
+                              "x": 1.6666667084944875,
+                              "y": 2.6066667155215613,
+                              "geometry": "M11.08333 14.14867l0-1.58334c0-1.7489-1.41776-3.16667-3.16666-3.16666l-4.75 0c-1.7489 0-3.16667 1.41777-3.16667 3.16666l0 1.58334m11.08333-14.14867c1.39667 0.36208 2.37199 1.6225 2.37199 3.06533 0 1.44284-0.97532 2.70325-2.37199 3.06534m4.75 8.018l0-1.58334c-0.00108-1.44311-0.97771-2.70297-2.375-3.06375",
+                              "width": 16.666667963329115,
+                              "height": 14.893333284478437,
+                              "stroke": "#5B6B64",
+                              "strokeWidth": 1.3333333333333333,
+                              "strokeLinejoin": "round",
+                              "strokeLinecap": "round"
+                            },
+                            {
+                              "type": "ellipse",
+                              "id": "DryeV",
+                              "x": 4.166666666666666,
+                              "y": 2.5,
+                              "width": 6.666666666666666,
+                              "height": 6.666666666666666,
+                              "stroke": "#5B6B64",
+                              "strokeWidth": 1.3333333333333333,
+                              "strokeLinejoin": "round",
+                              "strokeLinecap": "round"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "Yj7fo",
+                          "name": "同行者",
+                          "context": "span",
+                          "fill": "#5b6b64",
+                          "content": "同行者",
+                          "lineHeight": 1.6,
+                          "fontFamily": "Noto Sans TC",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "EFBE4",
+                      "name": "a",
+                      "context": "Link - a",
+                      "width": 70.8,
+                      "height": 48,
+                      "layout": "vertical",
+                      "padding": 4,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "KN6VT",
+                          "name": "svg",
+                          "context": "ArrowLeftRight - svg",
+                          "clip": true,
+                          "width": 20,
+                          "height": 20,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "path",
+                              "id": "hkra9",
+                              "x": 3.333333416988975,
+                              "y": 2.5,
+                              "geometry": "M3.16667 0l-3.16667 3.16667 3.16667 3.16666m-3.16667-3.16666l12.66667 0m-3.16667 11.08333l3.16667-3.16667-3.16667-3.16666m3.16667 3.16666l-12.66667 0",
+                              "width": 13.333333918922825,
+                              "height": 15,
+                              "stroke": "#5B6B64",
+                              "strokeWidth": 1.3333333333333333,
+                              "strokeLinejoin": "round",
+                              "strokeLinecap": "round"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "AuYgz",
+                          "name": "分帳結算",
+                          "context": "span",
+                          "fill": "#5b6b64",
+                          "content": "分帳結算",
+                          "lineHeight": 1.6,
+                          "fontFamily": "Noto Sans TC",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "E73P7m",
+              "name": "a",
+              "context": "Link - a",
+              "width": 70.8,
+              "height": 48,
+              "layout": "vertical",
+              "padding": 4,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "VvOqg",
+                  "name": "svg",
+                  "context": "List - svg",
+                  "clip": true,
+                  "width": 20,
+                  "height": 20,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "path",
+                      "id": "xpsQ3",
+                      "x": 2.5,
+                      "y": 4.16666683397795,
+                      "geometry": "M0 0l0.00792 0m-0.00792 5.54167l0.00792 0m-0.00792 5.54166l0.00792 0m3.95041-11.08333l10.29167 0m-10.29167 5.54167l10.29167 0m-10.29167 5.54166l10.29167 0",
+                      "width": 15,
+                      "height": 11.66666683397795,
+                      "stroke": "#5B6B64",
+                      "strokeWidth": 1.3333333333333333,
+                      "strokeLinejoin": "round",
+                      "strokeLinecap": "round"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "avIZn",
+                  "name": "支出分類",
+                  "context": "span",
+                  "fill": "#5b6b64",
+                  "content": "支出分類",
+                  "lineHeight": 1.6,
+                  "fontFamily": "Noto Sans TC",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "sGDfM",
+              "name": "button",
+              "context": "Button - button",
+              "padding": [
+                15.11,
+                17.4,
+                12.89,
+                17.4
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "T41j6",
+                  "name": "svg",
+                  "context": "ChevronLeft - svg",
+                  "clip": true,
+                  "width": 20,
+                  "height": 20,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "path",
+                      "id": "Z9p0A",
+                      "x": 7.5,
+                      "y": 5,
+                      "geometry": "M4.75 9.5l-4.75-4.75 4.75-4.75",
+                      "width": 5,
+                      "height": 10,
+                      "stroke": "#245C49",
+                      "strokeWidth": 1.3333333333333333,
+                      "strokeLinejoin": "round",
+                      "strokeLinecap": "round"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "JJWi2",
+                  "name": "登出",
+                  "context": "span",
+                  "fill": "#245c49",
+                  "content": "登出",
+                  "lineHeight": 1.6,
+                  "textAlign": "center",
+                  "fontFamily": "Noto Sans TC",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "variables": {
