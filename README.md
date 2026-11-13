@@ -122,6 +122,18 @@ docs/                 產品路線圖與開發文件
 
 想快速了解一次完整迭代，可從 [Phase 1B 需求](specs/plans/005-owner-managed-trip-splitting/spec.md)、[系統分析](specs/plans/005-owner-managed-trip-splitting/plan.md)、[驗證紀錄](specs/plans/005-owner-managed-trip-splitting/validation.md) 開始；後續使用者回饋與規則修正見[回饋紀錄](specs/plans/005-owner-managed-trip-splitting/feedback-2026-11-11.md)。
 
+### Skills 客製化調整
+
+本專案使用 Waterball 的 AI BDD skills，並在安裝後依實作經驗補強以下流程：
+
+- **重構與確認關卡**：讓任務規劃支援純重構、工程交付及明確的人工確認，無需變更 DSL 時可沿用既有回歸測試。
+- **設計交付與同步**：新增 `.pen` 設計稿與桌機／手機預覽，取得開發者確認後才製作 prototype；以畫面索引和版本對照維持設計、prototype 與實作一致。
+- **畫面驗收**：任務須引用所有實際影響畫面的設計，先比對代表畫面，再逐項記錄設計與產品的差異，避免僅以功能測試通過作為完成依據。
+- **低記憶體執行**：加入 16GB 模式，重用代理、限制重型工作與測試並行度，保留獨立審查及完整驗證範圍。
+- **跨 session 交接**：在明確 checkpoint 保存進度、版本、待跑驗證與設計確認紀錄，支援分階段續跑、舊任務補驗及獨立後端先行。
+
+客製化規則與模板位於 `.agents/skills/`，調整背景及驗證紀錄保留於 `docs/skill-engineering/`。
+
 ## 線上試用
 
 [Railway 試用版](https://app-production-ca12.up.railway.app/)是先前個人記帳階段的部署紀錄，未確認包含目前的分帳功能，也不保證持續可用。部署設定與限制見[操作手冊](specs/plans/004-railway-trial-deployment/runbook.md)及[驗證紀錄](specs/plans/004-railway-trial-deployment/validation.md)；請勿將試用版視為正式資料的長期保存服務。
