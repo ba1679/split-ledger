@@ -1,31 +1,33 @@
 ---
 name: ui-plan
-description: 根據 plan package 與 truth，先交付 .pen 設計並取得開發者確認，再產出同步的可操作 prototype 與畫面交接索引；只寫 plan-side ui/**，不修改 truth。
+description: 承接受影響的 UI 設計範圍，引用固定現況基準，交付 .pen、預覽與設計確認；prototype 按互動問題選用。一般模式只寫 plan-side ui/**，明確指定的基準建立模式可寫 specs/ui-baseline/**；不修改 truth。
 disable-model-invocation: true
 ---
 
 # UI Plan
 
-`ui-plan` 依序交付 UI plan、`.pen`、開發者確認、prototype 與同步檢查。UI artifact 留在 plan package；業務規則仍由 spec 與 truth owner 管理。`.pen` 交付後必須等待開發者明確確認，才可繼續 prototype 與依賴該設計的下游流程。
+承接 C 類設計變更或明確指定的基準建立工作。一般模式交付本次設計差異與畫面索引；建立基準模式核對已驗收產品現況。業務規則由 spec／truth owner 管理。
 
 # SOP
 
-## Phase 1 -- 對齊 plan、truth-delta 與 UI 範圍
+## Phase 1 -- 定位模式、基準與需求差異
 
-1. READ 讀取使用者需求、呼叫者 handoff、plan package 的 `spec.md`、`research.md`、`plan.md`、`truth-delta.md`、既有 `ui/**`，以及與 UI 有關的 `specs/truth/contracts/**`、`specs/truth/features/**`。
-2. READ 讀取 `../shared/ui-delivery.md`、`../shared/session-handoff.md`、`../shared/low-memory-execution.md`、`templates/ui-plan.md` 與 `templates/ui-plan.example.md`，確認設計細緻度、開發者確認、同步與續跑契約，承接或建立資源預算；恢復工作時先核對既有版本與關卡。
-3. DELEGATE 若缺口會改變使用者可見流程、畫面責任、互動入口、錯誤狀態或與 truth 的對齊方式，呼叫 `/clarify`；未收斂前停止。
+1. READ 讀取使用者要求、呼叫者 handoff、plan package 的 `spec.md`、`research.md`、`plan.md`、`truth-delta.md`、既有 `ui/**` 及相關 truth；基準建立工作讀取指定產品 commit 與範圍，無 plan package 時使用基準 README 保存交接。
+2. READ 讀取 `../shared/ui-delivery.md`、`../shared/session-handoff.md` 與 `../shared/low-memory-execution.md`，承接或建立資源契約，恢復時核對模式、版本及有效確認。
+3. THINK 核對 UI 分流與寫入範圍，定位固定基準／預覽、現況及需求差異；A／B 回報既有依據與適用驗證，交回呼叫者，不製作無關設計。
+4. DELEGATE 缺口影響畫面責任、操作意圖或 truth 對齊時呼叫 `/clarify`，只停止受影響範圍。
 
-## Phase 2 -- 交付 .pen 與開發者確認
+## Phase 2 -- 交付必要設計並取得確認
 
-1. THINK 依需求、truth-delta 與現有 truth 收斂畫面範圍、狀態、主要 flow、可見回饋、錯誤處理、accessibility 與 responsive 行為。
-2. WRITE 將 UI 規劃與畫面交接索引寫入 `specs/plans/NNN-<slug>/ui/ui-plan.md`，以可用的 Pencil 工具建立、檢查及儲存可編輯 `.pen`，匯出桌機／手機與關鍵狀態預覽；工具不可用時保存缺口並回報，不以 HTML 代替設計交付。
-3. WRITE 展示 `.pen` 路徑、可見預覽、設計版本、畫面／狀態範圍及待決事項，請開發者確認；將關卡記為待確認，保存續跑點並停止依賴流程。未收到對此版的明確確認，不執行下一 phase。
-4. READ 讀取開發者回覆；要求修改時修正並重新展示，明確確認後記錄確認者、回覆依據、日期及版本，才解鎖 prototype。
+1. READ 讀取 `templates/ui-plan.md` 與 `templates/ui-plan.example.md`，收斂本次設計與畫面索引；基準建立時將適用欄位記於基準 README。
+2. THINK 依已載入契約收斂必要桌機／手機畫面、狀態、共用元件、行為與適配註記，判定是否存在需要體驗的互動問題。
+3. WRITE 以支援格式的設計工具建立、檢查並儲存必要 `.pen` 與預覽；一般模式只寫 `specs/plans/NNN-<slug>/ui/**`，明確基準建立模式才寫 `specs/ui-baseline/**` 並對照固定產品版本。
+4. WRITE 展示可編輯設計、預覽、版本、核對差異與確認範圍，保存待確認紀錄及續跑點，停止依賴工作。
+5. READ 承接明確回覆，要求修改時更新並重新展示；確認有效後保存原回覆與範圍，解鎖其依賴。
 
-## Phase 3 -- 製作並同步 prototype
+## Phase 3 -- 完成選用互動與畫面交接
 
-1. READ 讀取 `templates/prototype-entry.html`、`templates/prototype-entry.example.html`、`templates/prototype-screen.html`、`templates/prototype-screen.example.html`、`rules/高保真靜態頁面切分與Flow覆蓋判準.md` 與 `rules/靜態網站雛形與實作計畫邊界判準.md`，確認可操作雛形的覆蓋與產品邊界。
-2. WRITE 依已確認設計產出或更新 `ui/*.html` 與必要資源，串起主流程及關鍵回饋，記錄模擬限制；不得寫入 `specs/truth/**`。
-3. READ 實際操作 prototype，在對應資料、狀態與尺寸下比對設計預覽並逐項記錄差異；若改變設計意圖，返回上一 phase 更新設計並重新確認；業務規則衝突回交 owner。
-4. WRITE 更新畫面索引的版本、同步狀態與證據；只有全部受影響畫面同步、確認有效且無未決重大差異時，才交付 `/dsl-refine`、`/tasks` 或實作，並回報檔案、限制與下一個 checkpoint。
+1. THINK 記錄 prototype 選用方式與問題；設計及註記足夠時選不製作，直接準備交接。
+2. READ 選用互動時讀取 `rules/局部互動原型選用與交付判準.md`，確認該問題的最小交付範圍。
+3. WRITE 若選用，完成指定連線或局部程式原型、實際操作與同版設計核對，保存問題決策及限制；改設計意圖時回到上一 phase，業務矛盾回交 owner。
+4. WRITE 更新索引、有效確認、版本與各受阻依賴，交付已就緒範圍給 `/dsl-refine`／`/tasks`；基準模式回報現況核對與涵蓋範圍，不宣稱未執行的產品驗收已完成。

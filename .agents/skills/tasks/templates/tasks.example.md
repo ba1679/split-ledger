@@ -1,9 +1,9 @@
-# Tasks: 房間聊天規格調整
+# 任務規劃: 房間聊天規格調整
 
-**Plan Package**: `specs/plans/004-room-chat-adjustment`
-**Core Inputs**: `spec.md`, `plan.md`, `research.md`, `truth-delta.md`, `specs/truth/techstack.md`, `specs/truth/contracts/**`, `specs/truth/data/**`, `specs/truth/features/backend/**`, `specs/truth/features/frontend/**`, `ui/**`
+**Plan package**: `specs/plans/004-room-chat-adjustment`
+**核心輸入**: `spec.md`, `plan.md`, `research.md`, `truth-delta.md`, `specs/truth/techstack.md`, `specs/truth/contracts/**`, `specs/truth/data/**`, `specs/truth/features/backend/**`, `specs/truth/features/frontend/**`, 適用的 `ui/**`
 
-## Task Binding Contract
+## 任務綁定契約
 
 - 產品行為開發任務對應 `truth-delta.md` 的語意；重構、工程交付與確認任務追溯 spec / plan，並引用相關 truth 或 NOOP（若有）。
 - Phase 1 `Setup` 只做本輪新增技術的基礎建設、技術環境與最後的 smoke-test；不寫 DSL 語意、不寫產品行為。
@@ -11,26 +11,29 @@
 - 無需對齊 DSL 時省略 Phase 3，記錄原因與既有回歸範圍。
 - Phase 3 `Test Alignment & Implementation` 的目的：在寫產品碼之前，先把本輪所有受影響 DSL 的自動化測試對齊最新版 truth。
 - Truth 參照必須使用 `specs/truth/**` 路徑；plan 參照才使用當前 plan package 內相對路徑。
-- Feature `Shared Must Read` 除 feature、同模組 DSL、對應 `truth-delta` 列外，還必須列入回追到的 planner 產物。
+- Feature `Shared Must Read` 除 feature、同模組 DSL、對應 `truth-delta` 列外，還必須列入按分流回追到的適用產物或既有呈現／行為依據。
 
-## 設計前置、資源模式與 session checkpoints
+## UI 分流、資源模式與 session checkpoints
 
 - 資源契約：low-memory-16gb：主代理實作、一個固定 reviewer；workers=1，瀏覽器逐一執行；呼叫 skill 不代表新增 agent；完整測試矩陣維持，依序排程。
-- 設計前置：示例假設 ui/ui-plan.md 記錄 design-v1 已獲開發者明確確認並固定檔案雜湊／原回覆；實際產出時必須查證，不得複製本例當批准。pending 時先回交 ui-plan，依賴它的前端工作不解鎖；已批准則引用原證據，不重複詢問。
-- 畫面索引與同步：ui/ui-plan.md 的 room/main、room/error、navigation；prototype p1 對應 design-v1 且 synced（示例前提）。
+- 分流與理由、受影響畫面／行為：C，新增 room/main、room/error 與 navigation；下方完整任務以 C 為主。A／B 分支見後述對照。
+- 既有呈現／固定基準＋本次設計與行為依據：ui/ui-plan.md 記錄必要現況與 design-v1；業務行為依 feature／DSL。
+- 適用設計確認與未決依賴：示例假設 design-v1 已確認並記錄實際雜湊／原回覆；正式產出必須查證，不能複製本例作批准。
+- Prototype 選用與相關決策：不製作；設計與操作註記足以交接，無原型版本或同步前置。
+- 基準回填範圍或不適用理由：room/main、room/error 與 navigation；相關產品驗收後回填並獨立核對。
 
 | Checkpoint      | 完成條件／驗證                  | 下一範圍與交接位置     |
 | --------------- | ------------------------------- | ---------------------- |
 | 測試層完成 T015 | 全部 DSL 就緒且獨立 review 通過 | T016 green；handoff.md |
 
-<!-- 依範圍列出測試 review、後端 feature 組、代表畫面桌機／手機比對、其餘前端及最終整合等適用交接點。待確認只產出阻礙與前置關卡，不把尚未同步的前端任務交給 implement。 -->
+<!-- 依範圍列出測試 review、後端 feature 組、代表畫面桌機／手機比對、其餘前端及最終整合等適用交接點。待確認只產出阻礙與前置關卡，只阻擋依賴未決事項的任務；A／B 缺 ui/ 或不製作 prototype 不算未完成。 -->
 
 - 後端交接：T021 回歸完成後，下一範圍 T022。
 - 第一個代表畫面：T022 完成桌機／手機與相關狀態比對，T023 完成後交接；後續共用版型的畫面必須依賴此比對，若無後續畫面則註明不適用。
-- 最終整合：T024 獨立 UI gate，之後依適用交付範圍驗證並交接，不宣稱未跑矩陣已完成。
+- 最終整合：T024 獨立 UI gate；適用完整回歸及其他產品驗收完成後才解鎖 T028，T029 核對回填後交付，不宣稱未跑矩陣已完成。
 
 - 分波與補驗：預設全批測試對齊後 review；UI 受阻時可明列本波僅獨立 backend 的 feature／DSL／Test Scope 與 review 依賴。前端後補時增量加入其對齊與 review，不宣告全 plan 已就緒。
-- 舊 tasks 更新：保留既有 ID／歷史證據及不受影響的 `[X]`；缺批准／比對者重開或新增補驗，阻擋相應最終 gate；新增 ID 不得重複。
+- 舊 tasks 更新：保留既有 ID／歷史證據及不受影響的 `[X]`；缺適用批准／比對者才重開或新增補驗，阻擋相應最終 gate；新增 ID 不得重複。
 
 ## Phase 1: Setup
 
@@ -222,14 +225,13 @@
 - `specs/truth/features/frontend/房間對戰/dsl.md` -> 本檔 Given／When／Then 全部列
 - `truth-delta.md` -> `/dsl-refine` ADD `frontend/房間對戰/登入與送訊畫面.feature`
 - `ui/ui-plan.md` -> 房間對戰畫面的視覺方向、畫面與流程
-- `ui/index.html` -> 同步的 room/main、room/error prototype p1
 - `ui/room.pen` -> room-desktop、room-mobile、room-error、navigation frames，design-v1
 - `ui/design-previews/room-desktop.png`、`ui/design-previews/room-mobile.png`、`ui/design-previews/room-error.png` -> 同資料預覽
 - `ui/ui-plan.md` -> 設計批准原回覆／雜湊、資訊位置與共享導航索引
 
 **Boundary**:
 
-- 只讓此 Test Scope 全綠；依 design-v1／prototype p1 完成 room/main、room/error 與 navigation，不能以既有版面覆蓋設計。
+- 只讓此 Test Scope 全綠；依 design-v1 與固定現況依據 完成 room/main、room/error 與 navigation，不能以既有版面覆蓋設計。
 
 **Test Scope**:
 
@@ -238,7 +240,7 @@
 **受影響畫面與完成證據**：
 
 - room/main、room/error、navigation；正式 /rooms/:id 與共享 AppShell。
-- 同假資料在 1280px／375px 比對設計／prototype／產品，validation.md 留版本、截圖與「預期／實際／差異／處理」。
+- 同假資料在 1280px／375px 比對固定設計／產品，validation.md 留版本、截圖與「預期／實際／差異／處理」。
 - T022 為代表畫面比對 checkpoint；任何後續套用同版型的畫面任務須依賴其通過，重大變更回交開發者確認。
 
 - [ ] T022 [BDD-GREEN] 讓 Test Scope 全綠並完成代表畫面比對
@@ -251,7 +253,8 @@
 **Read**:
 
 - `ui/ui-plan.md` -> 視覺方向
-- `ui/index.html`
+- `ui/room.pen` 與對應桌機／手機預覽
+- `validation.md` -> 固定版本、逐畫面差異及處理證據
 - `frontend/src/pages/`
 
 **Boundary**:
@@ -259,7 +262,7 @@
 - 不改 truth、不加 feature、不重跑 GREEN 當通過條件。
 
 - [ ] T024 subagent review (ui quality gate)
-  - Evidence: 獨立核對桌機／手機、主旅程、關鍵狀態與三方版本，逐項差異已修正或有開發者接受依據；不能只寫 PASS。
+  - Evidence: 獨立核對桌機／手機、主旅程、關鍵狀態與固定基準／設計／產品版本；本例不製作原型，逐項差異已修正或有開發者接受依據；不能只寫 PASS。
 
 ## Phase 5: 示範遷移與確認（示意：依需求選用）
 
@@ -273,3 +276,28 @@
   - 前置：T025；確認對象：使用者；通過條件：使用者明確確認可繼續。
 - [ ] T027 遷移其餘介面並檢查無用舊樣式
   - Dependencies: T026
+
+## Phase 6: 驗收後基準回填（有設計內容需回填時）
+
+**來源**: plan.md／ui/ui-plan.md -> 將已驗收 room/main、room/error 與 navigation 納入現況基準
+**Dependencies**: T022、T023、T024、相關產品任務及要求的完整回歸已通過；若 Phase 5 遷移也影響同一畫面，T027 與其驗收亦為前置
+
+- [ ] T028 回填本次已驗收的共用基準
+  - Read: ui/ui-plan.md 的固定起點、validation.md 的產品版本與驗收證據、最新基準及其與起點的差異。
+  - 寫入範圍：specs/ui-baseline/split-ledger.pen 的 room 與 navigation、相關 previews/、README.md。
+  - 更新相關 frame／元件、同版預覽、README 的產品 commit、涵蓋範圍、差異與更新紀錄；比較最新基準並保留其他 plan 成果，同範圍衝突回交。
+- [ ] T029 subagent review (baseline backfill)
+  - Dependencies: T028
+  - Read: 本次基準 diff、產品驗收、預覽及 README。
+  - 完成證據：未實作回填的 reviewer 核對上述內容一致，記錄實際版本與發現；通過才可完成 plan。
+
+<!-- 無設計內容需回填時省略本 phase 並記錄理由。產品 UI gate 與回填核對責任不同，不新增第二次產品 UI 家族 gate。 -->
+
+## UI 分流對照（獨立示例，依實際需求採用）
+
+| 分流 | 任務依據與驗證 | 交付／阻擋結果 |
+| --- | --- | --- |
+| A：純後端索引效能改善 | plan.md 記不適用，沿用既有隔離／行為回歸及效能驗證 | 無 ui/ 仍可完成，無 UI gate／設計回填 |
+| B：修正訊息筆數 | plan.md 記 room/main 的既有呈現及新版計數 truth，驗證筆數與必要手機長文字回歸 | 不新增 .pen，不製作 prototype，無設計回填則記不適用 |
+| C：本例新增入口 | 已確認 design-v1、代表畫面與逐項差異、一次最終 UI gate | 原型不製作是合法狀態；產品驗收後回填 |
+| C：只有拖曳互動待決 | 局部原型只驗證 drag/order，尚 pending | 只阻擋該互動依賴；已明列獨立 A／B 範圍可繼續 |

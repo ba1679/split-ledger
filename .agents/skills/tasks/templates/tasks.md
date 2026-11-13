@@ -1,9 +1,9 @@
-# Tasks: {{FEATURE_NAME}}
+# 任務規劃: {{FEATURE_NAME}}
 
-**Plan Package**: `{{PLAN_PACKAGE}}`
-**Core Inputs**: `spec.md`, `plan.md`, `research.md`, `truth-delta.md`, `specs/truth/techstack.md`, `specs/truth/contracts/**`, `specs/truth/data/**`, `specs/truth/features/backend/**`, `specs/truth/features/frontend/**`, `ui/**`
+**Plan package**: `{{PLAN_PACKAGE}}`
+**核心輸入**: `spec.md`, `plan.md`, `research.md`, `truth-delta.md`, `specs/truth/techstack.md`, `specs/truth/contracts/**`, `specs/truth/data/**`, `specs/truth/features/backend/**`, `specs/truth/features/frontend/**`, 適用的 `ui/**`
 
-## Task Binding Contract
+## 任務綁定契約
 
 - 產品行為開發任務對應 `truth-delta.md` 的語意；重構、工程交付與確認任務追溯 spec / plan，並引用相關 truth 或 NOOP（若有）。
 - Phase 1 `Setup` 只做本輪新增技術的基礎建設、技術環境與最後的 smoke-test；不寫 DSL 語意、不寫產品行為。
@@ -11,22 +11,25 @@
 - 無需對齊 DSL 時省略 Phase 3，記錄原因與既有回歸範圍。
 - Phase 3 `Test Alignment & Implementation` 的目的：在寫產品碼之前，先把本輪所有受影響 DSL 的自動化測試對齊最新版 truth。
 - Truth 參照必須使用 `specs/truth/**` 路徑；plan 參照才使用當前 plan package 內相對路徑。
-- Feature `Shared Must Read` 除 feature、同模組 DSL、對應 `truth-delta` 列外，還必須列入回追到的 planner 產物。
+- Feature `Shared Must Read` 除 feature、同模組 DSL、對應 `truth-delta` 列外，還必須列入按分流回追到的適用產物或既有呈現／行為依據。
 
-## 設計前置、資源模式與 session checkpoints
+## UI 分流、資源模式與 session checkpoints
 
 - 資源契約：{{RESOURCE_CONTRACT}}；呼叫 skill 不代表新增 agent；完整測試矩陣維持，依序排程。
-- 設計前置：{{DESIGN_PREREQUISITE_EVIDENCE}}。pending 時先回交 ui-plan，依賴它的前端工作不解鎖；已批准則引用原證據，不重複詢問。
-- 畫面索引與同步：{{SCREEN_INDEX_SYNC_REFERENCE}}。
+- 分流與理由、受影響畫面／行為：{{UI_CLASSIFICATION_AND_SCOPE}}。
+- 既有呈現／固定基準＋本次設計與行為依據：{{PRESENTATION_AND_BEHAVIOR_REFERENCES}}。
+- 適用設計確認與未決依賴：{{APPLICABLE_APPROVAL_AND_BLOCKERS}}。
+- Prototype 選用與相關決策：{{PROTOTYPE_SELECTION_AND_DECISIONS}}。
+- 基準回填範圍或不適用理由：{{BASELINE_BACKFILL_SCOPE}}。
 
 | Checkpoint                | 完成條件／驗證                  | 下一範圍與交接位置                 |
 | ------------------------- | ------------------------------- | ---------------------------------- |
 | {{SESSION_CHECKPOINT_ID}} | {{SESSION_CHECKPOINT_CRITERIA}} | {{SESSION_NEXT_SCOPE}}；handoff.md |
 
-<!-- 依範圍列出測試 review、後端 feature 組、代表畫面桌機／手機比對、其餘前端及最終整合等適用交接點。待確認只產出阻礙與前置關卡，不把尚未同步的前端任務交給 implement。 -->
+<!-- 依範圍列出測試 review、後端 feature 組、代表畫面桌機／手機比對、其餘前端及最終整合等適用交接點。待確認只產出阻礙與前置關卡，只阻擋依賴未決事項的任務；A／B 缺 ui/ 或不製作 prototype 不算未完成。 -->
 
 - 分波與補驗：預設全批測試對齊後 review；UI 受阻時可明列本波僅獨立 backend 的 feature／DSL／Test Scope 與 review 依賴。前端後補時增量加入其對齊與 review，不宣告全 plan 已就緒。
-- 舊 tasks 更新：保留既有 ID／歷史證據及不受影響的 `[X]`；缺批准／比對者重開或新增補驗，阻擋相應最終 gate；新增 ID 不得重複。
+- 舊 tasks 更新：保留既有 ID／歷史證據及不受影響的 `[X]`；缺適用批准／比對者才重開或新增補驗，阻擋相應最終 gate；新增 ID 不得重複。
 
 ## Phase 1: Setup
 
@@ -143,7 +146,7 @@
 **受影響畫面與完成證據**（無 UI 則註明不適用）：
 
 - {{AFFECTED_SCREEN_IDS_ROUTES_COMPONENTS}}
-- {{APPROVED_PEN_PREVIEW_PROTOTYPE_BINDINGS}}
+- {{CLASSIFIED_PRESENTATION_AND_BEHAVIOR_BINDINGS}}
 - {{SCREEN_COMPARISON_COMPLETION_EVIDENCE}}
 - {{REPRESENTATIVE_SCREEN_CHECKPOINT_DEPENDENCIES}}
 
@@ -172,7 +175,7 @@
 **受影響畫面與完成證據**（無 UI 則註明不適用）：
 
 - {{AFFECTED_SCREEN_IDS_ROUTES_COMPONENTS}}
-- {{APPROVED_PEN_PREVIEW_PROTOTYPE_BINDINGS}}
+- {{CLASSIFIED_PRESENTATION_AND_BEHAVIOR_BINDINGS}}
 - {{SCREEN_COMPARISON_COMPLETION_EVIDENCE}}
 - {{REPRESENTATIVE_SCREEN_CHECKPOINT_DEPENDENCIES}}
 
@@ -201,7 +204,7 @@
 **受影響畫面與完成證據**（無 UI 則註明不適用）：
 
 - {{AFFECTED_SCREEN_IDS_ROUTES_COMPONENTS}}
-- {{APPROVED_PEN_PREVIEW_PROTOTYPE_BINDINGS}}
+- {{CLASSIFIED_PRESENTATION_AND_BEHAVIOR_BINDINGS}}
 - {{SCREEN_COMPARISON_COMPLETION_EVIDENCE}}
 - {{REPRESENTATIVE_SCREEN_CHECKPOINT_DEPENDENCIES}}
 - `{{OBSOLETE_PRODUCT_CODE_PATH}}` -> {{OBSOLETE_PRODUCT_BEHAVIOR}}
@@ -231,7 +234,7 @@
 - 本輪沒有 plan-side 產物時省略整個 phase。
 
 - [ ] T{{PLAN_SIDE_GATE_TASK_ID}} subagent review ({{PLAN_SIDE_GATE_NAME}} quality gate)
-  - Evidence: {{PLAN_SIDE_GATE_EVIDENCE}}；UI 須核對三方版本、桌機／手機與逐項差異收斂，不以功能綠燈或無溢出代替。
+  - Evidence: {{PLAN_SIDE_GATE_EVIDENCE}}；C 類 UI 須核對固定基準／設計／產品版本、桌機／手機與逐項差異收斂；僅選用互動附其證據，不以功能綠燈或無溢出代替。
 
 ## Phase {{DELIVERY_PHASE}}: 工程交付與確認（依需求選用）
 
@@ -245,3 +248,19 @@
   - 前置：T{{REFACTOR_TASK_ID}}；確認對象：{{CONFIRMER}}；通過條件：{{CONFIRM_CRITERIA}}
 - [ ] T{{REMAINING_TASK_ID}} {{REMAINING_ACTION}}
   - Dependencies: T{{CONFIRM_TASK_ID}}
+
+## Phase {{BASELINE_PHASE}}: 驗收後基準回填（有設計內容需回填時）
+
+**來源**: plan.md／ui/ui-plan.md -> {{BASELINE_BACKFILL_REQUIREMENT}}
+**Dependencies**: {{PRODUCT_ACCEPTANCE_UI_GATE_AND_REGRESSION_TASKS}}
+
+- [ ] T{{BASELINE_UPDATE_TASK_ID}} 回填本次已驗收的共用基準
+  - Read: {{BASELINE_START_AND_LATEST_REFERENCES}}；{{ACCEPTED_PRODUCT_AND_DESIGN_EVIDENCE}}
+  - 寫入範圍：{{BASELINE_WRITE_SCOPE}}
+  - 更新相關 frame／元件、同版預覽、README 的產品 commit、涵蓋範圍、差異與更新紀錄；比較最新基準並保留其他 plan 成果，同範圍衝突回交。
+- [ ] T{{BASELINE_REVIEW_TASK_ID}} subagent review (baseline backfill)
+  - Dependencies: T{{BASELINE_UPDATE_TASK_ID}}
+  - Read: 本次基準 diff、產品驗收、預覽及 README。
+  - 完成證據：{{BASELINE_REVIEW_EVIDENCE}}；由未實作本次回填的審查者核對，通過才可完成 plan。
+
+<!-- 無設計內容需回填時省略本 phase 並記錄理由。產品 UI gate 與回填核對責任不同，不新增第二次產品 UI 家族 gate。 -->

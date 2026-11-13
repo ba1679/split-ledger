@@ -1,6 +1,6 @@
 ---
 name: system-analysis
-description: 在 plan package 的 `spec.md`、`research.md`、`truth-delta.md` 與 `specs/truth/**` 基礎上，盤點本次需求涉及的系統介面與分析 wave，產出 plan-side `plan.md`，並把 plan package、truth root、truth-delta path 傳給 `/api-plan`、`/data-plan`、`/ui-plan`。
+description: 在 plan package 的 `spec.md`、`research.md`、`truth-delta.md` 與 `specs/truth/**` 基礎上，盤點本次需求涉及的系統介面與分析 wave，產出 plan-side `plan.md`，將 plan package、truth root、truth-delta path 傳給 API／data owner，依 UI 分流條件委派 `/ui-plan`。
 disable-model-invocation: true
 ---
 
@@ -13,7 +13,7 @@ disable-model-invocation: true
 ## Phase 1 -- 對齊 plan、truth 與控制平面
 
 1. READ 讀取使用者需求、呼叫者要求、目標 plan package 的 `spec.md`、`research.md`、`truth-delta.md`、既有 `plan.md`、`specs/truth/techstack.md` 與相關 `specs/truth/**`。
-2. READ 讀取 `templates/plan.md` 與 `templates/plan.example.md`，確認 `plan.md` 的固定結構與完成樣貌。
+2. READ 讀取 `templates/plan.md`、`templates/plan.example.md` 與 `../shared/ui-delivery.md`，確認 plan 結構與 UI 分流契約。
 3. READ 讀取 `.agents/constitution/CONSTITUTION.md`、`.agents/constitution/shared.md` 與 `.agents/constitution/skills/system-analysis/plan.md`。
 4. WRITE 若 plan package 尚未有 `plan.md` 父層，建立必要目錄；本 skill 不建立或修改 `specs/truth/**`。
 
@@ -26,11 +26,11 @@ disable-model-invocation: true
 ## Phase 3 -- 規劃分析 Wave 並產出 plan
 
 1. READ 需要判斷先後與平行分組時，讀取 `rules/Wave依賴排序與平行分組判準.md`。
-2. THINK 依介面依賴、truth 變更風險與可平行程度安排 Wave，確認每個介面至少被一個後續 planner 承接。
-3. WRITE 將系統介面盤點、Wave、分析重點與委派理由寫入 `specs/plans/NNN-<slug>/plan.md`。
+2. THINK 依已載入契約判定各範圍 UI 分流、呈現／行為依據與基準缺口；依決策依賴、truth 風險及可平行程度安排 Wave，確認各介面的 owner 或既有依據。
+3. WRITE 將系統介面盤點、UI 分流與理由、受影響畫面／行為、固定基準或替代依據、Wave 決策依賴及委派理由寫入 `specs/plans/NNN-<slug>/plan.md`。
 
 ## Phase 4 -- 委派 planner 並交付
 
 1. READ 需要判斷 planner 對應時，讀取 `rules/分析介面委派與planner對應判準.md`。
-2. DELEGATE 依 Wave 順序將 API 介面交給 `/api-plan`、資料介面交給 `/data-plan`、UI 介面交給 `/ui-plan`；每次 handoff 都必須包含 plan package path、truth root、truth-delta path、介面名稱與分析重點。
-3. WRITE 向使用者回報 `plan.md`、系統介面數量、Wave 數量、委派到哪些 planner，以及是否可進入 `/dsl-refine` 或 `/tasks`。
+2. DELEGATE 依已記錄的 Wave 與決策依賴，將 API 介面交 `/api-plan`、資料介面交 `/data-plan`，僅 C 類設計範圍交 `/ui-plan`；handoff 包含 plan package、truth root、truth-delta、介面、分流、受影響範圍、固定基準／既有依據與分析重點。A／B 留下既有依據及驗證責任，無須委派設計。
+3. WRITE 向使用者回報 `plan.md`、系統介面數量、Wave 數量、委派到哪些 planner，以及可進入 `/dsl-refine`／`/tasks` 的範圍、受阻項及依賴；部分就緒不宣稱全 plan 就緒。
