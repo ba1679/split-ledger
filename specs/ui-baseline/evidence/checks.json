@@ -1,0 +1,78 @@
+{
+  "method": "Pen integrated browser CDP; real React frontend and Fastify API; isolated seeded test database",
+  "scope": "focused UI observation, not full BDD regression or physical-device testing",
+  "checks": [
+    {
+      "check": "empty-name",
+      "alert": "請填寫旅行名稱。",
+      "focus": "例如：日本春日旅行",
+      "dialog": {
+        "x": 19,
+        "y": 147.90625,
+        "width": 352,
+        "height": 548.1796875,
+        "top": 147.90625,
+        "right": 371,
+        "bottom": 696.0859375,
+        "left": 19
+      },
+      "scrollWidth": 390,
+      "width": 390
+    },
+    {
+      "check": "date-order",
+      "alert": "結束日不能早於開始日。",
+      "values": [
+        "日期順序檢查",
+        "2027/03/10",
+        "2027/03/09"
+      ],
+      "scrollWidth": 390,
+      "width": 390
+    },
+    {
+      "check": "cancel",
+      "open": false,
+      "focus": "新增旅行",
+      "cards": 2
+    },
+    {
+      "check": "intermediate-768",
+      "width": 768,
+      "scrollWidth": 768,
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 190,
+        "height": 900,
+        "top": 0,
+        "right": 190,
+        "bottom": 900,
+        "left": 0
+      },
+      "columns": "247px 247px",
+      "cards": [
+        {
+          "x": 220,
+          "y": 182.984375,
+          "width": 247,
+          "height": 343.7890625,
+          "top": 182.984375,
+          "right": 467,
+          "bottom": 526.7734375,
+          "left": 220
+        },
+        {
+          "x": 491,
+          "y": 182.984375,
+          "width": 247,
+          "height": 343.7890625,
+          "top": 182.984375,
+          "right": 738,
+          "bottom": 526.7734375,
+          "left": 491
+        }
+      ]
+    }
+  ]
+}
