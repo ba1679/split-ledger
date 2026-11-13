@@ -6,11 +6,13 @@
 - 模式：新版 `/ui-plan` 的明確「建立基準」模式；本次只寫 `specs/ui-baseline/**`。
 - 固定產品 commit：`29f420a43707fe1707fc36bba914fb361bc0a229`。該 commit 提交 skill chain 改版，產品碼沿用原現況。
 - 設計檔：[split-ledger.pen](split-ledger.pen)。由 Pen 官方 CLI 的設計工具建立、匯入為可編輯圖層、檢查並儲存，非截圖包裝或假副檔名。
-- 設計檔 SHA256：`fcf567aa8ee35bd20bcc0d5df4071f35fd821387584e96fa57729ebcc4916331`。
+- v0.1 已批准版本設計檔 SHA256（取自 `6bb68a5`）：`fcf567aa8ee35bd20bcc0d5df4071f35fd821387584e96fa57729ebcc4916331`。
 - 確認狀態：`approved`。確認者為本 chat 使用者，日期 2026-11-13（Asia/Taipei）；在 DateField 排版修正交付後，使用者原回覆：「可以，這版 baseline 我確認，請把設計稿、預覽與相關文件一起 commit。」
 - 有效確認範圍：本版四張主畫面、名稱錯誤狀態、13 個共用元件與 DateField 元件區位置修正，包含文件已揭露的替代字型差異；不涵蓋尚未收錄的產品畫面或未驗證狀態。
 - 目前已批准基準：`baseline-v0.1`；對應本節設計檔雜湊與本次有效確認範圍。
-- 基準 Git 版本：設計稿、預覽與本 README 由同一次提交固定；本次提交可用 `git log -1 --format=%H -- specs/ui-baseline/split-ledger.pen` 取得。後續 plan 記下該實際 commit＋路徑＋畫面 ID＋同版預覽，不以可變的 HEAD 或版本別名代替。
+- 已批准基準 Git 版本：`6bb68a5023d43aa6beadaee4453676c30ba635f7`。後續 plan 記下該實際 commit＋路徑＋畫面 ID＋同版預覽，不以可變的 HEAD 或版本別名代替。
+
+目前工作檔另含 `baseline-v0.2` 的旅行帳本範圍，已於 2026-11-14 取得使用者確認，狀態為 `approved`；詳見 [旅行帳本版本、預覽與核對](ledger-baseline.md)。本節 v0.1 的原確認持續有效；新增旅行帳本的確認原文與範圍另記於該文件。原版 13 個共用元件本輪均未變更；目前整份工作檔的雜湊另記於旅行帳本文件，未涵蓋畫面與狀態仍不在批准範圍。Pen 用量限制使畫布仍保留旅行帳本的 pending 標記，正式確認以文件紀錄為準。
 
 ## 範圍與畫面索引
 
@@ -124,3 +126,5 @@
 | 2026-11-13 | baseline-v0.1 | 固定 29f420a 現況，交付我的旅行／新增旅行桌機手機 4 張、名稱錯誤元件、共用元件與核對證據 | pending，待使用者確認 |
 | 2026-11-13 | baseline-v0.1 排版修正 | DateField 桌機元件移至 (300, 300)、手機元件移至 (560, 300)，兩者間隔 60px；工具檢查所有頂層畫面／元件無重疊，畫面內容與元件實例維持原樣 | pending，原確認範圍不變 |
 | 2026-11-13 | baseline-v0.1 確認 | 使用者確認 DateField 排版修正後的本版基準，記錄原回覆、有效範圍及最終設計雜湊；設計說明與 frame context 改為 approved | approved |
+| 2026-11-13 | baseline-v0.2 旅行帳本 | 沿用已確認共用元件，新增桌機／手機主視窗與支出區捲動視窗、空帳本元件、旅行內導覽；詳見 ledger-baseline.md | pending，僅新增範圍待確認 |
+| 2026-11-14 | baseline-v0.2 確認 | 使用者確認旅行帳本；保存原回覆與有效範圍，設計稿、預覽及文件一起提交。Pen 用量限制導致畫布批准標記尚未同步 | approved，標記同步限制見 ledger-baseline.md |
