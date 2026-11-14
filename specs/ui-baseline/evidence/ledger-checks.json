@@ -1,0 +1,379 @@
+[
+  {
+    "check": "ledger-desktop",
+    "width": 1440,
+    "height": 900,
+    "scrollWidth": 1440,
+    "scrollHeight": 1212,
+    "text": "t.\n旅帳\n我的旅行\n同行者\n分帳結算\n支出分類\nA LITTLE RECORD\nOF EVERY JOURNEY.\n\n小旅人 的旅行帳本\n\n登出\n我的旅行\nTRAVEL JOURNAL\n日本春日旅行\n\n2027-03-10 — 2027-03-15旅行日期\n\n記一筆\n同行者\n分帳結算\n個人總花費 · 依幣別分開統計\nJPY\n16,000\nJPY\nTWD\n8,000.00\nTWD\nJPY\n小旅人\n應收\nJPY 1000\n小安\n應付\nJPY -1000\nTWD\n小旅人\n已平衡\nTWD 0\n小安\n已平衡\nTWD 0\n沿途的花費\n3 筆紀錄\n巷口的拉麵店\n2027-03-11 · 餐飲\nJPY 2,000\n京都町家住宿\n2027-03-10 · 住宿\nJPY 15,000\n往返機票\n2027-01-15 · 交通\nTWD 8,000.00",
+    "regions": [
+      {
+        "class": "page-head",
+        "box": {
+          "x": 284,
+          "y": 116,
+          "width": 1100,
+          "height": 130.390625,
+          "top": 116,
+          "right": 1384,
+          "bottom": 246.390625,
+          "left": 284
+        }
+      },
+      {
+        "class": "trip-navigation",
+        "box": {
+          "x": 284,
+          "y": 282.390625,
+          "width": 1100,
+          "height": 46.3984375,
+          "top": 282.390625,
+          "right": 1384,
+          "bottom": 328.7890625,
+          "left": 284
+        }
+      },
+      {
+        "class": "totals",
+        "box": {
+          "x": 284,
+          "y": 399.5859375,
+          "width": 1100,
+          "height": 151.7890625,
+          "top": 399.5859375,
+          "right": 1384,
+          "bottom": 551.375,
+          "left": 284
+        }
+      },
+      {
+        "class": "balance-grid",
+        "box": {
+          "x": 284,
+          "y": 585.375,
+          "width": 1100,
+          "height": 202.1875,
+          "top": 585.375,
+          "right": 1384,
+          "bottom": 787.5625,
+          "left": 284
+        }
+      },
+      {
+        "class": "ledger",
+        "box": {
+          "x": 284,
+          "y": 863.5625,
+          "width": 1100,
+          "height": 268.5859375,
+          "top": 863.5625,
+          "right": 1384,
+          "bottom": 1132.1484375,
+          "left": 284
+        }
+      },
+      {
+        "class": "bottom-nav",
+        "box": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0,
+          "top": 0,
+          "right": 0,
+          "bottom": 0,
+          "left": 0
+        }
+      }
+    ]
+  },
+  {
+    "check": "ledger-mobile",
+    "width": 390,
+    "height": 844,
+    "scrollY": 0,
+    "scrollWidth": 390,
+    "scrollHeight": 1396,
+    "regions": [
+      {
+        "class": "page-head",
+        "box": {
+          "x": 20,
+          "y": 93,
+          "width": 350,
+          "height": 145.5859375,
+          "top": 93,
+          "right": 370,
+          "bottom": 238.5859375,
+          "left": 20
+        }
+      },
+      {
+        "class": "totals",
+        "box": {
+          "x": 20,
+          "y": 380.78125,
+          "width": 350,
+          "height": 130.1875,
+          "top": 380.78125,
+          "right": 370,
+          "bottom": 510.96875,
+          "left": 20
+        }
+      },
+      {
+        "class": "balance-grid",
+        "box": {
+          "x": 20,
+          "y": 544.96875,
+          "width": 350,
+          "height": 420.375,
+          "top": 544.96875,
+          "right": 370,
+          "bottom": 965.34375,
+          "left": 20
+        }
+      },
+      {
+        "class": "ledger",
+        "box": {
+          "x": 20,
+          "y": 1041.34375,
+          "width": 350,
+          "height": 244.5859375,
+          "top": 1041.34375,
+          "right": 370,
+          "bottom": 1285.9296875,
+          "left": 20
+        }
+      },
+      {
+        "class": "bottom-nav",
+        "box": {
+          "x": 0,
+          "y": 779,
+          "width": 390,
+          "height": 65,
+          "top": 779,
+          "right": 390,
+          "bottom": 844,
+          "left": 0
+        }
+      }
+    ],
+    "navigation": [
+      {
+        "text": "我的旅行",
+        "box": {
+          "x": 12,
+          "y": 788,
+          "width": 70.796875,
+          "height": 48,
+          "top": 788,
+          "right": 82.796875,
+          "bottom": 836,
+          "left": 12
+        }
+      },
+      {
+        "text": "同行者",
+        "box": {
+          "x": 82.796875,
+          "y": 788,
+          "width": 70.8046875,
+          "height": 48,
+          "top": 788,
+          "right": 153.6015625,
+          "bottom": 836,
+          "left": 82.796875
+        }
+      },
+      {
+        "text": "分帳結算",
+        "box": {
+          "x": 153.6015625,
+          "y": 788,
+          "width": 70.796875,
+          "height": 48,
+          "top": 788,
+          "right": 224.3984375,
+          "bottom": 836,
+          "left": 153.6015625
+        }
+      },
+      {
+        "text": "支出分類",
+        "box": {
+          "x": 224.3984375,
+          "y": 788,
+          "width": 70.8046875,
+          "height": 48,
+          "top": 788,
+          "right": 295.203125,
+          "bottom": 836,
+          "left": 224.3984375
+        }
+      },
+      {
+        "text": "登出",
+        "box": {
+          "x": 295.203125,
+          "y": 788,
+          "width": 82.796875,
+          "height": 48,
+          "top": 788,
+          "right": 378,
+          "bottom": 836,
+          "left": 295.203125
+        }
+      }
+    ]
+  },
+  {
+    "check": "ledger-mobile-scrolled",
+    "width": 390,
+    "height": 844,
+    "scrollY": 552,
+    "scrollWidth": 390,
+    "rows": [
+      {
+        "text": "巷口的拉麵店\n2027-03-11 · 餐飲\nJPY 2,000",
+        "href": "/trips/a7beed72-d5b0-4d43-94f7-a41c58b9ae03/expenses/5e4c8283-0a34-42e9-a336-5e6918941dd6",
+        "box": {
+          "x": 21,
+          "y": 490.34375,
+          "width": 348,
+          "height": 81.1953125,
+          "top": 490.34375,
+          "right": 369,
+          "bottom": 571.5390625,
+          "left": 21
+        }
+      },
+      {
+        "text": "京都町家住宿\n2027-03-10 · 住宿\nJPY 15,000",
+        "href": "/trips/a7beed72-d5b0-4d43-94f7-a41c58b9ae03/expenses/2c2b12f7-31e1-4efb-bd4e-2e19f560b695",
+        "box": {
+          "x": 21,
+          "y": 571.5390625,
+          "width": 348,
+          "height": 81.1953125,
+          "top": 571.5390625,
+          "right": 369,
+          "bottom": 652.734375,
+          "left": 21
+        }
+      },
+      {
+        "text": "往返機票\n2027-01-15 · 交通\nTWD 8,000.00",
+        "href": "/trips/a7beed72-d5b0-4d43-94f7-a41c58b9ae03/expenses/2c7e8362-8b55-439a-b6f4-2650ccf248a6",
+        "box": {
+          "x": 21,
+          "y": 652.734375,
+          "width": 348,
+          "height": 80.1953125,
+          "top": 652.734375,
+          "right": 369,
+          "bottom": 732.9296875,
+          "left": 21
+        }
+      }
+    ],
+    "navigation": {
+      "x": 0,
+      "y": 779,
+      "width": 390,
+      "height": 65,
+      "top": 779,
+      "right": 390,
+      "bottom": 844,
+      "left": 0
+    }
+  },
+  {
+    "check": "ledger-desktop-scrolled",
+    "width": 1440,
+    "height": 900,
+    "scrollY": 312,
+    "scrollWidth": 1440,
+    "ledger": {
+      "x": 284,
+      "y": 551.5625,
+      "width": 1100,
+      "height": 268.5859375,
+      "top": 551.5625,
+      "right": 1384,
+      "bottom": 820.1484375,
+      "left": 284
+    }
+  },
+  {
+    "check": "ledger-date-dialog",
+    "title": "旅行日期",
+    "inputs": [
+      {
+        "value": "2027/03/10",
+        "label": "開始日選填"
+      },
+      {
+        "value": "2027/03/15",
+        "label": "結束日選填"
+      }
+    ],
+    "buttons": [
+      {
+        "text": "×",
+        "label": "清除開始日"
+      },
+      {
+        "text": "",
+        "label": "選擇開始日"
+      },
+      {
+        "text": "×",
+        "label": "清除結束日"
+      },
+      {
+        "text": "",
+        "label": "選擇結束日"
+      },
+      {
+        "text": "取消",
+        "label": null
+      },
+      {
+        "text": "儲存日期",
+        "label": null
+      }
+    ]
+  },
+  {
+    "check": "ledger-date-cancel",
+    "open": false,
+    "focus": "旅行日期",
+    "dates": "2027-03-10 — 2027-03-15旅行日期"
+  },
+  {
+    "check": "ledger-intermediate-768",
+    "width": 768,
+    "scrollWidth": 768,
+    "sidebarWidth": 190,
+    "rows": 3
+  },
+  {
+    "check": "ledger-empty-mobile",
+    "width": 390,
+    "scrollWidth": 390,
+    "title": "下一趟旅行",
+    "date": "旅行日期未定",
+    "emptyHeading": "旅程還有很多空白，真好。",
+    "emptyAction": "記錄第一筆支出",
+    "href": "/trips/0b125fa8-f1b1-4da7-bac9-41ee678a74ad/expenses/new"
+  },
+  {
+    "check": "canvas",
+    "topLevelOverlapPairs": [],
+    "approvedComponentsUnchanged": 13,
+    "scope": "Compared raw component subtrees before and after; known font substitutions retained"
+  }
+]

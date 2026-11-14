@@ -1,0 +1,82 @@
+{
+  "date": "2026-11-14",
+  "timezone": "Asia/Taipei",
+  "operation": "canvas organization only; existing design approvals retained",
+  "regions": {
+    "QBbzP": "00 / 版本與索引",
+    "OKWYQ": "01 / 共用元件庫",
+    "nObqJ": "02 / 既有產品畫面"
+  },
+  "featureGroups": {
+    "d0FIv": "我的旅行與新增旅行",
+    "Bf22k": "旅行帳本"
+  },
+  "componentDefinitionsPreserved": 16,
+  "screenSubtreesPreserved": 8,
+  "comparisonExcludes": [
+    "root x",
+    "root y",
+    "root context"
+  ],
+  "brokenReferences": [],
+  "overlapPairs": {
+    "document": [],
+    "QBbzP": [],
+    "OKWYQ": [],
+    "nObqJ": [],
+    "d0FIv": [],
+    "Bf22k": []
+  },
+  "preservedOutsideApproval": "UBNEL; existing fetch-error observation, clearly labelled outside approved scope",
+  "screenExports": [
+    {
+      "frameId": "GlUDZ",
+      "preview": "specs/ui-baseline/previews/trips-desktop.png",
+      "sha256": "9d5080864747b2d0a86d045372be3965bc6229844464f947e3e3fd094108645f",
+      "unchanged": true
+    },
+    {
+      "frameId": "o337R",
+      "preview": "specs/ui-baseline/previews/trips-create-desktop.png",
+      "sha256": "ecf50efcef500921167123b05ec27d3d8dd3c21c2e99f8e7d60d289e32d28cd1",
+      "unchanged": true
+    },
+    {
+      "frameId": "i1wuXl",
+      "preview": "specs/ui-baseline/previews/trips-mobile.png",
+      "sha256": "7ec32dfdbb9c907059f917a2d0b9a44961bb2578c40810bb9be228c191e18423",
+      "unchanged": true
+    },
+    {
+      "frameId": "UfWmt",
+      "preview": "specs/ui-baseline/previews/trips-create-mobile.png",
+      "sha256": "5e8de86cabfc80763ba9083d6c2392770b14b81a8b60e14f40bf9a5fc34be9e1",
+      "unchanged": true
+    },
+    {
+      "frameId": "K4fUl",
+      "preview": "specs/ui-baseline/previews/ledger-desktop.png",
+      "sha256": "c8eb5a84c9bfd18e6dcd5232d4ec9038365cf72f53c1de9da6c585ab6a80c65b",
+      "unchanged": true
+    },
+    {
+      "frameId": "j4FlQR",
+      "preview": "specs/ui-baseline/previews/ledger-mobile.png",
+      "sha256": "4e883ea5d90017ed6eda11db2c9125c7f0e41547e8cbd50bb09ea9a2e9d6ec05",
+      "unchanged": true
+    },
+    {
+      "frameId": "vQfME",
+      "preview": "specs/ui-baseline/previews/ledger-expenses-desktop.png",
+      "sha256": "94acb4cd96cc27ee00badbcdcc82200609cea4407c64605e93e17dea54823c78",
+      "unchanged": true
+    },
+    {
+      "frameId": "pwPFO",
+      "preview": "specs/ui-baseline/previews/ledger-expenses-mobile.png",
+      "sha256": "2d99597654b0735dd010d7c7e8f73ed874027fe2f16f8dd2eb6d9d629ed7b167",
+      "unchanged": true
+    }
+  ],
+  "designSha256": "2f3f89c639551e354e04fe765b57f6ece6dab7372aee15bb47406382edac7085"
+}
