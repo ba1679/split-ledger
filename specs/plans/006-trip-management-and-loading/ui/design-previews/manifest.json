@@ -1,0 +1,313 @@
+{
+  "date": "2026-11-14",
+  "source_design": "design-v7",
+  "source_pen_sha256": "6c33bce25da872057d253a44bd0e59dec1f0e41f974873fb6db0dfe10b6c1abc",
+  "method": "Pen desktop Export scale=1; source document not saved or modified",
+  "original_png_hashes": "unavailable; no claim of byte identity to missing exports",
+  "previews": [
+    {
+      "screen": "U01-D",
+      "frame": "qOVYr",
+      "path": "ui/design-previews/qOVYr.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "967f5310aa25c637bfa32be4f4d85da2f668b82180da40efa8ab54199794e73b"
+    },
+    {
+      "screen": "U01-M",
+      "frame": "uBMYs",
+      "path": "ui/design-previews/uBMYs.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "0c7d816aa77f0e5fb184e9f2022d859ebfe35cd1361a6f750716964b46d090d2"
+    },
+    {
+      "screen": "U02-D",
+      "frame": "nh4JN",
+      "path": "ui/design-previews/nh4JN.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "d398f959e8020e1ae9698cf3889cf59ca8d36d2e338251ab77a62ca16360a5eb"
+    },
+    {
+      "screen": "U02-M",
+      "frame": "c5e28",
+      "path": "ui/design-previews/c5e28.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "a02aaf72463ea83f9444548e5e254a84234bc33ec55e4d3488eb6a0c52a4ec99"
+    },
+    {
+      "screen": "U03-D",
+      "frame": "WLw0N",
+      "path": "ui/design-previews/WLw0N.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "1fbca62658290906ddff900168363735f1e75ffa633cdbe24f65d26228a355c2"
+    },
+    {
+      "screen": "U03-M",
+      "frame": "VtNXn",
+      "path": "ui/design-previews/VtNXn.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "66129f6db03592d3f7fad272bdcdc16bef66862bc72b3bc84f1ca8e3cc8932ff"
+    },
+    {
+      "screen": "U04-D",
+      "frame": "Wd1Pq",
+      "path": "ui/design-previews/Wd1Pq.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "06abb7a35bcf5b4d3526c25f91354d64ab07d8793c31680a723027f16e62fc58"
+    },
+    {
+      "screen": "U04-M",
+      "frame": "A0kb5",
+      "path": "ui/design-previews/A0kb5.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "8e1a958f4285083164033533934d5eac709b3b0a52917712f50727deb44fb4b0"
+    },
+    {
+      "screen": "S01-D",
+      "frame": "k5UPcL",
+      "path": "ui/design-previews/k5UPcL.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "d0ace861cd57bd111a6f2748f500c6a13dfaee0a224ecbabb4626c2bf5f40f7e"
+    },
+    {
+      "screen": "S01-M",
+      "frame": "vkszC",
+      "path": "ui/design-previews/vkszC.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "7dd7651ed873527580fa56e07a17df17c3f75426cd09adced00f22418dec1f63"
+    },
+    {
+      "screen": "S02-D",
+      "frame": "G7HrKo",
+      "path": "ui/design-previews/G7HrKo.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "1ae0e68914fe03cc53a8a3d5443c1a65b537d7303174ab8c6b7d0eb9d33437df"
+    },
+    {
+      "screen": "S02-M",
+      "frame": "rHv6p",
+      "path": "ui/design-previews/rHv6p.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "f258fd98973463bd8b2709c7e30b5507c9f7e34a2db3c3478a0dcd5bacf63a7a"
+    },
+    {
+      "screen": "S03-D",
+      "frame": "ybPvI",
+      "path": "ui/design-previews/ybPvI.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "d31e7ffa7deda4a12bfd2589188f2816a1c01065ca2b992045873aa49bd49e90"
+    },
+    {
+      "screen": "S03-M",
+      "frame": "DECWg",
+      "path": "ui/design-previews/DECWg.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "cc6d00afd58330095447c11954e0261435ecc88341cb598cad8f29ff0f72427c"
+    },
+    {
+      "screen": "S04-D",
+      "frame": "g1Pexm",
+      "path": "ui/design-previews/g1Pexm.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "13f70e3ee4ce726219aa3d973d5659c197e3f2c30c536e61b358ce4e1006525f"
+    },
+    {
+      "screen": "S04-M",
+      "frame": "U2nnu",
+      "path": "ui/design-previews/U2nnu.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "a4cd0ef7023ae0717bd20fcb6122bf90e81b41c633b6dd0200085256db6bd2a3"
+    },
+    {
+      "screen": "S05-D",
+      "frame": "M6LRw",
+      "path": "ui/design-previews/M6LRw.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "d71222930443790ae8618dbe00585b94c2cbbc39acb001ce2aeb968c8b7183f4"
+    },
+    {
+      "screen": "S05-M",
+      "frame": "kMwFM",
+      "path": "ui/design-previews/kMwFM.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "1480ec5b8e3651c2a8206e4ff9a04c84de80c7a76113d0fbc21e81e45cc2095b"
+    },
+    {
+      "screen": "S06-D",
+      "frame": "ddFff",
+      "path": "ui/design-previews/ddFff.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "ec1d5cedecae0726827205627f40ecbfb15bf28573b4f9a45ead309be4d95d86"
+    },
+    {
+      "screen": "S06-M",
+      "frame": "hmwlx",
+      "path": "ui/design-previews/hmwlx.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "2016494969af617324bbb5f56e4c6f35142b9fc10c80eb178ace6c7a775315c5"
+    },
+    {
+      "screen": "S07-D",
+      "frame": "vCf8Y",
+      "path": "ui/design-previews/vCf8Y.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "685ba23f8f90e91e30bb9546c982368ab4e3d5171d4d2bacc94cc9ce107d38fd"
+    },
+    {
+      "screen": "S07-M",
+      "frame": "quiiR",
+      "path": "ui/design-previews/quiiR.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "d3700f91b0a95f4168dfc978fb005320711d1187db20493c8d302a9dc3a4124e"
+    },
+    {
+      "screen": "S09-D",
+      "frame": "s8IowS",
+      "path": "ui/design-previews/s8IowS.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "4b353b0b9a5092f5bb39db95750efb995e9950d4f3c3434527b2d2079c4d65b0"
+    },
+    {
+      "screen": "S09-M",
+      "frame": "tI380",
+      "path": "ui/design-previews/tI380.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "0921587ecefc93989c80ebda46310494df834f5c132b08d52b51c5e65f59e97c"
+    },
+    {
+      "screen": "U05-M1",
+      "frame": "FTGvi",
+      "path": "ui/design-previews/FTGvi.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "db5ac4a9deaa718389619e9233151ab397692de3e71e90f1fa619c9980e6e82e"
+    },
+    {
+      "screen": "U05-M2",
+      "frame": "skr2f",
+      "path": "ui/design-previews/skr2f.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "560749d5118d2efa910726fefc321cc79694c414761af05b45ab54f288c530af"
+    },
+    {
+      "screen": "U05-M3",
+      "frame": "K7sv4E",
+      "path": "ui/design-previews/K7sv4E.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "fb4e22b5ccd6256d2a02eef970cda412002bcb488e7d210cc932a0c468520e14"
+    },
+    {
+      "screen": "S08-D",
+      "frame": "Z6aGfB",
+      "path": "ui/design-previews/Z6aGfB.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "abf8ce47f6371dadc7160de6935576e8659d5631a2a7334cb25d2a87bf77c748"
+    },
+    {
+      "screen": "S08-M1",
+      "frame": "lEany",
+      "path": "ui/design-previews/lEany.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "7e3073d6fc3287f965f96cc29ced2516a239d81be52804cec8a1a4bf99b9e034"
+    },
+    {
+      "screen": "S08-M2",
+      "frame": "l3jVE",
+      "path": "ui/design-previews/l3jVE.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "f604d62fc2f2d52c17937daf87d89775ef0b71ffa49f844e8e85e2eb8fa08c6f"
+    },
+    {
+      "screen": "U06-D",
+      "frame": "ZMoXS",
+      "path": "ui/design-previews/ZMoXS.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "aa5709447f794802c658b4863b4b377e997f9d08ebcaa6d5d8cdef364921314f"
+    },
+    {
+      "screen": "U06-M",
+      "frame": "xsZKA",
+      "path": "ui/design-previews/xsZKA.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "d7e3d4da67218c4d5153a29373a2b8fa0491e335c27680e9491c97c50e2d3e41"
+    },
+    {
+      "screen": "U07-D",
+      "frame": "Dsq2D",
+      "path": "ui/design-previews/Dsq2D.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "bb53c5eb0eefbb2a5f8059b1ef13466f17fef34003d13e2d09f29b74fb2abcaf"
+    },
+    {
+      "screen": "U07-M",
+      "frame": "kOFc3",
+      "path": "ui/design-previews/kOFc3.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "97a4cdea426495eb88d3681938bda52aada520a6a7e58d1415b543ca472a59d4"
+    },
+    {
+      "screen": "U08-D",
+      "frame": "GfuLl",
+      "path": "ui/design-previews/GfuLl.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "af428a5fcf6994c13c713a23dab5239a6e63dc54a51657fbf1f8c54eaf8bc478"
+    },
+    {
+      "screen": "U08-M",
+      "frame": "eSFbG",
+      "path": "ui/design-previews/eSFbG.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "d7ed21ca675d3086e7db22adf1479f9edb9481a970f74626f60a1708c016f0d8"
+    },
+    {
+      "screen": "S10-D",
+      "frame": "s825M",
+      "path": "ui/design-previews/s825M.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "80c6659f7090ea71f686ff23f720a544068dc74f430acbf8737a50b6b9a2a73b"
+    },
+    {
+      "screen": "S10-M",
+      "frame": "F1Hwk",
+      "path": "ui/design-previews/F1Hwk.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "01611639fb8c7768f895126c1f281fe79bf20aae5d78d7f331a916b24b37e300"
+    }
+  ]
+}

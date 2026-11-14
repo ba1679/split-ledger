@@ -6,7 +6,7 @@ trips:
     security:
       - BetterAuthSession: []
     summary: 分頁列出自己的旅行帳本
-    description: 只回傳目前 session 所屬帳號的旅行，按 createdAt、id 由新到舊排序；cursor 綁定本帳號與排序條件。
+    description: 只回傳目前 session 所屬帳號的 active 旅行；垃圾桶與已 purge 旅行不在此清單。按 createdAt、id 由新到舊排序；cursor 綁定本帳號與排序條件。
     parameters:
       - $ref: ../components/parameters.yaml#/PageLimit
       - $ref: ../components/parameters.yaml#/PageCursor
@@ -63,7 +63,7 @@ trips:
             schema:
               $ref: ../components/schemas/shared.yaml#/ApiError
       '409':
-        description: 提供的 UUID 已存在，不以此回應推斷既有資料是否屬於其他帳號。
+        description: 提供的 UUID 已存在或已在永久刪除 reservation 中；code=ID_CONFLICT，不以此回應推斷既有資料是否屬於其他帳號。
         content:
           application/json:
             schema:
@@ -99,6 +99,12 @@ trip:
               $ref: ../components/schemas/shared.yaml#/ApiError
       '404':
         description: 旅行不存在或不屬於目前帳號，皆回相同 NOT_FOUND。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '409':
+        description: 本人旅行在垃圾桶；code=TRIP_TRASHED。普通子資源不可用 404 偽裝操作成功。
         content:
           application/json:
             schema:
@@ -144,6 +150,12 @@ trip:
               $ref: ../components/schemas/shared.yaml#/ApiError
       '403':
         description: Origin 缺失、不可信或不符；code=REQUEST_ORIGIN_REJECTED。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '409':
+        description: 本人旅行在垃圾桶；code=TRIP_TRASHED。普通子資源不可用 404 偽裝操作成功。
         content:
           application/json:
             schema:

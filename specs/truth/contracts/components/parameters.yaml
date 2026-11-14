@@ -6,6 +6,46 @@ TripId:
   schema:
     type: string
     format: uuid
+OperationId:
+  name: operationId
+  in: path
+  required: true
+  description: 客戶端為一次旅行生命週期或縮圖命令產生的 UUID；僅本人可查收據。
+  schema:
+    type: string
+    format: uuid
+ThumbnailRevision:
+  name: thumbnailRevision
+  in: path
+  required: true
+  description: 從旅行清單或狀態取得的縮圖版本十進位字串；僅目前版本可讀。
+  schema:
+    type: string
+    pattern: '^(?:0|[1-9][0-9]*)$'
+UploadOperationId:
+  name: X-Operation-Id
+  in: header
+  required: true
+  description: 單檔上傳的持久命令 UUID；重試必須保留相同檔案 bytes 與所有預期版本。
+  schema:
+    type: string
+    format: uuid
+ExpectedLifecycleRevision:
+  name: X-Expected-Lifecycle-Revision
+  in: header
+  required: true
+  description: 上傳或無本文縮圖命令的預期生命週期版本；完整十進位字串，不經 JS Number。
+  schema:
+    type: string
+    pattern: '^(?:0|[1-9][0-9]*)$'
+ExpectedThumbnailRevision:
+  name: X-Expected-Thumbnail-Revision
+  in: header
+  required: true
+  description: 縮圖命令的預期縮圖版本；完整十進位字串，不經 JS Number。
+  schema:
+    type: string
+    pattern: '^(?:0|[1-9][0-9]*)$'
 ExpenseId:
   name: expenseId
   in: path

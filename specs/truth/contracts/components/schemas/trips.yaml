@@ -1,7 +1,7 @@
 Trip:
   type: object
   additionalProperties: false
-  required: [id, name, startDate, endDate, expenseCount, ownerMemberId, simplifyDebts, accountingRevision, createdAt, updatedAt]
+  required: [id, name, startDate, endDate, expenseCount, ownerMemberId, simplifyDebts, accountingRevision, lifecycleRevision, thumbnailRevision, hasThumbnail, createdAt, updatedAt]
   properties:
     id:
       type: string
@@ -33,6 +33,13 @@ Trip:
       type: string
       pattern: '^(?:0|[1-9][0-9]*)$'
       description: 非負十進位整數字串；所有影響分帳的寫入後遞增，不使用 JS Number。
+    lifecycleRevision:
+      $ref: '#/RevisionString'
+    thumbnailRevision:
+      $ref: '#/RevisionString'
+    hasThumbnail:
+      type: boolean
+      description: 只表示目前有無自訂縮圖；清單不載入 image bytes。
     createdAt:
       $ref: ./shared.yaml#/IsoTimestamp
     updatedAt:
@@ -45,7 +52,7 @@ CreateTripRequest:
     id:
       type: string
       format: uuid
-      description: 客戶端為這次建立產生並保留的 UUID；回應遺失時用 GET /api/trips/{tripId} 查證。
+      description: 客戶端為這次建立產生並保留的 UUID；回應遺失時用 GET /api/trips/{tripId}/state 查證，purge 後亦不可重用。
     name:
       type: string
       minLength: 1
@@ -95,3 +102,129 @@ TripList:
       type: string
       nullable: true
       description: null 表示沒有下一頁。
+RevisionString:
+  type: string
+  pattern: '^(?:0|[1-9][0-9]*)$'
+  description: 資料庫 bigint 的完整非負十進位字串；不得以 JS Number 解析或比較。
+TrashTrip:
+  type: object
+  additionalProperties: false
+  required: [id, name, deletedAt, lifecycleRevision, thumbnailRevision, hasThumbnail]
+  properties:
+    id:
+      type: string
+      format: uuid
+    name:
+      type: string
+    deletedAt:
+      $ref: ./shared.yaml#/IsoTimestamp
+    lifecycleRevision:
+      $ref: '#/RevisionString'
+    thumbnailRevision:
+      $ref: '#/RevisionString'
+    hasThumbnail:
+      type: boolean
+TrashTripList:
+  type: object
+  additionalProperties: false
+  required: [items, nextCursor]
+  properties:
+    items:
+      type: array
+      items:
+        $ref: '#/TrashTrip'
+    nextCursor:
+      type: string
+      nullable: true
+      description: 綁定 owner、trash 範圍及 deletedAt/id 由新到舊排序；null 表示已到末頁。
+TripState:
+  oneOf:
+    - $ref: '#/LiveTripState'
+    - $ref: '#/PurgedTripState'
+  description: 專用 owner 狀態投影；purged 不含可復原資料。
+LiveTripState:
+  type: object
+  additionalProperties: false
+  required: [state, lifecycleRevision, thumbnailRevision, hasThumbnail]
+  properties:
+    state:
+      type: string
+      enum: [active, trash]
+    lifecycleRevision:
+      $ref: '#/RevisionString'
+    thumbnailRevision:
+      $ref: '#/RevisionString'
+    hasThumbnail:
+      type: boolean
+PurgedTripState:
+  type: object
+  additionalProperties: false
+  required: [state, lifecycleRevision, thumbnailRevision, hasThumbnail]
+  properties:
+    state:
+      type: string
+      enum: [purged]
+    lifecycleRevision:
+      type: string
+      nullable: true
+      enum: [null]
+      description: purged 無目前旅行列；特定命令提交版本從收據讀。
+    thumbnailRevision:
+      type: string
+      nullable: true
+      enum: [null]
+    hasThumbnail:
+      type: boolean
+      nullable: true
+      enum: [null]
+TripLifecycleCommand:
+  type: object
+  additionalProperties: false
+  required: [operationId, expectedLifecycleRevision]
+  properties:
+    operationId:
+      type: string
+      format: uuid
+    expectedLifecycleRevision:
+      $ref: '#/RevisionString'
+TripOperationResult:
+  type: object
+  additionalProperties: false
+  required: [operationId, kind, state, lifecycleRevision, thumbnailRevision, thumbnailPresent]
+  properties:
+    operationId:
+      type: string
+      format: uuid
+    kind:
+      type: string
+      enum: [move_to_trash, restore, purge, save_thumbnail, reset_thumbnail]
+    state:
+      type: string
+      enum: [active, trash, purged]
+    lifecycleRevision:
+      $ref: '#/RevisionString'
+    thumbnailRevision:
+      $ref: '#/RevisionString'
+    thumbnailPresent:
+      type: boolean
+      nullable: true
+      description: save_thumbnail 必為 true、reset_thumbnail 必為 false；生命週期命令必為 null。move_to_trash/restore/purge 的 state 分別必為 trash/active/purged；縮圖命令必為 active。
+TripOperationOutcome:
+  type: object
+  additionalProperties: false
+  required: [result, currentState]
+  properties:
+    result:
+      $ref: '#/TripOperationResult'
+    currentState:
+      $ref: '#/TripState'
+  description: result 為原命令提交結果，永不被後來命令覆寫；currentState 為查詢當下 owner 狀態。重播同一命令及查證使用相同形狀。
+ThumbnailUpload:
+  type: object
+  additionalProperties: false
+  required: [image]
+  properties:
+    image:
+      type: string
+      format: binary
+      description: 唯一檔案 part；不得有其他欄位或第二檔。

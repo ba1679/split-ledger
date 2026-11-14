@@ -1,12 +1,109 @@
 {
   "version": "3.0.0",
-  "darkMode": false,
+  "darkMode": true,
   "gridEnabling": false,
   "currentViewName": null,
   "defaultView": {
     "detailLevel": "All",
     "relationshipMode": "All",
-    "tablePositions": [],
+    "tablePositions": [
+      {
+        "name": "user",
+        "schemaName": "auth",
+        "x": 340.7392578125,
+        "y": 12
+      },
+      {
+        "name": "session",
+        "schemaName": "auth",
+        "x": 849.478515625,
+        "y": 12
+      },
+      {
+        "name": "account",
+        "schemaName": "auth",
+        "x": 849.478515625,
+        "y": 346
+      },
+      {
+        "name": "verification",
+        "schemaName": "auth",
+        "x": 12,
+        "y": 12
+      },
+      {
+        "name": "trips",
+        "schemaName": "public",
+        "x": 849.478515625,
+        "y": 840
+      },
+      {
+        "name": "trip_id_reservations",
+        "schemaName": "public",
+        "x": 849.478515625,
+        "y": 1334
+      },
+      {
+        "name": "trip_operation_receipts",
+        "schemaName": "public",
+        "x": 849.478515625,
+        "y": 1540
+      },
+      {
+        "name": "trip_thumbnails",
+        "schemaName": "public",
+        "x": 1409.5216874693792,
+        "y": -132.9827809225698
+      },
+      {
+        "name": "trip_members",
+        "schemaName": "public",
+        "x": 1515.2255074874488,
+        "y": 511.4102048460891
+      },
+      {
+        "name": "categories",
+        "schemaName": "public",
+        "x": 849.478515625,
+        "y": 1938
+      },
+      {
+        "name": "currencies",
+        "schemaName": "public",
+        "x": 340.7392578125,
+        "y": 314
+      },
+      {
+        "name": "expenses",
+        "schemaName": "public",
+        "x": 2173.0853835030107,
+        "y": -62.78812918643831
+      },
+      {
+        "name": "expense_shares",
+        "schemaName": "public",
+        "x": 2822.46630859375,
+        "y": 12
+      },
+      {
+        "name": "settlements",
+        "schemaName": "public",
+        "x": 2342.3427285038974,
+        "y": 1423.0521170972092
+      },
+      {
+        "name": "repayments",
+        "schemaName": "public",
+        "x": 2822.46630859375,
+        "y": 282
+      },
+      {
+        "name": "settlement_adjustments",
+        "schemaName": "public",
+        "x": 2822.46630859375,
+        "y": 872
+      }
+    ],
     "tableGroupCollapseStates": [],
     "stickyNoteLayouts": [],
     "referencePaths": []

@@ -96,7 +96,7 @@
 | `分攤欄提示至少選一人且帳務不變` | 無 | 不支援 | 無 | Then：檢查該欄有可讀修正訊息，草稿保留且無成功提示；API支出/份額/settlement與基準相等，監聽無有效新增寫入。 |
 | `付款欄提示選擇付款人且帳務不變` | 無 | 不支援 | 無 | Then：檢查該欄有可讀修正訊息，草稿保留且無成功提示；API支出/份額/settlement與基準相等，監聽無有效新增寫入。 |
 | `機票仍由 Alice 付款且只由 Alice 分攤並保留原始內容與統計` | 無 | 不支援 | 無 | Then：畫面仍顯示TWD8000與2027-01-15；GET expense payer=ownerMemberId、唯一share=owner且8000，原ID金額幣別日期分類及GET totals逐項等於舊基準，無成員債務。 |
-| `晚餐不再出現且沒有晚餐造成的分攤與付款安排` | 無 | 不支援 | 無 | Then：清單無晚餐、GET expense=404；此唯一支出的shares消失，settlement成員皆0或不再有該幣別，arrangements空，不殘留舊payer/份額。 |
+| `晚餐不再出現且沒有晚餐造成的分攤與付款安排` | 無 | 不支援 | 無 | Then：清單無晚餐、先GET trip state=active才以GET expense=404確認單筆刪除；trash/purged不可據普通404推論該DELETE成功。此唯一支出的shares消失，settlement成員皆0或不再有該幣別，arrangements空，不殘留舊payer/份額。 |
 | `已保存的 JPY 400 還款仍存在且 Amy 剩餘應付 Alice JPY 400` | 無 | 不支援 | 無 | Then：核對GET repayment原ID、兩端、JPY400與paidOn未變；GET expense=800而非1000；前端刷新settlement顯示Amy→Alice JPY400，原TWD300不變。兩種模式均從新來源重建；不得重用舊JPY600結果。 |
 | `修改草稿保留且未宣稱支出與分帳已更新` | 無 | 不支援 | 無 | Then：UI草稿200保留並提示結果尚未確認，無更新成功/已完成重算；舊已確認餘額標記為舊資料而非新結果；監聽只原PATCH一次，原ID查證暫404/不可用也不以成功或未寫入推論。 |
 | `owner 已開啟支出日期日曆且焦點在 2027-03-11` | 無 | 不支援 | viewport以桌面與375px手機各跑；沿用DateField，不以原生日期對話框代替。 | Given：使用owner fixture建立合法旅行與Alice/Amy成員，開支出表單，DateField填2027-03-11並開自訂日曆，焦點定位當日；確認沒有提交寫入。 |
@@ -108,3 +108,23 @@
 | `owner 將點心金額改為 JPY 200` | 無 | 不支援 | 無 | When：打開點心修改表單填200提交一次；等待PATCH成功及settlement/repayments失效刷新，保存新revision；不另外結清或改寫實付。 |
 | `owner 刪除共同支出點心` | 無 | 不支援 | 無 | When：在點心刪除確認中確認一次，等待DELETE與帳本/結算刷新；只刪來源，不發實付刪除請求。 |
 | `原結清與差額調整仍保留原值且實付仍顯示 JPY 33` | 無 | 不支援 | 原結清obligation=100/3、Amy實付33、Amy調整+1/3、Alice調整-1/3。 | Then：畫面歷史實付仍顯示Amy→Alice JPY33與原paidOn；GET原settlementId所有不可變欄位逐項等於Given保存快照，兩筆調整及repayment ID/金額/兩端/日期均不變。最新淨額由案例的獨立DataTable斷言承接，不在本句依動作推測oracle。 |
+
+## 006 旅行管理與等待契約
+
+沿用真實 API 與隔離資料庫、Playwright BDD 與 page object；延遲／失敗／回應遺失使用可控制屏障，不以任意 sleep 判定。Given 準備已完成前序與畫面狀態；When 為唯一操作；Then 等待指定結果並對應真實 API／DB 權威資料，請求監測確認不該送出的命令為零。只讀再查核不是第二個受測動作。
+
+| DSL 句型 | Gherkin 參數 | Data Table 參數 | 預設參數 | StepDef 實作語意 |
+| --- | --- | --- | --- | --- |
+| `原支出刪除結果未知且旅行目前為 "{狀態}"` | 狀態:string，一般可用且支出已刪／垃圾桶／已永久刪除 | 不支援 | 無 | Given：owner原expense有完整草稿與原UUID，DELETE response遺失，DB狀態按本例：active且原expense確已刪；trash保留原expense；purged整趟消失。查證前保存receipt/狀態及來源快照，不能以普通GET404預認單筆刪除成功。 |
+| `owner 查證原次支出刪除` | 無 | 不支援 | 無 | When：只點原意圖查證，先GET trip state，僅active才查expense；trash/purged顯相應狀態，不重送DELETE/POST、不復原trip。保留原ID與draft。 |
+| `支出刪除查證呈現 "{結果}"` | 結果:string，原支出已刪／旅行在垃圾桶／旅行已永久刪除 | 不支援 | 無 | Then：active且expense404才按既有語意確認單筆已刪；trash顯旅行已在垃圾桶與復原下一步、不得確認單筆已刪；purged顯整趟已不存在而不歸因原DELETE成功。未知state或query失敗維持unknown/原draft。DB前後無變，僅一原DELETE，API狀態及畫面一致。 |
+
+## 006 旅行管理與等待契約
+
+沿用真實 API 與隔離資料庫、Playwright BDD 與 page object；延遲／失敗／回應遺失使用可控制屏障，不以任意 sleep 判定。Given 準備已完成前序與畫面狀態；When 為唯一操作；Then 等待指定結果並對應真實 API／DB 權威資料，請求監測確認不該送出的命令為零。只讀再查核不是第二個受測動作。
+
+| DSL 句型 | Gherkin 參數 | Data Table 參數 | 預設參數 | StepDef 實作語意 |
+| --- | --- | --- | --- | --- |
+| `支出草稿未提交且另一裝置已將旅行移入垃圾桶` | 無 | 不支援 | 無 | Given：owner電腦已開expense新增/編輯表單並填點心JPY500，手機已成功trash；保留可用draft與原trip/帳務快照，不清為已保存。 |
+| `owner 從舊表單保存點心` | 無 | 不支援 | 無 | When：按保存一次，真API拒絕TRIP_TRASHED，僅查最新trip state，不重送或復原。 |
+| `舊表單說明垃圾桶狀態並提供復原下一步` | 無 | 不支援 | 無 | Then：顯示旅行已在垃圾桶、前往垃圾桶復原入口；停止busy，不宣告點心已保存，適用draft保留；普通帳務不可操作、DB無點心／其份額與付款影響，其餘資料同前態。 |

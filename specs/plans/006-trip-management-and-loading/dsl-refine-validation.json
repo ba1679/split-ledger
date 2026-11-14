@@ -1,0 +1,173 @@
+{
+  "date": "2026-11-14",
+  "tool": {
+    "gherkin-official": "43.0.0",
+    "python": "3.12.12"
+  },
+  "scope": "specification-only; no product tests",
+  "features": [
+    {
+      "path": "specs/truth/features/backend/categories/垃圾桶分類引用.feature",
+      "rules": 2,
+      "cases": 2
+    },
+    {
+      "path": "specs/truth/features/backend/trips/垃圾桶存取與擁有者隔離.feature",
+      "rules": 3,
+      "cases": 85
+    },
+    {
+      "path": "specs/truth/features/backend/trips/整趟永久刪除.feature",
+      "rules": 5,
+      "cases": 11
+    },
+    {
+      "path": "specs/truth/features/backend/trips/旅行垃圾桶與復原.feature",
+      "rules": 7,
+      "cases": 7
+    },
+    {
+      "path": "specs/truth/features/backend/trips/旅行競爭與結果查證.feature",
+      "rules": 9,
+      "cases": 24
+    },
+    {
+      "path": "specs/truth/features/backend/trips/縮圖保存與私有讀取.feature",
+      "rules": 3,
+      "cases": 9
+    },
+    {
+      "path": "specs/truth/features/backend/trips/縮圖傳輸與提交邊界.feature",
+      "rules": 1,
+      "cases": 12
+    },
+    {
+      "path": "specs/truth/features/backend/trips/縮圖格式與容量邊界.feature",
+      "rules": 5,
+      "cases": 32
+    },
+    {
+      "path": "specs/truth/features/frontend/design-system/全站初讀與局部等待.feature",
+      "rules": 10,
+      "cases": 34
+    },
+    {
+      "path": "specs/truth/features/frontend/design-system/全站操作忙碌與防重複.feature",
+      "rules": 4,
+      "cases": 46
+    },
+    {
+      "path": "specs/truth/features/frontend/design-system/操作失敗與未知結果.feature",
+      "rules": 5,
+      "cases": 5
+    },
+    {
+      "path": "specs/truth/features/frontend/design-system/背景更新與分頁等待.feature",
+      "rules": 5,
+      "cases": 5
+    },
+    {
+      "path": "specs/truth/features/frontend/design-system/鍵盤與減少動態效果.feature",
+      "rules": 2,
+      "cases": 6
+    },
+    {
+      "path": "specs/truth/features/frontend/expenses/旅行生命週期下的刪除查證.feature",
+      "rules": 2,
+      "cases": 4
+    },
+    {
+      "path": "specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature",
+      "rules": 14,
+      "cases": 16
+    },
+    {
+      "path": "specs/truth/features/frontend/trips/旅行管理與確認.feature",
+      "rules": 11,
+      "cases": 18
+    },
+    {
+      "path": "specs/truth/features/frontend/trips/旅行結果查證與舊連結.feature",
+      "rules": 6,
+      "cases": 19
+    },
+    {
+      "path": "specs/truth/features/frontend/trips/縮圖讀取與帳號清理.feature",
+      "rules": 4,
+      "cases": 4
+    },
+    {
+      "path": "specs/truth/features/frontend/trips/縮圖限制與選圖錯誤.feature",
+      "rules": 4,
+      "cases": 48
+    },
+    {
+      "path": "specs/truth/features/frontend/trips/縮圖預覽與保存.feature",
+      "rules": 12,
+      "cases": 23
+    }
+  ],
+  "total": {
+    "files": 20,
+    "rules": 114,
+    "expanded_cases": 410,
+    "parse_errors": 0
+  },
+  "structure": {
+    "single_When_per_example": true,
+    "no_action_And": true,
+    "outline_columns_complete": true,
+    "no_literal_brace_parameters": true,
+    "example_titles_describe_data": true
+  },
+  "sha256": {
+    "specs/truth/features/backend/categories/垃圾桶分類引用.feature": "4c98f3ef9d4719035c530891389ed3c84e74dcfbf33575398852ef5f38668067",
+    "specs/truth/features/backend/trips/垃圾桶存取與擁有者隔離.feature": "e5241c68d7e279d88460ce6c2ac5346c2a4aa876b807b07f6b549db17c71fdcc",
+    "specs/truth/features/backend/trips/整趟永久刪除.feature": "0597d8c8dfe12f90684614d1371084cfa2d86d3daeefef6376edd35bc7223aaa",
+    "specs/truth/features/backend/trips/旅行垃圾桶與復原.feature": "3a4c9f36b85dfd9ed562abffd237c19e6b846700d3005f7eee72d8ff374a0ffd",
+    "specs/truth/features/backend/trips/旅行競爭與結果查證.feature": "861ab01ce4a9b0e34175516248cfa897414470fe4da913f4680830947473a4ea",
+    "specs/truth/features/backend/trips/縮圖保存與私有讀取.feature": "debe5071007188e65b65ea12fd2d34ce64cf68aa8d9631349f452279f281436f",
+    "specs/truth/features/backend/trips/縮圖傳輸與提交邊界.feature": "979da481a6bd0a779e4d165015a4160fbffd2f05e18a5fede070990e79748edf",
+    "specs/truth/features/backend/trips/縮圖格式與容量邊界.feature": "18073c5c3275dacd2dc87a39f37ee1092b47adfdfc9eda7132d1d10195819a8e",
+    "specs/truth/features/frontend/design-system/全站初讀與局部等待.feature": "21d9ed2958b8f8e16a75461acbc3b5e8e27ea3874a5bba61cbfa4cb344801f49",
+    "specs/truth/features/frontend/design-system/全站操作忙碌與防重複.feature": "26e2d6df845dbb2bafadb80a6b8df695a6371da491b0a0c845234e7659a17879",
+    "specs/truth/features/frontend/design-system/操作失敗與未知結果.feature": "c32a655e1854573e7ad13496a703e206ef297ff5b10fb04dd3ba5a27debdbaf5",
+    "specs/truth/features/frontend/design-system/背景更新與分頁等待.feature": "986b94de06aabebceec11d34df9c83e7d9369c6e8beafab6c2425eac23a6f5cc",
+    "specs/truth/features/frontend/design-system/鍵盤與減少動態效果.feature": "07eaaf872681cf8e543a851e80605e52b8669932485437cb2dcb9839a9edb03c",
+    "specs/truth/features/frontend/expenses/旅行生命週期下的刪除查證.feature": "8516028cc024c2c7ebb28fa5629c772942c2d700e01f15e66a22d349a1499a18",
+    "specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature": "6bfde388359625c5719ed9b60a232415d02b7ddf7acd09e66411801b664ab98c",
+    "specs/truth/features/frontend/trips/旅行管理與確認.feature": "ba38de5b740aa37c38c7fec8c23c063f52e839dbd6ed64189013d9aa582bc62a",
+    "specs/truth/features/frontend/trips/旅行結果查證與舊連結.feature": "8d9d50bbe42c5c5e4fa7bcf328f27ce59fa846de5285402bd8831f4a603517ba",
+    "specs/truth/features/frontend/trips/縮圖讀取與帳號清理.feature": "1a0e2c3b103c463fe5d408015641fb94094160703ac58af70d54c75fdf94ddae",
+    "specs/truth/features/frontend/trips/縮圖限制與選圖錯誤.feature": "17fecb7ffeb32897bde3b40d516279a2223e31bb9f63810314de7b92b62b76fc",
+    "specs/truth/features/frontend/trips/縮圖預覽與保存.feature": "53056c26774233cfa0536049927a682cea74f28bc829344dfb760bd77a00ce44",
+    "specs/truth/features/backend/trips/dsl.md": "7907c1127d32f40a111785712d1bb16abd7df5e3af4bf5286ec2786e9302a375",
+    "specs/truth/features/backend/categories/dsl.md": "d1a9ce2773edbfd1752d17d9afad8c343a0e7c43e34b321d293ed6f1977dc748",
+    "specs/truth/features/frontend/trips/dsl.md": "e5f9e0d1c813aab50dcc4cd13971c42fd4781d10742412edb552fa858067df93",
+    "specs/truth/features/frontend/expenses/dsl.md": "008f7c266cd4ad973e04a71e8aa0ccbfdba44ebe855381c690555d09a9d1f9e3",
+    "specs/truth/features/frontend/design-system/dsl.md": "c2cdc7f4da55021601409232b6585724a42af11bde38965d1e8960da49500e3d"
+  },
+  "topology": {
+    "backend": {
+      "features": 27,
+      "root_rows": 5,
+      "module_rows": 249,
+      "steps": 682,
+      "warnings": 0,
+      "status": "PASSED"
+    },
+    "frontend": {
+      "features": 28,
+      "root_rows": 10,
+      "module_rows": 411,
+      "steps": 721,
+      "warnings": 0,
+      "status": "PASSED"
+    }
+  },
+  "independent_review": {
+    "agent": "/root/review_006",
+    "status": "passed",
+    "open_blocking_findings": 0
+  }
+}

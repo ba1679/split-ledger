@@ -37,6 +37,12 @@ expenses:
           application/json:
             schema:
               $ref: ../components/schemas/shared.yaml#/ApiError
+      '409':
+        description: 本人旅行在垃圾桶；code=TRIP_TRASHED。普通子資源不可用 404 偽裝操作成功。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
   post:
     tags: [expenses]
     operationId: createExpense
@@ -83,7 +89,7 @@ expenses:
             schema:
               $ref: ../components/schemas/shared.yaml#/ApiError
       '409':
-        description: 建立 UUID 已存在，code=ID_CONFLICT；不得把衝突資料回傳給其他帳號。
+        description: 建立 UUID 已存在，code=ID_CONFLICT；不得把衝突資料回傳給其他帳號；本人垃圾桶旅行回 code=TRIP_TRASHED。
         content:
           application/json:
             schema:
@@ -120,6 +126,12 @@ expense:
               $ref: ../components/schemas/shared.yaml#/ApiError
       '404':
         description: 旅行或支出不存在、不屬於目前帳號，或支出不在指定旅行，均回相同 NOT_FOUND。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '409':
+        description: 本人旅行在垃圾桶；code=TRIP_TRASHED。普通子資源不可用 404 偽裝操作成功。
         content:
           application/json:
             schema:
@@ -176,6 +188,12 @@ expense:
           application/json:
             schema:
               $ref: ../components/schemas/shared.yaml#/ApiError
+      '409':
+        description: 本人旅行在垃圾桶；code=TRIP_TRASHED。普通子資源不可用 404 偽裝操作成功。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
   delete:
     tags: [expenses]
     operationId: deleteExpense
@@ -207,6 +225,12 @@ expense:
               $ref: ../components/schemas/shared.yaml#/ApiError
       '403':
         description: Origin 缺失、不可信或不符；code=REQUEST_ORIGIN_REJECTED。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '409':
+        description: 本人旅行在垃圾桶；code=TRIP_TRASHED。普通子資源不可用 404 偽裝操作成功。
         content:
           application/json:
             schema:
@@ -253,6 +277,12 @@ totals:
               $ref: ../components/schemas/shared.yaml#/ApiError
       '404':
         description: 旅行不存在或不屬於目前帳號。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '409':
+        description: 本人旅行在垃圾桶；code=TRIP_TRASHED。普通子資源不可用 404 偽裝操作成功。
         content:
           application/json:
             schema:

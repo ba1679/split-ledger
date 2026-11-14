@@ -1,4 +1,4 @@
-Project "travel_ledger_phase_1b" {
+Project "travel_ledger_trip_lifecycle" {
   database_type: "PostgreSQL"
   Note: '''
   個人與 owner 管理旅行分帳的目前完整持久化模型。auth schema 的四張表由固定版本 Better Auth
@@ -10,6 +10,9 @@ Project "travel_ledger_phase_1b" {
   count 與清單以同一 SQL 或一致性 snapshot 讀取；聚合值不得轉成浮點金額。
   公平份額由支出金額與分攤成員數重建；淨額與付款安排由目前支出、實際還款及
   歷史結清差額重建，不持久化衍生總額。所有分帳寫入由旅行列鎖及帳務 revision 序列化。
+  垃圾桶保留原旅行列與全部子資料；僅 owner 明確確認的整趟永久刪除可使用受控
+  immutable trigger DELETE 例外。縮圖只存目前的正規化 WebP，不保存原始照片；
+  最小操作收據與 UUID reservation 不保存可復原的旅行、帳務或圖片內容。
   '''
 }
 
@@ -93,24 +96,138 @@ Table trips {
   end_date date [null]
   simplify_debts boolean [not null, default: false, note: '只改變衍生付款建議，不改寫帳務來源']
   accounting_revision bigint [not null, default: 0, note: '所有影響分帳來源或建議的寫入後遞增']
+  deleted_at timestamptz [null, note: 'NULL 為一般可用；非 NULL 為垃圾桶；復原清為 NULL']
+  lifecycle_revision bigint [not null, default: 0, note: '成功移入／復原後遞增；purge 結果版本留在收據']
+  thumbnail_revision bigint [not null, default: 0, note: '成功上傳／更換／恢復預設後遞增；與帳務 revision 分離']
   created_at timestamptz [not null]
   updated_at timestamptz [not null]
 
   Indexes {
     (owner_id, id) [unique, name: 'trips_owner_id_id_uq']
     (owner_id, created_at, id) [name: 'trips_owner_created_id_idx']
+    (owner_id, deleted_at, created_at, id) [name: 'trips_owner_deleted_created_id_idx']
   }
 
   Note: '''
   起迄日各自可空；CHECK (start_date IS NULL OR end_date IS NULL OR end_date >= start_date)。
-  name 須等於 trim 後值且非空。日期為真實日曆 DATE，不做時區轉換；本版無刪除旅行 API。
+  name 須等於 trim 後值且非空。日期為真實日曆 DATE，不做時區轉換。
   PATCH 在交易中鎖定本人旅行（SELECT FOR UPDATE），合併新舊日期後驗證再更新；
   CHECK 違反（23514）回 400 VALIDATION_ERROR，原資料不變。
   expenseCount 從 expenses 批次計算；列表索引配合 owner、created_at、id，不逐列發 SQL 計數。
-  CHECK accounting_revision >= 0。旅行 owner 是唯一具有讀寫權的登入使用者；
+  CHECK accounting_revision >= 0、lifecycle_revision >= 0、thumbnail_revision >= 0。
+  旅行 owner 是唯一具有讀寫權的登入使用者；
   trip_members 的 owner 成員只是可付款、可分攤的帳務身分，不授予同行者登入權。
   所有影響分帳的寫入先由 session 確認 owner，在 READ COMMITTED 交易中鎖旅行 FOR UPDATE，
-  依旅行→子資源的順序驗證與更新後遞增 revision；多查詢結算讀取使用 REPEATABLE READ 唯讀快照。
+  依旅行→子資源的順序驗證 active 狀態與更新後遞增帳務 revision；多查詢結算讀取
+  使用 REPEATABLE READ 唯讀快照，在同一快照先驗證 active 再讀子資料。
+  一般清單只取 deleted_at IS NULL；垃圾桶清單只取 IS NOT NULL。owner scope 查證
+  可讀本人垃圾桶旅行的最小辨識資訊，但普通帳本／子資源一律拒絕其讀寫；
+  不得把一般清單未列出或普通帳本不可讀直接視為永久刪除。
+  移入／復原鎖本人旅行列、核對 expected lifecycle_revision、翻轉 deleted_at 並遞增
+  lifecycle_revision，不重建成員或帳務、不遞增 accounting_revision。thumbnail_revision
+  僅縮圖命令變更。圖片在交易外處理；提交時鎖本人旅行列，重驗 active、
+  expected lifecycle_revision 與 expected thumbnail_revision，避免處理期間移入再復原
+  或另一張圖片已保存時覆寫新意圖。永久刪除只允許垃圾桶旅行；完成時將下一個
+  lifecycle_revision 留在同交易操作收據。本版無自動到期清除。
+  '''
+}
+
+Table trip_id_reservations {
+  trip_id uuid [pk, not null, note: '全系統永久保留曾使用旅行 UUID；不保存名稱或帳務']
+  owner_id text [not null, note: '原 owner；整趟旅行清除後仍供 owner scoped 查證']
+  reserved_at timestamptz [not null]
+  purged_at timestamptz [null, note: 'NULL 表示尚未永久清除；清除成功後同交易設定']
+
+  Indexes {
+    (owner_id, trip_id) [unique, name: 'trip_id_reservations_owner_trip_uq']
+  }
+
+  Note: '''
+  migration 先從全部既有 trips 回填，再啟用 trips BEFORE INSERT reservation trigger。
+  每次新旅行 INSERT 在同交易先插入 reservation；trip_id 全系統唯一且永不重用，
+  reservation 衝突使舊建立操作及跨 owner 重用皆拒絕，回滾時 reservation 也回滾。
+  與 trips 無刪除型 FK；整趟 purge 只將 purged_at 從 NULL 改成 DB 時鐘，保留 ID、
+  owner 與時間作最小 tombstone。不得以 ON CONFLICT UPDATE 重新啟用或覆蓋舊 ID。
+  由 trigger 拒絕 reservation 的 DELETE、owner/trip_id/reserved_at UPDATE；purged_at
+  只能在對應 owner/trip 的受控 purge context 由 NULL 一次設定，不能清空或重寫。
+  本人查證：若 trips 為 active 或 trash 以 trips.deleted_at 判斷；trip 已無列且本人
+  reservation.purged_at 非 NULL 才能判斷曾永久刪除。其他 owner 不得查到此記錄。
+  不提供從 reservation 重建旅行或帳務的能力；本版無自動清除此最小識別資訊。
+  '''
+}
+
+Enum trip_operation_kind {
+  move_to_trash
+  restore
+  purge
+  save_thumbnail
+  reset_thumbnail
+}
+
+Enum trip_operation_result_state {
+  active
+  trash
+  purged
+}
+
+Table trip_operation_receipts {
+  owner_id text [not null, note: '只由驗證後 session 決定；同 owner 命令 UUID 唯一']
+  operation_id uuid [not null, note: '客戶端為原操作產生，重送／查證時重用']
+  trip_id uuid [not null, note: '不設 trips FK；purge 後仍可查原結果']
+  kind trip_operation_kind [not null]
+  request_fingerprint bytea [not null, note: '32 bytes；動作、目標、預期版本與參數摘要，不含原圖 bytes']
+  result_state trip_operation_result_state [not null, note: '原操作提交時的結果，非目前旅行狀態']
+  result_lifecycle_revision bigint [not null, note: '原操作提交後版本；purge 後仍可查']
+  result_thumbnail_revision bigint [not null, note: '原操作提交後縮圖版本']
+  result_thumbnail_present boolean [null, note: '圖片命令 true／false；生命週期命令為 NULL']
+  created_at timestamptz [not null]
+
+  Indexes {
+    (owner_id, operation_id) [pk, name: 'trip_operation_receipts_pk']
+    (owner_id, trip_id, created_at, operation_id) [name: 'trip_operation_receipts_owner_trip_created_idx']
+  }
+
+  Note: '''
+  只保存已完整提交的操作結果；失敗或回滾不留成功收據。CHECK octet_length(request_fingerprint)=32、
+  版本非負；kind=save_thumbnail/reset_thumbnail 才可有非 NULL result_thumbnail_present，
+  其餘為 NULL。move_to_trash 必為 trash、restore 必為 active、purge 必為 purged；
+  thumbnail 命令的 result_state 必為 active。其他請求欄位不持久化為可復原資料。
+  各命令在同交易內鎖旅行，鎖取得後重讀 receipt，再核對目前狀態／預期版本、
+  修改資料並插入收據；purge 使旅行列消失時，等待競爭交易後須重讀 receipt。
+  同 owner+operation_id+相同 fingerprint 重送查原結果，不再執行；同 ID 異內容拒絕。
+  過期的新命令拒絕且不得覆蓋較新意圖。若 purge 已提交、旅行列消失，先查同 owner
+  收據及 reservation，不能把一般查詢的 404 當原命令成功。收據無 trips FK，
+  保證 purge 後仍可查；owner_id 另 FK 到 auth.user 並由所有讀取按 owner 篩選。
+  原收據成功後若又有較新命令，應同時回原結果及由 trip／reservation 得到的
+  目前狀態，不用原結果覆寫目前狀態。不得存旅行名稱、帳務內容、圖片／原圖 bytes。
+  本版不提供操作歷程或自動清收據；索引供 owner＋旅行定位，不是公開事件流。
+  收據建立後由 trigger 拒絕 UPDATE／DELETE，防止過期重送失去權威結果；
+  唯一鍵在並行同 operation_id 請求中決定一個提交結果，競爭者再讀已提交收據。
+  '''
+}
+
+Table trip_thumbnails {
+  owner_id text [not null]
+  trip_id uuid [not null]
+  image_webp bytea [not null, note: '只保存目前正規化縮圖；長度 1..524288 bytes']
+  width integer [not null, note: '最終 WebP 寬，1..1200 px']
+  height integer [not null, note: '最終 WebP 高，1..1200 px']
+  updated_at timestamptz [not null]
+
+  Indexes {
+    (owner_id, trip_id) [pk, name: 'trip_thumbnails_pk']
+  }
+
+  Note: '''
+  一趟旅行最多一張目前縮圖；CHECK octet_length(image_webp) BETWEEN 1 AND 524288，
+  width/height BETWEEN 1 AND 1200；輸出必為單張 WebP，後端另驗實際內容、方向、
+  色彩及無 EXIF/GPS。上傳原檔上限 10485760 bytes、25000000 像素、任一邊
+  16384 px；輸入只接受靜態 JPEG/PNG/WebP。這些是請求驗證，原檔不寫入 DB。
+  轉碼結果最多 524288 bytes，超過則調低尺寸／品質再檢查。
+  列表只取 trips.thumbnail_revision 與是否有縮圖投影，不讀 image_webp；
+  受權限保護的圖片讀取依 owner、旅行狀態及目前版本取 bytes。
+  新圖以相同主鍵原子取代，恢復預設刪除此列並遞增 trips.thumbnail_revision；
+  垃圾桶保留本列，復原後仍為原圖；整趟 purge 在同交易刪除本列。
   '''
 }
 
@@ -140,7 +257,8 @@ Table trip_members {
   CHECK name = app_trim(name) AND char_length(name) > 0；name_key 與 categories.name_key
   使用同一 generated/ASCII/C collation 策略。唯一鍵不過濾停用成員，owner 也佔用名稱。
   SQL partial UNIQUE (trip_id) WHERE role = 'owner' 保證每趟至多一個 owner；建立旅行及 migration
-  在同一交易中建立一個 owner 成員，保證至少一個。owner 成員不得停用、刪除或更改 role；
+  在同一交易中建立一個 owner 成員，保證至少一個。owner 成員不得停用或更改 role；
+  平常不得刪除，僅 owner 明確確認且旅行已在垃圾桶後，整趟受控 purge 可刪除；
   同行者曾被任何支出、分攤、還款、結清或調整引用時由 FK RESTRICT 禁止實體刪除，改為停用。
   停用者仍參與歷史計算；新支出、新還款及修改支出不得新增停用者引用，重新啟用後可選。
   同行者名稱更改只變顯示名稱，不以名稱建立帳務關聯；不同旅行可重名。
@@ -277,6 +395,7 @@ Table settlements {
   旅行列鎖內重算並核對成員、幣別、模式和精確應付額，才建立本列、實付與兩筆調整，
   並遞增旅行 revision。若版本過期，不寫入任何結清資料。快照不因後續支出修正重新套用。
   狀態以此不可變紀錄表示已結清，不能將實付金額與公平應付額差異視為未付或反向債權。
+  單筆歷史 UPDATE／DELETE 持續禁止；僅同一已確認垃圾桶旅行的受控整趟 purge 可 DELETE。
   '''
 }
 
@@ -307,6 +426,7 @@ Table repayments {
   結清實付與 settlements 一對一，且兩端、幣別一致；其差額由兩筆調整吸收，
   不按精確應付額自動取整，也不儲存取整選擇。任何還款均作為實際事實保留，
   不因 Simplify Debts 切換或來源支出修改/刪除而改寫。
+  單筆歷史 UPDATE／DELETE 持續禁止；僅同一已確認垃圾桶旅行的受控整趟 purge 可 DELETE。
   '''
 }
 
@@ -332,13 +452,17 @@ Table settlement_adjustments {
   收款人的調整 = 實付 − 精確應付，兩筆精確總和為零。若差額為零仍保留兩筆零調整，
   便於稽核一對一完整性。DB deferred constraint trigger／等價交易驗證保證兩筆、
   成員與 settlements 兩端一致、幣別一致及精確相反；不存或推論取整方式。
+  單筆歷史 UPDATE／DELETE 持續禁止；僅同一已確認垃圾桶旅行的受控整趟 purge 可 DELETE。
   '''
 }
 
 Ref: auth.session.user_id > auth.user.id [delete: cascade]
 Ref: auth.account.user_id > auth.user.id [delete: cascade]
 Ref: trips.owner_id > auth.user.id [delete: restrict]
+Ref: trip_id_reservations.owner_id > auth.user.id [delete: restrict]
+Ref: trip_operation_receipts.owner_id > auth.user.id [delete: restrict]
 Ref: categories.owner_id > auth.user.id [delete: restrict]
+Ref: trip_thumbnails.(owner_id, trip_id) > trips.(owner_id, id) [delete: restrict]
 Ref: trip_members.(owner_id, trip_id) > trips.(owner_id, id) [delete: restrict]
 Ref: expenses.(owner_id, trip_id) > trips.(owner_id, id) [delete: restrict]
 Ref: expenses.(owner_id, category_id) > categories.(owner_id, id) [delete: restrict]
@@ -373,3 +497,34 @@ Ref: settlement_adjustments.currency_code > currencies.code [delete: restrict]
 // NUMERIC 欄位只存整數分子/分母，不以 SQL 除法持久化有限小數；不同幣別不可相加或抵銷。
 // 回歸涵蓋 trim/emoji/ASCII 重名、停用名稱保留、跨 owner/trip FK、分類刪除競爭、
 // PATCH 與多幣別精確加總、舊支出回填、結清/還款競態、實付差額及獨立超額反轉。
+// 006 新 migration（不回寫既有 0001–0003）：先建 trip_id_reservations 並回填現存 trips，
+// 再加 trips INSERT reservation trigger，避免 client UUID 在 purge 後經原建立請求重用；
+// reservation 的 PK 由全系統 UUID 衝突保護，trip INSERT 與 reservation 必須同交易。
+// reservation 及 receipt 的不可變 trigger 與 purge 一次性標記同 migration 建立。
+// 新增 deleted_at、lifecycle_revision、thumbnail_revision，建 owner+deleted_at 清單索引；
+// 新增 trip_thumbnails（bytea CHECK 1..524288）、trip_operation_receipts、兩個 operation enums。
+// 接收圖片的 10 MiB/25 MP/16384 px 與靜態格式限制由 API 驗證，DB 只保存已轉碼 WebP。
+// 所有旅行子資源普通讀寫均先在 owner scoped 一致快照或旅行列鎖內核對 deleted_at IS NULL；
+// 垃圾桶查證與復原／purge 使用專屬 owner scope。不得讓普通 404 代表單筆支出刪除成功；
+// owner 可藉已存在的 trash 列及 reservation.purged_at 區分 active/trash/purged。
+// 同旅行寫入鎖序：先 trips FOR UPDATE，核對狀態和 expected lifecycle/thumbnail revision，
+// 鎖後重讀 receipt，再讀／鎖子資料，最後一次提交業務變更與 receipt；
+// 同 operation_id 重送比 fingerprint，勿因競爭者最初未讀到收據就錯報版本衝突。
+// purge 必須同一 READ COMMITTED 交易內：owner scoped 鎖定 trash trip，驗 expected lifecycle
+// revision 並取得 owner_id/trip_id 的 transaction-local purge context；依序刪除
+// settlement_adjustments → repayments → settlements → expense_shares → expenses → trip_members
+// → trip_thumbnails → trips；再更新 reservation.purged_at 及寫 purge receipt，一起 COMMIT。
+// 若任一步失敗則全回滾，包括 reservation/receipt；沒有部分清除或已成功的假回應。
+// 修改既有 app_protect_owner 與 app_immutable_payment trigger：只在 TG_OP='DELETE'、
+// OLD.owner_id/trip_id 完全吻合 transaction-local purge context，且該 trip 仍在垃圾桶
+// 時放行；UPDATE 與其他單筆 DELETE 一律按原規則拒絕。context 只在專用 purge routine
+// 交易範圍內設置與清理，不採 session_replication_role 或全域 DISABLE TRIGGER。
+// 上述 context 為 app 既有 DB 權限內的操作限制，不聲稱能隔離任意 SQL 權限持有者。
+// 既有 deferred checks 對已被同交易整趟清除的 trips/expenses/settlements 跳過；
+// purge migration 必須以有完整支出、分攤、還款、結清、調整、owner 及自訂圖的旅行
+// 證明提交成功，且單筆歷史刪除仍拒絕。共用分類與幣別／帳號不進 purge；
+// 垃圾桶支出仍計入 categories.usageCount 並由分類 FK RESTRICT 保護復原連結。
+// 操作收據僅保存已提交結果。purge 後 trip FK 不能存在，故 receipt.trip_id 刻意無 FK；
+// receipt.owner_id 與 reservation.owner_id 仍 FK auth.user，查證必須 owner 篩選。
+// 原操作已成功但較新操作又改變狀態時，receipt 與目前 trip/reservation 分開讀取。
+// 只刪 live application 旅行與圖，不宣稱安全覆寫 WAL、備份或已下載副本。

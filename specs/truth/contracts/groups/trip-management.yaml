@@ -1,0 +1,510 @@
+trashTrips:
+  get:
+    tags:
+    - trips
+    operationId: listTrashTrips
+    x-session-required: true
+    security:
+    - BetterAuthSession: []
+    summary: 分頁列出本人垃圾桶旅行
+    description: 僅本人 deletedAt 非 null 的旅行；按 deletedAt、id 由新到舊；不載入帳務或圖片 bytes，cursor 綁定 owner 與 trash 範圍。
+    parameters:
+    - $ref: ../components/parameters.yaml#/PageLimit
+    - $ref: ../components/parameters.yaml#/PageCursor
+    responses:
+      '200':
+        description: 成功。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/trips.yaml#/TrashTripList
+      '400':
+        description: 分頁參數或 cursor 無效。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+tripState:
+  parameters:
+  - $ref: ../components/parameters.yaml#/TripId
+  get:
+    tags:
+    - trips
+    operationId: getTripState
+    x-session-required: true
+    security:
+    - BetterAuthSession: []
+    summary: 查證本人旅行目前狀態
+    description: 專用 owner scope；active/trash 讀 trips，purged 只讀本人 reservation tombstone。purged 不回名稱、帳務或圖片內容；未知或他人統一
+      404。此狀態不證明特定命令成功，需查 operation 收據。
+    responses:
+      '200':
+        description: 成功。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/trips.yaml#/TripState
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '404':
+        description: 旅行不存在或非本人，統一 code=NOT_FOUND；不得洩漏其他 owner 的狀態。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+trashTrip:
+  parameters:
+  - $ref: ../components/parameters.yaml#/TripId
+  post:
+    tags:
+    - trips
+    operationId: moveTripToTrash
+    x-session-required: true
+    security:
+    - BetterAuthSession: []
+    summary: 移入旅行垃圾桶
+    description: 僅 active 可移入；成功後仍保留完整帳務、分類引用與縮圖。 請求只接受 application/json；operationId 為本 owner 全域唯一 UUID。指紋包含 kind、tripId、完整命令欄位；同
+      ID 同指紋的持久收據必先於版本與狀態檢查重播，無新寫入。新命令在旅行列鎖下比對 expectedLifecycleRevision，提交時與收據同交易；回應遺失先 GET operations 查證。
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/trips.yaml#/TripLifecycleCommand
+    responses:
+      '200':
+        description: 成功。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/trips.yaml#/TripOperationOutcome
+      '400':
+        description: 無效 UUID、版本或 JSON 格式；code=VALIDATION_ERROR。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '403':
+        description: Origin 不符；code=REQUEST_ORIGIN_REJECTED。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '404':
+        description: 旅行不存在或非本人，統一 code=NOT_FOUND；不得洩漏其他 owner 的狀態。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '409':
+        description: 同 operationId 不同指紋 code=OPERATION_ID_CONFLICT；預期版本不符 code=TRIP_STATE_CHANGED；狀態不符 code=TRIP_NOT_TRASHED、TRIP_TRASHED 或 TRIP_PURGED。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+restoreTrip:
+  parameters:
+  - $ref: ../components/parameters.yaml#/TripId
+  post:
+    tags:
+    - trips
+    operationId: restoreTrip
+    x-session-required: true
+    security:
+    - BetterAuthSession: []
+    summary: 從垃圾桶復原旅行
+    description: 僅 trash 可復原；原帳務、成員、縮圖與版本保留。 請求只接受 application/json；operationId 為本 owner 全域唯一 UUID。指紋包含 kind、tripId、完整命令欄位；同
+      ID 同指紋的持久收據必先於版本與狀態檢查重播，無新寫入。新命令在旅行列鎖下比對 expectedLifecycleRevision，提交時與收據同交易；回應遺失先 GET operations 查證。
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/trips.yaml#/TripLifecycleCommand
+    responses:
+      '200':
+        description: 成功。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/trips.yaml#/TripOperationOutcome
+      '400':
+        description: 無效 UUID、版本或 JSON 格式；code=VALIDATION_ERROR。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '403':
+        description: Origin 不符；code=REQUEST_ORIGIN_REJECTED。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '404':
+        description: 旅行不存在或非本人，統一 code=NOT_FOUND；不得洩漏其他 owner 的狀態。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '409':
+        description: 同 operationId 不同指紋 code=OPERATION_ID_CONFLICT；預期版本不符 code=TRIP_STATE_CHANGED；狀態不符 code=TRIP_NOT_TRASHED、TRIP_TRASHED 或 TRIP_PURGED。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+purgeTrip:
+  parameters:
+  - $ref: ../components/parameters.yaml#/TripId
+  post:
+    tags:
+    - trips
+    operationId: purgeTrip
+    x-session-required: true
+    security:
+    - BetterAuthSession: []
+    summary: 永久刪除垃圾桶旅行
+    description: 僅 trash 可 purge；同交易清除整趟帳務與縮圖，保留不可重用的 UUID reservation 與最小收據。無自動清除。 請求只接受 application/json；operationId
+      為本 owner 全域唯一 UUID。指紋包含 kind、tripId、完整命令欄位；同 ID 同指紋的持久收據必先於版本與狀態檢查重播，包含 purge 後，且無新寫入；同 ID 不同指紋拒絕。新命令在旅行列鎖下比對 expectedLifecycleRevision，提交時與收據同交易；回應遺失先
+      GET operations 查證。
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/trips.yaml#/TripLifecycleCommand
+    responses:
+      '200':
+        description: 成功。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/trips.yaml#/TripOperationOutcome
+      '400':
+        description: 無效 UUID、版本或 JSON 格式；code=VALIDATION_ERROR。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '403':
+        description: Origin 不符；code=REQUEST_ORIGIN_REJECTED。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '404':
+        description: 旅行不存在或非本人，統一 code=NOT_FOUND；不得洩漏其他 owner 的狀態。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '409':
+        description: 同 operationId 不同指紋 code=OPERATION_ID_CONFLICT；預期版本不符 code=TRIP_STATE_CHANGED；狀態不符 code=TRIP_NOT_TRASHED、TRIP_TRASHED 或 TRIP_PURGED。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+tripOperation:
+  parameters:
+  - $ref: ../components/parameters.yaml#/TripId
+  - $ref: ../components/parameters.yaml#/OperationId
+  get:
+    tags:
+    - trips
+    operationId: getTripOperation
+    x-session-required: true
+    security:
+    - BetterAuthSession: []
+    summary: 查證旅行命令提交結果
+    description: 依 owner、tripId、operationId 精確查持久收據；purge 後仍可查。result 是原提交結果，currentState 為當下 owner 狀態。若收據尚未存在回
+      404 OPERATION_NOT_FOUND，不代表請求失敗；他人或未知旅行統一 404 NOT_FOUND。不得當成使用者操作歷程列表。
+    responses:
+      '200':
+        description: 成功。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/trips.yaml#/TripOperationOutcome
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '404':
+        description: 未知旅行／他人旅行 code=NOT_FOUND；本人旅行但沒有該收據 code=OPERATION_NOT_FOUND。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+thumbnail:
+  parameters:
+  - $ref: ../components/parameters.yaml#/TripId
+  post:
+    tags:
+    - trips
+    operationId: saveTripThumbnail
+    x-session-required: true
+    security:
+    - BetterAuthSession: []
+    summary: 保存或更換旅行縮圖
+    description: 只接受 multipart/form-data，剛好一個名為 image 的檔案 part、零文字欄位，拒絕空檔、第二檔與多餘 part；所有 metadata 在必填 header。指紋含
+      kind、tripId、兩個完整預期版本及原始檔案 bytes 的 SHA-256；同 ID 同指紋收據先重播。僅 active，可在旅行列鎖下比對兩版本。只接受實際可解碼的靜態 JPEG/PNG/WebP；MIME／副檔名不得代替解碼，拒絕動畫、偽造、損壞與截斷內容。檔案
+      1..10485760 bytes、整個 multipart 請求 <=10551296 bytes（含最多 65536 bytes framing），files=1、fields=0、parts=1；像素 <=25000000、每邊 <=16384。方向校正、sRGB、移除 metadata 後縮至每邊 <=1200 px，只保存 <=524288 bytes 的 WebP，原圖不保存。超出輸出預算且無法有界轉碼時拒絕；轉碼 timeout 初值 10 秒，上傳 deadline 初值 60 秒。來源檢查先於
+      multipart 解析；檔案尚未完整接收或處理尚未提交時中止，不得提交；若提交完成後才遺失回應，仍可能已成功，客戶端須查收據。
+    parameters:
+    - $ref: ../components/parameters.yaml#/UploadOperationId
+    - $ref: ../components/parameters.yaml#/ExpectedLifecycleRevision
+    - $ref: ../components/parameters.yaml#/ExpectedThumbnailRevision
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            $ref: ../components/schemas/trips.yaml#/ThumbnailUpload
+    responses:
+      '200':
+        description: 成功。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/trips.yaml#/TripOperationOutcome
+      '400':
+        description: 缺少 part、額外欄位、無效 header、空檔、截斷或 malformed multipart；code=VALIDATION_ERROR 或 UPLOAD_INCOMPLETE。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '403':
+        description: Origin 不符；code=REQUEST_ORIGIN_REJECTED。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '404':
+        description: 旅行不存在或非本人，統一 code=NOT_FOUND；不得洩漏其他 owner 的狀態。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '408':
+        description: 接收或處理逾時；code=UPLOAD_TIMEOUT。若連線已中止可能無 HTTP 回應，仍須查收據。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '409':
+        description: 同 operationId 不同指紋 code=OPERATION_ID_CONFLICT；版本衝突 code=TRIP_STATE_CHANGED 或 THUMBNAIL_UPDATED；垃圾桶 code=TRIP_TRASHED；已 purge code=TRIP_PURGED。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '413':
+        description: 第二檔／多餘 part、檔案、整請求或解碼像素／尺寸超限；code=IMAGE_TOO_LARGE。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '415':
+        description: 非靜態 JPEG/PNG/WebP 或偽造格式；code=UNSUPPORTED_IMAGE_TYPE。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '422':
+        description: 內容損壞或無法在預算內產出 WebP；code=INVALID_IMAGE。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '503':
+        description: 目前圖片處理工作忙碌，未接納本次處理；code=UPLOAD_BUSY。客戶端先查同 operationId 收據，確認未提交後才由使用者決定重試。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+  delete:
+    tags:
+    - trips
+    operationId: resetTripThumbnail
+    x-session-required: true
+    security:
+    - BetterAuthSession: []
+    summary: 恢復預設旅行縮圖
+    description: DELETE 無本文；以必填 header 傳 operationId 與兩個預期版本。指紋含 kind、tripId 與版本；同 ID 同指紋重播先於狀態／版本檢查。僅 active 可執行；成功刪自訂圖片並遞增
+      thumbnailRevision，即使原本已無圖片也以一次明確命令提交；縮圖結果 false。
+    parameters:
+    - $ref: ../components/parameters.yaml#/UploadOperationId
+    - $ref: ../components/parameters.yaml#/ExpectedLifecycleRevision
+    - $ref: ../components/parameters.yaml#/ExpectedThumbnailRevision
+    responses:
+      '200':
+        description: 成功。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/trips.yaml#/TripOperationOutcome
+      '400':
+        description: 缺少／無效 header 或帶本文；code=VALIDATION_ERROR。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '403':
+        description: Origin 不符；code=REQUEST_ORIGIN_REJECTED。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '404':
+        description: 旅行不存在或非本人，統一 code=NOT_FOUND；不得洩漏其他 owner 的狀態。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '409':
+        description: 同 operationId 不同指紋 code=OPERATION_ID_CONFLICT；版本衝突 code=TRIP_STATE_CHANGED 或 THUMBNAIL_UPDATED；垃圾桶
+          code=TRIP_TRASHED。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+activeThumbnailBytes:
+  parameters:
+  - $ref: ../components/parameters.yaml#/TripId
+  - $ref: ../components/parameters.yaml#/ThumbnailRevision
+  get:
+    tags:
+    - trips
+    operationId: getTripThumbnail
+    x-session-required: true
+    security:
+    - BetterAuthSession: []
+    summary: 讀取本人旅行縮圖
+    description: 僅 active 旅行、目前 thumbnailRevision 且 hasThumbnail=true 可讀；URL 只含 UUID 與版本，不含 token／secret；每次驗證 session
+      與 owner。無圖片／舊版本回 404，已 purge 回 404。
+    responses:
+      '200':
+        description: 目前版本的正規化 WebP bytes，不回原圖。
+        headers:
+          Cache-Control:
+            description: 私有圖片不可由共用快取或瀏覽器持久快取保存。
+            schema:
+              type: string
+              enum:
+              - private, no-store
+          X-Content-Type-Options:
+            description: 停用 MIME sniffing。
+            schema:
+              type: string
+              enum:
+              - nosniff
+        content:
+          image/webp:
+            schema:
+              type: string
+              format: binary
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '404':
+        description: 旅行／縮圖不存在、非本人、已 purge 或版本非目前值；code=NOT_FOUND。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '409':
+        description: 本人旅行在垃圾桶；code=TRIP_TRASHED，請使用垃圾桶縮圖路徑。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+trashThumbnailBytes:
+  parameters:
+  - $ref: ../components/parameters.yaml#/TripId
+  - $ref: ../components/parameters.yaml#/ThumbnailRevision
+  get:
+    tags:
+    - trips
+    operationId: getTrashTripThumbnail
+    x-session-required: true
+    security:
+    - BetterAuthSession: []
+    summary: 讀取本人旅行縮圖（垃圾桶）
+    description: 僅 trash 旅行、目前 thumbnailRevision 且 hasThumbnail=true 可讀；URL 只含 UUID 與版本，不含 token／secret；每次驗證 session
+      與 owner。無圖片／舊版本回 404，已 purge 回 404。本人垃圾桶旅行走專用路徑；普通子資源仍須回 409 TRIP_TRASHED。
+    responses:
+      '200':
+        description: 目前版本的正規化 WebP bytes，不回原圖。
+        headers:
+          Cache-Control:
+            description: 私有圖片不可由共用快取或瀏覽器持久快取保存。
+            schema:
+              type: string
+              enum:
+              - private, no-store
+          X-Content-Type-Options:
+            description: 停用 MIME sniffing。
+            schema:
+              type: string
+              enum:
+              - nosniff
+        content:
+          image/webp:
+            schema:
+              type: string
+              format: binary
+      '401':
+        description: 尚未登入。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '404':
+        description: 旅行／縮圖不存在、非本人、已 purge 或版本非目前值；code=NOT_FOUND。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError

@@ -35,3 +35,15 @@
 | `使用者"乙"已有"交通"分類且使用者"甲"已登入` | 無 | 不支援 | 無 | 以隔離測試資料庫建立句中帳號、有效 session 與指定業務資料；檢查擁有者關聯和已落地狀態；回寫業務識別供唯一 Act 使用，不必由 API 重演前序操作。 |
 | `使用者"甲"建立"交通"分類` | 無 | 不支援 | 無 | 以甲的有效 session 與寫入時可信 Origin 呼叫 POST /api/categories；記錄回應，核對資料庫分類與關聯，不透過前端操作。 |
 | `"交通"分類屬於使用者"甲"` | 無 | 不支援 | 無 | 201；資料庫另有乙的同名分類，但新 category.owner_id=甲 且 id 不同；甲再讀可見。 |
+
+## 006 旅行管理與等待契約
+
+所有 Given 由隔離 PostgreSQL fixture 建立且確認權威資料已落地；保留穩定 owner/trip/member/record ID、版本與前態快照，不重演目標 Act。所有 When 只有一次命令或查詢；記錄請求、回應、原 operationId 與版本，非同步競爭由 Given 的屏障安排。Then 的再讀屬只讀驗證，不推進業務。精確帳務用獨立 BigInt 有理數 oracle。
+
+| DSL 句型 | Gherkin 參數 | Data Table 參數 | 預設參數 | StepDef 實作語意 |
+| --- | --- | --- | --- | --- |
+| `餐飲分類僅被垃圾桶旅行的一筆支出引用` | 無 | 不支援 | 無 | Given：隔離DB建立Alice、日本旅行trash及一筆餐飲支出，分類無其他引用；保留category與trip/expense穩定ID及前態。回寫session；不先刪分類。 |
+| `owner 查詢垃圾桶旅行使用的分類` | 無 | 不支援 | 無 | When：一次GET /api/categories，記錄category usageCount，不寫資料。 |
+| `分類使用筆數仍為 1` | 無 | 不支援 | 無 | Then：response指定category usageCount=1且DB expenses含trash引用；只讀再查一致，分類與帳務未變。 |
+| `owner 刪除垃圾桶旅行使用的分類` | 無 | 不支援 | 無 | When：一次DELETE category，使用owner session及可信Origin；記錄回應，等待交易結束。 |
+| `分類因仍被使用而拒絕刪除` | 無 | 不支援 | 無 | Then：409 CATEGORY_IN_USE（依categories契約），DB category與expense FK未變、usage=1；owner再讀分類存在，恢復旅行後仍為同分類ID，不另送復原Act。 |
