@@ -6,7 +6,7 @@
 - 新版 `/ui-plan` 的明確建立基準模式；只修改 `specs/ui-baseline/**`，不修改產品、truth 或 skill。
 - 固定產品來源：`6bb68a5023d43aa6beadaee4453676c30ba635f7`。
 - 沿用同 commit 的 `baseline-v0.1` 已確認範圍；原確認持續有效，本次新增旅行帳本亦已取得明確確認。
-- 可編輯設計：[split-ledger.pen](split-ledger.pen)，批准提交時 SHA256：`698307d170a2c4900b689ba58b9ee4c601b884fbaafe883fe45ec585bb8d0a67`；2026-11-14 整理後目前 SHA256：`2f3f89c639551e354e04fe765b57f6ece6dab7372aee15bb47406382edac7085`。
+- 可編輯設計：[split-ledger.pen](split-ledger.pen)，批准提交時 SHA256：`698307d170a2c4900b689ba58b9ee4c601b884fbaafe883fe45ec585bb8d0a67`；2026-11-14 三區整理版本（f9698f9）SHA256：`2f3f89c639551e354e04fe765b57f6ece6dab7372aee15bb47406382edac7085`。
 - 有效確認範圍：以下四張旅行帳本視窗、空帳本元件、旅行內導覽變體與已揭露差異；不涵蓋未收錄畫面或未驗證狀態。
 - 確認者：本 chat 使用者；2026-11-14 原回覆：「可以，這版旅行帳本 baseline 我確認，請把設計稿、預覽與相關文件一起 commit。」
 - 畫布標記同步限制：本次嘗試更新說明與 frame context 時，Pen 官方工具因帳戶本期用量限制拒絕執行，未寫入變更。當時 .pen 保留交付時的 pending 標記；2026-11-14 使用者切換帳號後工具恢復，本次已透過正式設計工具同步批准標記。畫面內容與已確認預覽不變。

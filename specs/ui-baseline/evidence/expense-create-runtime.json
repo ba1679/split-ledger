@@ -1,0 +1,54 @@
+{
+  "productCommit": "f9698f91ba5a64827fe8e6801bb48207c59502d8",
+  "pid": 38019,
+  "node": "v24.21.0",
+  "webOrigin": "http://127.0.0.1:44191",
+  "apiOrigin": "http://127.0.0.1:57999",
+  "database": "isolated temporary worker database on test-db:54330",
+  "tripId": "d26e9343-af8b-41c2-92c8-293e0c5a1366",
+  "emptyTripId": "31166351-2b46-4304-9f5d-6181707ebdf5",
+  "dataset": {
+    "tripName": "日本春日旅行",
+    "dates": [
+      "2027-03-10",
+      "2027-03-15"
+    ],
+    "members": [
+      "小旅人",
+      "小安"
+    ],
+    "expenses": [
+      {
+        "item": "往返機票",
+        "amount": "8000",
+        "currency": "TWD",
+        "category": "交通"
+      },
+      {
+        "item": "京都町家住宿",
+        "amount": "15000",
+        "currency": "JPY",
+        "category": "住宿"
+      },
+      {
+        "item": "巷口的拉麵店",
+        "amount": "2000",
+        "currency": "JPY",
+        "category": "餐飲",
+        "shares": [
+          "小旅人",
+          "小安"
+        ]
+      }
+    ],
+    "expectedPersonalTotals": {
+      "JPY": "16000",
+      "TWD": "8000"
+    },
+    "expectedNetJPY": {
+      "小旅人": "1000",
+      "小安": "-1000"
+    }
+  },
+  "session": "test-only seeded identity; cookie not recorded"
+}
