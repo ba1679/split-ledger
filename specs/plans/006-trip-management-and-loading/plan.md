@@ -19,7 +19,7 @@ specs/plans/006-trip-management-and-loading/
 ├── plan.md
 ├── ui/                        # Wave 3：UI plan、.pen、預覽及確認關卡
 │   ├── ui-plan.md
-│   └── handoff.md
+│   └── design-previews/        # 32份PNG，共用對應38個已確認frame
 └── tasks.md                   # /tasks已完成；292筆待執行任務
 specs/truth/
 ├── techstack.md               # 技術研究已更新，新增方向尚未實作
@@ -161,21 +161,18 @@ packages/shared/               # 既有精確帳務；不因垃圾桶或換圖�
 
 ### 執行狀態與下游關卡
 
-| 階段                    | 狀態             | 交付與下一步                                                                                                         |
-| ----------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------- |
-| 系統介面盤點與分析順序  | 已完成           | 3 介面、3 個依序 Wave；本 plan 為 planner handoff 依據                                                               |
-| Wave 1 `/data-plan`     | 已完成           | DBML parser 通過：16 tables／26 refs／4 enums；data delta 4 ADD／4 MODIFY／2 NOOP；未執行 migration                  |
-| Wave 2 `/api-plan`      | 已完成           | OpenAPI 0.3.0、39 operations；Redocly valid（3 個既有警告），引用／唯一性檢查通過；API delta 5 ADD／5 MODIFY／1 NOOP |
-| Wave 3 `/ui-plan`       | 已完成           | design-v7 已由使用者於 2026-11-13 確認；38 frame／PNG，索引與 hash 見 ui/ui-plan.md。                                |
-| UI prototype／截圖比對  | 本輪省略         | 依使用者明確指示移除必做關卡與驗證產物；以前期設計稿為主。                                                           |
-| `/dsl-refine` | 已完成（2026-11-14） | 20份新增介面feature、114 Rule／410展開案例、DSL唯一匹配及獨立審查通過；詳dsl-refine-review.md。 |
-| `/tasks` | 已完成（2026-11-14） | tasks.md共292筆，231句測試對齊、21組Green/Refactor、完整工程/UI/基準交付；下一步/implement T001。 |
+| 階段                   | 狀態                 | 交付與下一步                                                                                                         |
+| ---------------------- | -------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| 系統介面盤點與分析順序 | 已完成               | 3 介面、3 個依序 Wave；本 plan 為 planner handoff 依據                                                               |
+| Wave 1 `/data-plan`    | 已完成               | DBML parser 通過：16 tables／26 refs／4 enums；data delta 4 ADD／4 MODIFY／2 NOOP；未執行 migration                  |
+| Wave 2 `/api-plan`     | 已完成               | OpenAPI 0.3.0、39 operations；Redocly valid（3 個既有警告），引用／唯一性檢查通過；API delta 5 ADD／5 MODIFY／1 NOOP |
+| Wave 3 `/ui-plan`      | 已完成               | design-v7 已由使用者於 2026-11-13 確認；38 frame／32份共用PNG，索引與 hash 見 ui/ui-plan.md。                        |
+| UI prototype／截圖比對 | 本輪省略             | 依使用者明確指示移除必做關卡與驗證產物；以前期設計稿為主。                                                           |
+| `/dsl-refine`          | 已完成（2026-11-14） | 20份新增介面feature、114 Rule／410展開案例、DSL唯一匹配及獨立審查通過；詳dsl-refine-review.md。                      |
+| `/tasks`               | 已完成（2026-11-14） | tasks.md共292筆，231句測試對齊、21組Green/Refactor、完整工程/UI/基準交付；下一步/implement T001。                    |
 
 目前沒有需要新增 `/clarify` 的系統介面或責任邊界缺口；若下游發現改變業務結果的真實衝突，回交規格 owner，不自行削弱驗收。
 
-**目前 checkpoint**: design-v7 已由使用者於 2026-11-13 明確確認，SHA-256 `6c33bce25da872057d253a44bd0e59dec1f0e41f974873fb6db0dfe10b6c1abc`，共38 frame／PNG。使用者同時要求本次省略 prototype 與截圖驗證，前期規劃以設計稿為主；已移除原型截圖／對照、驗證腳本／結果與舊驗證報告，既有 v6 原型移至歷史目錄。UI 規劃關卡完成，可依 ui/handoff.md 接續前端 DSL／tasks，本輪未執行下游 skill。規格與47模板／121展開驗收案例保留，包含管理旅行dropdown、建立時optional縮圖，以及保留已建立旅行與同trip圖片重傳。Skill檔案由使用者後續另行更新。
+## 目前交接
 
-
-**2026-11-14 checkpoint更新**：`/dsl-refine`已完成；下一步`/tasks`。本輪只更新介面feature/DSL、delta與plan-side交接，未實作產品。47模板的逐項覆蓋、20份feature／114 Rule／410展開案例、design-v7畫面對照、審查與驗證見[dsl-refine-review.md](dsl-refine-review.md)；目前狀態見[handoff.md](handoff.md)。原2026-11-13 checkpoint保留為歷史，本段取代其「尚未執行下游」狀態。
-
-**2026-11-14 tasks checkpoint**：已產出[tasks.md](tasks.md)；292筆全部待執行。230 RED＋1 ALIGN集中T009–T239，T240測試碼/binding審查先解鎖T241正式schema與runtime複核，後續依依賴續跑。21組功能Green/Refactor、38frame任務對應、Linux/資源/備份/真機與完整回歸、一次UI gate及基準回填/獨立核對均已列入。PNG預覽實際缺失已由同hash design-v7透過Pen工具重匯出38檔，未改設計、未重問批准、未恢復prototype或規劃期截圖比對。機械檢查見[tasks-validation.json](tasks-validation.json)；本輪不改truth或產品程式。下一步`/implement`從T001開始，依Setup/Foundation checkpoint交接。
+需求/研究/資料與API分析、design-v7確認、DSL細化與tasks規劃皆已完成，產品尚未實作。下一步為`/implement`從T001開始，先到T001–T008 checkpoint；唯一最新狀態見[handoff.md](handoff.md)。設計保留38個frame與32份共用PNG，版本與適配只見[ui/ui-plan.md](ui/ui-plan.md)；本plan不另維護階段快照或驗證JSON。

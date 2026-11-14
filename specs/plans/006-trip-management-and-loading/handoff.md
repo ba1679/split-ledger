@@ -1,43 +1,34 @@
 # 006 目前交接
 
-- 日期：2026-11-14；plan：`specs/plans/006-trip-management-and-loading`。
-- Requested step：`/tasks`；checkpoint：任務清單完成，全部292筆待執行。下一已解鎖範圍：`/implement` 從T001開始，只跑到當輪指定checkpoint後交接。
-- HEAD：`aa7d56cc0aee119737680a38663b482bb5d1779f`；branch：`codex/006-trip-management-planning`。本輪未commit/push、未實作產品、未執行migration/BDD/E2E。
-- 任務：[tasks.md](tasks.md)；231句逐句scope、292任務依賴、21feature與38畫面對照及機械結果：[tasks-validation.json](tasks-validation.json)。
-- 上游DSL成果保持：20新增feature／114 Rules／410規格案例；47 acceptance模板覆蓋見[dsl-refine-review.md](dsl-refine-review.md)。這些不是已通過產品測試。
-- 本輪不改truth，既有API/data/techstack/features dirty與未追蹤成果全部保留；未新增產品或測試碼。只新增tasks/驗證文件，更新plan/交接，恢復38份設計PNG。
+- 日期：2026-11-14；分支：`codex/006-trip-management-planning`。
+- 規劃快照已於 `d683158` commit；本次精簡另以Git commit保存，未push。產品碼、migration與測試實作尚未開始。
+- 狀態：需求、研究、API/data分析、design-v7確認、DSL細化與tasks規劃完成。全部292筆任務待執行，無待重新澄清或設計批准事項。
+- 下一步：`/implement`從T001開始，完成T001–T008的Setup/Foundation checkpoint後保存交接。任務順序、逐句測試入口、依賴與38個畫面到任務的對照均見[tasks.md](tasks.md)。
 
-## 執行順序與驗證關卡
+## 權威文件
 
-| 範圍              | 完成條件／後續                                                                                        |
-| ----------------- | ----------------------------------------------------------------------------------------------------- |
-| T001–T008         | Setup新套件/環境smoke及Foundation骨架；不得提前產品Green                                              |
-| T009–T239         | 230 RED＋1 ALIGN，各句獨立task與精確feature/Rule入口；如被產品schema前序阻擋，runtime待驗必須據實保留 |
-| T240              | 全批binding/測試碼獨立審查只先解鎖T241，不宣稱每句均實際觀察RED                                       |
-| T241及runtime複核 | 正式產品schema與第一feature全綠，原reviewer複核已跑/仍受產品前序阻擋帳；通過才續T242                  |
-| T257              | 8新增後端Feature及全後端回歸checkpoint                                                                |
-| T258–T259         | 管理旅行與U02/U06/S01桌機/手機代表比對checkpoint，後續套用依賴此完成                                  |
-| T283              | 其餘前端功能組完成checkpoint；共20新增feature＋1受MODIFY DSL影響的既有scope                           |
-| T284–T288         | Linux、資源、備份、真機/讀屏、完整自動回歸；T288不等待人工T287，UI gate須同時等兩者                   |
-| T289–T292         | 一次UI家族審查→驗收後baseline回填→獨立回填核對→交付；全部要求完成才標plan完成                         |
+- 業務/API/data/介面規格：`spec.md`、`research.md`、`truth-delta.md`與`specs/truth/**`。
+- 驗收到介面規則、畫面資訊位置：[dsl-refine-review.md](dsl-refine-review.md)。保留47模板對照，Rule直接用feature內tag定位。
+- 設計版本、原批准、畫面索引與適配：[ui/ui-plan.md](ui/ui-plan.md)。design-v7 `.pen` SHA-256 `6c33bce25da872057d253a44bd0e59dec1f0e41f974873fb6db0dfe10b6c1abc`；38frame、32份共用PNG。
+- 固定現況整合起點仍為`8fc9f94134c66ffd29918014b950894b1007aa86`的`specs/ui-baseline/**`。未改現況基準或design-v7；prototype不製作，規劃期截圖比對省略。
 
-目前沒有需重新澄清或設計批准的阻塞。未執行的產品矩陣仍完整保留：API、Chromium/WebKit、桌機/手機、真機選圖/輔助工具、purge競爭故障、Linux binary、RSS/CPU及含bytea備份還原；參照tasks的命令與逐項證據要求。
+## 執行與驗證關卡
 
-## 設計與基準
+| 範圍      | 完成條件／下一步                                                                        |
+| --------- | --------------------------------------------------------------------------------------- |
+| T001–T008 | 新套件/環境smoke與共用骨架；不提前產品Green                                             |
+| T009–T239 | 230 RED＋1 ALIGN；各句task內有代表feature/Rule入口，產品前序受阻者保留runtime待驗       |
+| T240–T241 | 全批binding/測試碼審查只先解鎖正式schema slice；其runtime複核及本scope全Green後才續T242 |
+| T257      | 新增後端功能組與完整後端回歸checkpoint                                                  |
+| T258–T259 | 管理旅行、U02/U06/S01兩尺寸代表比對後才套用後續共用樣式                                 |
+| T283      | 其餘前端功能組完成；共20新增feature＋1受修改DSL影響的既有scope                          |
+| T284–T288 | Linux、資源、備份、真機/讀屏與完整自動回歸；T288可獨立於人工T287執行                    |
+| T289–T292 | 一次UI家族審查→驗收後基準回填→獨立核對→交付                                             |
 
-- C類design-v7、38frame；`.pen` SHA-256 `6c33bce25da872057d253a44bd0e59dec1f0e41f974873fb6db0dfe10b6c1abc`。使用者2026-11-13完整批准原回覆見[ui/ui-plan.md](ui/ui-plan.md)，沿用有效確認。
-- 本輪發現索引38份PNG缺失，已用Pen desktop從同一批准.pen重新匯出38份，未改.pen；PNG尺寸均吻合、抽看手機新增選圖預覽正常。實際hash/尺寸見[預覽恢復清單](ui/design-previews/manifest.json)，無原PNG hash故不宣稱位元組與原匯出相同。
-- Prototype=不製作；規劃期截圖比對省略。正式產品的逐畫面/代表checkpoint及最終UI驗收仍待實作。
-- 固定現況整合起點：`8fc9f94134c66ffd29918014b950894b1007aa86` 的 `specs/ui-baseline/**`，.pen SHA-256 `144a81b3086885bf57f5a694a78ed75f089f032730f91767088598ed1572a3d3`；未改現況基準。產品實作、UI驗收與基準回填目前皆未開始。
+規格稽核曾通過：20新增feature／114 Rules／410展開案例，兩端DSL拓樸0警告；審查摘要見dsl-refine-review.md。這些不是已通過的產品測試。API、Chromium/WebKit、兩尺寸、真機、輔助工具、故障競爭、Linux、資源及備份還原矩陣仍待實作階段完成。
 
-## 資源與程序
+## 資源與精簡範圍
 
-沿用`profile=low-memory-16gb`（已觀測RAM16GiB）；主代理`/root`、唯一既有輔助`/root/review_006`只做獨立審查，不新增子代理；同時重型工作1、worker=1，Chromium後WebKit依序。後續每次重型工作前量測實際壓力/PID，swap單點值不當壓力判定。
+沿用`low-memory-16gb`（已觀測16GiB），主代理加最多一位既有審查者；同時重型工作1、worker=1，瀏覽器依序。每次重型工作前量測壓力與受管PID，不以swap單點或代理完成推定OS回收；不關閉使用者程序。目前沒有本輪常駐產品服務或測試runner。
 
-本輪Pen CLI0.3.14 headless因schema2.22不相容已exit0；改用官方interactive連桌面成功Get批准frame並Export。Export呼叫曾等待timeout，但38份檔案實際全部寫出並核對；未save .pen。兩個受管interactive session均以exit正常結束（exit0），使用者Pen桌面保留；工具/代理PID對應及OS記憶體回收未知，不宣稱代理完成等於釋放。沒有本輪常駐server/browser runner。
-
-## 未提交狀態
-
-進入本輪前已有：contracts的parameters/trips/categories及各group/openapi、data-model兩檔、techstack、5個模組DSL，以及未追蹤006 package/20個feature/trip-management contract。本輪全部保留；最新細項以 `git -c core.quotepath=false status --short` 查看，勿用reset清理。當前改動仍未commit/push。
-
-下一步：`/implement` 處理006，從T001開始；按T001–T008的Setup/Foundation checkpoint保存交接，之後接逐句Phase3，不跳過runtime待驗、獨立審查或產品驗收。
+本次把必要RED入口與驗證摘要合併回上述文件，移除3份生成JSON及獨立UI交接、6張共用狀態PNG，刪去可由feature tag取得的重複Rule索引。任務ID/依賴、驗收、truth及.pen保持；後續只在此文件維護目前進度。

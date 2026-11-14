@@ -1,10 +1,10 @@
 # 功能規格：旅行垃圾桶、自訂縮圖與全站等待回饋
 
-**功能分支**: 未建立；plan ID `006-trip-management-and-loading`
+**功能分支**: `codex/006-trip-management-planning`；plan ID `006-trip-management-and-loading`
 
 **建立日期**: 2026-11-13
 
-**狀態**: 草稿；已完成 clarify 與技術研究，圖片限制已於 2026-11-13 收斂，可進入需求舉例與系統分析
+**狀態**: 需求與前期規劃完成，產品尚未實作；最新續跑點見 `handoff.md`。
 
 **輸入**: 使用者描述：「希望可以刪除 trip，並且跳出確認 dialog 進行防呆，還有自訂旅行縮圖的功能，還有 loading UI 的優化（目前有些地方是用文字來顯示 loading）。」使用者後續選擇 `1B、2A、3A`。
 

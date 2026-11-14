@@ -13,7 +13,7 @@
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 設計檔         | `ui/split-ledger-006.pen`，真正 Pencil execute／Export／save 儲存；005 未改。                                                                                                                                                                     |
 | 版本與 SHA-256 | `design-v7`；`6c33bce25da872057d253a44bd0e59dec1f0e41f974873fb6db0dfe10b6c1abc`；526,282 bytes。歷史 design-v6 SHA `8b3c05c895e98e42257d47070d61c585b72f05c419413ae85395322c86158f27`，其 30 PNG 已封存 `history/design-v6/approved-design-v6/`。 |
-| 範圍           | 38 個實際 frame／38 PNG：原 30 畫面（U02 D/M 更新）＋新增 U06／U07／U08／S10 各 D/M。                                                                                                                                                             |
+| 範圍           | 38 個已確認frame保持；PNG精簡為32份，6個共用狀態frame引用保留的同語意總表。                                                                                                                                                                       |
 | 尺寸           | 桌機 1440×900；手機 390×844，以 .pen 與匯出預覽交付。                                                                                                                                                                                             |
 | 確認           | design-v7 `approved`；確認者：使用者；日期：2026-11-13；範圍：完整 38 個 frame 與其桌機／手機設計。原回覆見下方紀錄。                                                                                                                             |
 | 本輪交付範圍   | 使用者明確省略 prototype 與截圖比對驗證；UI 規劃已完成。正式產品實作未開始，功能／無障礙／響應式驗收由後續實作承接。                                                                                                                              |
@@ -40,50 +40,58 @@
 
 ## 畫面與狀態索引
 
-下表為使用者已確認的 design-v7 完整 38 個 frame；Pencil 已匯出桌機／手機預覽，作為後續 UI 實作依據。
+下表保留已確認design-v7完整38個frame；32份PNG供檢視，6個狀態frame共用總表預覽。尺寸欄描述原.pen frame，引用共用PNG時不代表該PNG尺寸；產品仍需依原frame與下列註記適配。
 
-| 畫面／狀態                               | 介面／驗收責任                                        | .pen frame／預覽／尺寸                                   |
-| ---------------------------------------- | ----------------------------------------------------- | -------------------------------------------------------- |
-| `U01-D` 旅行清單                         | Trips／AppShell；trash、thumbnail、loading acceptance | `qOVYr` · [預覽](design-previews/qOVYr.png) · 1440×900   |
-| `U01-M` 旅行清單                         | Trips／AppShell；trash、thumbnail、loading acceptance | `uBMYs` · [預覽](design-previews/uBMYs.png) · 390×844    |
-| `U02-D` 旅行帳本・管理 dropdown 觸發按鈕 | TripLedger／AppShell；dropdown、trash、loading        | `nh4JN` · [預覽](design-previews/nh4JN.png) · 1440×900   |
-| `U02-M` 旅行帳本・管理 dropdown 觸發按鈕 | TripLedger／AppShell；dropdown、trash、loading        | `c5e28` · [預覽](design-previews/c5e28.png) · 390×844    |
-| `U03-D` 垃圾桶                           | /trips/trash；trash acceptance                        | `WLw0N` · [預覽](design-previews/WLw0N.png) · 1440×900   |
-| `U03-M` 垃圾桶                           | /trips/trash；trash acceptance                        | `VtNXn` · [預覽](design-previews/VtNXn.png) · 390×844    |
-| `U04-D` 縮圖編輯                         | TripLedger 縮圖 dialog；thumbnail lifecycle／format   | `Wd1Pq` · [預覽](design-previews/Wd1Pq.png) · 1440×900   |
-| `U04-M` 縮圖編輯                         | TripLedger 縮圖 dialog；thumbnail lifecycle／format   | `A0kb5` · [預覽](design-previews/A0kb5.png) · 390×844    |
-| `S01-D` 移至垃圾桶確認                   | TripLedger 管理選單→確認；trash                       | `k5UPcL` · [預覽](design-previews/k5UPcL.png) · 1440×900 |
-| `S01-M` 移至垃圾桶確認                   | TripLedger 管理選單→確認；trash                       | `vkszC` · [預覽](design-previews/vkszC.png) · 390×844    |
-| `S02-D` 永久刪除確認                     | 垃圾桶永久刪除；trash                                 | `G7HrKo` · [預覽](design-previews/G7HrKo.png) · 1440×900 |
-| `S02-M` 永久刪除確認                     | 垃圾桶永久刪除；trash                                 | `rHv6p` · [預覽](design-previews/rHv6p.png) · 390×844    |
-| `S03-D` 縮圖預覽／錯誤／忙碌／保存後成功 | 縮圖共用狀態；thumbnail lifecycle／format             | `ybPvI` · [預覽](design-previews/ybPvI.png) · 1440×900   |
-| `S03-M` 縮圖預覽／錯誤／忙碌／保存後成功 | 縮圖共用狀態；thumbnail lifecycle／format             | `DECWg` · [預覽](design-previews/DECWg.png) · 390×844    |
-| `S04-D` 初載／空白／錯誤／暫停           | 全站讀取元件；loading                                 | `g1Pexm` · [預覽](design-previews/g1Pexm.png) · 1440×900 |
-| `S04-M` 初載／空白／錯誤／暫停           | 全站讀取元件；loading                                 | `U2nnu` · [預覽](design-previews/U2nnu.png) · 390×844    |
-| `S05-D` 查證／結果未知／衝突             | operation outcome／state；conflict／loading           | `M6LRw` · [預覽](design-previews/M6LRw.png) · 1440×900   |
-| `S05-M` 查證／結果未知／衝突             | operation outcome／state；conflict／loading           | `kMwFM` · [預覽](design-previews/kMwFM.png) · 390×844    |
-| `S06-D` 舊連結存取                       | /trips/:tripId/* 存取邊界；conflict                   | `ddFff` · [預覽](design-previews/ddFff.png) · 1440×900   |
-| `S06-M` 舊連結存取                       | /trips/:tripId/* 存取邊界；conflict                   | `hmwlx` · [預覽](design-previews/hmwlx.png) · 390×844    |
-| `S07-D` 長名稱／圖片 fallback            | Trips／TripLedger／垃圾桶；thumbnail fallback         | `vCf8Y` · [預覽](design-previews/vCf8Y.png) · 1440×900   |
-| `S07-M` 長名稱／圖片 fallback            | Trips／TripLedger／垃圾桶；thumbnail fallback         | `quiiR` · [預覽](design-previews/quiiR.png) · 390×844    |
-| `S09-D` 預設圖尚未保存                   | 縮圖本地草稿／保存；thumbnail lifecycle               | `s8IowS` · [預覽](design-previews/s8IowS.png) · 1440×900 |
-| `S09-M` 預設圖尚未保存                   | 縮圖本地草稿／保存；thumbnail lifecycle               | `tI380` · [預覽](design-previews/tI380.png) · 390×844    |
-| `U05-M1` 我的旅行次級選單                | AppShell 我的旅行導覽；trash                          | `FTGvi` · [預覽](design-previews/FTGvi.png) · 390×844    |
-| `U05-M2` 我的旅行次級選單                | AppShell 我的旅行導覽；trash                          | `skr2f` · [預覽](design-previews/skr2f.png) · 390×844    |
-| `U05-M3` 我的旅行次級選單                | AppShell 我的旅行導覽；trash                          | `K7sv4E` · [預覽](design-previews/K7sv4E.png) · 390×844  |
-| `S08-D` 全站等待狀態                     | 全站表單／付款／分類／成員等待；loading               | `Z6aGfB` · [預覽](design-previews/Z6aGfB.png) · 1440×900 |
-| `S08-M1` 全站等待狀態                    | 全站表單／付款／分類／成員等待；loading               | `lEany` · [預覽](design-previews/lEany.png) · 390×844    |
-| `S08-M2` 全站等待狀態                    | 全站表單／付款／分類／成員等待；loading               | `l3jVE` · [預覽](design-previews/l3jVE.png) · 390×844    |
-| `U06-D` 管理旅行選單展開                 | TripLedger anchored menu；thumbnail／trash            | `ZMoXS` · [預覽](design-previews/ZMoXS.png) · 1440×900   |
-| `U06-M` 管理旅行選單展開                 | TripLedger anchored menu；thumbnail／trash            | `xsZKA` · [預覽](design-previews/xsZKA.png) · 390×844    |
-| `U07-D` 新增旅行・未選圖片               | Trips／TripForm；新增旅行無圖與取消                   | `Dsq2D` · [預覽](design-previews/Dsq2D.png) · 1440×900   |
-| `U07-M` 新增旅行・未選圖片               | Trips／TripForm；新增旅行無圖與取消                   | `kOFc3` · [預覽](design-previews/kOFc3.png) · 390×844    |
-| `U08-D` 新增旅行・已選圖片預覽           | Trips／TripForm；新增旅行選填縮圖與草稿               | `GfuLl` · [預覽](design-previews/GfuLl.png) · 1440×900   |
-| `U08-M` 新增旅行・已選圖片預覽           | Trips／TripForm；新增旅行選填縮圖與草稿               | `eSFbG` · [預覽](design-previews/eSFbG.png) · 390×844    |
-| `S10-D` 旅行建立成功但圖片保存失敗       | 建立結果→同 trip 縮圖重傳；thumbnail lifecycle        | `s825M` · [預覽](design-previews/s825M.png) · 1440×900   |
-| `S10-M` 旅行建立成功但圖片保存失敗       | 建立結果→同 trip 縮圖重傳；thumbnail lifecycle        | `F1Hwk` · [預覽](design-previews/F1Hwk.png) · 390×844    |
+| 畫面／狀態                               | 介面／驗收責任                                        | .pen frame／預覽／尺寸                                          |
+| ---------------------------------------- | ----------------------------------------------------- | --------------------------------------------------------------- |
+| `U01-D` 旅行清單                         | Trips／AppShell；trash、thumbnail、loading acceptance | `qOVYr` · [預覽](design-previews/qOVYr.png) · 1440×900          |
+| `U01-M` 旅行清單                         | Trips／AppShell；trash、thumbnail、loading acceptance | `uBMYs` · [預覽](design-previews/uBMYs.png) · 390×844           |
+| `U02-D` 旅行帳本・管理 dropdown 觸發按鈕 | TripLedger／AppShell；dropdown、trash、loading        | `nh4JN` · [預覽](design-previews/nh4JN.png) · 1440×900          |
+| `U02-M` 旅行帳本・管理 dropdown 觸發按鈕 | TripLedger／AppShell；dropdown、trash、loading        | `c5e28` · [預覽](design-previews/c5e28.png) · 390×844           |
+| `U03-D` 垃圾桶                           | /trips/trash；trash acceptance                        | `WLw0N` · [預覽](design-previews/WLw0N.png) · 1440×900          |
+| `U03-M` 垃圾桶                           | /trips/trash；trash acceptance                        | `VtNXn` · [預覽](design-previews/VtNXn.png) · 390×844           |
+| `U04-D` 縮圖編輯                         | TripLedger 縮圖 dialog；thumbnail lifecycle／format   | `Wd1Pq` · [預覽](design-previews/Wd1Pq.png) · 1440×900          |
+| `U04-M` 縮圖編輯                         | TripLedger 縮圖 dialog；thumbnail lifecycle／format   | `A0kb5` · [預覽](design-previews/A0kb5.png) · 390×844           |
+| `S01-D` 移至垃圾桶確認                   | TripLedger 管理選單→確認；trash                       | `k5UPcL` · [預覽](design-previews/k5UPcL.png) · 1440×900        |
+| `S01-M` 移至垃圾桶確認                   | TripLedger 管理選單→確認；trash                       | `vkszC` · [預覽](design-previews/vkszC.png) · 390×844           |
+| `S02-D` 永久刪除確認                     | 垃圾桶永久刪除；trash                                 | `G7HrKo` · [預覽](design-previews/G7HrKo.png) · 1440×900        |
+| `S02-M` 永久刪除確認                     | 垃圾桶永久刪除；trash                                 | `rHv6p` · [預覽](design-previews/rHv6p.png) · 390×844           |
+| `S03-D` 縮圖預覽／錯誤／忙碌／保存後成功 | 縮圖共用狀態；thumbnail lifecycle／format             | `ybPvI` · [共用狀態預覽](design-previews/DECWg.png) · 1440×900  |
+| `S03-M` 縮圖預覽／錯誤／忙碌／保存後成功 | 縮圖共用狀態；thumbnail lifecycle／format             | `DECWg` · [預覽](design-previews/DECWg.png) · 390×844           |
+| `S04-D` 初載／空白／錯誤／暫停           | 全站讀取元件；loading                                 | `g1Pexm` · [共用狀態預覽](design-previews/U2nnu.png) · 1440×900 |
+| `S04-M` 初載／空白／錯誤／暫停           | 全站讀取元件；loading                                 | `U2nnu` · [預覽](design-previews/U2nnu.png) · 390×844           |
+| `S05-D` 查證／結果未知／衝突             | operation outcome／state；conflict／loading           | `M6LRw` · [共用狀態預覽](design-previews/kMwFM.png) · 1440×900  |
+| `S05-M` 查證／結果未知／衝突             | operation outcome／state；conflict／loading           | `kMwFM` · [預覽](design-previews/kMwFM.png) · 390×844           |
+| `S06-D` 舊連結存取                       | /trips/:tripId/* 存取邊界；conflict                   | `ddFff` · [共用狀態預覽](design-previews/hmwlx.png) · 1440×900  |
+| `S06-M` 舊連結存取                       | /trips/:tripId/* 存取邊界；conflict                   | `hmwlx` · [預覽](design-previews/hmwlx.png) · 390×844           |
+| `S07-D` 長名稱／圖片 fallback            | Trips／TripLedger／垃圾桶；thumbnail fallback         | `vCf8Y` · [預覽](design-previews/vCf8Y.png) · 1440×900          |
+| `S07-M` 長名稱／圖片 fallback            | Trips／TripLedger／垃圾桶；thumbnail fallback         | `quiiR` · [預覽](design-previews/quiiR.png) · 390×844           |
+| `S09-D` 預設圖尚未保存                   | 縮圖本地草稿／保存；thumbnail lifecycle               | `s8IowS` · [預覽](design-previews/s8IowS.png) · 1440×900        |
+| `S09-M` 預設圖尚未保存                   | 縮圖本地草稿／保存；thumbnail lifecycle               | `tI380` · [預覽](design-previews/tI380.png) · 390×844           |
+| `U05-M1` 我的旅行次級選單                | AppShell 我的旅行導覽；trash                          | `FTGvi` · [預覽](design-previews/FTGvi.png) · 390×844           |
+| `U05-M2` 我的旅行次級選單                | AppShell 我的旅行導覽；trash                          | `skr2f` · [預覽](design-previews/skr2f.png) · 390×844           |
+| `U05-M3` 我的旅行次級選單                | AppShell 我的旅行導覽；trash                          | `K7sv4E` · [預覽](design-previews/K7sv4E.png) · 390×844         |
+| `S08-D` 全站等待狀態                     | 全站表單／付款／分類／成員等待；loading               | `Z6aGfB` · [預覽](design-previews/Z6aGfB.png) · 1440×900        |
+| `S08-M1` 全站等待狀態                    | 全站表單／付款／分類／成員等待；loading               | `lEany` · [共用狀態預覽](design-previews/Z6aGfB.png) · 390×844  |
+| `S08-M2` 全站等待狀態                    | 全站表單／付款／分類／成員等待；loading               | `l3jVE` · [共用狀態預覽](design-previews/Z6aGfB.png) · 390×844  |
+| `U06-D` 管理旅行選單展開                 | TripLedger anchored menu；thumbnail／trash            | `ZMoXS` · [預覽](design-previews/ZMoXS.png) · 1440×900          |
+| `U06-M` 管理旅行選單展開                 | TripLedger anchored menu；thumbnail／trash            | `xsZKA` · [預覽](design-previews/xsZKA.png) · 390×844           |
+| `U07-D` 新增旅行・未選圖片               | Trips／TripForm；新增旅行無圖與取消                   | `Dsq2D` · [預覽](design-previews/Dsq2D.png) · 1440×900          |
+| `U07-M` 新增旅行・未選圖片               | Trips／TripForm；新增旅行無圖與取消                   | `kOFc3` · [預覽](design-previews/kOFc3.png) · 390×844           |
+| `U08-D` 新增旅行・已選圖片預覽           | Trips／TripForm；新增旅行選填縮圖與草稿               | `GfuLl` · [預覽](design-previews/GfuLl.png) · 1440×900          |
+| `U08-M` 新增旅行・已選圖片預覽           | Trips／TripForm；新增旅行選填縮圖與草稿               | `eSFbG` · [預覽](design-previews/eSFbG.png) · 390×844           |
+| `S10-D` 旅行建立成功但圖片保存失敗       | 建立結果→同 trip 縮圖重傳；thumbnail lifecycle        | `s825M` · [預覽](design-previews/s825M.png) · 1440×900          |
+| `S10-M` 旅行建立成功但圖片保存失敗       | 建立結果→同 trip 縮圖重傳；thumbnail lifecycle        | `F1Hwk` · [預覽](design-previews/F1Hwk.png) · 390×844           |
 
-### 全站覆蓋對照（設計時必須落入 `S08-D/M`）
+### 共用狀態預覽與適配
+
+- S03-D共用S03-M：照片預覽、拒絕、忙碌、保存成功的狀態語意相同；桌機卡片可並排、手機垂直排列，實際dialog尺寸/工具列依U04-D/M與原S03 frame。
+- S04-D共用S04-M：初讀、真空、明確失敗、paused共用狀態規則；骨架依所在內容結構適配，不把狀態總表直接當正式產品頁。
+- S05-D共用S05-M：查證中、結果未知、版本/狀態衝突共用說明與下一步；桌機並排與手機垂直版面仍參照各自原frame，查證耗盡要停止busy。
+- S06-D共用S06-M：trash、purged、找不到旅行的三種訊息/出口保持；不同寬度自然換行，資訊與動作順序一致。
+- S08-M1/M2共用S08-D完整總表：保留登入/身分、支出詳情與表單、分類、同行者、分帳、還款、結清及旅行總額的全部等待責任；手機以單欄顯示、保留原表單內容/草稿與局部busy。兩個手機frame仍在.pen內可檢視，無需另外常駐PNG。
+
+### 全站覆蓋對照（S08共用狀態）
 
 | 正式頁面／元件 | 初次無資料 | 已有資料更新／載入更多 | 提交／查證／失敗 |
 | ----------------------------------------- | ---------------------------------------- | ------------------------------------------------------ |
@@ -109,14 +117,16 @@
 - 確認者：使用者；日期：2026-11-13；版本：design-v7；SHA-256 `6c33bce25da872057d253a44bd0e59dec1f0e41f974873fb6db0dfe10b6c1abc`。
 - 使用者原回覆：「確認 design-v7，我覺得這次不用 prototype 了，截圖的一些驗證也幫我拿掉，我之後會再更新 skill，讓前期規劃以設計稿為主就好」。
 - 本輪以可編輯 `.pen`、38 個畫面索引、桌機／手機設計預覽及互動規格完成交接。依使用者指示，取消 prototype 製作、瀏覽器截圖比對、額外 viewport 矩陣及其規劃期驗證關卡，不再列為待辦。
-- 原型截圖／對照圖、驗證腳本／結果及舊驗證報告已移除；舊原型與 v6 設計僅封存至 `history/design-v6/`，不作為最新實作依據。
+- 本package只保留design-v7與必要共用預覽；舊原型、對照圖及規劃期驗證產物不作為實作前置。
 - 需求與驗收情境不因流程精簡而刪減：5 份 feature、47 模板／121 展開案例。正式產品的功能、響應式、鍵盤、無障礙及圖片上傳驗收仍由後續實作承接。
 - 本次只調整 006 的交付方式；skill 檔案留待使用者另行更新。
 
 ## 下游交接
 
-UI 規劃關卡已完成，可依 `spec.md`、`research.md`、acceptance、API／data truth 與此版設計接續 `/dsl-refine`、`/tasks`。本輪未執行這兩個下游 skill，也未開始正式產品實作。
+UI、DSL細化與任務規劃均已完成；實作依 `tasks.md` 從T001開始，業務規格仍以spec/acceptance與API／data／feature truth為準。正式產品實作尚未開始。
 
-續跑見 [handoff.md](handoff.md)。
+目前進度與續跑點統一見 [../handoff.md](../handoff.md)。
 
-2026-11-14 `/tasks` 檔案核對：原索引38份PNG當時不在工作區；已從本文件同hash design-v7用Pen desktop `Export(..., {scale:1})`重新匯出至原 `ui/design-previews/` 路徑，全部PNG header與尺寸1440×900／390×844核對通過。沒有儲存或修改.pen、沒有新設計意圖，原批准有效。匯出為設計預覽恢復，不是產品截圖比對或prototype。見[../tasks.md](../tasks.md)、[../tasks-validation.json](../tasks-validation.json)。
+## 預覽保存
+
+2026-11-14由Pen desktop從同一批准.pen以scale=1恢復匯出預覽，未修改或重新保存.pen；來源SHA-256與上述批准版本一致。原匯出PNG雜湊不可得，不宣稱位元組完全相同。本次依使用者同意移除6張重複狀態PNG，保留32份；原38個frame、設計批准與全部驗收要求保持。逐檔尺寸可從PNG讀取，畫面/路徑依本索引，不另維護manifest。
