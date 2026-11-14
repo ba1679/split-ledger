@@ -23,7 +23,7 @@
 - Level: `MUST`
 - 在 plan 的 `handoff.md` 維護目前交接，不重貼整份 tasks／truth／歷史 log；詳細驗證保留在既有檔案。至少包含 plan 路徑、checkpoint、task／slice／requested step、目前 HEAD／branch、dirty 與未追蹤檔案清單及 diff 摘要、未完成工作與下一個已解鎖範圍。
 - 記錄資源契約、環境／工具版本、受管服務／session／PID（若可觀測）及用途、退出與未知狀態、完整待跑／已跑矩陣和 log 路徑、review findings。通過證據綁定程式版本／環境；內容變更後依影響範圍重驗，不混加不同版本的結果。
-- UI 工作另保存設計／prototype／實作版本、畫面 ID、確認原回覆或引用、有效批准範圍、同步狀態、未決差異與受阻依賴。只保存進度，不擴大原 task 的產品／測試寫入權限。
+- UI 交接按共用 UI 契約保存分流與理由、畫面／狀態 ID、呈現／行為依據、固定基準與設計／實作版本、適用確認原回覆及範圍、比對與未決差異；prototype 保存選用方式，選用時才保存版本、狀態、問題與決策。另列受阻依賴及基準回填／審查進度；只保存進度，不擴大 task 寫入權限。
 - 新 session 先核對 Git 及未提交內容、檔案與證據仍存在、環境與受管程序、版本與關卡，再接續指定入口。缺少證據時標記待驗證，不盲信前一 chat 的完成宣告；不清除其他人的變更或任意終止程序。
 - 正常回報只提供成果、阻礙、交接檔路徑與下一步。沿用現有資源契約；工具環境無法回收時明列未知，不為換 context 持續累積代理。
 
@@ -31,7 +31,8 @@
 
 ```md
 handoff.md：T031 green 已完成，完整 scope 與證據連至 validation.md；下一筆 T032 refactor。
-設計 d2 已批准，prototype p2 對應 d2；待跑 WebKit 仍未完成，不勾選相關 task。
+C 類設計 d2 已批准，固定基準 commit 與預覽已引用；prototype 不製作。
+待跑 WebKit 仍未完成，不勾選相關 task；驗收後尚待基準回填及獨立核對。
 ```
 
 ## Bad Example
@@ -43,17 +44,17 @@ handoff.md：T031 green 已完成，完整 scope 與證據連至 validation.md�
 # Rule 3 - 舊任務補驗與獨立介面分波必須保留證據
 
 - Level: `MUST`
-- 舊 plan 缺設計批准或畫面比對時，由 `/tasks` 盤點受影響 tasks、後繼 UI gate／回歸與其版本；保留歷史驗證紀錄和不受影響的 `[X]`，只將不符合新完成條件的 tasks／關卡重開為 `[ ]` 並註記原因，或新增明確依賴的補驗 tasks。不能重生整份清單而丟失已確認進度。
+- 舊 plan 先核對實際分流、有效原確認及完成證據，不因新流程自動推翻歷史交付。缺少適用設計批准或畫面比對時，由 `/tasks` 盤點受影響 tasks、後繼 UI gate／回歸與其版本；保留歷史驗證紀錄和不受影響的 `[X]`，只將不符合新完成條件的 tasks／關卡重開為 `[ ]` 並註記原因，或新增明確依賴的補驗 tasks。不能重生整份清單而丟失已確認進度。
 - 後補批准不能自動恢復 UI 完成狀態。逐畫面比對通過後才重新勾選；有效的原 BDD 證據可沿用，產品／環境／規格改變時依影響範圍重驗，不能把過期的 review 或回歸當成最新版通過。
-- UI 待確認而 backend 不依賴其決策時，`/tasks` 可明列本波僅 backend 的 feature／DSL／Test Scope、共同依賴、Phase 3 review 與對應 GREEN；將前端列為受阻範圍，不宣稱其測試已對齊或整個 plan 已就緒。
+- 某 UI 範圍待確認而其他 A／B／C 範圍不依賴其決策時，`/tasks` 可明列本波獨立範圍的 feature／DSL／Test Scope、共同依賴、Phase 3 review 與對應 GREEN；將依賴待決事項的範圍列為受阻，不宣稱其測試已對齊或整個 plan 已就緒。
 - 每波所有需對齊 DSL 都完成且本波獨立 Phase 3 review 通過後，只解鎖明列依賴此 review 的 feature。未明確分波時仍遵守原全批 review，不由 implement 自行縮小範圍。
-- 前端批准並同步後，重新執行 `/dsl-refine`／`/tasks` 增量加入其 DSL 對齊、review 與後續 feature，新增 tasks 使用未使用的 ID，保留既有 ID、完成狀態及證據；共用 DSL 改變時重開受影響舊測試／review。最終完整回歸與 UI gate 仍覆蓋全 plan。
+- 受阻範圍的適用設計確認與選用互動決策完成後，重新執行 `/dsl-refine`／`/tasks` 增量加入其 DSL 對齊、review 與後續 feature，新增 tasks 使用未使用的 ID，保留既有 ID、完成狀態及證據；共用 DSL 改變時重開受影響舊測試／review。最終完整回歸仍覆蓋全 plan，UI gate 覆蓋適用設計範圍。
 
 ## Good Example
 
 ```md
 backend wave：T010–T020 測試對齊 → T021 review → 對應 backend GREEN。
-frontend 等 d1 批准、prototype 同步後增量排 T040 起的測試與獨立 review。
+frontend 的 C 類範圍等 d1 批准後增量排 T040 起的測試與獨立 review；prototype 不製作。
 舊帳本 T030 缺畫面比對：保留功能測試 log，新增 T050 補驗並阻擋最終 UI gate。
 ```
 

@@ -1,6 +1,6 @@
 ---
 name: tasks
-description: 根據 plan package 的 `spec.md`、`plan.md`、`research.md`、`ui/**`，以及 `truth-delta.md` 與 `specs/truth/**` 產出可直接執行的 `tasks.md`。先寫 Setup 與 Foundational，需要變更的 DSL 測試集中於 Phase 3；亦支援純重構回歸、工程交付與明確的使用者確認關卡。
+description: 根據 plan package 的 `spec.md`、`plan.md`、`research.md`、適用的 `ui/**`，以及 `truth-delta.md` 與 `specs/truth/**` 產出可直接執行的 `tasks.md`。先寫 Setup 與 Foundational，需要變更的 DSL 測試集中於 Phase 3；亦支援純重構回歸、工程交付與明確的使用者確認關卡。
 disable-model-invocation: true
 ---
 
@@ -12,11 +12,11 @@ disable-model-invocation: true
 
 ## Phase 1 -- 收斂 plan package、truth-delta 與本輪 DSL 清單
 
-1. READ 讀取使用者需求、目標 plan package 的 `spec.md`、`plan.md`、`research.md`、`ui/**`、`truth-delta.md`，以及受影響模組的 truth feature、模組 DSL、truth-delta 實際引用的介面根共用 DSL rows、相關 contracts/data 與 `specs/truth/techstack.md`。
+1. READ 讀取使用者需求、目標 plan package 的 `spec.md`、`plan.md`、`research.md`、適用的 `ui/**`、`truth-delta.md`，以及受影響模組的 truth feature、模組 DSL、truth-delta 實際引用的介面根共用 DSL rows、相關 contracts/data 與 `specs/truth/techstack.md`。
 2. READ 讀取 `.agents/constitution/CONSTITUTION.md` 與 `.agents/constitution/shared.md`，並將其中規則視為高於本地 artifact 規範的約束。
 3. READ 讀取 `rules/TruthDelta影響盤點與任務型態判準.md`，確認 ADD / MODIFY / DELETE / NOOP 如何拆到 Phase 3 測試層與 Feature 產品層，以及 Setup、Foundational 與 Test Alignment 的邊界。
 4. READ 讀取 `rules/acceptance-classification-and-delivery-gates.md`，分類每項驗收及其證據、依賴與來源；混合要求分別承接，不得以非 BDD 任務掩蓋產品行為缺口。
-5. READ 讀取 `../shared/low-memory-execution.md`、`../shared/session-handoff.md`；若有 UI 影響再讀取 `../shared/ui-delivery.md` 與畫面交接索引，核對開發者設計確認及 prototype 同步。缺少批准或不同步時只列受阻範圍與前置關卡，不輸出該範圍可執行的前端測試／實作任務。
+5. READ 讀取 `../shared/low-memory-execution.md`、`../shared/session-handoff.md` 與 `../shared/ui-delivery.md`，核對分流、相應呈現／行為依據及適用確認；只列實際受阻依賴與前置，不輸出其可執行任務。
 6. THINK 盤點本輪 Feature 用到的全部 DSL 句：含 truth-delta 有改的句，以及本輪 Feature 用到、尚無 stepdef 的句。若有 `MODIFY` 或 `DELETE`，同時盤點既有 stepdef、helper、fixture 與產品分支，只用來寫後續 task，不輸出獨立 phase。若任一句沒有唯一 DSL 定義，停止受影響範圍並回交 `/dsl-refine`。
 
 ## Phase 2 -- 產生 Setup 與 Foundational
@@ -39,15 +39,15 @@ disable-model-invocation: true
 2. THINK 對 `MODIFY` 的 truth interface feature file，建立 `[BDD-GREEN] -> [BDD-REFACTOR]`，並宣告 `Test Scope`。
 3. THINK 對 `DELETE` 的 truth interface feature file、Rule、Example 或 DSL 句型，建立 `[CODE-REMOVE] -> [REGRESSION]`，並宣告 `Test Scope`。
 4. READ 讀取 `rules/Feature約束從plan介面回追.md`，確認 Feature `Shared Must Read` 如何從 `truth-delta` 列回追 `plan.md` 介面與 planner 產物，以及 plan-side quality gate 何時出現。
-5. THINK 為每個 Feature phase 填入 `Shared Must Read`、`Boundary` 與 `Test Scope`：先寫 feature、同模組 DSL、該 `/dsl-refine` 列，再依已載入規則補上該介面 planner 產物；未使用介面根共用 DSL row 時省略根 DSL。truth 參照使用 `specs/truth/**`；plan-side 參照使用 plan package 相對路徑。若回追點名的產物不存在，停止受影響範圍並回交該 planner。
-6. THINK 依實際產品落點列出所有受影響畫面／狀態 ID、路由及共享導航／元件，逐一綁定已確認 `.pen` frame、預覽及同步 prototype；在各前端 task 的完成條件加入逐畫面比對證據，指定第一個代表性畫面的桌機／手機比對 checkpoint，讓後續套用相同版型的任務明列依賴。
-7. THINK 依已載入規則，在最後一個用到各 plan-side 產物的 Feature phase 之後，為每個產物家族各加一題 `subagent review (<產物名> quality gate)`。
+5. THINK 為每個 Feature phase 填入 `Shared Must Read`、`Boundary` 與 `Test Scope`：先寫 feature、同模組 DSL、該 `/dsl-refine` 列，再依已載入規則補上該介面產物或既有依據；未使用介面根共用 DSL row 時省略根 DSL。truth 參照使用 `specs/truth/**`；plan-side 參照使用 plan package 相對路徑。若回追點名的適用依據不存在，停止其依賴並回交相應 owner。
+6. THINK 按已載入契約將所有實際受影響畫面／狀態、路由、共享導航／元件綁定分流對應的依據與證據；C 類指定代表性桌機／手機比對 checkpoint 及後續依賴，僅選用互動綁定原型入口與決策。
+7. THINK 依已載入規則判定適用產物家族，在最後一個消費者後安排一次 quality gate，明列範圍、參照與證據。
 8. THINK 若產品介面行為的驗收無法被現有 truth feature、同模組 DSL 與相關共用 DSL rows 唯一承接，停止受影響範圍並回交 `/dsl-refine`。
 9. THINK 依驗收分類建立獨立重構、工程交付與確認任務，記錄來源、範圍、驗證證據與依賴；純重構引用既有受影響的回歸測試，缺少適當測試時明列補足或其他驗證與限制。確認關卡後的受阻任務不得提前解鎖。
-10. THINK 記錄設計批准為強制前置：已由 `/ui-plan` 取得則引用原證據，不重複詢問；待確認時列 `[USER-CONFIRM]` 的版本、展示物、開發者及受阻依賴，先回交 `/ui-plan`，不可延到實作後才確認。依已載入續跑規則安排 session checkpoints 與交接條件。
+10. THINK 依分流安排適用的確認關卡與 session checkpoints，引用既有有效證據；依共用契約安排驗收後基準回填及獨立核對任務，明列產品驗收依賴、寫入範圍、版本整合與完成條件，不適用則記錄理由。
 
 ## Phase 5 -- 輸出並驗證 tasks.md
 
 1. WRITE 先讀取 `templates/tasks.md` 與 `templates/tasks.example.md`，再依骨架複製結構、參考範例改寫填位符號與具體內容，輸出 `specs/plans/NNN-<slug>/tasks.md`；增量／舊 plan 補驗依已載入規則保留 ID 與歷史證據，只重開受影響項目或新增補驗依賴。
-2. READ 回頭檢查：新增任務皆為 `- [ ] T###`、既有狀態與補驗有依據、truth-delta 已納入 Core Inputs、沒有 Impact Audit phase、有新增技術時 Setup 寫清套件名與 smoke-test、Foundational 每則有「只做／不做」、有待處理 DSL 時 Phase 3 已集中 ALIGN / REMOVE / RED，否則記錄省略原因；每項驗收均有來源與證據、確認關卡依賴明確、Feature phase 不含 `[BDD-RED]` / `[BDD-ALIGN]` / `[BDD-REMOVE]`、每個 Feature phase 有 `Test Scope`、Feature `Shared Must Read` 含回追產物、每個 plan-side 產物家族在最後一個消費者之後有 quality gate、truth 參照指向 `specs/truth/**`、plan-side 參照用於回追產物及交付任務需求來源；若不符合，立即修正。
-3. READ 核對模板與輸出未要求無上限派工；UI 批准／同步前置、跨模組畫面參照、代表畫面依賴、逐畫面差異證據與 session checkpoints 均可執行；若有缺漏，修正後才交付。
+2. READ 回頭檢查：新增任務皆為 `- [ ] T###`、既有狀態與補驗有依據、truth-delta 已納入核心輸入、沒有 Impact Audit phase、有新增技術時 Setup 寫清套件名與 smoke-test、Foundational 每則有「只做／不做」、有待處理 DSL 時 Phase 3 已集中 ALIGN / REMOVE / RED，否則記錄省略原因；每項驗收均有來源與證據、確認關卡依賴明確、Feature phase 不含 `[BDD-RED]` / `[BDD-ALIGN]` / `[BDD-REMOVE]`、每個 Feature phase 有 `Test Scope`、Feature `Shared Must Read` 含回追產物、每個適用產物家族在最後一個消費者之後有 quality gate、truth 參照指向 `specs/truth/**`、plan-side 參照用於回追產物及交付任務需求來源；若不符合，立即修正。
+3. READ 核對模板與輸出未要求無上限派工；UI 分流與條件前置、跨模組參照、代表畫面依賴、適用差異證據、驗收後回填及 session checkpoints 均可執行；若有缺漏，修正後才交付。

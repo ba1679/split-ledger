@@ -1,0 +1,23 @@
+{
+  "productCommit": "29f420a43707fe1707fc36bba914fb361bc0a229",
+  "pid": 29746,
+  "node": "v24.21.0",
+  "webOrigin": "http://127.0.0.1:44191",
+  "apiOrigin": "http://127.0.0.1:62803",
+  "database": "isolated temporary worker database on test-db:54330",
+  "dataset": [
+    {
+      "name": "日本春日旅行",
+      "startDate": "2027-03-10",
+      "endDate": "2027-03-15",
+      "expenseCount": 1
+    },
+    {
+      "name": "台南的慢週末",
+      "startDate": "2027-04-03",
+      "endDate": "2027-04-05",
+      "expenseCount": 0
+    }
+  ],
+  "session": "test-only seeded identity; cookie not recorded"
+}

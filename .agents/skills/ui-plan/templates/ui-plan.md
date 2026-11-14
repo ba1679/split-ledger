@@ -1,124 +1,73 @@
-# 前端 / UI 設計與可操作雛形規劃
+# UI 設計與畫面交接
 
-## 介面範圍
+## 介面範圍與模式
 
-- 目標系統介面：`{{UI_INTERFACE_NAME}}`
-- 需求來源：`{{REQUIREMENT_SCOPE}}`
-- 上游依據：`{{UPSTREAM_ARTIFACTS}}`
-- 產出順序：UI plan → `.pen` 與預覽 → 開發者明確確認 → prototype 與同步檢查 → 下游。
+- 模式與寫入範圍：{{UI_MODE_AND_WRITE_SCOPE}}
+- 目標系統介面與需求來源：{{UI_INTERFACE_AND_REQUIREMENTS}}
+- 上游依據與 UI 分流：{{UPSTREAM_AND_UI_CLASSIFICATION}}
+- 受影響範圍與待決依賴：{{AFFECTED_AND_BLOCKED_SCOPE}}
 
-## 設計交付與開發者確認
+## 固定基準與本次差異
 
-- 設計檔與固定版本：`{{DESIGN_PATH_AND_VERSION}}`
-- 桌機／手機尺寸及預覽：`{{VIEWPORTS_AND_PREVIEWS}}`
-- 確認狀態：`{{DESIGN_APPROVAL_STATUS}}`
-- 確認者、日期、原回覆或引用與範圍：`{{DESIGN_APPROVAL_EVIDENCE}}`
-- 重大待決事項及受阻下游：`{{BLOCKED_UI_SCOPE}}`
+- 基準 commit、檔案、畫面／狀態 ID、同版預覽：{{BASELINE_FIXED_REFERENCES}}
+- 固定產品版本與現況核對：{{PRODUCT_VERSION_AND_CURRENT_CHECK}}
+- 未涵蓋範圍與替代依據：{{BASELINE_GAPS_AND_EVIDENCE}}
+- 沿用與改動的設計意圖：{{DESIGN_DELTA}}
+- 業務行為 spec／truth 來源：{{BEHAVIOR_AUTHORITY}}
 
-<!-- 狀態使用 pending／changes-requested／approved；沒有回覆時不填造確認證據。只有批准有效後才製作 prototype。 -->
+<!-- 無基準時填必要現況核對與涵蓋限制，不強迫先建全產品基準。一般模式只寫 plan-side ui/**；基準模式的適用紀錄可放 README，不強制建立 plan package。 -->
 
-## 畫面交接索引與同步狀態
+## 設計交付與確認
 
-| 畫面／狀態 ID       | 資訊責任與區塊順序            | .pen frame／預覽／尺寸與資料 | Prototype 路徑／狀態入口  | 正式路由／元件            | Feature／tasks            | 設計／prototype／實作版本與同步狀態 |
-| ------------------- | ----------------------------- | ---------------------------- | ------------------------- | ------------------------- | ------------------------- | ----------------------------------- |
-| {{SCREEN_STATE_ID}} | {{SCREEN_INFORMATION_LAYOUT}} | {{DESIGN_FRAME_REFERENCE}}   | {{PROTOTYPE_STATE_ENTRY}} | {{PRODUCT_SCREEN_TARGET}} | {{FEATURE_TASK_BINDINGS}} | {{UI_VERSION_SYNC_STATUS}}          |
+- 設計檔、版本與 commit／內容雜湊：{{DESIGN_FIXED_VERSION}}
+- 桌機／手機尺寸與可見預覽：{{VIEWPORTS_AND_PREVIEWS}}
+- 確認狀態：{{DESIGN_APPROVAL_STATUS}}
+- 確認者、日期、原回覆／引用及範圍：{{DESIGN_APPROVAL_EVIDENCE}}
+- 本次確認、沿用確認與受阻範圍：{{APPROVAL_SCOPE_AND_DEPENDENCIES}}
 
-- 共用元件與響應式規則：`{{SHARED_VISUAL_RESPONSIVE_RULES}}`
-- 關鍵狀態覆蓋及可共用／不適用理由：`{{STATE_COVERAGE}}`
-- 需要明確確認的設計變更與 AI 可自主適配範圍：`{{DESIGN_CHANGE_BOUNDARY}}`
-- 舊產物／未同步項目與處理：`{{STALE_ARTIFACT_DISPOSITION}}`
+<!-- 確認狀態為 pending／changes-requested／approved；沒有回覆保留待確認，不填造證據。 -->
 
-## 視覺方向
+## 畫面交接索引
 
-- 風格來源：`{{STYLE_SOURCE}}`
-- 本次風格結論：`{{STYLE_CONCLUSION}}`
-- 視覺重點：`{{VISUAL_FOCUS}}`
-- 審美原則：`{{AESTHETIC_PRINCIPLES}}`
+| 畫面／狀態 ID | 資訊責任與區塊順序 | 基準／差異 frame、預覽、尺寸與資料 | 正式路由／元件 | Feature／tasks | 固定版本與比對狀態 |
+| --- | --- | --- | --- | --- | --- |
+| {{SCREEN_STATE_ID}} | {{SCREEN_INFORMATION_LAYOUT}} | {{SCREEN_DESIGN_REFERENCES}} | {{PRODUCT_SCREEN_TARGET}} | {{FEATURE_TASK_BINDINGS}} | {{SCREEN_VERSION_COMPARISON_STATUS}} |
 
-## 畫面與流程
+- 共用元件、跨模組導航及影響：{{SHARED_COMPONENT_IMPACT}}
+- 字體／顏色／間距與視覺層級：{{VISUAL_RULES}}
+- Responsive 與 accessibility：{{RESPONSIVE_ACCESSIBILITY_RULES}}
+- 空白／載入／錯誤／長內容／確認／結果未明的覆蓋及共用／不適用理由：{{STATE_COVERAGE}}
+- AI 適配與需重新確認的邊界：{{DESIGN_CHANGE_BOUNDARY}}
 
-### 1. `{{SCREEN_1_NAME}}`
+## 行為與畫面註記
 
-- 對應雛形檔案：`{{SCREEN_1_FILE}}`
-- 主要目的：`{{SCREEN_1_GOAL}}`
-- 進入條件：`{{SCREEN_1_ENTRY_CONDITION}}`
-- 主要操作：`{{SCREEN_1_PRIMARY_ACTIONS}}`
-- 成功流轉：`{{SCREEN_1_SUCCESS_TRANSITIONS}}`
-- 失敗回饋：`{{SCREEN_1_ERROR_FEEDBACK}}`
+### {{SCREEN_NAME}}
 
-### 2. `{{SCREEN_2_NAME}}`
+- 畫面／狀態 ID 與設計 frame：{{SCREEN_NOTE_REFERENCE}}
+- 主要目的、進入條件與資訊揭露：{{SCREEN_GOAL_ENTRY_AND_DISCLOSURE}}
+- 主要操作、成功流轉與取消語意：{{SCREEN_ACTIONS_AND_TRANSITIONS}}
+- 輸入驗證、失敗回饋、狀態衝突與保留內容：{{SCREEN_VALIDATION_AND_ERRORS}}
+- 角色／權限差異與隱藏資訊：{{SCREEN_ROLE_AND_PRIVACY_RULES}}
 
-- 對應雛形檔案：`{{SCREEN_2_FILE}}`
-- 主要目的：`{{SCREEN_2_GOAL}}`
-- 進入條件：`{{SCREEN_2_ENTRY_CONDITION}}`
-- 主要操作：`{{SCREEN_2_PRIMARY_ACTIONS}}`
-- 成功流轉：`{{SCREEN_2_SUCCESS_TRANSITIONS}}`
-- 失敗回饋：`{{SCREEN_2_ERROR_FEEDBACK}}`
+<!-- 依必要畫面增減；重複狀態引用共用規則。流程註記不要求每頁另做 HTML。 -->
 
-### 3. `{{SCREEN_3_NAME}}`
+## Prototype 選用與問題決策
 
-- 對應雛形檔案：`{{SCREEN_3_FILE}}`
-- 主要目的：`{{SCREEN_3_GOAL}}`
-- 進入條件：`{{SCREEN_3_ENTRY_CONDITION}}`
-- 主要操作：`{{SCREEN_3_PRIMARY_ACTIONS}}`
-- 成功流轉：`{{SCREEN_3_SUCCESS_TRANSITIONS}}`
-- 失敗回饋：`{{SCREEN_3_ERROR_FEEDBACK}}`
+- 選用方式與理由：{{PROTOTYPE_SELECTION_AND_REASON}}
+- 待確認問題與涵蓋互動／畫面 ID：{{PROTOTYPE_QUESTIONS_AND_SCOPE}}
+- 決策結果、確認證據與受阻依賴：{{INTERACTION_DECISIONS_AND_DEPENDENCIES}}
 
-### 4. `{{SCREEN_4_NAME}}`
+<!-- 不製作是合法完成狀態，以下選用欄位省略或明寫不適用，不填 pending。選用時逐互動填寫，不要求完整頁面。 -->
 
-- 對應雛形檔案：`{{SCREEN_4_FILE}}`
-- 主要目的：`{{SCREEN_4_GOAL}}`
-- 進入條件：`{{SCREEN_4_ENTRY_CONDITION}}`
-- 主要操作：`{{SCREEN_4_PRIMARY_ACTIONS}}`
-- 成功流轉：`{{SCREEN_4_SUCCESS_TRANSITIONS}}`
-- 失敗回饋：`{{SCREEN_4_ERROR_FEEDBACK}}`
+- 選用互動狀態、入口、固定版本與對應設計：{{SELECTED_INTERACTION_STATUS_AND_VERSION}}
+- 已操作輸入／回饋、尺寸／資料及證據：{{SELECTED_INTERACTION_EVIDENCE}}
+- 模擬限制、工具能力限制與替代方式：{{PROTOTYPE_LIMITATIONS}}
 
-<!--
-  依實際畫面數量增減區塊。
-  每個畫面都應對回真實產品流程，並先在這份 plan 中定義清楚，後續再落地成對應 HTML 雛形。
--->
+## 實作與驗收交接
 
-## 互動與假資料原則
-
-- 假資料策略：`{{FAKE_DATA_STRATEGY}}`
-- 互動原則：`{{INTERACTION_PRINCIPLES}}`
-- 內容原則：`{{CONTENT_PRINCIPLES}}`
-
-## 狀態與資訊揭露
-
-- 使用者可見資訊：`{{VISIBLE_INFORMATION}}`
-- 必須隱藏資訊：`{{HIDDEN_INFORMATION}}`
-- 主要 UI 狀態：`{{UI_STATES}}`
-- 角色或權限差異：`{{ROLE_DIFFERENCES}}`
-
-## 驗證與錯誤回饋
-
-- 輸入驗證：`{{INPUT_VALIDATION}}`
-- 狀態衝突處理：`{{STATE_CONFLICT_HANDLING}}`
-- 使用者可理解錯誤訊息：`{{ERROR_MESSAGE_STRATEGY}}`
-
-## 靜態雛形輸出規劃
-
-- 多頁入口：`{{MULTI_PAGE_ENTRY_STRATEGY}}`
-- 預計輸出檔案：`{{PLANNED_HTML_OUTPUTS}}`
-- 換頁原則：`{{PAGE_TRANSITION_PRINCIPLES}}`
-- Review 目標：`{{REVIEW_GOAL}}`
-
-## 前端實作切分建議
-
-- 頁面 / 容器切分：`{{PAGE_SPLIT_PLAN}}`
-- 共用元件或區塊：`{{SHARED_COMPONENTS}}`
-- 對後端契約的依賴：`{{API_DEPENDENCIES}}`
-- 驗收重點：`{{ACCEPTANCE_FOCUS}}`
-
-## 同步檢查、差異與交接
-
-- 已操作旅程與模擬限制：`{{PROTOTYPE_FLOW_EVIDENCE}}`
-- 比對版本、資料、尺寸與證據位置：`{{UI_COMPARISON_EVIDENCE}}`
-
-| 畫面／版本                    | 設計預期               | 實際呈現／截圖             | 差異與影響            | 處理結果／確認依據        |
-| ----------------------------- | ---------------------- | -------------------------- | --------------------- | ------------------------- |
-| {{COMPARISON_SCREEN_VERSION}} | {{DESIGN_EXPECTATION}} | {{ACTUAL_SCREEN_EVIDENCE}} | {{DIFFERENCE_IMPACT}} | {{DIFFERENCE_RESOLUTION}} |
-
-- 下一 checkpoint 與受阻依賴：`{{NEXT_UI_CHECKPOINT}}`
-- 續跑資訊：`handoff.md`，記錄版本、批准、受阻範圍與下一入口。
+- 頁面／元件切分與 API 依賴：{{IMPLEMENTATION_SEAMS_AND_API_DEPENDENCIES}}
+- 第一組代表性桌機／手機畫面及後續依賴：{{REPRESENTATIVE_SCREEN_CHECKPOINT}}
+- 同尺寸比對資料、截圖與差異清單位置：{{SCREEN_COMPARISON_PLAN}}
+- 基準回填範圍、產品驗收與獨立核對依賴：{{BASELINE_BACKFILL_HANDOFF}}
+- 舊版本處理與未完成限制：{{STALE_ARTIFACT_DISPOSITION}}
+- 下一入口、已就緒／受阻範圍與續跑紀錄：{{NEXT_SCOPE_AND_HANDOFF}}

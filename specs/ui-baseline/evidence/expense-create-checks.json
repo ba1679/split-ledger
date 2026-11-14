@@ -1,0 +1,617 @@
+{
+  "productCommit": "f9698f91ba5a64827fe8e6801bb48207c59502d8",
+  "date": "2026-11-14",
+  "timezone": "Asia/Taipei",
+  "browser": "Pen integrated Chromium",
+  "deviceScaleFactor": 1,
+  "checks": [
+    {
+      "check": "expense-default-desktop",
+      "width": 1440,
+      "height": 900,
+      "scrollWidth": 1440,
+      "scrollHeight": 1035,
+      "text": "t.\n旅帳\n我的旅行\n同行者\n分帳結算\n支出分類\nA LITTLE RECORD\nOF EVERY JOURNEY.\n\n小旅人 的旅行帳本\n\n登出\n日本春日旅行\n記下這筆花費\n\n先記錄誰付了錢，再選這筆要由誰平均分攤。\n\n支出項目\n金額\n\nJPY 使用整數金額\n\n幣別\n支出日期\n以 YYYY/MM/DD 輸入日期，或按向下鍵開啟日曆。\n分類選填\n誰付款？\n小旅人\n小安\n誰一起平均分攤？\n小旅人\n小安\n\n付款人可以不參與分攤。\n\n取消\n儲存支出",
+      "inputs": [
+        {
+          "type": "text",
+          "value": "",
+          "placeholder": "例如：巷口的拉麵店",
+          "checked": false,
+          "role": null
+        },
+        {
+          "type": "text",
+          "value": "",
+          "placeholder": "0",
+          "checked": false,
+          "role": null
+        },
+        {
+          "type": "text",
+          "value": "JPY · Yen",
+          "placeholder": "搜尋幣別代碼或名稱",
+          "checked": false,
+          "role": "combobox"
+        },
+        {
+          "type": "text",
+          "value": "2026/11/14",
+          "placeholder": "YYYY/MM/DD",
+          "checked": false,
+          "role": null
+        },
+        {
+          "type": "text",
+          "value": "未分類",
+          "placeholder": "搜尋分類",
+          "checked": false,
+          "role": "combobox"
+        },
+        {
+          "type": "radio",
+          "value": "df441962-1dd2-4304-a4b7-8a8d7aebbbf9",
+          "placeholder": "",
+          "checked": true,
+          "role": null
+        },
+        {
+          "type": "radio",
+          "value": "e72e979d-63e6-46f6-bd6a-ed586b5f48fa",
+          "placeholder": "",
+          "checked": false,
+          "role": null
+        },
+        {
+          "type": "checkbox",
+          "value": "df441962-1dd2-4304-a4b7-8a8d7aebbbf9",
+          "placeholder": "",
+          "checked": true,
+          "role": null
+        },
+        {
+          "type": "checkbox",
+          "value": "e72e979d-63e6-46f6-bd6a-ed586b5f48fa",
+          "placeholder": "",
+          "checked": false,
+          "role": null
+        }
+      ],
+      "regions": [
+        {
+          "selector": "main",
+          "box": {
+            "x": 228,
+            "y": 0,
+            "width": 1212,
+            "height": 1034.765625,
+            "top": 0,
+            "right": 1440,
+            "bottom": 1034.765625,
+            "left": 228
+          }
+        },
+        {
+          "selector": "back",
+          "box": {
+            "x": 284,
+            "y": 48,
+            "width": 110,
+            "height": 44,
+            "top": 48,
+            "right": 394,
+            "bottom": 92,
+            "left": 284
+          }
+        },
+        {
+          "selector": "page-head",
+          "box": {
+            "x": 284,
+            "y": 116,
+            "width": 1100,
+            "height": 82.390625,
+            "top": 116,
+            "right": 1384,
+            "bottom": 198.390625,
+            "left": 284
+          }
+        },
+        {
+          "selector": "form-panel expense-form",
+          "box": {
+            "x": 284,
+            "y": 234.390625,
+            "width": 1100,
+            "height": 720.375,
+            "top": 234.390625,
+            "right": 1384,
+            "bottom": 954.765625,
+            "left": 284
+          }
+        },
+        {
+          "selector": "",
+          "box": {
+            "x": 284,
+            "y": 234.390625,
+            "width": 1100,
+            "height": 633.9765625,
+            "top": 234.390625,
+            "right": 1384,
+            "bottom": 868.3671875,
+            "left": 284
+          }
+        },
+        {
+          "selector": "expense-sharing",
+          "box": {
+            "x": 284,
+            "y": 595.375,
+            "width": 1100,
+            "height": 272.9921875,
+            "top": 595.375,
+            "right": 1384,
+            "bottom": 868.3671875,
+            "left": 284
+          }
+        },
+        {
+          "selector": "form-actions",
+          "box": {
+            "x": 284,
+            "y": 884.3671875,
+            "width": 1100,
+            "height": 70.3984375,
+            "top": 884.3671875,
+            "right": 1384,
+            "bottom": 954.765625,
+            "left": 284
+          }
+        },
+        {
+          "selector": "bottom-nav",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          }
+        }
+      ]
+    },
+    {
+      "check": "expense-default-mobile",
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 390,
+      "scrollHeight": 1254,
+      "regions": [
+        {
+          "selector": "main",
+          "box": {
+            "x": 0,
+            "y": 0,
+            "width": 390,
+            "height": 1254.359375,
+            "top": 0,
+            "right": 390,
+            "bottom": 1254.359375,
+            "left": 0
+          }
+        },
+        {
+          "selector": "back",
+          "box": {
+            "x": 20,
+            "y": 25,
+            "width": 110,
+            "height": 44,
+            "top": 25,
+            "right": 130,
+            "bottom": 69,
+            "left": 20
+          }
+        },
+        {
+          "selector": "page-head",
+          "box": {
+            "x": 20,
+            "y": 93,
+            "width": 350,
+            "height": 71.9921875,
+            "top": 93,
+            "right": 370,
+            "bottom": 164.9921875,
+            "left": 20
+          }
+        },
+        {
+          "selector": "form-panel expense-form",
+          "box": {
+            "x": 20,
+            "y": 189.9921875,
+            "width": 350,
+            "height": 954.3671875,
+            "top": 189.9921875,
+            "right": 370,
+            "bottom": 1144.359375,
+            "left": 20
+          }
+        },
+        {
+          "selector": "expense-money two-col",
+          "box": {
+            "x": 20,
+            "y": 295.984375,
+            "width": 350,
+            "height": 148.59375,
+            "top": 295.984375,
+            "right": 370,
+            "bottom": 444.578125,
+            "left": 20
+          }
+        },
+        {
+          "selector": "expense-sharing",
+          "box": {
+            "x": 20,
+            "y": 656.96875,
+            "width": 350,
+            "height": 400.9921875,
+            "top": 656.96875,
+            "right": 370,
+            "bottom": 1057.9609375,
+            "left": 20
+          }
+        },
+        {
+          "selector": "form-actions",
+          "box": {
+            "x": 20,
+            "y": 1073.9609375,
+            "width": 350,
+            "height": 70.3984375,
+            "top": 1073.9609375,
+            "right": 370,
+            "bottom": 1144.359375,
+            "left": 20
+          }
+        },
+        {
+          "selector": "bottom-nav",
+          "box": {
+            "x": 0,
+            "y": 779,
+            "width": 390,
+            "height": 65,
+            "top": 779,
+            "right": 390,
+            "bottom": 844,
+            "left": 0
+          }
+        }
+      ],
+      "values": [
+        {
+          "type": "text",
+          "value": "",
+          "checked": false
+        },
+        {
+          "type": "text",
+          "value": "",
+          "checked": false
+        },
+        {
+          "type": "text",
+          "value": "JPY · Yen",
+          "checked": false
+        },
+        {
+          "type": "text",
+          "value": "2026/11/14",
+          "checked": false
+        },
+        {
+          "type": "text",
+          "value": "未分類",
+          "checked": false
+        },
+        {
+          "type": "radio",
+          "value": "df441962-1dd2-4304-a4b7-8a8d7aebbbf9",
+          "checked": true
+        },
+        {
+          "type": "radio",
+          "value": "e72e979d-63e6-46f6-bd6a-ed586b5f48fa",
+          "checked": false
+        },
+        {
+          "type": "checkbox",
+          "value": "df441962-1dd2-4304-a4b7-8a8d7aebbbf9",
+          "checked": true
+        },
+        {
+          "type": "checkbox",
+          "value": "e72e979d-63e6-46f6-bd6a-ed586b5f48fa",
+          "checked": false
+        }
+      ]
+    },
+    {
+      "check": "expense-empty-submit",
+      "active": "例如：巷口的拉麵店",
+      "errors": [
+        "請填寫支出項目。",
+        "請輸入符合幣別位數且大於零的正數金額。"
+      ],
+      "invalidCount": 2
+    },
+    {
+      "check": "expense-shared-mobile",
+      "width": 390,
+      "height": 844,
+      "scrollHeight": 1394,
+      "scrollWidth": 390,
+      "values": [
+        {
+          "type": "text",
+          "value": "夜市點心",
+          "checked": false
+        },
+        {
+          "type": "text",
+          "value": "2000",
+          "checked": false
+        },
+        {
+          "type": "text",
+          "value": "JPY · Yen",
+          "checked": false
+        },
+        {
+          "type": "text",
+          "value": "2027/03/11",
+          "checked": false
+        },
+        {
+          "type": "text",
+          "value": "餐飲",
+          "checked": false
+        },
+        {
+          "type": "radio",
+          "value": "df441962-1dd2-4304-a4b7-8a8d7aebbbf9",
+          "checked": true
+        },
+        {
+          "type": "radio",
+          "value": "e72e979d-63e6-46f6-bd6a-ed586b5f48fa",
+          "checked": false
+        },
+        {
+          "type": "checkbox",
+          "value": "df441962-1dd2-4304-a4b7-8a8d7aebbbf9",
+          "checked": true
+        },
+        {
+          "type": "checkbox",
+          "value": "e72e979d-63e6-46f6-bd6a-ed586b5f48fa",
+          "checked": true
+        }
+      ],
+      "preview": "每人分攤\n\n小旅人、小安\n\nJPY 1000",
+      "errors": [],
+      "regions": [
+        {
+          "selector": "expense-sharing",
+          "box": {
+            "x": 20,
+            "y": 656.96875,
+            "width": 350,
+            "height": 516.78125,
+            "top": 656.96875,
+            "right": 370,
+            "bottom": 1173.75,
+            "left": 20
+          }
+        },
+        {
+          "selector": "share-preview",
+          "box": {
+            "x": 20,
+            "y": 1081.9609375,
+            "width": 350,
+            "height": 91.7890625,
+            "top": 1081.9609375,
+            "right": 370,
+            "bottom": 1173.75,
+            "left": 20
+          }
+        },
+        {
+          "selector": "form-actions",
+          "box": {
+            "x": 20,
+            "y": 1213.75,
+            "width": 350,
+            "height": 70.3984375,
+            "top": 1213.75,
+            "right": 370,
+            "bottom": 1284.1484375,
+            "left": 20
+          }
+        }
+      ]
+    },
+    {
+      "check": "expense-shared-desktop",
+      "width": 1440,
+      "height": 900,
+      "scrollHeight": 1174,
+      "scrollWidth": 1440,
+      "preview": "每人分攤\n\n小旅人、小安\n\nJPY 1000",
+      "regions": [
+        {
+          "selector": "expense-sharing",
+          "box": {
+            "x": 284,
+            "y": 595.375,
+            "width": 1100,
+            "height": 388.78125,
+            "top": 595.375,
+            "right": 1384,
+            "bottom": 984.15625,
+            "left": 284
+          }
+        },
+        {
+          "selector": "share-preview",
+          "box": {
+            "x": 284,
+            "y": 892.3671875,
+            "width": 1100,
+            "height": 91.7890625,
+            "top": 892.3671875,
+            "right": 1384,
+            "bottom": 984.15625,
+            "left": 284
+          }
+        },
+        {
+          "selector": "form-actions",
+          "box": {
+            "x": 284,
+            "y": 1024.15625,
+            "width": 1100,
+            "height": 70.3984375,
+            "top": 1024.15625,
+            "right": 1384,
+            "bottom": 1094.5546875,
+            "left": 284
+          }
+        }
+      ]
+    },
+    {
+      "check": "currency-search",
+      "search": "USD",
+      "expanded": "true",
+      "options": [
+        "USD · US Dollar"
+      ]
+    },
+    {
+      "check": "currency-keyboard-attempt",
+      "value": "USD",
+      "expanded": "true",
+      "hint": "請先選擇幣別。",
+      "amount": "2000",
+      "result": "CDP Enter did not select; not counted as verified keyboard behavior"
+    },
+    {
+      "check": "currency-select",
+      "value": "USD · US Dollar",
+      "expanded": "false",
+      "hint": "USD 最多 2 位小數",
+      "amount": "12.50",
+      "preview": "每人分攤\n\n小旅人、小安\n\nUSD 6.25",
+      "buttons": [
+        "展開幣別選單",
+        "選擇支出日期",
+        "展開分類選單"
+      ]
+    },
+    {
+      "check": "currency-precision",
+      "amount": "12.50",
+      "error": [
+        "請輸入符合幣別位數的正數金額。"
+      ]
+    },
+    {
+      "check": "expense-intermediate-768",
+      "width": 768,
+      "scrollWidth": 768,
+      "sidebarWidth": 190,
+      "inputs": []
+    },
+    {
+      "check": "expense-cancel",
+      "route": "/trips/d26e9343-af8b-41c2-92c8-293e0c5a1366",
+      "status": 200,
+      "items": [
+        "巷口的拉麵店",
+        "京都町家住宿",
+        "往返機票"
+      ],
+      "count": 3
+    }
+  ],
+  "canvas": {
+    "overlaps": [
+      {
+        "id": "document",
+        "pairs": []
+      },
+      {
+        "id": "QBbzP",
+        "pairs": []
+      },
+      {
+        "id": "OKWYQ",
+        "pairs": []
+      },
+      {
+        "id": "nObqJ",
+        "pairs": []
+      },
+      {
+        "id": "shRbo",
+        "pairs": []
+      },
+      {
+        "id": "zzzM8",
+        "pairs": []
+      },
+      {
+        "id": "q6E9p",
+        "pairs": []
+      }
+    ],
+    "placeholder": [],
+    "originalComponentsUnchanged": true,
+    "invalidRefs": []
+  },
+  "originalScreenExportsUnchanged": 8,
+  "resource": {
+    "profile": "low-memory-16gb",
+    "ramGiB": 16,
+    "agents": 1,
+    "testWorkers": 0,
+    "runtimePid": 38019,
+    "webPort": 44191,
+    "apiPort": 57999,
+    "exitCode": 0,
+    "closedMarker": "BASELINE_CLOSED",
+    "workerDatabase": "ledger_test_38019_903",
+    "workerDatabaseRemaining": 0
+  },
+  "approval": {
+    "version": "baseline-v0.3",
+    "status": "approved",
+    "date": "2026-11-14",
+    "timezone": "Asia/Taipei",
+    "confirmedBy": "user in this chat",
+    "originalReply": "可以，這版新增支出 baseline 我確認，請把設計稿、預覽與相關文件一起 commit。",
+    "scope": "six expense-create screen frames, six new component/state definitions and disclosed differences",
+    "designSha256": "144a81b3086885bf57f5a694a78ed75f089f032730f91767088598ed1572a3d3",
+    "approvalUpdateScreenExportsUnchanged": 6
+  }
+}
