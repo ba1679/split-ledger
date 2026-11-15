@@ -1,7 +1,9 @@
+import { TripCommandDialog, ThumbnailEntryDialog } from './TripCommandDialog.js';
+import { TripManagementMenu } from './TripManagementMenu.js';
 import { Button } from '../../components/ui/button.js';
 import React, { useState } from 'react';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams, useNavigate } from 'react-router-dom';
 import {
   apiRequest,
   type Trip,
@@ -23,6 +25,8 @@ export function TripLedger() {
   const { tripId } = useParams(),
     { account } = useSession();
   const [editing, setEditing] = useState(false);
+  const [managementDialog, setManagementDialog] = useState<'thumbnail' | 'trash' | null>(null);
+  const navigate = useNavigate();
   const location = useLocation();
   const trip = useQuery({
     queryKey: ['account', account!.id, 'trip', tripId],
@@ -89,6 +93,19 @@ export function TripLedger() {
 
   return (
     <>
+      {managementDialog === 'trash' ? (
+        <TripCommandDialog
+          trip={trip.data}
+          operation="trash"
+          onClose={() => setManagementDialog(null)}
+          onComplete={() => {
+            setManagementDialog(null);
+            navigate('/trips', { state: { message: '旅行已移至垃圾桶，可從垃圾桶復原。' } });
+          }}
+        />
+      ) : managementDialog === 'thumbnail' ? (
+        <ThumbnailEntryDialog trip={trip.data} onClose={() => setManagementDialog(null)} />
+      ) : null}
       <Link className="back" to="/trips">
         <Icon name="back" />
         <span>我的旅行</span>
@@ -104,12 +121,15 @@ export function TripLedger() {
             </Button>
           </p>
         </div>
-        <Button asChild variant="default">
-          <Link to={`/trips/${trip.data.id}/expenses/new`}>
-            <Icon name="plus" />
-            <span>記一筆</span>
-          </Link>
-        </Button>
+        <div className="ledger-actions">
+          <Button asChild variant="default">
+            <Link to={`/trips/${trip.data.id}/expenses/new`}>
+              <Icon name="plus" />
+              <span>記一筆</span>
+            </Link>
+          </Button>
+          <TripManagementMenu onSelect={setManagementDialog} />
+        </div>
       </header>
       <nav aria-label="旅行內導覽" className="trip-navigation">
         <Button asChild variant="outline">

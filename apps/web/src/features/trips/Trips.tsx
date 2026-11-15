@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { apiRequest, type Trip, type ItemList } from '../../api/index.js';
 import { useSession } from '../auth/session.js';
 import { QueryState } from '../../components/QueryState.js';
@@ -16,6 +16,12 @@ export function tripDates(trip: Pick<Trip, 'startDate' | 'endDate'>) {
 
 export function Trips() {
   const { account } = useSession();
+  const location = useLocation();
+  const heading = useRef<HTMLHeadingElement>(null);
+  const message = (location.state as { message?: string } | null)?.message;
+  useEffect(() => {
+    if (message) heading.current?.focus();
+  }, [message]);
   const [creating, setCreating] = useState(false);
   const trips = useQuery({
     queryKey: ['account', account!.id, 'trips'],
@@ -24,10 +30,13 @@ export function Trips() {
 
   return (
     <div className="trips-page">
+      <div className="mobile-trip-brand">t. 旅帳</div>
       <header className="page-head">
         <div>
           <div className="eyebrow">MY JOURNEYS</div>
-          <h1>每一趟，都有故事。</h1>
+          <h1 ref={heading} tabIndex={-1}>
+            每一趟，都有故事。
+          </h1>
           <p className="muted">把沿途的小花費，留在各自的旅行裡。</p>
         </div>
         <Button onClick={() => setCreating(true)}>
@@ -35,6 +44,11 @@ export function Trips() {
           <span>新增旅行</span>
         </Button>
       </header>
+      {(location.state as { message?: string } | null)?.message ? (
+        <p className="feedback" role="status">
+          {(location.state as { message: string }).message}
+        </p>
+      ) : null}
       {trips.isPending || trips.error ? (
         <QueryState
           pending={trips.isPending}

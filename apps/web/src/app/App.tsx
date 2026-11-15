@@ -1,3 +1,4 @@
+import { TrashTrips } from '../features/trips/TrashTrips.js';
 import { Button } from '../components/ui/button.js';
 import React from 'react';
 import { Navigate, Route, Routes, Link } from 'react-router-dom';
@@ -46,6 +47,14 @@ export function App() {
         element={
           <PrivatePage>
             <Trips />
+          </PrivatePage>
+        }
+      />
+      <Route
+        path="/trips/trash"
+        element={
+          <PrivatePage>
+            <TrashTrips />
           </PrivatePage>
         }
       />
