@@ -3,6 +3,10 @@ import {
   bigint,
   boolean,
   char,
+  customType,
+  integer,
+  pgEnum,
+  primaryKey,
   date,
   numeric,
   pgTable,
@@ -33,6 +37,9 @@ export const trips = pgTable('trips', {
   endDate: date('end_date'),
   simplifyDebts: boolean('simplify_debts').notNull().default(false),
   accountingRevision: bigint('accounting_revision', { mode: 'bigint' }).notNull().default(0n),
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
+  lifecycleRevision: bigint('lifecycle_revision', { mode: 'bigint' }).notNull().default(0n),
+  thumbnailRevision: bigint('thumbnail_revision', { mode: 'bigint' }).notNull().default(0n),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
@@ -131,3 +138,60 @@ export const settlementAdjustments = pgTable('settlement_adjustments', {
   denominator: numeric('denominator').notNull(),
   minorUnit: smallint('minor_unit').notNull(),
 });
+
+const bytea = customType<{ data: Buffer; driverData: Buffer }>({ dataType: () => 'bytea' });
+
+export const tripOperationKind = pgEnum('trip_operation_kind', [
+  'move_to_trash',
+  'restore',
+  'purge',
+  'save_thumbnail',
+  'reset_thumbnail',
+]);
+
+export const tripOperationResultState = pgEnum('trip_operation_result_state', [
+  'active',
+  'trash',
+  'purged',
+]);
+
+export const tripIdReservations = pgTable('trip_id_reservations', {
+  tripId: uuid('trip_id').primaryKey(),
+  ownerId: text('owner_id')
+    .notNull()
+    .references(() => user.id),
+  reservedAt: timestamp('reserved_at', { withTimezone: true }).notNull().defaultNow(),
+  purgedAt: timestamp('purged_at', { withTimezone: true }),
+});
+
+export const tripOperationReceipts = pgTable(
+  'trip_operation_receipts',
+  {
+    ownerId: text('owner_id')
+      .notNull()
+      .references(() => user.id),
+    operationId: uuid('operation_id').notNull(),
+    tripId: uuid('trip_id').notNull(),
+    kind: tripOperationKind('kind').notNull(),
+    requestFingerprint: bytea('request_fingerprint').notNull(),
+    resultState: tripOperationResultState('result_state').notNull(),
+    resultLifecycleRevision: bigint('result_lifecycle_revision', { mode: 'bigint' }).notNull(),
+    resultThumbnailRevision: bigint('result_thumbnail_revision', { mode: 'bigint' }).notNull(),
+    resultThumbnailPresent: boolean('result_thumbnail_present'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [primaryKey({ columns: [table.ownerId, table.operationId] })],
+);
+
+export const tripThumbnails = pgTable(
+  'trip_thumbnails',
+  {
+    ownerId: text('owner_id').notNull(),
+    tripId: uuid('trip_id').notNull(),
+    imageWebp: bytea('image_webp').notNull(),
+    width: integer('width').notNull(),
+    height: integer('height').notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [primaryKey({ columns: [table.ownerId, table.tripId] })],
+);
