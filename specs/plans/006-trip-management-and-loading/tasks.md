@@ -2,7 +2,7 @@
 
 **Plan package**: `specs/plans/006-trip-management-and-loading`  
 **建立日期**: 2026-11-14  
-**狀態**: 任務規劃完成；所有任務待執行，未開始產品實作。
+**狀態**: T001–T258完成；下一筆T259 [BDD-REFACTOR]（前端旅行管理與確認；資源恢復後續跑），plan尚未交付。
 
 **核心輸入**: `spec.md`、`plan.md`、`research.md`、`truth-delta.md`、`dsl-refine-review.md`、`ui/ui-plan.md`，以及 `specs/truth/techstack.md`、`specs/truth/contracts/**`、`specs/truth/data/data-model.dbml`、受影響 `specs/truth/features/**`。
 
@@ -21,8 +21,8 @@
 - Prototype=不製作；不新增規劃期prototype、規劃期截圖比對或額外viewport矩陣。下列1440×900／390×844比對及瀏覽器矩陣是正式產品實作驗收，保留原交接要求。
 - 實作時每個C範圍記錄設計／產品固定版本、同尺寸同可比資料、預期與產品畫面、差異與處理到 `validation.md`；首個代表性桌機／手機checkpoint通過，才套用其共用樣式到後續畫面。沒有變更意圖時不另設USER-CONFIRM；若有重大設計偏差，停止依賴範圍並回交使用者確認，其他成果保留。
 - 基準回填適用：完成產品驗收與UI gate後，將已驗收旅行管理／縮圖／等待共享元件及受影響頁面更新到 `specs/ui-baseline/**`，保留最新基準的其他成果；另有獨立回填核對，不能把提案直接升為現況。
-- `profile=low-memory-16gb`；已觀測RAM16GiB。主代理逐筆處理，最多保留一位既有輔助代理（目前 `/root/review_006`）做獨立審查，不spawn子代理；同時重型工作1、worker=1，Chromium後WebKit依序執行。不因[P]增加代理；代理到PID回收未知須明記。每次重型工作前核對壓力、程序與受管PID，服務/fixtures用finally teardown，勿終止使用者程序。
-- 規劃快照已保存於Git；目前分支 `codex/006-trip-management-planning`，最新進度與續跑點以 `handoff.md` 為準。所有任務待執行，未實作產品或部署。
+- `profile=low-memory-16gb`；已觀測RAM16GiB。主代理逐筆處理，最多保留一位輔助代理做獨立審查（本輪主代理直接實作，未啟動審查者；規劃期 `/root/review_006` 不視為本輪存活代理），不spawn子代理；同時重型工作1、worker=1，Chromium後WebKit依序執行。不因[P]增加代理；代理到PID回收未知須明記。每次重型工作前核對壓力、程序與受管PID，服務/fixtures用finally teardown，勿終止使用者程序。
+- 規劃與目前實作快照已保存於Git；目前分支 `codex/006-trip-management-planning`，最新進度與續跑點以 `handoff.md` 為準。T001–T258已完成各筆適用驗證；Phase 3及已完成後端/前端管理scope的runtime與獨立審查見validation。T259以後仍待執行，plan尚未交付；使用者已明示授權先按scope提交目前成果，無push/deploy。
 
 ## 執行入口與完整矩陣
 
@@ -46,16 +46,16 @@
 
 **Goal**: 固定新增圖片技術與執行環境，完成無產品行為的smoke。
 
-- [ ] T001 加入固定版本圖片依賴與lockfile
+- [X] T001 加入固定版本圖片依賴與lockfile
   - Read: `specs/truth/techstack.md` → 圖片上傳／處理；`research.md` → 決策2～5。
   - 在apps/api/package.json加入 `@fastify/multipart@10.1.8`、`sharp@0.35.5` 並更新pnpm-lock.yaml；核對Node24.22.2／pnpm11.25.0。僅依套件必要性配置最小allowBuilds/optional binary，不全域放行、不實作endpoint。
 
-- [ ] T002 配置影像執行環境與單worker測試入口
+- [X] T002 配置影像執行環境與單worker測試入口
   - Dependencies: T001。
   - Read: `specs/truth/techstack.md` → 測試／部署；`scripts/pnpm.sh`、apps/api/package.json、現有Playwright配置。
   - 設定可重現的macOS/目標Linux sharp optional binary安裝；檢查隔離DB連線與正式migration runner可用、browser安裝入口、worker=1覆寫。只建環境/設定，不新增schema、purge或UI行為。
 
-- [ ] T003 執行新技術smoke並保存工具鏈證據
+- [X] T003 執行新技術smoke並保存工具鏈證據
   - Dependencies: T002。
   - Read: `research.md` → 已執行的有限技術實驗；`specs/truth/techstack.md`。
   - 用實際sharp轉一張測試PNG為WebP並讀metadata，Fastify測試實例註冊multipart解析單檔；只驗套件可載入／parser/binary運作，記錄版本/平台/exit於validation.md的Setup節，不宣稱產品邊界/E2E通過。
@@ -64,31 +64,31 @@
 
 **Goal**: 建立共用落點與fixture擴充骨架，不提前做產品Green或DSL row實作。
 
-- [ ] T004 建立後端旅行管理與圖片模組落點骨架
+- [X] T004 建立後端旅行管理與圖片模組落點骨架
   - Dependencies: T003。
   - Read: `truth-delta.md` → data/API owner；apps/api/src/modules/trips/index.ts、splitting/trip-scope.ts、src/db/schema.ts。
   - 只做：建立內部型別、依賴注入及生命週期/圖片/收據模組的檔案邊界與編譯可用介面。
   - 不做：SQL migration、DB表、route成功回覆、狀態轉移、purge或解碼策略。
 
-- [ ] T005 建立API資料對照與交易屏障支援骨架
+- [X] T005 建立API資料對照與交易屏障支援骨架
   - Dependencies: T004。
   - Read: apps/api/tests/support/fixtures.ts、world.ts、database.ts、splitting/transaction-fault-fixture.ts；`specs/truth/data/data-model.dbml`。
   - 只做：擴充scenario context的穩定識別/版本/快照型別、可控stream/時鐘/交易屏障接口與teardown；保留正式DB/transaction真實性。
   - 不做：Given資料語意、Then斷言、為測試自建產品表或繞過trigger。實際fixture實作隨各DSL RED。
 
-- [ ] T006 建立影像測試資產與完整性工具骨架
+- [X] T006 建立影像測試資產與完整性工具骨架
   - Dependencies: T005。
   - Read: `specs/truth/features/backend/trips/dsl.md` → 圖片格式／容量／metadata句群；現有API support。
   - 只做：建立測試資產目錄、原始檔hash/decoder元資料型別、可生成各格式與邊界檔的工具入口；存取以隔離暫存目錄及finally清理。
   - 不做：產品轉碼策略或偽造任一圖片Given結果；各真實fixture/可解碼邊界驗證於對應DSL RED落地。
 
-- [ ] T007 建立前端頁面操作與查證觀測骨架
+- [X] T007 建立前端頁面操作與查證觀測骨架
   - Dependencies: T006。
   - Read: apps/web/tests/support/fixtures.ts、browser.ts、save-outcomes.spec.ts與splitting支援。
   - 只做：建立trips/thumbnail/loading的page-object邊界、request計數／回應屏障／viewport排程／object URL觀測接口，擴充timeout用可控屏障且finally釋放。
   - 不做：對應句型stepdef、假後端結果、繞過UI送出或完整產品流程。
 
-- [ ] T008 建立共用等待元件與圖片API整合的型別落點
+- [X] T008 建立共用等待元件與圖片API整合的型別落點
   - Dependencies: T007。
   - Read: apps/web/src/components/QueryState.tsx、FormDialog.tsx、ui/button.tsx、src/api/index.ts；`ui/ui-plan.md` → 共用狀態。
   - 只做：建立待用狀態型別/props及檔案邊界、保持既有export與編譯；不先在使用者頁面接入。
@@ -125,1162 +125,1162 @@
 
 - 下列逐句任務可在有限預算以互不衝突檔案平行；本輪預設全批、不分backend/frontend波次，最後獨立review通過只先解鎖T241正式schema slice，T241的獨立runtime複核通過後才依序解鎖其餘Feature。既有審查者只讀測試與證據、不自行修補。
 
-- [ ] T009 [P] [BDD-RED] `旅行生命週期基準為 "{狀態}"`
+- [X] T009 [P] [BDD-RED] `旅行生命週期基準為 "{狀態}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行垃圾桶與復原.feature` → `@B006-001`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `旅行生命週期基準為 "{狀態}"`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T010 [P] [BDD-RED] `owner 執行旅行命令 "{操作}"`
+- [X] T010 [P] [BDD-RED] `owner 執行旅行命令 "{操作}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行垃圾桶與復原.feature` → `@B006-001`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `owner 執行旅行命令 "{操作}"`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T011 [P] [BDD-RED] `旅行專屬資料與帳務對照完全一致`
+- [X] T011 [P] [BDD-RED] `旅行專屬資料與帳務對照完全一致`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行垃圾桶與復原.feature` → `@B006-002`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `旅行專屬資料與帳務對照完全一致`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T012 [P] [BDD-RED] `其他旅行與共用資料保持原狀`
+- [X] T012 [P] [BDD-RED] `其他旅行與共用資料保持原狀`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行垃圾桶與復原.feature` → `@B006-002`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `其他旅行與共用資料保持原狀`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T013 [P] [BDD-RED] `命令拒絕為 "{錯誤}" 且沒有部分變更`
+- [X] T013 [P] [BDD-RED] `命令拒絕為 "{錯誤}" 且沒有部分變更`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/整趟永久刪除.feature` → `@B006-008`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `命令拒絕為 "{錯誤}" 且沒有部分變更`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T014 [P] [BDD-RED] `旅行以同一身分成為垃圾桶`
+- [X] T014 [P] [BDD-RED] `旅行以同一身分成為垃圾桶`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行垃圾桶與復原.feature` → `@B006-001`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `旅行以同一身分成為垃圾桶`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T015 [P] [BDD-RED] `旅行以同一身分成為一般可用`
+- [X] T015 [P] [BDD-RED] `旅行以同一身分成為一般可用`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行垃圾桶與復原.feature` → `@B006-003`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `旅行以同一身分成為一般可用`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T016 [P] [BDD-RED] `owner 讀取 "{清單}" 旅行清單`
+- [X] T016 [P] [BDD-RED] `owner 讀取 "{清單}" 旅行清單`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行垃圾桶與復原.feature` → `@B006-005`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `owner 讀取 "{清單}" 旅行清單`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T017 [P] [BDD-RED] `清單只包含 "{狀態}" 的本人旅行`
+- [X] T017 [P] [BDD-RED] `清單只包含 "{狀態}" 的本人旅行`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行垃圾桶與復原.feature` → `@B006-005`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `清單只包含 "{狀態}" 的本人旅行`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T018 [P] [BDD-RED] `整趟旅行清除後才提交永久刪除結果`
+- [X] T018 [P] [BDD-RED] `整趟旅行清除後才提交永久刪除結果`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/整趟永久刪除.feature` → `@B006-007`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `整趟旅行清除後才提交永久刪除結果`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T019 [P] [BDD-RED] `垃圾桶旅行已保留 180 天且期間未要求永久刪除`
+- [X] T019 [P] [BDD-RED] `垃圾桶旅行已保留 180 天且期間未要求永久刪除`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行垃圾桶與復原.feature` → `@B006-011`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `垃圾桶旅行已保留 180 天且期間未要求永久刪除`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T020 [P] [BDD-RED] `下一次 "{操作}" 在交易中途會明確失敗`
+- [X] T020 [P] [BDD-RED] `下一次 "{操作}" 在交易中途會明確失敗`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行競爭與結果查證.feature` → `@B006-012`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `下一次 "{操作}" 在交易中途會明確失敗`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T021 [P] [BDD-RED] `交易失敗回報錯誤且全部權威資料回滾`
+- [X] T021 [P] [BDD-RED] `交易失敗回報錯誤且全部權威資料回滾`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行競爭與結果查證.feature` → `@B006-012`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `交易失敗回報錯誤且全部權威資料回滾`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T022 [P] [BDD-RED] `前次 "{操作}" 已明確失敗且故障已解除`
+- [X] T022 [P] [BDD-RED] `前次 "{操作}" 已明確失敗且故障已解除`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行競爭與結果查證.feature` → `@B006-013`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `前次 "{操作}" 已明確失敗且故障已解除`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T023 [P] [BDD-RED] `本次 "{操作}" 完整成功而沒有重複資料`
+- [X] T023 [P] [BDD-RED] `本次 "{操作}" 完整成功而沒有重複資料`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行競爭與結果查證.feature` → `@B006-013`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `本次 "{操作}" 完整成功而沒有重複資料`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T024 [P] [BDD-RED] `owner 讀取垃圾桶旅行的 "{資源}"`
+- [X] T024 [P] [BDD-RED] `owner 讀取垃圾桶旅行的 "{資源}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/垃圾桶存取與擁有者隔離.feature` → `@B006-014`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `owner 讀取垃圾桶旅行的 "{資源}"`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T025 [P] [BDD-RED] `owner 對垃圾桶旅行送出 "{寫入}"`
+- [X] T025 [P] [BDD-RED] `owner 對垃圾桶旅行送出 "{寫入}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/垃圾桶存取與擁有者隔離.feature` → `@B006-015`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `owner 對垃圾桶旅行送出 "{寫入}"`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T026 [P] [BDD-RED] `旅行請求的存取者為 "{存取者}"`
+- [X] T026 [P] [BDD-RED] `旅行請求的存取者為 "{存取者}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/垃圾桶存取與擁有者隔離.feature` → `@B006-016`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `旅行請求的存取者為 "{存取者}"`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T027 [P] [BDD-RED] `該存取者嘗試 "{存取}"`
+- [X] T027 [P] [BDD-RED] `該存取者嘗試 "{存取}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/垃圾桶存取與擁有者隔離.feature` → `@B006-016`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `該存取者嘗試 "{存取}"`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T028 [P] [BDD-RED] `請求不洩漏他人旅行且資料不變`
+- [X] T028 [P] [BDD-RED] `請求不洩漏他人旅行且資料不變`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/垃圾桶存取與擁有者隔離.feature` → `@B006-016`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `請求不洩漏他人旅行且資料不變`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T029 [P] [BDD-RED] `原次 "{原操作}" 已成功但回應遺失，目前為 "{目前狀態}"`
+- [X] T029 [P] [BDD-RED] `原次 "{原操作}" 已成功但回應遺失，目前為 "{目前狀態}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行競爭與結果查證.feature` → `@B006-017`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `原次 "{原操作}" 已成功但回應遺失，目前為 "{目前狀態}"`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T030 [P] [BDD-RED] `owner 查證同一次原旅行操作`
+- [X] T030 [P] [BDD-RED] `owner 查證同一次原旅行操作`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行競爭與結果查證.feature` → `@B006-017`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `owner 查證同一次原旅行操作`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T031 [P] [BDD-RED] `查證分別回傳原操作結果與目前權威狀態`
+- [X] T031 [P] [BDD-RED] `查證分別回傳原操作結果與目前權威狀態`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行競爭與結果查證.feature` → `@B006-017`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `查證分別回傳原操作結果與目前權威狀態`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T032 [P] [BDD-RED] `owner 重送同一次原旅行操作`
+- [X] T032 [P] [BDD-RED] `owner 重送同一次原旅行操作`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行競爭與結果查證.feature` → `@B006-018`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `owner 重送同一次原旅行操作`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T033 [P] [BDD-RED] `原收據重播而較新意圖保持不變`
+- [X] T033 [P] [BDD-RED] `原收據重播而較新意圖保持不變`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行競爭與結果查證.feature` → `@B006-018`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `原收據重播而較新意圖保持不變`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T034 [P] [BDD-RED] `原旅行操作尚無可讀取收據`
+- [X] T034 [P] [BDD-RED] `原旅行操作尚無可讀取收據`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行競爭與結果查證.feature` → `@B006-019`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `原旅行操作尚無可讀取收據`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T035 [P] [BDD-RED] `查無收據不等於命令失敗`
+- [X] T035 [P] [BDD-RED] `查無收據不等於命令失敗`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行競爭與結果查證.feature` → `@B006-019`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `查無收據不等於命令失敗`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T036 [P] [BDD-RED] `本次旅行命令使用 "{衝突}"`
+- [X] T036 [P] [BDD-RED] `本次旅行命令使用 "{衝突}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行競爭與結果查證.feature` → `@B006-020`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `本次旅行命令使用 "{衝突}"`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T037 [P] [BDD-RED] `另一裝置的 "{先完成}" 已先取得旅行寫入順序`
+- [X] T037 [P] [BDD-RED] `另一裝置的 "{先完成}" 已先取得旅行寫入順序`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行競爭與結果查證.feature` → `@B006-021`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `另一裝置的 "{先完成}" 已先取得旅行寫入順序`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T038 [P] [BDD-RED] `owner 保存 JPY 500 的點心支出`
+- [X] T038 [P] [BDD-RED] `owner 保存 JPY 500 的點心支出`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行競爭與結果查證.feature` → `@B006-021`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `owner 保存 JPY 500 的點心支出`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T039 [P] [BDD-RED] `點心保存結果為 "{結果}"`
+- [X] T039 [P] [BDD-RED] `點心保存結果為 "{結果}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行競爭與結果查證.feature` → `@B006-021`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `點心保存結果為 "{結果}"`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T040 [P] [BDD-RED] `垃圾桶中恰有一筆點心且其餘帳務保持`
+- [X] T040 [P] [BDD-RED] `垃圾桶中恰有一筆點心且其餘帳務保持`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行競爭與結果查證.feature` → `@B006-022`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `垃圾桶中恰有一筆點心且其餘帳務保持`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T041 [P] [BDD-RED] `本次新圖片已開始處理但尚未提交`
+- [X] T041 [P] [BDD-RED] `本次新圖片已開始處理但尚未提交`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行競爭與結果查證.feature` → `@B006-023`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `本次新圖片已開始處理但尚未提交`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T042 [P] [BDD-RED] `原次圖片處理完成並嘗試保存`
+- [X] T042 [P] [BDD-RED] `原次圖片處理完成並嘗試保存`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行競爭與結果查證.feature` → `@B006-023`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `原次圖片處理完成並嘗試保存`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T043 [P] [BDD-RED] `新圖片未落地且已生效的旅行狀態保持`
+- [X] T043 [P] [BDD-RED] `新圖片未落地且已生效的旅行狀態保持`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/旅行競爭與結果查證.feature` → `@B006-023`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `新圖片未落地且已生效的旅行狀態保持`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T044 [P] [BDD-RED] `待保存圖片為 "{格式}"、{大小} bytes、{寬} x {高} px`
+- [X] T044 [P] [BDD-RED] `待保存圖片為 "{格式}"、{大小} bytes、{寬} x {高} px`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/縮圖格式與容量邊界.feature` → `@B006-024`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `待保存圖片為 "{格式}"、{大小} bytes、{寬} x {高} px`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T045 [P] [BDD-RED] `owner 保存待選圖片為旅行縮圖`
+- [X] T045 [P] [BDD-RED] `owner 保存待選圖片為旅行縮圖`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/縮圖格式與容量邊界.feature` → `@B006-024`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `owner 保存待選圖片為旅行縮圖`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T046 [P] [BDD-RED] `有效圖片保存為唯一目前縮圖`
+- [X] T046 [P] [BDD-RED] `有效圖片保存為唯一目前縮圖`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/縮圖格式與容量邊界.feature` → `@B006-024`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `有效圖片保存為唯一目前縮圖`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T047 [P] [BDD-RED] `圖片拒絕為 "{原因}" 且保留原縮圖`
+- [X] T047 [P] [BDD-RED] `圖片拒絕為 "{原因}" 且保留原縮圖`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/縮圖格式與容量邊界.feature` → `@B006-026`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `圖片拒絕為 "{原因}" 且保留原縮圖`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T048 [P] [BDD-RED] `待保存檔案內容為 "{內容}"`
+- [X] T048 [P] [BDD-RED] `待保存檔案內容為 "{內容}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/縮圖格式與容量邊界.feature` → `@B006-027`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `待保存檔案內容為 "{內容}"`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T049 [P] [BDD-RED] `本次保存包含兩張各自合法圖片`
+- [X] T049 [P] [BDD-RED] `本次保存包含兩張各自合法圖片`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/縮圖格式與容量邊界.feature` → `@B006-028`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `本次保存包含兩張各自合法圖片`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T050 [P] [BDD-RED] `待保存照片含方向與位置資訊且內容為 "{內容}"`
+- [X] T050 [P] [BDD-RED] `待保存照片含方向與位置資訊且內容為 "{內容}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/縮圖保存與私有讀取.feature` → `@B006-029`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `待保存照片含方向與位置資訊且內容為 "{內容}"`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T051 [P] [BDD-RED] `保存結果為去除原始資訊的有界縮圖`
+- [X] T051 [P] [BDD-RED] `保存結果為去除原始資訊的有界縮圖`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/縮圖保存與私有讀取.feature` → `@B006-029`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `保存結果為去除原始資訊的有界縮圖`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T052 [P] [BDD-RED] `旅行使用預設圖且舊自訂圖不可再取得`
+- [X] T052 [P] [BDD-RED] `旅行使用預設圖且舊自訂圖不可再取得`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/縮圖保存與私有讀取.feature` → `@B006-030`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `旅行使用預設圖且舊自訂圖不可再取得`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T053 [P] [BDD-RED] `owner 讀取 "{路徑}" 的縮圖`
+- [X] T053 [P] [BDD-RED] `owner 讀取 "{路徑}" 的縮圖`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/縮圖保存與私有讀取.feature` → `@B006-031`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `owner 讀取 "{路徑}" 的縮圖`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T054 [P] [BDD-RED] `圖片讀取符合 "{結果}" 的私有契約`
+- [X] T054 [P] [BDD-RED] `圖片讀取符合 "{結果}" 的私有契約`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/縮圖保存與私有讀取.feature` → `@B006-031`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `圖片讀取符合 "{結果}" 的私有契約`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T055 [P] [BDD-RED] `縮圖傳輸條件為 "{條件}"`
+- [X] T055 [P] [BDD-RED] `縮圖傳輸條件為 "{條件}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/縮圖傳輸與提交邊界.feature` → `@B006-104`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `縮圖傳輸條件為 "{條件}"`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T056 [P] [BDD-RED] `送出本次縮圖傳輸`
+- [X] T056 [P] [BDD-RED] `送出本次縮圖傳輸`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/縮圖傳輸與提交邊界.feature` → `@B006-104`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `送出本次縮圖傳輸`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T057 [P] [BDD-RED] `縮圖傳輸拒絕為 "{錯誤}" 且沒有提交`
+- [X] T057 [P] [BDD-RED] `縮圖傳輸拒絕為 "{錯誤}" 且沒有提交`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/縮圖傳輸與提交邊界.feature` → `@B006-104`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `縮圖傳輸拒絕為 "{錯誤}" 且沒有提交`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T058 [P] [BDD-RED] `一般旅行的不可變歷史與owner成員已存在`
+- [X] T058 [P] [BDD-RED] `一般旅行的不可變歷史與owner成員已存在`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/整趟永久刪除.feature` → `@B006-114`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `一般旅行的不可變歷史與owner成員已存在`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T059 [P] [BDD-RED] `嘗試一般 "{歷史操作}"`
+- [X] T059 [P] [BDD-RED] `嘗試一般 "{歷史操作}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/整趟永久刪除.feature` → `@B006-114`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `嘗試一般 "{歷史操作}"`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T060 [P] [BDD-RED] `一般歷史保護仍拒絕且資料完全不變`
+- [X] T060 [P] [BDD-RED] `一般歷史保護仍拒絕且資料完全不變`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/trips/整趟永久刪除.feature` → `@B006-114`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/trips/dsl.md` → `一般歷史保護仍拒絕且資料完全不變`；`apps/api/tests/steps/trips/`（新句落 `apps/api/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T061 [P] [BDD-RED] `餐飲分類僅被垃圾桶旅行的一筆支出引用`
+- [X] T061 [P] [BDD-RED] `餐飲分類僅被垃圾桶旅行的一筆支出引用`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/categories/垃圾桶分類引用.feature` → `@B006-032`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/categories/dsl.md` → `餐飲分類僅被垃圾桶旅行的一筆支出引用`；`apps/api/tests/steps/categories/`（新句落 `apps/api/tests/steps/categories/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T062 [P] [BDD-RED] `owner 查詢垃圾桶旅行使用的分類`
+- [X] T062 [P] [BDD-RED] `owner 查詢垃圾桶旅行使用的分類`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/categories/垃圾桶分類引用.feature` → `@B006-032`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/categories/dsl.md` → `owner 查詢垃圾桶旅行使用的分類`；`apps/api/tests/steps/categories/`（新句落 `apps/api/tests/steps/categories/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T063 [P] [BDD-RED] `分類使用筆數仍為 1`
+- [X] T063 [P] [BDD-RED] `分類使用筆數仍為 1`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/categories/垃圾桶分類引用.feature` → `@B006-032`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/categories/dsl.md` → `分類使用筆數仍為 1`；`apps/api/tests/steps/categories/`（新句落 `apps/api/tests/steps/categories/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T064 [P] [BDD-RED] `owner 刪除垃圾桶旅行使用的分類`
+- [X] T064 [P] [BDD-RED] `owner 刪除垃圾桶旅行使用的分類`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/categories/垃圾桶分類引用.feature` → `@B006-033`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/categories/dsl.md` → `owner 刪除垃圾桶旅行使用的分類`；`apps/api/tests/steps/categories/`（新句落 `apps/api/tests/steps/categories/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T065 [P] [BDD-RED] `分類因仍被使用而拒絕刪除`
+- [X] T065 [P] [BDD-RED] `分類因仍被使用而拒絕刪除`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/backend/categories/垃圾桶分類引用.feature` → `@B006-033`。
   - Dependencies: T008。
   - Read: `specs/truth/features/backend/categories/dsl.md` → `分類因仍被使用而拒絕刪除`；`apps/api/tests/steps/categories/`（新句落 `apps/api/tests/steps/categories/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T066 [P] [BDD-RED] `owner 的旅行管理畫面為 "{狀態}"`
+- [X] T066 [P] [BDD-RED] `owner 的旅行管理畫面為 "{狀態}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行管理與確認.feature` → `@F006-034`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 的旅行管理畫面為 "{狀態}"`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T067 [P] [BDD-RED] `owner 選擇旅行操作 "{操作}"`
+- [X] T067 [P] [BDD-RED] `owner 選擇旅行操作 "{操作}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行管理與確認.feature` → `@F006-034`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 選擇旅行操作 "{操作}"`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T068 [P] [BDD-RED] `管理選單列出縮圖與移入入口而不遮罩帳本`
+- [X] T068 [P] [BDD-RED] `管理選單列出縮圖與移入入口而不遮罩帳本`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行管理與確認.feature` → `@F006-034`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `管理選單列出縮圖與移入入口而不遮罩帳本`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T069 [P] [BDD-RED] `管理旅行選單已展開`
+- [X] T069 [P] [BDD-RED] `管理旅行選單已展開`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行管理與確認.feature` → `@F006-035`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `管理旅行選單已展開`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T070 [P] [BDD-RED] `畫面進入縮圖編輯且尚未保存`
+- [X] T070 [P] [BDD-RED] `畫面進入縮圖編輯且尚未保存`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行管理與確認.feature` → `@F006-035`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `畫面進入縮圖編輯且尚未保存`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T071 [P] [BDD-RED] `畫面進入移入確認且尚未保存`
+- [X] T071 [P] [BDD-RED] `畫面進入移入確認且尚未保存`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行管理與確認.feature` → `@F006-036`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `畫面進入移入確認且尚未保存`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T072 [P] [BDD-RED] `owner 按 Escape 關閉管理選單`
+- [X] T072 [P] [BDD-RED] `owner 按 Escape 關閉管理選單`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行管理與確認.feature` → `@F006-037`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 按 Escape 關閉管理選單`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T073 [P] [BDD-RED] `選單關閉且焦點返回管理旅行`
+- [X] T073 [P] [BDD-RED] `選單關閉且焦點返回管理旅行`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行管理與確認.feature` → `@F006-037`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `選單關閉且焦點返回管理旅行`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T074 [P] [BDD-RED] `確認內容說明 "{後果}"`
+- [X] T074 [P] [BDD-RED] `確認內容說明 "{後果}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行管理與確認.feature` → `@F006-038`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `確認內容說明 "{後果}"`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T075 [P] [BDD-RED] `owner 以 "{方式}" 關閉 "{編輯}"`
+- [X] T075 [P] [BDD-RED] `owner 以 "{方式}" 關閉 "{編輯}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行管理與確認.feature` → `@F006-039`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 以 "{方式}" 關閉 "{編輯}"`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T076 [P] [BDD-RED] `關閉未確認操作不改變旅行資料`
+- [X] T076 [P] [BDD-RED] `關閉未確認操作不改變旅行資料`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行管理與確認.feature` → `@F006-039`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `關閉未確認操作不改變旅行資料`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T077 [P] [BDD-RED] `移入成功回到一般清單並更新相關入口`
+- [X] T077 [P] [BDD-RED] `移入成功回到一般清單並更新相關入口`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行管理與確認.feature` → `@F006-040`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `移入成功回到一般清單並更新相關入口`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T078 [P] [BDD-RED] `復原後原旅行重新可開啟且垃圾桶移除該項`
+- [X] T078 [P] [BDD-RED] `復原後原旅行重新可開啟且垃圾桶移除該項`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行管理與確認.feature` → `@F006-041`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `復原後原旅行重新可開啟且垃圾桶移除該項`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T079 [P] [BDD-RED] `完成整趟清除後才顯示永久刪除成功`
+- [X] T079 [P] [BDD-RED] `完成整趟清除後才顯示永久刪除成功`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行管理與確認.feature` → `@F006-042`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `完成整趟清除後才顯示永久刪除成功`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T080 [P] [BDD-RED] `owner 從 "{裝置}" 的我的旅行導覽進入垃圾桶`
+- [X] T080 [P] [BDD-RED] `owner 從 "{裝置}" 的我的旅行導覽進入垃圾桶`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行管理與確認.feature` → `@F006-043`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 從 "{裝置}" 的我的旅行導覽進入垃圾桶`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T081 [P] [BDD-RED] `垃圾桶導覽可達且不冒用旅行內導覽`
+- [X] T081 [P] [BDD-RED] `垃圾桶導覽可達且不冒用旅行內導覽`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行管理與確認.feature` → `@F006-043`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `垃圾桶導覽可達且不冒用旅行內導覽`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T082 [P] [BDD-RED] `目前 "{清單}" 已成功確認沒有旅行`
+- [X] T082 [P] [BDD-RED] `目前 "{清單}" 已成功確認沒有旅行`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行管理與確認.feature` → `@F006-044`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `目前 "{清單}" 已成功確認沒有旅行`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T083 [P] [BDD-RED] `owner 開啟 "{清單}"`
+- [X] T083 [P] [BDD-RED] `owner 開啟 "{清單}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行管理與確認.feature` → `@F006-044`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 開啟 "{清單}"`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T084 [P] [BDD-RED] `畫面呈現 "{清單}" 的真正空狀態`
+- [X] T084 [P] [BDD-RED] `畫面呈現 "{清單}" 的真正空狀態`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行管理與確認.feature` → `@F006-044`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `畫面呈現 "{清單}" 的真正空狀態`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T085 [P] [BDD-RED] `目前縮圖草稿為 "{草稿}" 且尚未保存`
+- [X] T085 [P] [BDD-RED] `目前縮圖草稿為 "{草稿}" 且尚未保存`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖預覽與保存.feature` → `@F006-046`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `目前縮圖草稿為 "{草稿}" 且尚未保存`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T086 [P] [BDD-RED] `owner 將縮圖預覽切為 "{草稿}"`
+- [X] T086 [P] [BDD-RED] `owner 將縮圖預覽切為 "{草稿}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖預覽與保存.feature` → `@F006-045`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 將縮圖預覽切為 "{草稿}"`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T087 [P] [BDD-RED] `畫面預覽 "{草稿}" 並清楚標示尚未保存`
+- [X] T087 [P] [BDD-RED] `畫面預覽 "{草稿}" 並清楚標示尚未保存`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖預覽與保存.feature` → `@F006-045`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `畫面預覽 "{草稿}" 並清楚標示尚未保存`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T088 [P] [BDD-RED] `前次縮圖草稿已取消且原縮圖為富士山`
+- [X] T088 [P] [BDD-RED] `前次縮圖草稿已取消且原縮圖為富士山`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖預覽與保存.feature` → `@F006-047`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `前次縮圖草稿已取消且原縮圖為富士山`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T089 [P] [BDD-RED] `縮圖編輯顯示富士山而非已放棄草稿`
+- [X] T089 [P] [BDD-RED] `縮圖編輯顯示富士山而非已放棄草稿`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖預覽與保存.feature` → `@F006-047`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `縮圖編輯顯示富士山而非已放棄草稿`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T090 [P] [BDD-RED] `owner 取消檔案選擇`
+- [X] T090 [P] [BDD-RED] `owner 取消檔案選擇`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖預覽與保存.feature` → `@F006-048`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 取消檔案選擇`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T091 [P] [BDD-RED] `縮圖草稿仍為 "{草稿}" 且遠端未變`
+- [X] T091 [P] [BDD-RED] `縮圖草稿仍為 "{草稿}" 且遠端未變`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖預覽與保存.feature` → `@F006-048`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `縮圖草稿仍為 "{草稿}" 且遠端未變`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T092 [P] [BDD-RED] `最後預覽的 "{草稿}" 成為已保存縮圖`
+- [X] T092 [P] [BDD-RED] `最後預覽的 "{草稿}" 成為已保存縮圖`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖預覽與保存.feature` → `@F006-049`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `最後預覽的 "{草稿}" 成為已保存縮圖`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T093 [P] [BDD-RED] `本次圖片保存將明確失敗且確定未提交`
+- [X] T093 [P] [BDD-RED] `本次圖片保存將明確失敗且確定未提交`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖預覽與保存.feature` → `@F006-050`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `本次圖片保存將明確失敗且確定未提交`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T094 [P] [BDD-RED] `圖片失敗有下一步且草稿仍為 "{草稿}"`
+- [X] T094 [P] [BDD-RED] `圖片失敗有下一步且草稿仍為 "{草稿}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖預覽與保存.feature` → `@F006-050`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `圖片失敗有下一步且草稿仍為 "{草稿}"`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T095 [P] [BDD-RED] `前次圖片明確失敗已解除且草稿仍可用`
+- [X] T095 [P] [BDD-RED] `前次圖片明確失敗已解除且草稿仍可用`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖預覽與保存.feature` → `@F006-051`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `前次圖片明確失敗已解除且草稿仍可用`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T096 [P] [BDD-RED] `新增旅行草稿的照片為 "{照片}"`
+- [X] T096 [P] [BDD-RED] `新增旅行草稿的照片為 "{照片}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature` → `@F006-052`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `新增旅行草稿的照片為 "{照片}"`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T097 [P] [BDD-RED] `owner 送出新增旅行`
+- [X] T097 [P] [BDD-RED] `owner 送出新增旅行`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature` → `@F006-052`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 送出新增旅行`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T098 [P] [BDD-RED] `新旅行只建立一次並使用 "{圖片}"`
+- [X] T098 [P] [BDD-RED] `新旅行只建立一次並使用 "{圖片}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature` → `@F006-052`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `新旅行只建立一次並使用 "{圖片}"`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T099 [P] [BDD-RED] `新增表單及選圖草稿已放棄且旅行不存在`
+- [X] T099 [P] [BDD-RED] `新增表單及選圖草稿已放棄且旅行不存在`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature` → `@F006-054`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `新增表單及選圖草稿已放棄且旅行不存在`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T100 [P] [BDD-RED] `owner 在新增表單選擇 "{照片}"`
+- [X] T100 [P] [BDD-RED] `owner 在新增表單選擇 "{照片}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature` → `@F006-055`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 在新增表單選擇 "{照片}"`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T101 [P] [BDD-RED] `新增表單顯示尚未保存預覽且沒有旅行資料`
+- [X] T101 [P] [BDD-RED] `新增表單顯示尚未保存預覽且沒有旅行資料`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature` → `@F006-055`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `新增表單顯示尚未保存預覽且沒有旅行資料`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T102 [P] [BDD-RED] `新增表單說明選圖錯誤並阻止帶錯誤直接建立`
+- [X] T102 [P] [BDD-RED] `新增表單說明選圖錯誤並阻止帶錯誤直接建立`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature` → `@F006-056`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `新增表單說明選圖錯誤並阻止帶錯誤直接建立`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T103 [P] [BDD-RED] `owner 移除新增表單的選圖`
+- [X] T103 [P] [BDD-RED] `owner 移除新增表單的選圖`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature` → `@F006-057`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 移除新增表單的選圖`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T104 [P] [BDD-RED] `新增草稿不含照片且建立入口可用`
+- [X] T104 [P] [BDD-RED] `新增草稿不含照片且建立入口可用`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature` → `@F006-057`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `新增草稿不含照片且建立入口可用`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T105 [P] [BDD-RED] `旅行建立將明確失敗`
+- [X] T105 [P] [BDD-RED] `旅行建立將明確失敗`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature` → `@F006-058`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `旅行建立將明確失敗`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T106 [P] [BDD-RED] `旅行未建立且可修正草稿保持`
+- [X] T106 [P] [BDD-RED] `旅行未建立且可修正草稿保持`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature` → `@F006-058`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `旅行未建立且可修正草稿保持`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T107 [P] [BDD-RED] `前次建立明確失敗已解除且照片草稿保留`
+- [X] T107 [P] [BDD-RED] `前次建立明確失敗已解除且照片草稿保留`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature` → `@F006-059`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `前次建立明確失敗已解除且照片草稿保留`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T108 [P] [BDD-RED] `旅行已建立但圖片未保存且可同旅行重傳`
+- [X] T108 [P] [BDD-RED] `旅行已建立但圖片未保存且可同旅行重傳`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature` → `@F006-060`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `旅行已建立但圖片未保存且可同旅行重傳`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T109 [P] [BDD-RED] `旅行已建立但圖片失敗且可重新上傳`
+- [X] T109 [P] [BDD-RED] `旅行已建立但圖片失敗且可重新上傳`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature` → `@F006-061`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `旅行已建立但圖片失敗且可重新上傳`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T110 [P] [BDD-RED] `owner 重新上傳已建立旅行的圖片`
+- [X] T110 [P] [BDD-RED] `owner 重新上傳已建立旅行的圖片`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature` → `@F006-061`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 重新上傳已建立旅行的圖片`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T111 [P] [BDD-RED] `本次 "{操作}" 已提交但回應將遺失且暫不可查證`
+- [X] T111 [P] [BDD-RED] `本次 "{操作}" 已提交但回應將遺失且暫不可查證`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖預覽與保存.feature` → `@F006-063`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `本次 "{操作}" 已提交但回應將遺失且暫不可查證`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T112 [P] [BDD-RED] `結果未確認並保留原操作的查證出口`
+- [X] T112 [P] [BDD-RED] `結果未確認並保留原操作的查證出口`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖預覽與保存.feature` → `@F006-063`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `結果未確認並保留原操作的查證出口`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T113 [P] [BDD-RED] `原次 "{操作}" 結果未知且現在可查證`
+- [X] T113 [P] [BDD-RED] `原次 "{操作}" 結果未知且現在可查證`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行結果查證與舊連結.feature` → `@F006-065`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `原次 "{操作}" 結果未知且現在可查證`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T114 [P] [BDD-RED] `owner 再次查證原旅行操作`
+- [X] T114 [P] [BDD-RED] `owner 再次查證原旅行操作`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行結果查證與舊連結.feature` → `@F006-065`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 再次查證原旅行操作`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T115 [P] [BDD-RED] `畫面分別顯示原次結果與目前旅行狀態`
+- [X] T115 [P] [BDD-RED] `畫面分別顯示原次結果與目前旅行狀態`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行結果查證與舊連結.feature` → `@F006-065`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `畫面分別顯示原次結果與目前旅行狀態`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T116 [P] [BDD-RED] `預設縮圖保存已送出且查證結束仍未知`
+- [X] T116 [P] [BDD-RED] `預設縮圖保存已送出且查證結束仍未知`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖預覽與保存.feature` → `@F006-066`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `預設縮圖保存已送出且查證結束仍未知`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T117 [P] [BDD-RED] `關閉後原圖片操作仍可查證且沒有撤銷命令`
+- [X] T117 [P] [BDD-RED] `關閉後原圖片操作仍可查證且沒有撤銷命令`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖預覽與保存.feature` → `@F006-066`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `關閉後原圖片操作仍可查證且沒有撤銷命令`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T118 [P] [BDD-RED] `旅行已在另一裝置成為 "{狀態}" 且本裝置保留舊帳本`
+- [X] T118 [P] [BDD-RED] `旅行已在另一裝置成為 "{狀態}" 且本裝置保留舊帳本`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行結果查證與舊連結.feature` → `@F006-067`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `旅行已在另一裝置成為 "{狀態}" 且本裝置保留舊帳本`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T119 [P] [BDD-RED] `owner 開啟原旅行舊連結`
+- [X] T119 [P] [BDD-RED] `owner 開啟原旅行舊連結`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行結果查證與舊連結.feature` → `@F006-067`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 開啟原旅行舊連結`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T120 [P] [BDD-RED] `舊連結只提供 "{狀態}" 的下一步而不顯示帳務`
+- [X] T120 [P] [BDD-RED] `舊連結只提供 "{狀態}" 的下一步而不顯示帳務`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行結果查證與舊連結.feature` → `@F006-067`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `舊連結只提供 "{狀態}" 的下一步而不顯示帳務`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T121 [P] [BDD-RED] `本次旅行 "{操作}" 將明確失敗`
+- [X] T121 [P] [BDD-RED] `本次旅行 "{操作}" 將明確失敗`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行結果查證與舊連結.feature` → `@F006-068`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `本次旅行 "{操作}" 將明確失敗`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T122 [P] [BDD-RED] `旅行操作失敗可重試且沒有成功假象`
+- [X] T122 [P] [BDD-RED] `旅行操作失敗可重試且沒有成功假象`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行結果查證與舊連結.feature` → `@F006-068`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `旅行操作失敗可重試且沒有成功假象`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T123 [P] [BDD-RED] `旅行縮圖的讀取將 "{結果}"`
+- [X] T123 [P] [BDD-RED] `旅行縮圖的讀取將 "{結果}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖讀取與帳號清理.feature` → `@F006-069`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `旅行縮圖的讀取將 "{結果}"`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T124 [P] [BDD-RED] `owner 查看旅行卡片`
+- [X] T124 [P] [BDD-RED] `owner 查看旅行卡片`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖讀取與帳號清理.feature` → `@F006-069`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 查看旅行卡片`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T125 [P] [BDD-RED] `縮圖區域保留位置且旅行識別與入口可用`
+- [X] T125 [P] [BDD-RED] `縮圖區域保留位置且旅行識別與入口可用`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖讀取與帳號清理.feature` → `@F006-069`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `縮圖區域保留位置且旅行識別與入口可用`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T126 [P] [BDD-RED] `縮圖使用預設呈現且等待已結束`
+- [X] T126 [P] [BDD-RED] `縮圖使用預設呈現且等待已結束`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖讀取與帳號清理.feature` → `@F006-070`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `縮圖使用預設呈現且等待已結束`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T127 [P] [BDD-RED] `圖片讀取已失敗且owner已開啟原旅行帳本`
+- [X] T127 [P] [BDD-RED] `圖片讀取已失敗且owner已開啟原旅行帳本`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖讀取與帳號清理.feature` → `@F006-071`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `圖片讀取已失敗且owner已開啟原旅行帳本`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T128 [P] [BDD-RED] `owner 保存 TWD 100 的早餐支出`
+- [X] T128 [P] [BDD-RED] `owner 保存 TWD 100 的早餐支出`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖讀取與帳號清理.feature` → `@F006-071`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 保存 TWD 100 的早餐支出`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T129 [P] [BDD-RED] `早餐成功保存且圖片失敗沒有改壞帳務`
+- [X] T129 [P] [BDD-RED] `早餐成功保存且圖片失敗沒有改壞帳務`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖讀取與帳號清理.feature` → `@F006-071`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `早餐成功保存且圖片失敗沒有改壞帳務`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T130 [P] [BDD-RED] `Alice 已查看私人旅行與垃圾桶且有未保存照片預覽`
+- [X] T130 [P] [BDD-RED] `Alice 已查看私人旅行與垃圾桶且有未保存照片預覽`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖讀取與帳號清理.feature` → `@F006-072`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `Alice 已查看私人旅行與垃圾桶且有未保存照片預覽`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T131 [P] [BDD-RED] `Alice 登出並切換為 Carol 帳號`
+- [X] T131 [P] [BDD-RED] `Alice 登出並切換為 Carol 帳號`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖讀取與帳號清理.feature` → `@F006-072`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `Alice 登出並切換為 Carol 帳號`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T132 [P] [BDD-RED] `Carol 畫面只含自己的資料且舊預覽已釋放`
+- [X] T132 [P] [BDD-RED] `Carol 畫面只含自己的資料且舊預覽已釋放`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖讀取與帳號清理.feature` → `@F006-072`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `Carol 畫面只含自己的資料且舊預覽已釋放`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T133 [P] [BDD-RED] `新縮圖上傳會在提交前中斷且確定未保存`
+- [X] T133 [P] [BDD-RED] `新縮圖上傳會在提交前中斷且確定未保存`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖預覽與保存.feature` → `@F006-095`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `新縮圖上傳會在提交前中斷且確定未保存`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T134 [P] [BDD-RED] `上傳等待結束且原縮圖與帳務維持`
+- [X] T134 [P] [BDD-RED] `上傳等待結束且原縮圖與帳務維持`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖預覽與保存.feature` → `@F006-095`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `上傳等待結束且原縮圖與帳務維持`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T135 [P] [BDD-RED] `owner 已在 "{裝置}" 開啟旅行選圖介面`
+- [X] T135 [P] [BDD-RED] `owner 已在 "{裝置}" 開啟旅行選圖介面`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖限制與選圖錯誤.feature` → `@F006-098`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 已在 "{裝置}" 開啟旅行選圖介面`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T136 [P] [BDD-RED] `owner 查看可選圖片條件`
+- [X] T136 [P] [BDD-RED] `owner 查看可選圖片條件`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖限制與選圖錯誤.feature` → `@F006-098`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 查看可選圖片條件`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T137 [P] [BDD-RED] `選圖介面揭露靜態單張格式與全部上限`
+- [X] T137 [P] [BDD-RED] `選圖介面揭露靜態單張格式與全部上限`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖限制與選圖錯誤.feature` → `@F006-098`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `選圖介面揭露靜態單張格式與全部上限`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T138 [P] [BDD-RED] `待選圖片不合規原因為 "{原因}"`
+- [X] T138 [P] [BDD-RED] `待選圖片不合規原因為 "{原因}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖限制與選圖錯誤.feature` → `@F006-099`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `待選圖片不合規原因為 "{原因}"`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T139 [P] [BDD-RED] `owner 嘗試保存這次不合規選圖`
+- [X] T139 [P] [BDD-RED] `owner 嘗試保存這次不合規選圖`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖限制與選圖錯誤.feature` → `@F006-099`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 嘗試保存這次不合規選圖`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T140 [P] [BDD-RED] `畫面說明 "{原因}" 並保留原已保存資料`
+- [X] T140 [P] [BDD-RED] `畫面說明 "{原因}" 並保留原已保存資料`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖限制與選圖錯誤.feature` → `@F006-099`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `畫面說明 "{原因}" 並保留原已保存資料`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T141 [P] [BDD-RED] `前次選圖已因 "{原因}" 被拒絕且現在備有合法JPEG`
+- [X] T141 [P] [BDD-RED] `前次選圖已因 "{原因}" 被拒絕且現在備有合法JPEG`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖限制與選圖錯誤.feature` → `@F006-100`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `前次選圖已因 "{原因}" 被拒絕且現在備有合法JPEG`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T142 [P] [BDD-RED] `owner 改選合法JPEG並保存縮圖`
+- [X] T142 [P] [BDD-RED] `owner 改選合法JPEG並保存縮圖`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖限制與選圖錯誤.feature` → `@F006-100`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 改選合法JPEG並保存縮圖`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T143 [P] [BDD-RED] `合法新圖可讀取且錯誤與等待已結束`
+- [X] T143 [P] [BDD-RED] `合法新圖可讀取且錯誤與等待已結束`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖限制與選圖錯誤.feature` → `@F006-100`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `合法新圖可讀取且錯誤與等待已結束`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T144 [P] [BDD-RED] `owner 在 "{裝置}" 備有合法 "{格式}" 照片`
+- [X] T144 [P] [BDD-RED] `owner 在 "{裝置}" 備有合法 "{格式}" 照片`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖限制與選圖錯誤.feature` → `@F006-101`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 在 "{裝置}" 備有合法 "{格式}" 照片`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T145 [P] [BDD-RED] `owner 選圖預覽後保存該照片`
+- [X] T145 [P] [BDD-RED] `owner 選圖預覽後保存該照片`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖限制與選圖錯誤.feature` → `@F006-101`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 選圖預覽後保存該照片`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T146 [P] [BDD-RED] `另一裝置可讀相同旅行的已保存縮圖`
+- [X] T146 [P] [BDD-RED] `另一裝置可讀相同旅行的已保存縮圖`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖限制與選圖錯誤.feature` → `@F006-101`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `另一裝置可讀相同旅行的已保存縮圖`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T147 [P] [BDD-RED] `其他裝置已使縮圖提交的 "{衝突}" 過期`
+- [X] T147 [P] [BDD-RED] `其他裝置已使縮圖提交的 "{衝突}" 過期`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行結果查證與舊連結.feature` → `@F006-102`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `其他裝置已使縮圖提交的 "{衝突}" 過期`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T148 [P] [BDD-RED] `owner 提交目前圖片草稿`
+- [X] T148 [P] [BDD-RED] `owner 提交目前圖片草稿`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行結果查證與舊連結.feature` → `@F006-102`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 提交目前圖片草稿`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T149 [P] [BDD-RED] `畫面說明衝突並保留目前權威狀態`
+- [X] T149 [P] [BDD-RED] `畫面說明衝突並保留目前權威狀態`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行結果查證與舊連結.feature` → `@F006-102`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `畫面說明衝突並保留目前權威狀態`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T150 [P] [BDD-RED] `不合法選圖仍留在新增旅行草稿`
+- [X] T150 [P] [BDD-RED] `不合法選圖仍留在新增旅行草稿`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature` → `@F006-105`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `不合法選圖仍留在新增旅行草稿`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T151 [P] [BDD-RED] `owner 嘗試提交仍有選圖錯誤的新增旅行`
+- [X] T151 [P] [BDD-RED] `owner 嘗試提交仍有選圖錯誤的新增旅行`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature` → `@F006-105`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 嘗試提交仍有選圖錯誤的新增旅行`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T152 [P] [BDD-RED] `選圖錯誤阻止建立且保留可修正內容`
+- [X] T152 [P] [BDD-RED] `選圖錯誤阻止建立且保留可修正內容`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature` → `@F006-105`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `選圖錯誤阻止建立且保留可修正內容`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T153 [P] [BDD-RED] `建立旅行已送出但原次建立結果尚未確認`
+- [X] T153 [P] [BDD-RED] `建立旅行已送出但原次建立結果尚未確認`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature` → `@F006-106`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `建立旅行已送出但原次建立結果尚未確認`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T154 [P] [BDD-RED] `站內處理原次建立的遺失回應`
+- [X] T154 [P] [BDD-RED] `站內處理原次建立的遺失回應`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature` → `@F006-106`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `站內處理原次建立的遺失回應`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T155 [P] [BDD-RED] `建立結果未知保留表單照片且只查原旅行`
+- [X] T155 [P] [BDD-RED] `建立結果未知保留表單照片且只查原旅行`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature` → `@F006-106`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `建立結果未知保留表單照片且只查原旅行`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T156 [P] [BDD-RED] `原次建立結果未知且現在狀態可確認為一般可用`
+- [X] T156 [P] [BDD-RED] `原次建立結果未知且現在狀態可確認為一般可用`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature` → `@F006-107`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `原次建立結果未知且現在狀態可確認為一般可用`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T157 [P] [BDD-RED] `owner 再次查證原次旅行建立`
+- [X] T157 [P] [BDD-RED] `owner 再次查證原次旅行建立`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature` → `@F006-107`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 再次查證原次旅行建立`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T158 [P] [BDD-RED] `原旅行確認後才續存同旅行照片`
+- [X] T158 [P] [BDD-RED] `原旅行確認後才續存同旅行照片`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature` → `@F006-107`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `原旅行確認後才續存同旅行照片`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T159 [P] [BDD-RED] `原旅行命令 "{操作}" 查證中且本輪無法確認`
+- [X] T159 [P] [BDD-RED] `原旅行命令 "{操作}" 查證中且本輪無法確認`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行結果查證與舊連結.feature` → `@F006-108`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `原旅行命令 "{操作}" 查證中且本輪無法確認`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T160 [P] [BDD-RED] `本輪旅行操作查證結束仍未知`
+- [X] T160 [P] [BDD-RED] `本輪旅行操作查證結束仍未知`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行結果查證與舊連結.feature` → `@F006-108`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `本輪旅行操作查證結束仍未知`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T161 [P] [BDD-RED] `旅行操作停止忙碌且保留原次查證入口`
+- [X] T161 [P] [BDD-RED] `旅行操作停止忙碌且保留原次查證入口`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/旅行結果查證與舊連結.feature` → `@F006-108`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `旅行操作停止忙碌且保留原次查證入口`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T162 [P] [BDD-RED] `原次預設圖片結果未知且編輯曾關閉再返回`
+- [X] T162 [P] [BDD-RED] `原次預設圖片結果未知且編輯曾關閉再返回`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖預覽與保存.feature` → `@F006-109`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `原次預設圖片結果未知且編輯曾關閉再返回`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T163 [P] [BDD-RED] `owner 查證返回後的原次圖片保存`
+- [X] T163 [P] [BDD-RED] `owner 查證返回後的原次圖片保存`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖預覽與保存.feature` → `@F006-109`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 查證返回後的原次圖片保存`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T164 [P] [BDD-RED] `返回後仍確認同一次預設圖片保存`
+- [X] T164 [P] [BDD-RED] `返回後仍確認同一次預設圖片保存`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖預覽與保存.feature` → `@F006-109`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `返回後仍確認同一次預設圖片保存`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T165 [P] [BDD-RED] `前次圖片上傳在提交前中斷且現已恢復連線`
+- [X] T165 [P] [BDD-RED] `前次圖片上傳在提交前中斷且現已恢復連線`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖預覽與保存.feature` → `@F006-113`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `前次圖片上傳在提交前中斷且現已恢復連線`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T166 [P] [BDD-RED] `owner 重試中斷後的圖片保存`
+- [X] T166 [P] [BDD-RED] `owner 重試中斷後的圖片保存`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖預覽與保存.feature` → `@F006-113`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `owner 重試中斷後的圖片保存`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T167 [P] [BDD-RED] `重試圖片保存成功且沒有殘留等待`
+- [X] T167 [P] [BDD-RED] `重試圖片保存成功且沒有殘留等待`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/trips/縮圖預覽與保存.feature` → `@F006-113`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/trips/dsl.md` → `重試圖片保存成功且沒有殘留等待`；`apps/web/tests/steps/trips/`（新句落 `apps/web/tests/steps/trips/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T168 [P] [BDD-ALIGN] `晚餐不再出現且沒有晚餐造成的分攤與付款安排`
+- [X] T168 [P] [BDD-ALIGN] `晚餐不再出現且沒有晚餐造成的分攤與付款安排`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/expenses/shared-expense-corrections-and-recalculation.feature` → `Rule: 刪除共同支出後移除其付款安排`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/expenses/dsl.md` → 本句；`apps/web/tests/steps/expenses/phase-1b/T178.ts`、`apps/web/tests/support/splitting/deleted-dinner-result.ts`；更新state-first斷言，保留原shares/安排及再讀驗證。
 
-- [ ] T169 [P] [BDD-RED] `原支出刪除結果未知且旅行目前為 "{狀態}"`
+- [X] T169 [P] [BDD-RED] `原支出刪除結果未知且旅行目前為 "{狀態}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/expenses/旅行生命週期下的刪除查證.feature` → `@F006-103`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/expenses/dsl.md` → `原支出刪除結果未知且旅行目前為 "{狀態}"`；`apps/web/tests/steps/expenses/`（新句落 `apps/web/tests/steps/expenses/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T170 [P] [BDD-RED] `owner 查證原次支出刪除`
+- [X] T170 [P] [BDD-RED] `owner 查證原次支出刪除`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/expenses/旅行生命週期下的刪除查證.feature` → `@F006-103`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/expenses/dsl.md` → `owner 查證原次支出刪除`；`apps/web/tests/steps/expenses/`（新句落 `apps/web/tests/steps/expenses/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T171 [P] [BDD-RED] `支出刪除查證呈現 "{結果}"`
+- [X] T171 [P] [BDD-RED] `支出刪除查證呈現 "{結果}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/expenses/旅行生命週期下的刪除查證.feature` → `@F006-103`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/expenses/dsl.md` → `支出刪除查證呈現 "{結果}"`；`apps/web/tests/steps/expenses/`（新句落 `apps/web/tests/steps/expenses/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T172 [P] [BDD-RED] `支出草稿未提交且另一裝置已將旅行移入垃圾桶`
+- [X] T172 [P] [BDD-RED] `支出草稿未提交且另一裝置已將旅行移入垃圾桶`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/expenses/旅行生命週期下的刪除查證.feature` → `@F006-110`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/expenses/dsl.md` → `支出草稿未提交且另一裝置已將旅行移入垃圾桶`；`apps/web/tests/steps/expenses/`（新句落 `apps/web/tests/steps/expenses/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T173 [P] [BDD-RED] `owner 從舊表單保存點心`
+- [X] T173 [P] [BDD-RED] `owner 從舊表單保存點心`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/expenses/旅行生命週期下的刪除查證.feature` → `@F006-110`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/expenses/dsl.md` → `owner 從舊表單保存點心`；`apps/web/tests/steps/expenses/`（新句落 `apps/web/tests/steps/expenses/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T174 [P] [BDD-RED] `舊表單說明垃圾桶狀態並提供復原下一步`
+- [X] T174 [P] [BDD-RED] `舊表單說明垃圾桶狀態並提供復原下一步`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/expenses/旅行生命週期下的刪除查證.feature` → `@F006-110`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/expenses/dsl.md` → `舊表單說明垃圾桶狀態並提供復原下一步`；`apps/web/tests/steps/expenses/`（新句落 `apps/web/tests/steps/expenses/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T175 [P] [BDD-RED] `全站 "{畫面}" 的 "{內容}" 初讀為 "{結果}"`
+- [X] T175 [P] [BDD-RED] `全站 "{畫面}" 的 "{內容}" 初讀為 "{結果}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站初讀與局部等待.feature` → `@F006-073`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `全站 "{畫面}" 的 "{內容}" 初讀為 "{結果}"`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T176 [P] [BDD-RED] `owner 開啟全站 "{畫面}"`
+- [X] T176 [P] [BDD-RED] `owner 開啟全站 "{畫面}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站初讀與局部等待.feature` → `@F006-073`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `owner 開啟全站 "{畫面}"`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T177 [P] [BDD-RED] `指定內容顯示結構骨架且不提前顯示空值`
+- [X] T177 [P] [BDD-RED] `指定內容顯示結構骨架且不提前顯示空值`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站初讀與局部等待.feature` → `@F006-073`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `指定內容顯示結構骨架且不提前顯示空值`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T178 [P] [BDD-RED] `該內容已在等待且本次讀取即將成功`
+- [X] T178 [P] [BDD-RED] `該內容已在等待且本次讀取即將成功`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站初讀與局部等待.feature` → `@F006-074`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `該內容已在等待且本次讀取即將成功`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T179 [P] [BDD-RED] `原次資料讀取完成`
+- [X] T179 [P] [BDD-RED] `原次資料讀取完成`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站初讀與局部等待.feature` → `@F006-074`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `原次資料讀取完成`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T180 [P] [BDD-RED] `畫面顯示 "{內容}" 的權威資料且骨架結束`
+- [X] T180 [P] [BDD-RED] `畫面顯示 "{內容}" 的權威資料且骨架結束`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站初讀與局部等待.feature` → `@F006-074`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `畫面顯示 "{內容}" 的權威資料且骨架結束`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T181 [P] [BDD-RED] `垃圾桶顯示已確認空狀態且沒有等待`
+- [X] T181 [P] [BDD-RED] `垃圾桶顯示已確認空狀態且沒有等待`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站初讀與局部等待.feature` → `@F006-075`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `垃圾桶顯示已確認空狀態且沒有等待`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T182 [P] [BDD-RED] `站內身分確認尚未完成`
+- [X] T182 [P] [BDD-RED] `站內身分確認尚未完成`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站初讀與局部等待.feature` → `@F006-076`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `站內身分確認尚未完成`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T183 [P] [BDD-RED] `使用者開啟網站`
+- [X] T183 [P] [BDD-RED] `使用者開啟網站`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站初讀與局部等待.feature` → `@F006-076`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `使用者開啟網站`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T184 [P] [BDD-RED] `身分確認有圖形與輔助語意且不洩漏私人內容`
+- [X] T184 [P] [BDD-RED] `身分確認有圖形與輔助語意且不洩漏私人內容`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站初讀與局部等待.feature` → `@F006-076`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `身分確認有圖形與輔助語意且不洩漏私人內容`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T185 [P] [BDD-RED] `新增支出必要選項 "{選項}" 尚在讀取`
+- [X] T185 [P] [BDD-RED] `新增支出必要選項 "{選項}" 尚在讀取`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站初讀與局部等待.feature` → `@F006-077`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `新增支出必要選項 "{選項}" 尚在讀取`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T186 [P] [BDD-RED] `owner 檢視新增支出選項`
+- [X] T186 [P] [BDD-RED] `owner 檢視新增支出選項`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站初讀與局部等待.feature` → `@F006-077`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `owner 檢視新增支出選項`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T187 [P] [BDD-RED] `局部選項等待且必要內容未齊不能保存`
+- [X] T187 [P] [BDD-RED] `局部選項等待且必要內容未齊不能保存`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站初讀與局部等待.feature` → `@F006-077`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `局部選項等待且必要內容未齊不能保存`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T188 [P] [BDD-RED] `owner 已備妥 "{操作}" 且命令將延遲後成功`
+- [X] T188 [P] [BDD-RED] `owner 已備妥 "{操作}" 且命令將延遲後成功`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站操作忙碌與防重複.feature` → `@F006-078`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `owner 已備妥 "{操作}" 且命令將延遲後成功`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T189 [P] [BDD-RED] `owner 執行全站操作 "{操作}"`
+- [X] T189 [P] [BDD-RED] `owner 執行全站操作 "{操作}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站操作忙碌與防重複.feature` → `@F006-078`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `owner 執行全站操作 "{操作}"`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T190 [P] [BDD-RED] `操作等待以置中圖形保留尺寸與操作語意`
+- [X] T190 [P] [BDD-RED] `操作等待以置中圖形保留尺寸與操作語意`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站操作忙碌與防重複.feature` → `@F006-078`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `操作等待以置中圖形保留尺寸與操作語意`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T191 [P] [BDD-RED] `原次 "{操作}" 正在處理且完成屏障可釋放`
+- [X] T191 [P] [BDD-RED] `原次 "{操作}" 正在處理且完成屏障可釋放`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站操作忙碌與防重複.feature` → `@F006-079`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `原次 "{操作}" 正在處理且完成屏障可釋放`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T192 [P] [BDD-RED] `owner 在等待中連續再次觸發相同操作`
+- [X] T192 [P] [BDD-RED] `owner 在等待中連續再次觸發相同操作`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站操作忙碌與防重複.feature` → `@F006-079`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `owner 在等待中連續再次觸發相同操作`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T193 [P] [BDD-RED] `操作只得到一個 "{結果}" 的已確認結果`
+- [X] T193 [P] [BDD-RED] `操作只得到一個 "{結果}" 的已確認結果`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站操作忙碌與防重複.feature` → `@F006-079`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `操作只得到一個 "{結果}" 的已確認結果`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T194 [P] [BDD-RED] `使用者未登入且站內Google登入將延遲`
+- [X] T194 [P] [BDD-RED] `使用者未登入且站內Google登入將延遲`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站操作忙碌與防重複.feature` → `@F006-080`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `使用者未登入且站內Google登入將延遲`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T195 [P] [BDD-RED] `使用者開始站內Google登入`
+- [X] T195 [P] [BDD-RED] `使用者開始站內Google登入`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站操作忙碌與防重複.feature` → `@F006-080`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `使用者開始站內Google登入`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T196 [P] [BDD-RED] `登入控制顯示圖形與可理解的登入狀態`
+- [X] T196 [P] [BDD-RED] `登入控制顯示圖形與可理解的登入狀態`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站操作忙碌與防重複.feature` → `@F006-080`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `登入控制顯示圖形與可理解的登入狀態`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T197 [P] [BDD-RED] `原次站內登入正在等待且隨後會成功返回`
+- [X] T197 [P] [BDD-RED] `原次站內登入正在等待且隨後會成功返回`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站操作忙碌與防重複.feature` → `@F006-081`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `原次站內登入正在等待且隨後會成功返回`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T198 [P] [BDD-RED] `登入只啟動一次且成功返回後結束等待`
+- [X] T198 [P] [BDD-RED] `登入只啟動一次且成功返回後結束等待`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站操作忙碌與防重複.feature` → `@F006-081`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `登入只啟動一次且成功返回後結束等待`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T199 [P] [BDD-RED] `支出已有 20 筆與確認總額且另有 5 筆未顯示`
+- [X] T199 [P] [BDD-RED] `支出已有 20 筆與確認總額且另有 5 筆未顯示`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/背景更新與分頁等待.feature` → `@F006-082`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `支出已有 20 筆與確認總額且另有 5 筆未顯示`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T200 [P] [BDD-RED] `owner 選擇載入更多支出`
+- [X] T200 [P] [BDD-RED] `owner 選擇載入更多支出`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/背景更新與分頁等待.feature` → `@F006-082`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `owner 選擇載入更多支出`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T201 [P] [BDD-RED] `原有支出與總額保持可見且只有尾端忙碌`
+- [X] T201 [P] [BDD-RED] `原有支出與總額保持可見且只有尾端忙碌`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/背景更新與分頁等待.feature` → `@F006-082`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `原有支出與總額保持可見且只有尾端忙碌`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T202 [P] [BDD-RED] `第二頁支出正在讀取且原次回應可完成`
+- [X] T202 [P] [BDD-RED] `第二頁支出正在讀取且原次回應可完成`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/背景更新與分頁等待.feature` → `@F006-083`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `第二頁支出正在讀取且原次回應可完成`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T203 [P] [BDD-RED] `列表恰有 25 筆不同支出且總額保持`
+- [X] T203 [P] [BDD-RED] `列表恰有 25 筆不同支出且總額保持`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/背景更新與分頁等待.feature` → `@F006-083`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `列表恰有 25 筆不同支出且總額保持`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T204 [P] [BDD-RED] `已載入 25 筆支出且背景更新將 "{結果}"`
+- [X] T204 [P] [BDD-RED] `已載入 25 筆支出且背景更新將 "{結果}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/背景更新與分頁等待.feature` → `@F006-084`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `已載入 25 筆支出且背景更新將 "{結果}"`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T205 [P] [BDD-RED] `系統進行本次背景資料更新`
+- [X] T205 [P] [BDD-RED] `系統進行本次背景資料更新`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/背景更新與分頁等待.feature` → `@F006-084`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `系統進行本次背景資料更新`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T206 [P] [BDD-RED] `更新僅顯示局部等待而保留全部已載入資料`
+- [X] T206 [P] [BDD-RED] `更新僅顯示局部等待而保留全部已載入資料`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/背景更新與分頁等待.feature` → `@F006-084`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `更新僅顯示局部等待而保留全部已載入資料`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T207 [P] [BDD-RED] `舊內容保持且局部等待結束並可重試`
+- [X] T207 [P] [BDD-RED] `舊內容保持且局部等待結束並可重試`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/背景更新與分頁等待.feature` → `@F006-085`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `舊內容保持且局部等待結束並可重試`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T208 [P] [BDD-RED] `背景更新已失敗且連線恢復`
+- [X] T208 [P] [BDD-RED] `背景更新已失敗且連線恢復`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/背景更新與分頁等待.feature` → `@F006-086`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `背景更新已失敗且連線恢復`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T209 [P] [BDD-RED] `owner 重試本次讀取`
+- [X] T209 [P] [BDD-RED] `owner 重試本次讀取`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站初讀與局部等待.feature` → `@F006-088`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `owner 重試本次讀取`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T210 [P] [BDD-RED] `最新已保存資料完整顯示且沒有重複`
+- [X] T210 [P] [BDD-RED] `最新已保存資料完整顯示且沒有重複`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/背景更新與分頁等待.feature` → `@F006-086`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `最新已保存資料完整顯示且沒有重複`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T211 [P] [BDD-RED] `初讀等待結束並顯示讀取錯誤與重試`
+- [X] T211 [P] [BDD-RED] `初讀等待結束並顯示讀取錯誤與重試`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站初讀與局部等待.feature` → `@F006-087`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `初讀等待結束並顯示讀取錯誤與重試`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T212 [P] [BDD-RED] `旅行初讀已失敗且現在可成功取得清單`
+- [X] T212 [P] [BDD-RED] `旅行初讀已失敗且現在可成功取得清單`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站初讀與局部等待.feature` → `@F006-088`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `旅行初讀已失敗且現在可成功取得清單`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T213 [P] [BDD-RED] `支出編輯草稿已修改且本次保存將明確失敗`
+- [X] T213 [P] [BDD-RED] `支出編輯草稿已修改且本次保存將明確失敗`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/操作失敗與未知結果.feature` → `@F006-089`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `支出編輯草稿已修改且本次保存將明確失敗`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T214 [P] [BDD-RED] `owner 保存目前支出編輯草稿`
+- [X] T214 [P] [BDD-RED] `owner 保存目前支出編輯草稿`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/操作失敗與未知結果.feature` → `@F006-089`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `owner 保存目前支出編輯草稿`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T215 [P] [BDD-RED] `保存等待結束且原帳務與修改草稿均保留`
+- [X] T215 [P] [BDD-RED] `保存等待結束且原帳務與修改草稿均保留`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/操作失敗與未知結果.feature` → `@F006-089`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `保存等待結束且原帳務與修改草稿均保留`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T216 [P] [BDD-RED] `前次支出保存明確失敗已解除且草稿保留`
+- [X] T216 [P] [BDD-RED] `前次支出保存明確失敗已解除且草稿保留`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/操作失敗與未知結果.feature` → `@F006-090`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `前次支出保存明確失敗已解除且草稿保留`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T217 [P] [BDD-RED] `原支出恰更新一次且呈現已確認結果`
+- [X] T217 [P] [BDD-RED] `原支出恰更新一次且呈現已確認結果`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/操作失敗與未知結果.feature` → `@F006-090`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `原支出恰更新一次且呈現已確認結果`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T218 [P] [BDD-RED] `實付結清已填合法草稿且保存會成功但回應遺失`
+- [X] T218 [P] [BDD-RED] `實付結清已填合法草稿且保存會成功但回應遺失`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/操作失敗與未知結果.feature` → `@F006-091`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `實付結清已填合法草稿且保存會成功但回應遺失`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T219 [P] [BDD-RED] `owner 保存本次實付結清`
+- [X] T219 [P] [BDD-RED] `owner 保存本次實付結清`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/操作失敗與未知結果.feature` → `@F006-091`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `owner 保存本次實付結清`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T220 [P] [BDD-RED] `實付結果尚未確認且不能重複新增`
+- [X] T220 [P] [BDD-RED] `實付結果尚未確認且不能重複新增`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/操作失敗與未知結果.feature` → `@F006-091`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `實付結果尚未確認且不能重複新增`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T221 [P] [BDD-RED] `原次實付正在查證但本輪仍無法確認`
+- [X] T221 [P] [BDD-RED] `原次實付正在查證但本輪仍無法確認`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/操作失敗與未知結果.feature` → `@F006-092`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `原次實付正在查證但本輪仍無法確認`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T222 [P] [BDD-RED] `本輪結果查證結束仍未知`
+- [X] T222 [P] [BDD-RED] `本輪結果查證結束仍未知`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/操作失敗與未知結果.feature` → `@F006-092`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `本輪結果查證結束仍未知`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T223 [P] [BDD-RED] `停止持續動畫並保留再次查證入口及草稿`
+- [X] T223 [P] [BDD-RED] `停止持續動畫並保留再次查證入口及草稿`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/操作失敗與未知結果.feature` → `@F006-092`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `停止持續動畫並保留再次查證入口及草稿`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T224 [P] [BDD-RED] `原次實付結果未知且現在可查證`
+- [X] T224 [P] [BDD-RED] `原次實付結果未知且現在可查證`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/操作失敗與未知結果.feature` → `@F006-093`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `原次實付結果未知且現在可查證`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T225 [P] [BDD-RED] `owner 再次查證原實付`
+- [X] T225 [P] [BDD-RED] `owner 再次查證原實付`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/操作失敗與未知結果.feature` → `@F006-093`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `owner 再次查證原實付`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T226 [P] [BDD-RED] `原實付已確認且恰有一筆付款事實`
+- [X] T226 [P] [BDD-RED] `原實付已確認且恰有一筆付款事實`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/操作失敗與未知結果.feature` → `@F006-093`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `原實付已確認且恰有一筆付款事實`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T227 [P] [BDD-RED] `畫面顯示等待連線而非無限處理中`
+- [X] T227 [P] [BDD-RED] `畫面顯示等待連線而非無限處理中`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站初讀與局部等待.feature` → `@F006-094`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `畫面顯示等待連線而非無限處理中`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T228 [P] [BDD-RED] `owner 使用 "{裝置}" 與鍵盤讀屏且偏好減少動態效果`
+- [X] T228 [P] [BDD-RED] `owner 使用 "{裝置}" 與鍵盤讀屏且偏好減少動態效果`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/鍵盤與減少動態效果.feature` → `@F006-096`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `owner 使用 "{裝置}" 與鍵盤讀屏且偏好減少動態效果`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T229 [P] [BDD-RED] `owner 以鍵盤開啟移至垃圾桶確認`
+- [X] T229 [P] [BDD-RED] `owner 以鍵盤開啟移至垃圾桶確認`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/鍵盤與減少動態效果.feature` → `@F006-096`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `owner 以鍵盤開啟移至垃圾桶確認`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T230 [P] [BDD-RED] `確認的名稱後果與安全焦點可辨識`
+- [X] T230 [P] [BDD-RED] `確認的名稱後果與安全焦點可辨識`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/鍵盤與減少動態效果.feature` → `@F006-096`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `確認的名稱後果與安全焦點可辨識`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T231 [P] [BDD-RED] `日期保存已送出且即將 "{結果}"`
+- [X] T231 [P] [BDD-RED] `日期保存已送出且即將 "{結果}"`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/鍵盤與減少動態效果.feature` → `@F006-097`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `日期保存已送出且即將 "{結果}"`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T232 [P] [BDD-RED] `可理解 "{結果}" 且焦點未無故移走`
+- [X] T232 [P] [BDD-RED] `可理解 "{結果}" 且焦點未無故移走`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/鍵盤與減少動態效果.feature` → `@F006-097`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `可理解 "{結果}" 且焦點未無故移走`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T233 [P] [BDD-RED] `日期保存進入本例指定狀態`
+- [X] T233 [P] [BDD-RED] `日期保存進入本例指定狀態`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/鍵盤與減少動態效果.feature` → `@F006-097`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `日期保存進入本例指定狀態`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T234 [P] [BDD-RED] `所有必要支出選項已由等待恢復成功`
+- [X] T234 [P] [BDD-RED] `所有必要支出選項已由等待恢復成功`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站初讀與局部等待.feature` → `@F006-111`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `所有必要支出選項已由等待恢復成功`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T235 [P] [BDD-RED] `owner 保存選項恢復後的支出`
+- [X] T235 [P] [BDD-RED] `owner 保存選項恢復後的支出`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站初讀與局部等待.feature` → `@F006-111`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `owner 保存選項恢復後的支出`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T236 [P] [BDD-RED] `選項等待結束且支出正常保存`
+- [X] T236 [P] [BDD-RED] `選項等待結束且支出正常保存`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站初讀與局部等待.feature` → `@F006-111`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `選項等待結束且支出正常保存`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T237 [P] [BDD-RED] `旅行清單正在等待連線且網路即將恢復`
+- [X] T237 [P] [BDD-RED] `旅行清單正在等待連線且網路即將恢復`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站初讀與局部等待.feature` → `@F006-112`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `旅行清單正在等待連線且網路即將恢復`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T238 [P] [BDD-RED] `網路恢復並完成原次旅行讀取`
+- [X] T238 [P] [BDD-RED] `網路恢復並完成原次旅行讀取`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站初讀與局部等待.feature` → `@F006-112`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `網路恢復並完成原次旅行讀取`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T239 [P] [BDD-RED] `連線等待結束且旅行資料可正常使用`
+- [X] T239 [P] [BDD-RED] `連線等待結束且旅行資料可正常使用`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站初讀與局部等待.feature` → `@F006-112`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `連線等待結束且旅行資料可正常使用`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
 
-- [ ] T240 subagent review (phase quality gate)
+- [X] T240 subagent review (phase quality gate)
   - Dependencies: T009–T239（231筆全部完成）。
   - Read: 全部Phase 3 task的最新diff、各DSL完整row、20新增feature與既有expense受影響file、bddgen/RED證據。
   - Evidence: 未參與受審測試實作的既有審查者核對231句唯一binding、生成案例與測試碼語意完整、參數與表格正確、真DB與原子性/請求次數斷言完整、無產品碼混入；兩端全scope生成0undefined/ambiguous、預期RED不含環境/fixture缺陷；逐句記錄實際已執行與因產品schema未落地而runtime待驗的差別，不以靜態review冒稱全部可達。記錄findings，修正再審；本次static/binding審查通過只解鎖T241，runtime待驗責任轉入T241及各scope首Green，不宣稱231句已全部觀察RED。
@@ -1304,12 +1304,12 @@
 
 - `specs/truth/features/backend/trips/旅行垃圾桶與復原.feature`（整檔、全部展開值；API project、worker=1）。
 
-- [ ] T241 [BDD-GREEN] 實作新生命週期schema、ID保留／收據基礎、owner狀態及清單、移入與復原
+- [X] T241 [BDD-GREEN] 實作新生命週期schema、ID保留／收據基礎、owner狀態及清單、移入與復原
   - Dependencies: T240。
   - 先以正式新migration建立006產品schema，再重跑backend新增scope並完成本Test Scope。由原獨立審查者複核Phase3延後的runtime帳：本scope的句均實際走到、其餘scope僅可因真實待實作產品前序能力受阻，不能因未寫測試/萬用schema guard掩蓋。記錄已觀察RED與產品前序受阻的逐句差別；有undefined/fixture缺陷回修原Phase3測試，不造schema/skip/改truth。此獨立runtime複核及本scope全Green均通過才可完成T241、解鎖T242；其餘句仍需在各自Green完整走到Then才算驗證。
   - Evidence: 整檔真API/DB通過，記錄案例集合、結果與版本到validation.md；完整來源與不變條件均成立，不只回應2xx。
 
-- [ ] T242 [BDD-REFACTOR] 在綠燈下整理此功能的產品碼與直接測試支援
+- [X] T242 [BDD-REFACTOR] 在綠燈下整理此功能的產品碼與直接測試支援
   - Dependencies: T241。
   - 保留public contract與行為，僅消除本scope重複／改善模組邊界；重跑同Test Scope及實際受影響既有回歸。
 
@@ -1332,15 +1332,43 @@
 
 - `specs/truth/features/backend/trips/縮圖格式與容量邊界.feature`（整檔、全部展開值；API project、worker=1）。
 
-- [ ] T243 [BDD-GREEN] 實作真實圖片驗證、受限單檔上傳與目前縮圖保存
+- [X] T243 [BDD-GREEN] 實作真實圖片驗證、受限單檔上傳與目前縮圖保存
   - Dependencies: T242。
+  - T240審查新增的被動觀測前置：正式接線 `tripManagementHooks.afterThumbnailJob`，在完整圖片job（含逾時後原生處理與全部DB續體）最外層finally觸發且恰一次；不能在HTTP timeout回應時提早觸發。T057要求native gate仍held時completion=0，release後completion=1再核DB。獨立runtime審查需核實無detached後續寫入；測試registry不自行emit、不以sleep/onResponse代替。
   - Evidence: 整檔真API/DB通過，記錄案例集合、結果與版本到validation.md；完整來源與不變條件均成立，不只回應2xx。
 
-- [ ] T244 [BDD-REFACTOR] 在綠燈下整理此功能的產品碼與直接測試支援
+- [X] T244 [BDD-REFACTOR] 在綠燈下整理此功能的產品碼與直接測試支援
   - Dependencies: T243。
   - 保留public contract與行為，僅消除本scope重複／改善模組邊界；重跑同Test Scope及實際受影響既有回歸。
 
-## Phase 4.3: ADD Feature File - backend/trips/縮圖保存與私有讀取.feature
+## Phase 4.3: ADD Feature File - backend/trips/整趟永久刪除.feature
+
+**Goal**: 完成整趟purge routine、歷史保護精確例外與永不復活，讓整份Test Scope全綠。
+
+**Shared Must Read**:
+
+- `specs/truth/features/backend/trips/整趟永久刪除.feature` → 全部Rule／Examples；`specs/truth/features/backend/trips/dsl.md` → 本檔全部使用句。
+- `truth-delta.md` → `/dsl-refine`的本feature及DSL ADD列，並回追 `/api-plan`、`/data-plan` 對應語意列。
+- `plan.md` → Wave 1資料生命週期、Wave 2權威契約；`specs/truth/contracts/groups/trip-management.yaml`、`specs/truth/contracts/groups/trips.yaml`、`specs/truth/contracts/components/schemas/trips.yaml`、`specs/truth/contracts/components/parameters.yaml` → 本Feature對應的命令、查詢、版本與錯誤定義。
+- `specs/truth/data/data-model.dbml` → data-model.dbml檔尾006 purge context/鎖序/deferred checks、reservation/receipts不可變；`specs/truth/techstack.md` → 本模組新技術；`research.md` → 適用決策2～9。
+
+**受影響畫面與完成證據**: A，無直接呈現改動；前端C責任由對應後續Feature承接。後端以真DB/API與故障/競爭證據驗證，不要求無關UI批准。
+
+**Boundary**: owner/trip transaction-local context只允許trash相符DELETE，調整→還款→結清→份額→支出→成員→縮圖→旅行與reservation/收據同交易；不得全域停trigger或允許一般歷史UPDATE。 限落點 `apps/api/drizzle/下一號purge migration、src/modules/trips/生命週期命令` 及該scope必要直接依賴（purge-result oracle實際讀取的owner-scoped已提交receipt GET及purged兩種圖片URL正式404）；完整receipt重播／競爭仍由T253承接，reset／trash可讀仍由T245承接。共享修改需跑已綠且受影響的原scope，不改truth遷就實作。
+
+**Test Scope**:
+
+- `specs/truth/features/backend/trips/整趟永久刪除.feature`（整檔、全部展開值；API project、worker=1）。
+
+- [X] T247 [BDD-GREEN] 完成整趟purge routine、歷史保護精確例外與永不復活
+  - Dependencies: T244。
+  - Evidence: 整檔真API/DB通過，記錄案例集合、結果與版本到validation.md；完整來源與不變條件均成立，不只回應2xx。
+
+- [X] T248 [BDD-REFACTOR] 在綠燈下整理此功能的產品碼與直接測試支援
+  - Dependencies: T247。
+  - 保留public contract與行為，僅消除本scope重複／改善模組邊界；重跑同Test Scope及實際受影響既有回歸。
+
+## Phase 4.4: ADD Feature File - backend/trips/縮圖保存與私有讀取.feature
 
 **Goal**: 完成正規化、預設圖保存與私有圖片生命週期，讓整份Test Scope全綠。
 
@@ -1359,39 +1387,12 @@
 
 - `specs/truth/features/backend/trips/縮圖保存與私有讀取.feature`（整檔、全部展開值；API project、worker=1）。
 
-- [ ] T245 [BDD-GREEN] 完成正規化、預設圖保存與私有圖片生命週期
-  - Dependencies: T244。
+- [X] T245 [BDD-GREEN] 完成正規化、預設圖保存與私有圖片生命週期
+  - Dependencies: T248。
   - Evidence: 整檔真API/DB通過，記錄案例集合、結果與版本到validation.md；完整來源與不變條件均成立，不只回應2xx。
 
-- [ ] T246 [BDD-REFACTOR] 在綠燈下整理此功能的產品碼與直接測試支援
+- [X] T246 [BDD-REFACTOR] 在綠燈下整理此功能的產品碼與直接測試支援
   - Dependencies: T245。
-  - 保留public contract與行為，僅消除本scope重複／改善模組邊界；重跑同Test Scope及實際受影響既有回歸。
-
-## Phase 4.4: ADD Feature File - backend/trips/整趟永久刪除.feature
-
-**Goal**: 完成整趟purge routine、歷史保護精確例外與永不復活，讓整份Test Scope全綠。
-
-**Shared Must Read**:
-
-- `specs/truth/features/backend/trips/整趟永久刪除.feature` → 全部Rule／Examples；`specs/truth/features/backend/trips/dsl.md` → 本檔全部使用句。
-- `truth-delta.md` → `/dsl-refine`的本feature及DSL ADD列，並回追 `/api-plan`、`/data-plan` 對應語意列。
-- `plan.md` → Wave 1資料生命週期、Wave 2權威契約；`specs/truth/contracts/groups/trip-management.yaml`、`specs/truth/contracts/groups/trips.yaml`、`specs/truth/contracts/components/schemas/trips.yaml`、`specs/truth/contracts/components/parameters.yaml` → 本Feature對應的命令、查詢、版本與錯誤定義。
-- `specs/truth/data/data-model.dbml` → data-model.dbml檔尾006 purge context/鎖序/deferred checks、reservation/receipts不可變；`specs/truth/techstack.md` → 本模組新技術；`research.md` → 適用決策2～9。
-
-**受影響畫面與完成證據**: A，無直接呈現改動；前端C責任由對應後續Feature承接。後端以真DB/API與故障/競爭證據驗證，不要求無關UI批准。
-
-**Boundary**: owner/trip transaction-local context只允許trash相符DELETE，調整→還款→結清→份額→支出→成員→縮圖→旅行與reservation/收據同交易；不得全域停trigger或允許一般歷史UPDATE。 限落點 `apps/api/drizzle/下一號purge migration、src/modules/trips/生命週期命令` 及該scope必要直接依賴；共享修改需跑已綠且受影響的原scope，不改truth遷就實作。
-
-**Test Scope**:
-
-- `specs/truth/features/backend/trips/整趟永久刪除.feature`（整檔、全部展開值；API project、worker=1）。
-
-- [ ] T247 [BDD-GREEN] 完成整趟purge routine、歷史保護精確例外與永不復活
-  - Dependencies: T246。
-  - Evidence: 整檔真API/DB通過，記錄案例集合、結果與版本到validation.md；完整來源與不變條件均成立，不只回應2xx。
-
-- [ ] T248 [BDD-REFACTOR] 在綠燈下整理此功能的產品碼與直接測試支援
-  - Dependencies: T247。
   - 保留public contract與行為，僅消除本scope重複／改善模組邊界；重跑同Test Scope及實際受影響既有回歸。
 
 ## Phase 4.5: ADD Feature File - backend/trips/垃圾桶存取與擁有者隔離.feature
@@ -1413,11 +1414,11 @@
 
 - `specs/truth/features/backend/trips/垃圾桶存取與擁有者隔離.feature`（整檔、全部展開值；API project、worker=1）。
 
-- [ ] T249 [BDD-GREEN] 統一全部旅行子資源active scope與owner隔離
-  - Dependencies: T248。
+- [X] T249 [BDD-GREEN] 統一全部旅行子資源active scope與owner隔離
+  - Dependencies: T246。
   - Evidence: 整檔真API/DB通過，記錄案例集合、結果與版本到validation.md；完整來源與不變條件均成立，不只回應2xx。
 
-- [ ] T250 [BDD-REFACTOR] 在綠燈下整理此功能的產品碼與直接測試支援
+- [X] T250 [BDD-REFACTOR] 在綠燈下整理此功能的產品碼與直接測試支援
   - Dependencies: T249。
   - 保留public contract與行為，僅消除本scope重複／改善模組邊界；重跑同Test Scope及實際受影響既有回歸。
 
@@ -1440,11 +1441,11 @@
 
 - `specs/truth/features/backend/categories/垃圾桶分類引用.feature`（整檔、全部展開值；API project、worker=1）。
 
-- [ ] T251 [BDD-GREEN] 保留垃圾桶分類usageCount與刪除引用保護
+- [X] T251 [BDD-GREEN] 保留垃圾桶分類usageCount與刪除引用保護
   - Dependencies: T250。
   - Evidence: 整檔真API/DB通過，記錄案例集合、結果與版本到validation.md；完整來源與不變條件均成立，不只回應2xx。
 
-- [ ] T252 [BDD-REFACTOR] 在綠燈下整理此功能的產品碼與直接測試支援
+- [X] T252 [BDD-REFACTOR] 在綠燈下整理此功能的產品碼與直接測試支援
   - Dependencies: T251。
   - 保留public contract與行為，僅消除本scope重複／改善模組邊界；重跑同Test Scope及實際受影響既有回歸。
 
@@ -1467,11 +1468,11 @@
 
 - `specs/truth/features/backend/trips/旅行競爭與結果查證.feature`（整檔、全部展開值；API project、worker=1）。
 
-- [ ] T253 [BDD-GREEN] 收斂回滾、收據重播、版本與跨裝置序列化
+- [X] T253 [BDD-GREEN] 收斂回滾、收據重播、版本與跨裝置序列化
   - Dependencies: T252。
   - Evidence: 整檔真API/DB通過，記錄案例集合、結果與版本到validation.md；完整來源與不變條件均成立，不只回應2xx。
 
-- [ ] T254 [BDD-REFACTOR] 在綠燈下整理此功能的產品碼與直接測試支援
+- [X] T254 [BDD-REFACTOR] 在綠燈下整理此功能的產品碼與直接測試支援
   - Dependencies: T253。
   - 保留public contract與行為，僅消除本scope重複／改善模組邊界；重跑同Test Scope及實際受影響既有回歸。
 
@@ -1494,11 +1495,11 @@
 
 - `specs/truth/features/backend/trips/縮圖傳輸與提交邊界.feature`（整檔、全部展開值；API project、worker=1）。
 
-- [ ] T255 [BDD-GREEN] 完成Origin解析順序、總量、deadline及單工作入場控制
+- [X] T255 [BDD-GREEN] 完成Origin解析順序、總量、deadline及單工作入場控制
   - Dependencies: T254。
   - Evidence: 整檔真API/DB通過，記錄案例集合、結果與版本到validation.md；完整來源與不變條件均成立，不只回應2xx。
 
-- [ ] T256 [BDD-REFACTOR] 在綠燈下整理此功能的產品碼與直接測試支援
+- [X] T256 [BDD-REFACTOR] 在綠燈下整理此功能的產品碼與直接測試支援
   - Dependencies: T255。
   - 保留public contract與行為，僅消除本scope重複／改善模組邊界；重跑同Test Scope及實際受影響既有回歸。
 
@@ -1506,7 +1507,7 @@
 
 **來源**: plan.md Wave1/2、research.md後端E2E、truth-delta三個owner與既有NOOP。
 
-- [ ] T257 [REGRESSION] 驗證後端完整功能組與既有帳務保護
+- [X] T257 [REGRESSION] 驗證後端完整功能組與既有帳務保護
   - Dependencies: T256。
   - Read: `specs/truth/features/backend/**`、API contracts/data；已完成8份新增feature及既有19份回歸。
   - Evidence: 全API BDD 27檔（新增182案例另列）、API support、migration空庫與既有0003資料升級、檢查舊migration checksum未動、正常重啟不重複套用；正式schema權限/FK/trigger/bytea/receipt一致。記錄版本與exit，無skip。此為功能整合，不另加truth產物家族review。
@@ -1534,7 +1535,7 @@
 
 - `specs/truth/features/frontend/trips/旅行管理與確認.feature`（整檔、全部表列資料；Chromium、WebKit及DSL指定兩尺寸依序，worker=1）。
 
-- [ ] T258 [BDD-GREEN] 完成管理dropdown、兩段確認、垃圾桶路由與清單更新
+- [X] T258 [BDD-GREEN] 完成管理dropdown、兩段確認、垃圾桶路由與清單更新
   - Dependencies: T257。
   - Evidence: 整檔產品BDD與權威資料一致，完成上述畫面/狀態比對、request count、鍵盤及手機操作所需證據；差異只在既定適配範圍內處理。
 
@@ -2045,3 +2046,7 @@
 | 基準與最終交付 | T290、T291、T292完成 | 所有要求均滿足才標plan完成 |
 
 抵達上述session checkpoint時保存交接並結束當輪，不自動建立新chat；下一輪依已解鎖task續跑，不重新審批有效design-v7、不跳過未完成review。缺真機/平台/審查工具時僅阻擋其依賴，保持實際進度，不把缺項標通過。
+
+## 2026-11-15 /tasks 增量相依修正
+
+T245整檔的purged Given必須使用正式purge；原T245→T246→T247順序形成無法完成的驗收前序。保留全部ID、T001–T244狀態、truth及整檔Green/refactor門檻，修正主鏈為T244→T247→T248→T245→T246→T249，並依執行順序交換兩phase區塊。T247必要直接依賴明列既有purge Then所查的已提交receipt GET及purged圖片404；不縮減驗收、不mock Given、不宣稱完整receipt scope完成。T245先前6/9PASS及reset/trash各focused1PASS屬部分證據，維持[ ]，待T248後重跑全部9例與回歸。根據/tasks SOP Phase5增量保留ID與歷史證據規則，以及plan Wave1/2、data purge及DSL已刪旅行建態權威；不涉及UI或truth語意決策。
