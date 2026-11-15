@@ -16,7 +16,7 @@ export default defineConfig({
   testDir,
   timeout: 15000,
   expect: { timeout: 3000 },
-  workers: 2,
+  workers: 1,
   fullyParallel: true,
   reporter: [['list']],
   use: { trace: 'retain-on-failure' },

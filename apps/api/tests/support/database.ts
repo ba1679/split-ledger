@@ -9,7 +9,7 @@ export const testDatabaseUrl =
 
 export const runMigrations = migrate;
 
-export async function createWorkerDatabase(worker: number) {
+export async function createWorkerDatabase(worker: number, initialize = runMigrations) {
   const url = new URL(testDatabaseUrl);
 
   if (!url.pathname.startsWith('/ledger_test') || url.port !== '54330')
@@ -35,7 +35,7 @@ export async function createWorkerDatabase(worker: number) {
   };
 
   try {
-    await runMigrations(pool);
+    await initialize(pool);
   } catch (error) {
     await closePool();
     await admin.query(`DROP DATABASE "${name}"`);

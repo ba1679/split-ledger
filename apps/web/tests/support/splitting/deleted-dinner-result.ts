@@ -1,6 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 import type { LedgerWorld } from '../../../../api/tests/support/world.js';
-import { callApi } from '../../../../api/tests/support/seed.js';
+import { callApi, requireProductTable } from '../../../../api/tests/support/seed.js';
+import { requireProductColumns } from '../../../../api/tests/support/splitting/schema.js';
 import { expenseLink } from '../expense-helpers.js';
 import {
   assertSingleExpenseDeletion,
@@ -32,6 +33,33 @@ export function assertDeletedDinnerProjection(state: ExpenseDeletion): void {
 /** Read only: the preceding When already checked the ledger and opened its refreshed settlement. */
 export async function assertDeletedDinner(page: Page, world: LedgerWorld): Promise<void> {
   const state = world.get<ExpenseDeletion>(deletedSharedExpenseKey);
+  await requireProductColumns(world, 'trips', [
+    'deleted_at',
+    'lifecycle_revision',
+    'thumbnail_revision',
+  ]);
+  await requireProductTable(world, 'trip_thumbnails');
+  // Ordinary child404 is evidence of this deletion only while the owner trip is active.
+  const tripState = await callApi(world, 'GET', `/api/trips/${state.tripId}/state`);
+  expect(
+    tripState.status(),
+    'Owner trip state must be available before interpreting expense404',
+  ).toBe(200);
+  const current = await tripState.json();
+  expect(current.state, 'Trash/purged must never confirm this individual DELETE').toBe('active');
+  const trip = await world.db.query(
+    `SELECT t.*,EXISTS(SELECT 1 FROM trip_thumbnails i WHERE i.owner_id=t.owner_id AND i.trip_id=t.id) AS has_thumbnail FROM trips t WHERE t.owner_id=$1 AND t.id=$2`,
+    [world.users.get('甲')!.id, state.tripId],
+  );
+  expect(trip.rows).toHaveLength(1);
+  const row = trip.rows[0]!;
+  expect(row.deleted_at).toBeNull();
+  expect(current).toEqual({
+    state: 'active',
+    lifecycleRevision: String(row.lifecycle_revision),
+    thumbnailRevision: String(row.thumbnail_revision),
+    hasThumbnail: row.has_thumbnail,
+  });
   assertDeletedDinnerProjection(state);
   await expect(page).toHaveURL(new RegExp(`/trips/${state.tripId}/settlement/?$`));
   await expect(expenseLink(page, '晚餐')).toHaveCount(0);
