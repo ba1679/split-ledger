@@ -11,7 +11,7 @@ import type { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 import type { FastifyInstance } from 'fastify';
 import { and, asc, eq, sql } from 'drizzle-orm';
 import type { Database } from '../../db/index.js';
-import { trips, tripMembers } from '../../db/schema.js';
+import { tripMembers } from '../../db/schema.js';
 import {
   Uuid,
   Timestamp,
@@ -131,31 +131,30 @@ export function registerMemberRoutes(app: FastifyInstance, db: Database, auth: A
           200: Type.Object({ items: Type.Array(Member) }),
           401: ErrorResponse,
           404: ErrorResponse,
+          409: ErrorResponse,
         },
       },
     },
     async (request, reply) => {
       const user = await requireUser(auth, request, reply);
-      const [trip] = await db
-        .select({ id: trips.id })
-        .from(trips)
-        .where(and(eq(trips.id, request.params.tripId), eq(trips.ownerId, user.id)));
 
-      if (!trip) throw notFound();
+      return db.transaction(
+        async (tx) => {
+          const trip = await requireOwnedTrip(tx, user.id, request.params.tripId);
+          const rows = await tx
+            .select()
+            .from(tripMembers)
+            .where(and(eq(tripMembers.tripId, trip.id), eq(tripMembers.ownerId, user.id)))
+            .orderBy(
+              sql`CASE WHEN ${tripMembers.role}='owner' THEN 0 ELSE 1 END`,
+              asc(tripMembers.nameKey),
+              asc(tripMembers.id),
+            );
 
-      const rows = await db
-        .select()
-        .from(tripMembers)
-        .where(and(eq(tripMembers.tripId, trip.id), eq(tripMembers.ownerId, user.id)))
-        .orderBy(
-          sql`CASE WHEN ${tripMembers.role}='owner' THEN 0 ELSE 1 END`,
-          asc(tripMembers.nameKey),
-          asc(tripMembers.id),
-        );
-
-      return {
-        items: rows.map(view),
-      };
+          return { items: rows.map(view) };
+        },
+        { isolationLevel: 'repeatable read', accessMode: 'read only' },
+      );
     },
   );
 
@@ -164,7 +163,7 @@ export function registerMemberRoutes(app: FastifyInstance, db: Database, auth: A
     {
       schema: {
         params: MemberParams,
-        response: { 200: Member, 401: ErrorResponse, 404: ErrorResponse },
+        response: { 200: Member, 401: ErrorResponse, 404: ErrorResponse, 409: ErrorResponse },
       },
     },
     async (request, reply) => {

@@ -1,5 +1,8 @@
 import Fastify from 'fastify';
 import statics from '@fastify/static';
+import multipart from '@fastify/multipart';
+import type { TripManagementHooks } from './modules/trips/management/dependencies.js';
+import { MAX_IMAGE_BYTES } from './modules/trips/management/image-processor.js';
 import pg from 'pg';
 import { createDatabase, migrate } from './db/index.js';
 import { listCurrencies, registerCurrencyRoutes } from './modules/currencies/index.js';
@@ -17,6 +20,7 @@ import { checkOrigin, HttpError, invalid } from './http.js';
 import type { SplittingHooks } from './modules/splitting/dependencies.js';
 
 export interface AppOptions {
+  tripManagementHooks?: TripManagementHooks;
   splittingHooks?: SplittingHooks;
   staticRoot?: string;
   pool?: pg.Pool;
@@ -107,7 +111,13 @@ export function buildApp(options: AppOptions = {}) {
       return;
     // This runs before parsing/schema validation, including malformed JSON requests.
     checkOrigin(request, appOrigin);
+    const thumbnailUpload =
+      request.method === 'POST' &&
+      /^\/api\/trips\/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\/thumbnail$/i.test(path) &&
+      request.headers['content-type']?.split(';')[0]?.trim().toLowerCase() ===
+        'multipart/form-data';
     if (
+      !thumbnailUpload &&
       ['POST', 'PATCH'].includes(request.method) &&
       request.headers['content-type']?.split(';')[0]?.trim().toLowerCase() !== 'application/json'
     )
@@ -118,6 +128,17 @@ export function buildApp(options: AppOptions = {}) {
         Number(request.headers['content-length'] ?? 0) !== 0)
     )
       throw invalid('刪除請求不得包含本文。');
+  });
+  app.register(multipart, {
+    throwFileSizeLimit: true,
+    limits: {
+      files: 1,
+      fields: 0,
+      parts: 1,
+      fileSize: MAX_IMAGE_BYTES,
+      headerPairs: 100,
+      fieldNameSize: 100,
+    },
   });
   app.addHook('onReady', async () => {
     await migrate(pool);
@@ -159,7 +180,7 @@ export function buildApp(options: AppOptions = {}) {
 
   registerCurrencyRoutes(app, db);
   registerAuthRoutes(app, auth, authConfig);
-  registerTripRoutes(app, db, auth, authConfig);
+  registerTripRoutes(app, db, auth, authConfig, options.tripManagementHooks);
   registerMemberRoutes(app, db, auth);
   registerSettlementReadRoutes({ app, db, auth, config: authConfig });
   registerSettlementRecordRoute({ app, db, auth, config: authConfig });

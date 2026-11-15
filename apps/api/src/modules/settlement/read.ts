@@ -50,7 +50,7 @@ export function registerSettlementReadRoutes({
     {
       schema: {
         params: Type.Object({ tripId: Uuid }, { additionalProperties: false }),
-        response: { 200: View, 401: ErrorResponse, 404: ErrorResponse },
+        response: { 200: View, 401: ErrorResponse, 404: ErrorResponse, 409: ErrorResponse },
       },
     },
     async (request, reply) => {

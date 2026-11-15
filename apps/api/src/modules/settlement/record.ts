@@ -109,7 +109,12 @@ export function registerSettlementRecordRoute({ app, db, auth }: SplittingModule
     {
       schema: {
         params: Type.Object({ tripId: Uuid, settlementId: Uuid }, { additionalProperties: false }),
-        response: { 200: SettlementRecordSchema, 401: ErrorResponse, 404: ErrorResponse },
+        response: {
+          200: SettlementRecordSchema,
+          401: ErrorResponse,
+          404: ErrorResponse,
+          409: ErrorResponse,
+        },
       },
     },
     async (request, reply) => {
