@@ -20,7 +20,7 @@ export async function observedThumbnailCommand(world: LedgerWorld, selected: str
   expect(['save', 'reset']).toContain(draft.intent);
   await expect.poll(() => ui.writes.length - start).toBe(1);
   const request = ui.writes[start]!;
-  const headers = request.headers();
+  const headers = await request.allHeaders();
   const operationId = headers['x-operation-id'];
 
   expect(request.method()).toBe(draft.intent === 'save' ? 'POST' : 'DELETE');

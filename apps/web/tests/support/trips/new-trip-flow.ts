@@ -114,11 +114,8 @@ export async function observeNewTripFlow(world: LedgerWorld): Promise<NewTripFlo
         'Client must complete native confirmation before image fetch',
       ).toContain(attempt!.source);
       flow.events.push({ phase: `image-confirmation-${attempt!.source}`, tripId });
-      const created = flow.responses.get(creator!);
-      const confirmation =
-        created?.status() === 201 && (await created.finished()) === null
-          ? created
-          : flow.lookups.get(tripId);
+      const created = await newTripRequestOutcome(flow, creator!);
+      const confirmation = created?.status() === 201 ? created : flow.lookups.get(tripId);
       expect(
         confirmation,
         'Lost201 headers do not supersede an actual successful Trip lookup',
@@ -178,11 +175,29 @@ export async function newTripRequestOutcome(
     )
     .toBe(true);
   expect(flow.errors.map(String)).toEqual([]);
+  if (flow.failures.has(request)) return undefined;
   const response = flow.responses.get(request);
   if (response) {
-    const failure = await response.finished();
-    if (failure) {
-      flow.failures.set(request, failure.message);
+    const completion: { ended: boolean; failure: Error | null } = { ended: false, failure: null };
+    void response.finished().then(
+      (error) => {
+        completion.failure = error;
+        completion.ended = true;
+      },
+      (error: unknown) => {
+        completion.failure = error instanceof Error ? error : new Error(String(error));
+        completion.ended = true;
+      },
+    );
+    await expect
+      .poll(() => completion.ended || flow.failures.has(request) || flow.errors.length > 0, {
+        timeout: 15000,
+      })
+      .toBe(true);
+    expect(flow.errors.map(String)).toEqual([]);
+    if (flow.failures.has(request)) return undefined;
+    if (completion.failure) {
+      flow.failures.set(request, completion.failure.message);
 
       return undefined;
     }

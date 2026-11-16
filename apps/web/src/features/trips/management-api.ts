@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '../../api/index.js';
 import { useSession } from '../auth/session.js';
@@ -45,7 +45,7 @@ export function useLifecycleCommand(
 ) {
   const { account } = useSession();
   const client = useQueryClient();
-  const operationId = useRef(crypto.randomUUID());
+  const [operationId] = useState(() => crypto.randomUUID());
   const locked = useRef(false);
   const mutation = useMutation({
     retry: false,
@@ -54,7 +54,7 @@ export function useLifecycleCommand(
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
-          operationId: operationId.current,
+          operationId,
           expectedLifecycleRevision: trip.lifecycleRevision,
         }),
       }),

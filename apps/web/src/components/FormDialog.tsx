@@ -58,7 +58,40 @@ export function FormDialog({
       className={`form-dialog ${className}`}
       aria-labelledby={titleId}
       aria-describedby={description ? descriptionId : undefined}
+      onKeyDown={(event) => {
+        if (
+          event.key !== 'Tab' ||
+          event.defaultPrevented ||
+          event.ctrlKey ||
+          event.metaKey ||
+          event.altKey
+        )
+          return;
+        const dialog = event.currentTarget;
+        const controls = [
+          ...dialog.querySelectorAll<HTMLElement>(
+            'button, a[href], input, select, textarea, [tabindex]',
+          ),
+        ].filter(
+          (control) =>
+            control.tabIndex >= 0 &&
+            !control.matches(':disabled') &&
+            control.getClientRects().length > 0 &&
+            getComputedStyle(control).visibility === 'visible',
+        );
+        const first = controls[0];
+        const last = controls[controls.length - 1];
+        if (
+          !first ||
+          document.activeElement === dialog ||
+          (event.shiftKey ? document.activeElement === first : document.activeElement === last)
+        ) {
+          event.preventDefault();
+          (event.shiftKey ? last : first)?.focus();
+        }
+      }}
       onCancel={(event) => {
+        if (event.target !== event.currentTarget) return;
         event.preventDefault();
         if (!busy) onClose();
       }}

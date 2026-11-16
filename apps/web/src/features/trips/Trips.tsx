@@ -23,72 +23,93 @@ export function Trips() {
     if (message) heading.current?.focus();
   }, [message]);
   const [creating, setCreating] = useState(false);
+  const [creationResult, setCreationResult] = useState(false);
   const trips = useQuery({
     queryKey: ['account', account!.id, 'trips'],
     queryFn: ({ signal }) => apiRequest<ItemList<Trip>>('/api/trips', { signal }),
   });
 
   return (
-    <div className="trips-page">
-      <div className="mobile-trip-brand">t. 旅帳</div>
-      <header className="page-head">
-        <div>
-          <div className="eyebrow">MY JOURNEYS</div>
-          <h1 ref={heading} tabIndex={-1}>
-            每一趟，都有故事。
-          </h1>
-          <p className="muted">把沿途的小花費，留在各自的旅行裡。</p>
+    <>
+      {!creationResult ? (
+        <div className="trips-page">
+          <div className="mobile-trip-brand">t. 旅帳</div>
+          <header className="page-head">
+            <div>
+              <div className="eyebrow">MY JOURNEYS</div>
+              <h1 ref={heading} tabIndex={-1}>
+                每一趟，都有故事。
+              </h1>
+              <p className="muted">把沿途的小花費，留在各自的旅行裡。</p>
+            </div>
+            <Button onClick={() => setCreating(true)}>
+              <Plus className="icon" size={19} strokeWidth={1.6} aria-hidden="true" />
+              <span>新增旅行</span>
+            </Button>
+          </header>
+          {(location.state as { message?: string } | null)?.message ? (
+            <p className="feedback" role="status">
+              {(location.state as { message: string }).message}
+            </p>
+          ) : null}
+          {trips.isPending || trips.error ? (
+            <QueryState
+              pending={trips.isPending}
+              error={trips.error}
+              retry={() => {
+                void trips.refetch();
+              }}
+            />
+          ) : trips.data.items.length ? (
+            <div className="grid">
+              {trips.data.items.map((trip, index) => (
+                <Link className="trip-card ds-trip-card" to={`/trips/${trip.id}`} key={trip.id}>
+                  <div className={`landscape${index % 2 ? ' warm' : ''}`} aria-hidden="true">
+                    {trip.hasThumbnail ? (
+                      <img
+                        className="trip-thumbnail"
+                        src={`/api/trips/${trip.id}/thumbnail/${trip.thumbnailRevision}`}
+                        alt=""
+                      />
+                    ) : (
+                      <span className="word">JOURNEY</span>
+                    )}
+                  </div>
+                  <div className="card-content">
+                    <div className="card-top">
+                      <h2>{trip.name}</h2>
+                      <ArrowRight className="icon" size={19} strokeWidth={1.6} aria-hidden="true" />
+                    </div>
+                    <p className="card-date">{tripDates(trip)}</p>
+                    <div className="card-bottom">
+                      <span>{trip.expenseCount} 筆支出</span>
+                      <span>開啟旅行帳本</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="empty">
+              <h2>旅程，從第一本帳本開始。</h2>
+              <p>建立一趟旅行，記下你的第一筆支出。</p>
+            </div>
+          )}
+          <p className="intro-note">
+            <FileText className="icon" size={19} strokeWidth={1.6} aria-hidden="true" />
+            <span>不同幣別各自統計，保留每筆支出原本的樣子。</span>
+          </p>
         </div>
-        <Button onClick={() => setCreating(true)}>
-          <Plus className="icon" size={19} strokeWidth={1.6} aria-hidden="true" />
-          <span>新增旅行</span>
-        </Button>
-      </header>
-      {(location.state as { message?: string } | null)?.message ? (
-        <p className="feedback" role="status">
-          {(location.state as { message: string }).message}
-        </p>
       ) : null}
-      {trips.isPending || trips.error ? (
-        <QueryState
-          pending={trips.isPending}
-          error={trips.error}
-          retry={() => {
-            void trips.refetch();
+      {creating ? (
+        <TripForm
+          onClose={() => {
+            setCreating(false);
+            setCreationResult(false);
           }}
+          onCreationResult={() => setCreationResult(true)}
         />
-      ) : trips.data.items.length ? (
-        <div className="grid">
-          {trips.data.items.map((trip, index) => (
-            <Link className="trip-card ds-trip-card" to={`/trips/${trip.id}`} key={trip.id}>
-              <div className={`landscape${index % 2 ? ' warm' : ''}`} aria-hidden="true">
-                <span className="word">JOURNEY</span>
-              </div>
-              <div className="card-content">
-                <div className="card-top">
-                  <h2>{trip.name}</h2>
-                  <ArrowRight className="icon" size={19} strokeWidth={1.6} aria-hidden="true" />
-                </div>
-                <p className="card-date">{tripDates(trip)}</p>
-                <div className="card-bottom">
-                  <span>{trip.expenseCount} 筆支出</span>
-                  <span>開啟旅行帳本</span>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      ) : (
-        <div className="empty">
-          <h2>旅程，從第一本帳本開始。</h2>
-          <p>建立一趟旅行，記下你的第一筆支出。</p>
-        </div>
-      )}
-      <p className="intro-note">
-        <FileText className="icon" size={19} strokeWidth={1.6} aria-hidden="true" />
-        <span>不同幣別各自統計，保留每筆支出原本的樣子。</span>
-      </p>
-      {creating ? <TripForm onClose={() => setCreating(false)} /> : null}
-    </div>
+      ) : null}
+    </>
   );
 }

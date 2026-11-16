@@ -154,6 +154,7 @@ function Navigation({ mobile = false }: { mobile?: boolean }) {
           showClose
         >
           <Link
+            tabIndex={0}
             className={pathname === '/trips' ? 'sheet-item active' : 'sheet-item'}
             to="/trips"
             onClick={() => setTripsMenu(false)}
@@ -162,6 +163,7 @@ function Navigation({ mobile = false }: { mobile?: boolean }) {
             旅行清單
           </Link>
           <Link
+            tabIndex={0}
             className={pathname === '/trips/trash' ? 'sheet-item active' : 'sheet-item'}
             to="/trips/trash"
             onClick={() => setTripsMenu(false)}

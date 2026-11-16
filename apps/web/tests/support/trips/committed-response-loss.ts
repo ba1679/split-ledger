@@ -82,6 +82,7 @@ export async function arrangeCommittedResponseLoss(
   const verificationGate = new Promise<void>((resolve) => {
     releaseVerification = resolve;
   });
+  const observations = new Set<Promise<void>>();
   const state: CommittedResponseLoss = {
     operation,
     mutations: [],
@@ -100,6 +101,7 @@ export async function arrangeCommittedResponseLoss(
     dispose: async () => {
       if (disposed) return;
       try {
+        await Promise.all(observations);
         state.releaseVerificationFailures();
         await expect.poll(() => state.pendingVerificationFailures).toBe(0);
         if (state.mutations.length)
@@ -123,27 +125,32 @@ export async function arrangeCommittedResponseLoss(
   const onRequest = (request: Request) => {
     const path = new URL(request.url()).pathname;
     if (!matches(path, request.method())) return;
-    try {
-      const headers = request.headers();
-      const data = isImage ? undefined : (request.postDataJSON() as Record<string, unknown>);
-      const operationId = String(isImage ? headers['x-operation-id'] : data!.operationId);
-      const tripId = path.split('/')[3]!;
-      expect(operationId).toMatch(/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i);
-      state.mutations.push({ method: request.method(), path, tripId, operationId });
-      expect(state.mutations.length, 'Unknown outcome must not cause another mutation').toBe(1);
-      state.request = request;
-      state.command = {
-        tripId,
-        operationId,
-        kind,
-        method: request.method(),
-        path,
-        headers: { origin: headers.origin! },
-        ...(data ? { data } : {}),
-      };
-    } catch (error) {
-      fail(error);
-    }
+    const observation = (async () => {
+      try {
+        const headers = await request.allHeaders();
+        expect(headers.origin).toBe(world.get<string>('webOrigin'));
+        const data = isImage ? undefined : (request.postDataJSON() as Record<string, unknown>);
+        const operationId = String(isImage ? headers['x-operation-id'] : data!.operationId);
+        const tripId = path.split('/')[3]!;
+        expect(operationId).toMatch(/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i);
+        state.mutations.push({ method: request.method(), path, tripId, operationId });
+        expect(state.mutations.length, 'Unknown outcome must not cause another mutation').toBe(1);
+        state.request = request;
+        state.command = {
+          tripId,
+          operationId,
+          kind,
+          method: request.method(),
+          path,
+          headers: { origin: headers.origin! },
+          ...(data ? { data } : {}),
+        };
+      } catch (error) {
+        fail(error);
+      }
+    })();
+    observations.add(observation);
+    void observation.finally(() => observations.delete(observation));
   };
   const onFailed = (request: Request) => {
     if (!state.done && matches(new URL(request.url()).pathname, request.method()))
@@ -189,7 +196,7 @@ export async function arrangeCommittedResponseLoss(
         const file = isNew
           ? world.get<NewTripDraft>('management:newTripDraft').file!
           : world.get<ThumbnailDraft>('management:draft').file!;
-        const headers = state.request!.headers();
+        const headers = await state.request!.allHeaders();
         world.set('management:thumbnailRequest', {
           tripId: command.tripId,
           operationId: command.operationId,

@@ -2,7 +2,7 @@
 
 **Plan package**: `specs/plans/006-trip-management-and-loading`  
 **建立日期**: 2026-11-14  
-**狀態**: T001–T258完成；下一筆T259 [BDD-REFACTOR]（前端旅行管理與確認；資源恢復後續跑），plan尚未交付。
+**狀態**: T001–T264完成；下一筆T265 [BDD-REFACTOR]（縮圖限制與選圖錯誤），plan尚未交付。
 
 **核心輸入**: `spec.md`、`plan.md`、`research.md`、`truth-delta.md`、`dsl-refine-review.md`、`ui/ui-plan.md`，以及 `specs/truth/techstack.md`、`specs/truth/contracts/**`、`specs/truth/data/data-model.dbml`、受影響 `specs/truth/features/**`。
 
@@ -1539,7 +1539,7 @@
   - Dependencies: T257。
   - Evidence: 整檔產品BDD與權威資料一致，完成上述畫面/狀態比對、request count、鍵盤及手機操作所需證據；差異只在既定適配範圍內處理。
 
-- [ ] T259 [BDD-REFACTOR] 在綠燈下整理本功能與共用狀態邊界
+- [X] T259 [BDD-REFACTOR] 在綠燈下整理本功能與共用狀態邊界
   - Dependencies: T258。
   - 不改業務/設計意圖，重跑本整檔及受影響已綠scope，刷新受影響產品/畫面證據，保留未改範圍。
 
@@ -1566,11 +1566,11 @@
 
 - `specs/truth/features/frontend/trips/縮圖預覽與保存.feature`（整檔、全部表列資料；Chromium、WebKit及DSL指定兩尺寸依序，worker=1）。
 
-- [ ] T260 [BDD-GREEN] 實作照片/預設草稿、最後預覽保存、取消及查證續接
+- [X] T260 [BDD-GREEN] 實作照片/預設草稿、最後預覽保存、取消及查證續接
   - Dependencies: T259。
   - Evidence: 整檔產品BDD與權威資料一致，完成上述畫面/狀態比對、request count、鍵盤及手機操作所需證據；差異只在既定適配範圍內處理。
 
-- [ ] T261 [BDD-REFACTOR] 在綠燈下整理本功能與共用狀態邊界
+- [X] T261 [BDD-REFACTOR] 在綠燈下整理本功能與共用狀態邊界
   - Dependencies: T260。
   - 不改業務/設計意圖，重跑本整檔及受影響已綠scope，刷新受影響產品/畫面證據，保留未改範圍。
 
@@ -1597,11 +1597,11 @@
 
 - `specs/truth/features/frontend/trips/新增旅行與選填縮圖.feature`（整檔、全部表列資料；Chromium、WebKit及DSL指定兩尺寸依序，worker=1）。
 
-- [ ] T262 [BDD-GREEN] 串接create確認後同trip圖片保存、失敗重傳與unknown
+- [X] T262 [BDD-GREEN] 串接create確認後同trip圖片保存、失敗重傳與unknown
   - Dependencies: T261。
   - Evidence: 整檔產品BDD與權威資料一致，完成上述畫面/狀態比對、request count、鍵盤及手機操作所需證據；差異只在既定適配範圍內處理。
 
-- [ ] T263 [BDD-REFACTOR] 在綠燈下整理本功能與共用狀態邊界
+- [X] T263 [BDD-REFACTOR] 在綠燈下整理本功能與共用狀態邊界
   - Dependencies: T262。
   - 不改業務/設計意圖，重跑本整檔及受影響已綠scope，刷新受影響產品/畫面證據，保留未改範圍。
 
@@ -1628,7 +1628,7 @@
 
 - `specs/truth/features/frontend/trips/縮圖限制與選圖錯誤.feature`（整檔、全部表列資料；Chromium、WebKit及DSL指定兩尺寸依序，worker=1）。
 
-- [ ] T264 [BDD-GREEN] 完成可見圖片限制、選圖拒絕與改選成功
+- [X] T264 [BDD-GREEN] 完成可見圖片限制、選圖拒絕與改選成功
   - Dependencies: T263。
   - Evidence: 整檔產品BDD與權威資料一致，完成上述畫面/狀態比對、request count、鍵盤及手機操作所需證據；差異只在既定適配範圍內處理。
 

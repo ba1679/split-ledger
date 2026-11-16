@@ -97,41 +97,4 @@ export function TripCommandDialog({
   );
 }
 
-export function ThumbnailEntryDialog({
-  trip,
-  onClose,
-}: {
-  trip: ManagedTrip;
-  onClose: () => void;
-}) {
-  const cancel = useRef<HTMLButtonElement>(null);
-
-  return (
-    <FormDialog
-      title="自訂旅行縮圖"
-      description={`為「${trip.name}」選擇旅行卡片的圖片。`}
-      onClose={onClose}
-      showClose
-      initialFocus={cancel}
-      className="thumbnail-editor"
-    >
-      {trip.hasThumbnail ? (
-        <img
-          className="thumbnail-preview"
-          src={`/api/trips/${trip.id}/thumbnail/${trip.thumbnailRevision}`}
-          alt={`${trip.name}目前的旅行縮圖`}
-        />
-      ) : (
-        <div className="landscape" aria-label="預設旅行縮圖">
-          <span className="word">JOURNEY</span>
-        </div>
-      )}
-      <div className="form-actions">
-        <Button ref={cancel} variant="outline" onClick={onClose}>
-          取消
-        </Button>
-        <Button disabled>保存圖片</Button>
-      </div>
-    </FormDialog>
-  );
-}
+export { ThumbnailEntryDialog } from './ThumbnailEditor.js';

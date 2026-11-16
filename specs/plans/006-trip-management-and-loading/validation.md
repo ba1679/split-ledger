@@ -2160,3 +2160,262 @@ T258 final：固定獨立reviewer `/root/review_006` 正式 **APPROVED / zero op
 另以 `docs(plan-006): record implementation and validation through T258` 提交本表及tasks/handoff/validation共3份進度文件。完成後以git log可取得該docs commit；此表不以自我引用hash製造額外commit。全部473個變更檔案各有唯一分組。共享測試fixture存在跨前後端相依，集中在test(fixtures)以保留import閉包；其後API/frontend/loading步驟各自提交。新前端未實作scope的RED案例在相應commit body明示，並非聲稱全plan測試全綠。
 
 驗證起點仍為原HEAD `7c1c35e67574e9d0bd29125592232735cabefb48` 加470檔source manifest SHA256 `287c607b11ac4b55ec72ab17c53034826b8848a30e3669ae2bb6c18d5b4b8f95`。現在內容已入Git，恢復時用各路徑內容核hash，不再要求git dirty集合等於舊未提交清單。`.cache`中的原始log/PNG仍為本機證據，未強制加入repository。
+
+
+## T259 — 旅行管理與確認綠燈下重構（驗證中）
+
+精確同T258完整18例，/bdd refactor，C原設計v7與固定baseline不改、prototype不做。產品基底HEAD `78c3171942`；四改動檔案manifest `.cache/implement-006/t259-files.sha256` SHA256 `7582fc98a494643c9ea03c092ab9e3e014906ad0870a2bc21baab85eddbabbb9`。只把journeys.css的管理/確認/trash/手機sheet樣式原順序抽至management.css，import緊接原journeys位置；並把生命週期hook的useRef即時UUID改useState lazyinitializer，仍每掛載保留同一操作UUID，lock/retry/body/cache順序未變。沒有擴充T260圖片保存、修改truth或斷言。
+
+拆檔等價證據：原journeys = 新journeys＋一個跨檔空白行＋management原文；非空白規則順序未變。當前環境拆前先成功build，保留`.cache/implement-006/t259-before/fresh-build-assets`；拆後build正式CSS逐byte完全相同，SHA256 `db8268d9280f0b733ee60e64486adbde024af596de10ac76a56409d087cd5381`，詳`t259-css-equivalence.json`。故舊共享UI呈現/表單/既有fixtures未變範圍沿用T258已完成的129×2舊web與275×2support，不能宣稱T259重跑它們；管理hook影響範圍重新完整72執行＋原額外22。新圖保存t259-ui，T258原19圖在ui與t259-before均保留，沒有覆寫舊證據。
+
+首attempt因Docker環境失敗中止：runtime setup30s逾時，3failed/1interrupted/14notrun、未進產品Given，root確認ownedrunner58510後SIGINT，exit130。4worker PID均退出；Dockerstatus running但engine_ping3s逾時、compose查詢無回應、PG3sconnecttimeout。使用者明確授權重啟Docker Desktop後，restart --timeout50 exit0，engine_ping OK，repo db/test-db health重新啟動並真PG查詢成功；tmpfs test-db與attemptworker隔離庫無殘留。沒有改斷言/timeout或產品源碼來處理此環境失敗。原矩陣/raw/log/4traces保留t259-attempt1，診斷/恢復`t259-docker-probes.json`、t259-docker-after-restart.json及restart/db log。Cua因Docker介面timeout無法取得狀態，沒有操作UI或改設定，已完成工具結果記錄；實際恢復使用有授權的官方CLI。
+
+資源：16GiB，入口pressure1/free62%/swap2259.81MiB，Docker恢復後pressure1/swap2243.81MiB，heavy1/worker1，root實作/固定reviewer只讀。最終runner98431按每個heavy前檢pressure、每個Playwright後核worker/DB，完整命令帳t259-matrix.json。此節等待最終runtime/新圖/資源及獨立review，不預先勾T259。
+
+
+T259最終矩陣：同4source版本，17命令全部exit0（3品質＋build＋focusedbddgen＋4scope＋2visual＋2WKkeyboard＋4nativeNavigation），主runner98431 exit0。完整72cases/228實際BDDsteps、68uniqueactualcase/browser/viewport（F043依DSL覆寫device）；額外Chrome8×2/WKkeyboard1×2/nativeNav1×4，共94執行全PASS，0skip/flaky/unexpected；scope原始`t259-scope-<project>.json`、逐句`t259-runtime-summary.json`、命令`t259-matrix.json`。額外導航仍先fresh無tabindex anchor證明ChromeTab/WKAltTab，再用真key/Enter走實際可見垃圾桶連結，owner投影/DB/原圖不變與零write。
+
+C重構後刷新證據：同v7設計/固定baseline與T258差異表全部沿用，19張PNG新保存在t259-ui；18張PNG檔案完全相同。U06-M重看before/after並解PNG濾波實比：390×844中僅27像素不同，bbox[20,264,23,424]、單channel最大2/255，差異位於細邊緣，沒有布局/資訊/操作變動；不是宣稱PNG編碼完全相同。全部15組JSON viewport/scrollWidth/nav/dialog/headings/focus metrics逐值完全相同（t259-metrics-comparison.json）。新40檔圖/metrics/QA/config manifest t259-ui-evidence.sha256 SHA256 `2d3348636a4c8a8b4e317315f1fbb25afb01be5a01c19e39410d26a103629782`；像素/檔案差異t259-visual-comparison.json，未覆寫T258證據。代表U02/U06/S01 D/M與其餘U01/U03/U05/S02/S04均已刷新；此為原設計下保呈現重構，不是重新批准新設計。
+
+資源最後：12個最終loggedworker PID及4個attemptworker均實際退出；owned全部index隔離DB空，audit t259-resources.log/worker-pids.json/processes.log，Docker修復後真query亦核attemptDB空。pressure1正常、swap2243.81MiB/free58%，本輪heavy已全退出。gitdiffcheck0；未新commit/push/deploy，產品之外只更新plan驗證/交接。固定reviewer正核最終同版資料，T259維持[ ]直到結論。
+
+T259 final：固定獨立reviewer正式 **APPROVED / zero open**，report t259-review.md SHA256 `b15def4867e49ca6ab74e31ccc7c0e2a7371672dc39d8085153ecf292ddb1fd5`。已獨立核4source/40UI entries、72/228 raw與68unique、17命令與94計數、等價與native導航證據。T259已回寫[X]，代表U02/U06/S01 D/M及整檔畫面checkpoint完成。依既有使用者不要停的明示授權保存此checkpoint後繼續T260，review/UI/完整驗證關卡仍保留；plan未交付。
+
+
+## T260 — 縮圖預覽與保存（部分Green，資源關卡交接；未完成）
+
+/bdd green，精確整檔23個展開case，C沿v7 U04/S03/S05/S09、固定baseline與prototype不做。T259已完成、259/292，T260維持[ ]。目前產品包含File/default/keep本地draft、只在保存時POST/DELETE，原ID/兩版本與File在同頁close/reopen保留、close只撤下modal而不撤回遠端、75s寫入timeout、receipt+state各5s有界查證、unknown禁再次保存/Again只讀、owner:trip key隔離與unmount防舊completion、內存last-confirmed Blob與URL回收；沒有localStorage/ServiceWorker持久圖片。
+
+已實際觀察並修正的slice failure（原log均保留flat t260-*.log）：缺filechooser；preview另browser context缺卡片實圖（只補當前scope必要hasThumbnail/version讀取，不宣稱T266全功能）；input的cancel冒泡被FormDialog誤當Escape（target guard）；thumbnail browser-command同步headers省Origin（awaitallHeaders保exactOrigin）；F050真PG23514經Drizzle cause包裝漏既有400分類（global handler改用既有postgresError取得原三SQLSTATE，未知碼仍500）；response-loss未分unknown；close丟失原次查證入口；partialbody helper硬限VALIDATION_ERROR而契約允/截斷指定UPLOAD_INCOMPLETE（只校exact碼，400/DB/receipt/File原URL全部保留）；重新選合法圖後仍殘前次error。committed-response-loss native header觀察改非同步並用Promise registry/cleanup await保收妥，仍捕真上游200、真DB提交後只drop response，不造回應。
+
+目前Green：preview2、cancel/reopen9、chooser2、save/明確失敗/解除重試6、unknown兩種draft2、unknown關閉再返回4、截斷/恢復6等各slice，不能累加不同版本當最終矩陣。第一輪完整Chromium-desktop23/23 PASS（t260-first-full-chromium.json/log，0skip/flaky/unexpected）；其後仍有共享Tab焦點循環與UI微調，所以這只是preliminary。最新web strict typecheck exit0在最後modifier guard之前，最終品質需重跑。新cache視覺QA九state＋keyboard：D早期9visual/1keyboard fail，首尾Tab wrap後focused keyboard PASS、M三次完整10case均PASS；D refined10 PASS但非最終凍結來源，不當作完成證據。畫面在t260-ui，U04/S09 M358×720、CTA y633.6875對稿634；unknown M約802高、CTA皆可見，所有header/scrollTop/寬度量測記錄同stem JSON。合成圖與稿照片不同，未硬植入提案照片；C最終逐圖表/固定版本尚待。
+
+獨立review目前未批准：最後source已加alive在invalidate await後再檢，以及確認Blob未載入的pending明確占位（不暗示default已保存）；這兩項曾由reviewer指出。額外Tab12次QA曾到BODY，FormDialog加可見enabled非負tabIndex首尾wrap，最新另排除Ctrl/Meta/Alt，最後這個modifier guard尚未跑品質或runtime。reviewer指出WK舊MyTrips sheet隱含Link可能被plainTab跳過、讓candidate最後項判斷漏接；已準備`t260-sheet-keyboard.config.ts`與`ui/T260-sheet-keyboard.spec.ts`（Chrome/WK mobile，plainTab/ShiftTab各8次/DB不變），尚未執行，需先實證再最小修，不把BODY改算通過。不建議整個DOM每Tab全手動循環，以免改radio/正tabindex/DateField與nativeLink偏好。
+
+資源中止：在正常pressure1期間已做上述工作；最後又升pressure2 warning，兩次各5秒有界重測仍2，swap2350.06MiB/free44%，見t260-pressure-rechecks.json。23個flat-log worker PID全退出、owned隔離DB空（t260-resources.log等），ps另查無ms-playwright/Chromium/MiniBrowser/headless_shell；唯一typecheck73417已exit0，無本輪heavy。只重置本輪暫用CUA JS session，未終止使用者程序。依資源規則停止新heavy；這不是測試失敗被算Green，亦不是T260完成。
+
+交接版本：baseHEAD78c3171942＋15個non-spec dirty/untracked source，manifest `t260-handoff-files.sha256` SHA256 `589b06da8b432890e9645f41ffacc58a3c4c50ea1bbacdbe44240265e9a714b4`（含T259原4檔及本輪增量）；working tree列表t260-handoff-git-status.txt。本snapshot是續跑點，不是已完整驗收版。尚待：資源正常→sheet plainTab probe/必要最小修→刷新所有source品質與D/M圖→本scope4×23=92→T259受影響全檔/代表畫面/鍵盤→舊web129×2/support275×2（sharedFormDialog）→API348/support356（sharedSQLSTATE handler）→所有worker/DB資源與固定reviewerfinal。全部通過才勾T260，之後T261；truth/設計未改，未新增commit/push/deploy。
+
+
+## T260 warning放寬後固定版本驗證（進行中）
+
+使用者2026-11-16授權本session warning2觀察續跑，保留heavy1/worker1/固定reviewer，critical4/OOM/受管資源不可回收仍停；不修改skill。來源base78c3171942＋16檔 `t260-final-files.sha256` SHA `9c6bd23bb347574d21c09c21327821c47ce1f74b950c88174f5348a2c83b84da`。新manifest後format/lint/root typecheck/root build全部0；本23例四project各23PASS，共92，0skip/flaky/unexpected。新視覺與鍵盤Chrome10×2+WK1×2=22，以及舊MyTrips sheet ChromeM/WKM各1，全PASS。後續受影響管理、舊web/support及API/support矩陣尚進行，尚不回寫T260。
+
+### C類同版設計與產品畫面比對
+
+設計design-v7/pen SHA6c33bce25da872057d253a44bd0e59dec1f0e41f974873fb6db0dfe10b6c1abc；U04-D Wd1Pq、M A0kb5；S09-D s8IowS、M tI380；共用S03-D/M ybPvI/DECWg、S05-D/M M6LRw/kMwFM。產品新18PNG及18JSON輸出`t260-ui`、manifest`t260-final-ui.sha256`；root逐圖檢視完成。固定baseline8fc9f94保留228px sidebar/真005帳務與資料，不刪已存在資訊以仿示意背景。
+
+| 畫面/狀態 | 核准預期 | 同版實際與差異處理 |
+| --- | --- | --- |
+| U04 current/photo D/M | D668×715置中、32內距、604×264預覽；M358×720@(16,62)、20內距、318×190預覽；title26/23、兩個相鄰文字工具、48px CTA | D@(386,92.5)、M@(16,62)與預覽均相符。D CTA y681.05對設計684（字型行高差約3px），M633.69對634。JPG富士示意替換為真64×48合成PNG測資及真檔名，非缺圖/假成功；未選草稿無未保存badge、保存disabled。工具hover軟綠是實際滑鼠位置。 |
+| S09 default D/M | 本機預設仍未保存、橄欖至沙色漸層/Mountain圖示、保存才套用；與U04相同位置 | 同尺寸/CTA、155deg #9ca982→#d5be8f漸層、48px圖示。文案在描述+badge+檔名合併表達同意圖，長度因真trip名與最大限制完整文案換行；M footer對齊634。 |
+| S03 saving D/M | 仍顯最後確認縮圖，工具/保存不可重送，spinner，保留取消/關閉 | 真native WebP gate停住截圖，最後確認Blob與新draft測資色不同可辨，spinner-only有aria label，48px CTA與U04對齊；非把新draft當遠端成功。狀態board為語意對照，未複製四張卡進dialog。 |
+| S03 failure photo/default D/M | 明確未保存、保留草稿可修正/重試、錯誤可讀 | 真23514拒絕400；紅色alert置limits後，預覽保留photo/default草稿；D footer707.84/M660.48因一行錯誤下移，dialog仍715/720，完全在viewport內；兩工具相鄰可用。 |
+| S05 verifying D/M | 等待查證只讀、spinner不重送，不提前宣告成功 | 真提交後丟失回應/暫緩GET截圖；最後確認Blob、unknown badge/描述、amber狀態、查證與保存spinner/disabled；D780.94/M801.56高，fit-content且上下>=16，footer全可見。 |
+| S05 unknown photo/default D/M | 不確定結果需再次查證原操作、不可重新保存/重選；關閉不撤回 | 真提交後讀回受阻，D781.33@(386,59.33)/M801.95@(16,21.02)，因兩行狀態與查證按鈕適配增高；M footer750.97+48在844內。保原photo File或reset意圖，最後確認圖相同、不誤顯草稿保存成功。 |
+
+全部18圖無水平溢出，標題與CTA皆可見；新keyboard實際連按Tab12步/Escape回管理trigger、MyTrips sheet plainTab/ShiftTab16步/Escape，保DB不變。shared FormDialog首尾wrap只管無修飾Tab，descendant file cancel不誤關dialog；WK sheet真RED後只兩Link tabIndex0修補。未改設計意圖/未新prototype；獨立靜態zeroopen，final待完整回歸與同版UI複核。
+
+
+### T260 受影響清單視覺修正後重新固定來源
+
+root比對management U01新圖時發現真照片仍疊舊預設裝飾圓線。這是視覺RED，不以功能Green免除：只在`.landscape .trip-thumbnail`增position relative/z-index1，照片蓋住既有偽元素，default裝飾不變。原runner64059精確SIGINT exit130，49登記worker皆退出；殘留唯一隔離DB ledger_test_56614_0在確認worker退出後精確DROP，重audit owned0且ps無browser。原完整品質/scope92/UI22/sheet2/management94與未完成oldweb證據完整保留`t260-final-attempt2`；不將不同來源partial相加。
+
+新來源16檔manifest SHA `5fdff503a2aa13432ec1ce48ba0cad28971294187f7e255fa1d3853d4889d887`，同base78c。唯一runner45009從頭重跑同完整矩陣，逐命令檢hash/pressure/回收，warning2使用者例外持續。品質format/lint/root typecheck/root build已重新0，新UI/全部scope/regression與final review待齊，T260仍[ ]，不預做T261。先前9c6b來源的畫面比對敘述僅為歷史，最終將以5fdf來源新圖/manifest覆核。
+
+
+### T260 最終來源5fdff5新圖比對收斂
+
+5fdff5來源完整scope92、縮圖UI/keyboard22、sheet2、管理scope72、管理visual16/WK keyboard2/native導航4全部PASS。新18PNG/18metrics manifest SHA `34ed503a844419b6780e4e747619c3239737cdfc0de50734d4fbac683b42d70c`，新管理19PNG/15metrics manifest SHA `05ff426550e2328cef3cf2fe1d192461231eea1e8971ba58f766241ef4ee7c9d`。36縮圖檔對前版33byteexact，3PNG差異(S03-failure-photo D/M、S05-unknown-default D)root與獨立reviewer重新逐圖核正常，18metrics全exact，故上表同一設計對照/CTA/狀態適配於此新來源再成立。
+
+管理34檔對前版30byteexact，4PNG變化U01-D/M照片圓線消除、U05-M1背景對應真圖、U06-M渲染細邊；root/獨立reviewer均已view差異。對T259原版13PNG byteexact、其餘6PNG（U01D/M、U03D/M、U05M1、U06M）逐圖核對：U01真圖片替換舊JOURNEY但不帶預設圓線，U03真照片/刪除日期跨日，U05背景同源實圖，U06無資訊/位置差異。15metrics逐值exact。代表U02/U06/S01與其餘未變部分承接T259已批准design-v7，保228shell/真005帳務。新sheet兩Link鍵盤tabIndex只語意變化、不移位置；4 native導航、2 sheet 16步與DB不變通過。
+
+獨立來源/新圖審查ZERO OPEN，但final批准仍待oldweb129×2、web-support275×2及API348/support356全矩陣。未將舊partial混計為完整回歸。
+
+
+### T260 完整矩陣結束（final review待核）
+
+新來源5fdff5固定不變，runner45009 exit0；`t260-final-matrix.json`36命令皆0，`t260-final-runtime-summary.json`逐raw確認1,722 expected、0unexpected/skip/flaky/root errors。
+
+| 範圍 | 執行數/結果 |
+| --- | --- |
+| 本縮圖23例×Chromium/WebKit×1440×900/390×844 | 92 PASS |
+| 縮圖新UI/鍵盤 Chrome10×2+WK1×2 | 22 PASS |
+| 共用MyTrips sheet plainTab/ShiftTab/Escape ChromeM/WKM | 2 PASS |
+| 前一管理整檔18×4+visual16+WKkeyboard2+native導航4 | 94 PASS |
+| 原web非F006 Chromium/WebKit各129 | 258 PASS |
+| 原web support Chromium/WebKit各275 | 550 PASS |
+| 全API BDD348+API support356 | 704 PASS |
+
+format、lint、root typecheck、root build及4個bddgen全部PASS；固定16源檔逐命令hash保護，完整副本`t260-final-source`。原attempt1品質空行/attempt2視覺中止均為歷史，不混計final PASS。
+
+最後audit55登記worker全退出、owned DB空，另ps無Chromium/ms-playwright/MiniBrowser/headless_shell，snapshot `t260-final-browser-processes.txt`；工具/agent到OS PID對應未知不宣稱已回收工具所有記憶體。pressure回1 normal，swap6079.50MiB（整輪有增長、未觀察critical/OOM），測試單worker/單heavy，全輪無新常駐agent/無使用者程序關閉。本session放寬warning gate已完成整組驗證，但不永久改skill。已交同固定reviewer final核對，T260待批准後才勾；T261尚未開始。
+
+
+T260正式完成：同固定reviewer APPROVED/zeroopen，report `.cache/implement-006/t260-review.md` SHA `f03a6e6f67229312034b300f8fbaa5ccbd7bdc346921a15734590d561c5a43e7`。獨立逐raw核1722次單次passed與scope逐Examples/96步×4=384BDDsteps、55PID退出/ownedDB空。已回寫T260 [X]，260/292；按使用者既有持續實作授權接T261 refactor，不提前勾。資源最後pressure1，heavy0；工具PID對應未知，不增加代理。
+
+
+## T261 refactor完整驗證（獨立final待核）
+
+baseHEAD78c＋16source manifest SHA5af2dc4657954c2d0bb4519ea0a7bc85f3bb58039be37d61268cf0d6027e1d31；對T260批准來源只有ThumbnailEditor.tsx local usePreviewUrl抽取、其餘15file exact，delta`t261-source-delta.json`及完整前後source副本可重驗。沒有業務/設計/feature/DSL/測試斷言改動。保remote-fetch→confirmedURL→FileURL順序、每次captured URL cleanup/[value,open]依賴與獨立state；關閉釋放URLs、unknown仍保File/opid/版本不變。
+
+runner41188 exit0，`t261-final-matrix.json`28命令全部0，`t261-final-runtime-summary.json`210實際expected/passed、0skip/flaky/unexpected/errors：本scope23×4=92＋新UI22＋sheet2＋前管理scope72/visual16/WKkeyboard2/nativeNav4=94。format/lint/root typecheck/root build/兩bddgen都PASS。
+
+新UI manifest SHAec5957ee560e07929015688e762d02d607f7db52aabf231224a4ca31058519a6，36檔33byteexact；18metrics全exact。3PNG差異：failurephotoD24pixel/max2、savingD6257pixel/max2（button渲染），unknown-default-D8005pixel/max230在description/limits/status字區，root與reviewer逐圖對T260核同文案/換行/位置/語意，未把max230誤稱微小channeldiff。新管理manifest SHA468520d9c4bcf8fa99444fc120d4455171fd33272fe59333e9a80e28bc40b9cf，34檔33byteexact、15metrics exact，唯一U01D12pixel/channelmax1細邊，root已view。所有C v7 U04/S09/S03/S05與管理代表畫面對照沿T260已批准且新圖覆核無未決差異。正式CSS對`t261-before-build.css`逐byte相同，SHAde4b676ea3a5a48e53ff19ca28c9251aeb58a0eb1978c5c46b80db4e83cf40aa。
+
+本輪只重跑210，不把T260的oldweb258/websupport550/API704加進當前執行數；這些源檔/共享元件/樣式/API/helpers對T260全矩陣不變，獨立審查接受沿用邊界，最終plan完整回歸仍保留。22本輪登記worker全退出、ownedDB空、ps無Playwright browser；pressure1 normal/swap5919.50MiB。工具agent PID對應未知；無新代理/commit/push。T261待獨立final批准前仍[ ]、T262未開始。
+
+
+T261正式完成：固定reviewer APPROVED/zeroopen，reportSHA685f18ab268a55dfaaff5504e2acd318354d63f4c643ce50db6f1387707233ea；210執行/28命令同5af2全部PASS，22PIDs退出/ownedDB空，CSSbyte等價及所有新圖比較收斂。已回寫T261 [X]，261/292；依持續實作授權接T262 green，未預勾。正常pressure1、heavy0、同一reviewer無新增代理。
+
+
+## T262 /bdd green進行中：13/16 preliminary Chromium slices通過
+
+T260/T261均正式完成，261/292；下一筆T262整檔新增旅行與選填縮圖16例×4=64最終scope未跑，T263未開始。先讀全部feature、適用DSL/contract/create UUID/state-first語意、C design-v7 U07/U08/S10/S05與D/M previews，維持16GiB/heavy1/worker1/原reviewer、warning2使用者例外。
+
+真RED缺chooser→TripImagePicker選圖/URL清理及TripForm本地File，新增dialog適用showClose/description/class與create-trip.css。F052無圖原本PASS；F054取消/X/Escape、F055 preview無提交共5PASS。HEIC無alert→明示轉檔/移除、禁建立及submitguard；F057移除仍殘native input.files→精確清input.value；F056/057/105共3PASS。F053缺imagePOST→create完整JSON201後才發同ID thumbnail兩版本/newUUID，F053/058/059（建立失敗保File/同ID重試）共3PASS。F060無已建立結果→新增CreatedTripResult S10；TripForm捕獲明確image拒絕保存created/File，Trips隱藏原清單但不卸載flow，單trip重傳freshopid，F060/061共2PASS。13為focused slice執行數，不宣稱完整同版本scope或T262完成。
+
+原RED/Green logs `t262-*.log`，目前剩F064圖片unknown、F106 create unknown state-first、F107權威確認後才續圖；唯一runner22871正跑F064真RED，其他測試已退出/最後audit9worker退出且ownedDB空。新的Picker/result/style檔保留未commit；目前20source preliminary manifestSHAe484c9bf0ab1e9dcbe6334ae660e3a7132da7112b0b731ac37f6809b1ef38433，後續實作仍會變，不作final批准版本。
+
+後續需按failure完成unknown、補spinner-only/guard與適用回收、完整64四project、新U07/U08/S10/S05桌手機比對、受影響T260/管理/舊web+support回歸及獨立final；不得把partial相加成final、不改truth/DSL/上游畫面。沒有新commit/push/代理/永久skill修改。T262維持[ ]。
+
+
+### T262 第一個完整Chromium scope Green，最終矩陣尚待
+
+目前T001–T261 [X]；T262 [ ]。`t262-first-full-chromium.json/log`16/16 passed、0skip/flaky/unexpected，是第一project preliminary（之後expenseCount等小修仍須freeze全重跑）。剩餘slice真RED F064先受helper await response.finished遮蔽：ignored afterEach probe記真200提交/control done/native requestfailed CONTENT_LENGTH_MISMATCH但finished未resolve，故new-trip-flow helper改15s bounded等待真finished或同Request真requestfailed，保flow.errors/status/DB/請求順序；probe已re-bddgen移除。F107 route又直await已截斷201，Given已證nativefail真，改用同helper選真201完成或真GET lookup，不鬆creationAudit/fields/DB屏障。固定reviewer已核觀測修補合理，holder避免closure TS narrow。
+
+產品：原PhotoAttempt(File/opid/兩version)保存、unknown=原receipt+state雙5s read/Again只GET、再讀目前Trip不回退cache；CreatedTripResult unknown中性占位，不能宣稱default/重建。create unknown先原state active，再GET原Trip exactid/name/date，初始兩版本0/0在createIntent保留，不把較新lookup版本拿來自動覆圖；15s create有界，5s查證有界。unknown鎖create/fieldset、保name/date/File，Again原UUID，不POST trips第二次。alive在await前後核對，newcreate finish只invalidate而不以舊saved/outcome寫Tripcache；ownerKey AppShell卸載隔離。spinner-only已加。F064及F106/107 Green。
+
+definite image拒絕後另讀目前Trip5s再呈現；讀不到用『目前圖片暫不可讀』，已存在圖按真versionURL呈現，expenseCount用真投影，不能201舊default/0筆假蓋新圖/新帳務。S10明確失敗可同trip新opid重傳，unknown只查證。web typecheck65530 exit0（後有小修，final仍需重跑）。
+
+當前唯一heavy60368跑新`t262-visual.config.ts` ChromeD（7state+keyboard）做第一輪U07/U08/S10/S05產品圖與focus RED，輸出t262-ui；需CSS/frame尺寸校準、cancel優先焦點及pending/verify畫面補證，再freeze完整64+適用T260/管理/舊web與support、獨立final。T263未開始；所有source與新Picker/Result/style/helper修改保留，無新commit/truth/.env/skill改動。最近pressure1/swap5751.50MiB，warning授權例外有效。原audit在active probe時曾報已知PID在跑，非leak；後各正常退出audit已重跑為空。
+
+
+## T262 最終固定版本完整驗證進行中
+
+第一個freeze7e748a…已有8quality/gen、64scope及69前縮圖scope執行通過，但獨立22圖審查指出R262-01：U08-D工具列應在右卻在左；M原左正確。只D `.create-image-tools.has-photo` justify-content flex-end、M覆flex-start，保48px操作區與長檔名獨立換行，D y比設計文字列低約24px作可用性適配，需在final逐項表明記，不能宣稱全exact。
+
+原runner43456/OS19088精確SIGINT exit130，35登記worker確認退出；唯一殘DB ledger_test_22824_0確認worker退出後精確DROP，重audit owned0且ps無Playwright browser。前15完成命令與原7e source/raw/UI存`t262-final-attempt1`，不混計新版本。
+
+最新22source manifest SHA `e17b64fc7cabd4a3fc1358da6adc0a12090c2436f2f72ac6f15127a139596cda`（base78c），t262-source-delta.json對T261僅8檔變/14exact。唯一runner31724從頭`t262-validate.py`，42命令／預期1112執行（64新scope+92前縮圖+30新UI/keyboard/date+22前縮圖UI+sheet2+管理94+oldweb258+websupport550），全部四project/兩browser序列worker1，逐命令hash/pressure/回收，raw與矩陣`t262-final-*`。API/support704剛由T260完整驗證且backend/source未改，本輪明確沿用而不加計執行數。
+
+目前quality/gens均0、ChromeD/M各16PASS，WK續跑中。新UI22PNG/22metrics初跑30項全PASS，final會全部重拍；D650×770@(395,65)、CTA763/764.19，M358×780@(16,32)、CTA729；unknown D867.97/M812為額外狀態的有界增高/預覽縮小，title/CTA已由QA逐button驗在viewport。S10頁面D維持228baseline shell/x284寬1100，banner204.98/CTA253.48/card427.98×278；Mbanner177.56/CTA296.16/card427.16×239接近批准稿。只有新create DateField用可選中文placeholder（既有呼叫預設不變），M輸入16px避免zoom，保44px日曆入口且native calendar四端QA已PASS。
+
+T262仍[ ]、261/292；待新同版本64/完整1112/逐圖比對與獨立final/回收再勾，T263未開始，無新commit/truth/skill修改。warning本session使用者例外持續，critical/OOM/無法回收才停。
+
+
+## T262 既有焦點回歸與結果頁焦點收斂後重新固定來源
+
+第二freeze e17 runner31724實際exit1：oldweb Chromium127PASS/2FAIL，原因初始焦點被新code移到Cancel。已讀truth `frontend/design-system/dsl.md:29` 明定旅行名稱獲焦，保其spec與原斷言；generic research『取消優先』不得蓋此specific truth。root與reviewer先前接受Cancel的解讀撤回。新create initialFocus恢復nameInput，dateEdit仍undefined，cache QA首驗Name（不再以自訂Cancel oracle為權威）。該e17仍partial，未跑oldWK/support不能沿用；歷史raw/UI/matrix存t262-final-attempt2。
+
+R262-02實測 `t262-focus-red-*`：image-failure與image-unknown×4projects共8均真BODY/outside Result。最小Result useEffect[] mount focus h1 tabindex-1/preventScroll。green1再測：初始Result焦點全8已進H1；Chromium兩尺寸Again pending後失焦/2fail，WebKit4PASS；桌機明證BODY。只Result action改aria-disabled+busy guard及既有ref lock，保焦點不失仍禁觸發，CSS pending opacity沿既有0.6；不改全站Button或日期表單。green2四端各2全PASS（8），Again只GET/no mutation、後續不被mount-only effect搶焦點。觀察JSON/redraw全留cache，原8RED observations另存t262-focus-red-observations。
+
+目前第三freeze22source SHA `5209c66a3d8ca60d9f631f4793f38f31f9e7787b4749190cc5cf5c682a0eed24`，base78c；source完整副本自動存`t262-source-snapshots/<manifestSHA>/`。唯一runner53727從頭46命令/預期1120（原1112矩陣+resultFocus2×4=8），仍完整oldweb258與support550，不沿用e17未完整舊回歸。品質/gens目前8均0，64scope先跑中；待新raw/UI/回收/獨立final方可勾T262，T263未開始，進度261/292。
+
+最後pressure2warning/swap5431.50MiB；本輪使用者warning例外持續，單heavy/worker/固定reviewer，無新commit/truth/.env/永久skill更動。
+
+
+### T262 design-v7逐畫面比對（5209固定來源，final新圖/矩陣待齊）
+
+行為依truth整檔16例與既有design-system DSL Name焦點；呈現依pen SHA6c33bce25da872057d253a44bd0e59dec1f0e41f974873fb6db0dfe10b6c1abc/design-v7，U07-D Dsq2D/M kOFc3、U08-D GfuLl/M eSFbG、S10-D s825M/M F1Hwk及S05-D/M M6LRw/kMwFM。baseline8fc9f94之228px shell、既有DateField日曆入口與真005帳務保留；新頁不以示意背景取代實際資料。
+
+| 畫面/狀態 | 核准預期 | 實際/差異與處理 |
+| --- | --- | --- |
+| U07 empty D/M | D650×770@(395,65)、M358×780@(16,32)；必填名稱/選填兩日期/選填圖、預設漸層、可無圖建立；CTA D763/M729 | 基準frame與CTA相符；D preview586×196、M318×160，垂直約1～2px文字行高差。名稱required+描述明示必填，保舊truth Name初焦（真焦點環是可用狀態，非錯誤/另改設計）。DateField保44px日曆操作，新增用中文placeholder避免截斷，M輸入16px而非稿較小字以避免手機focus zoom；既有呼叫預設不變。取消左/建立右相鄰，48px按鈕；M寬約153而稿150/151，差2～3px。 |
+| U08 photo D/M | 保同frame；真本地圖片+未保存badge/檔名；14px primary重新選圖與中性移除相鄰；建立後才保存 | 真64×48合成PNG/神社檔名替代富士示意照片，仍保真File/hash與尚未保存；cover只顯示裁切不改原檔。R262-01已D右/M左。D為48px操作區與長檔名完整換行保獨立row，文字工具相較稿約下移24px（非全exact）；不採negative-margin與檔名互疊。CTA仍D763/764.19、M729。 |
+| invalid HEIC D/M | 不當合法預覽，明示格式/轉檔/改選移除，阻止建立但保name/date | 真HEIC File留為錯誤草稿，不解碼假預覽；保存disabled及submitguard、原生input.files移除時清空。feedback frame至少770/780，適配預覽D176/M120留錯誤/操作空間；沒有提交請求。 |
+| create-failure D/M | 已知未建立原因/重試，保姓名日期/File，不能誤示成功或改成圖片保存 | 真POST400拒絕、無trip/thumbnail，紅色alert與仍可使用的表單/照片/重新送出；同UUID修正新意圖成功。本地URL不因明確失敗被撤銷。 |
+| U08 create-saving D/M | spinner-only、欄位及同intent鎖定、未確認建立前不送圖 | 真201 bytes由proxy暫留；原File仍預覽，aria正在建立旅行，POST trips1/thumbnail0。沒有以201headers假當已確認。 |
+| U08 photo-saving D/M | 原trip建立確認後才圖、無重建、spinner-only保持CTA尺寸 | 真201完整JSON先確認，native WebP gate停住原圖上傳；aria正在保存旅行圖片，仍本機File預覽、禁重送，原trip ID/versions0/0。 |
+| create-unknown與create-verifying D/M | state-first原UUID、exactTrip確認後才續圖；保表單/File、Again，未知不重建 | 新狀態D可增至867.97高、M812高，D176/M120預覽讓title/全部欄位/CTA保在viewport。Unknown/查證spinner只讀state再Trip，欄位disabled、建立disabled，停止忙碌後Again可用。S05為狀態語意板，未把三卡複製入表單。 |
+| S10 image-failure D/M | 已建立旅行與圖片失敗分開，amber結果/同trip重新上傳、真已建立卡 | D main x284/width1100承接228baseline，與示意x299/1037差屬未改shell整合。D banner約204.98/145、retry253.48、card427.98/278；M banner177.56/185.59、retry296.16、card427.16/239對稿約177/186、296、427/240。加入實際API原因第二行，M精簡說明保持同資訊；圖與筆數取最新Trip，讀不到不造default或0筆。 |
+| image-unknown與image-verifying D/M | 旅行已建立事實保留；圖片未知不稱失敗/default，不重建/重送，Again只查原收據/state | Result採中性圖片占位+unknown訊息、原PhotoAttempt保File/opid/versions；Again spinner-only/ARIA disabled與busy guard/ref lock保焦點並防重送。原結果與目前Trip分讀，更新時不用舊receipt填cache。 |
+
+全22 PNG/22 metrics將由本freeze重拍輸出t262-ui；QA capture逐button驗bounds（不是只驗無水平overflow），日期ArrowDown/日曆Escape/兩欄填寫四project、Tab/ShiftTab各12/Escape回原入口均保留；R262-02另兩結果分支×四project實測。Generic Cancel初焦推論已撤銷，既有Name斷言保持；新結果opener移除後mount focus H1，Again後不重搶heading。Pending使用真server/response/GET屏障，無任意sleep/假進度。
+
+
+### 5209 final新圖與既有畫面複核已收斂
+
+新44檔（22PNG/22metrics）manifest SHA54680f690ea063f0f6bfc29a049a02faf2056d9116be9f1f81b0e7e9e7597ada，獨立reviewer逐22圖view並核每個hash/標題與visiblecontrols/viewport邊界。Name focus環符合既有specific truth；R262-01 D工具右/M左視覺CLOSED；R262-02 final四raw各2PASS，8actual觀察皆首次H1，4unknown Again後BUTTON/inside/命令不增，runtime CLOSED。以上只關閉source/UI findings，不提前final批准。
+
+前縮圖UI36檔manifest SHA3ea942cd6ea08dcc7cd8ede8d6a22d3f6d60d6b8bc976f2db840c2d13a7532d7：對T26132byteexact，18metrics逐值exact；4PNG差異均root與reviewerview正常。量化failure-default-D16px/max2、failure-photo-M8px/max1、saving-D6257px/max2，unknown-photo-D8005px/max230在文字區；不把max230虛稱全max2，字句/換行/位置/unknown語意無變。
+
+前管理UI34檔manifest SHA585abd373e43d2622f65447e72937d31aead2ef03406e555f563a237e75fd54d：33byteexact，15metrics逐值exact；唯一U01-D12px/max1細邊，已獨立view正常。U02日期表單無視覺/位置差異，DateField optional placeholder預設維持，現有日期/confirm/選單/導航呈現均沿v7先前批准並重新實證。所有當前PNG/JSON用5209來源重拍，未用舊圖代新版本。
+
+oldweb Chromium兩個Name初焦回歸目前已實際PASS，整組與WK/support仍等46矩陣終點；T262維持[ ]，沒有把partial/舊source或視覺審查當全交付。
+
+
+## 2026-11-17 T262完成，續跑T263
+
+固定source a67337e2364d22611106a9664993335dd82e8d4daf171adfdc47af725c417ce7，獨立APPROVED/zeroopen，report SHA f17df3076aa5449668645f6e1c76709286f5d21503e7b67afddf3acfa6dedb34。完整必要1120個distinct案例均有有效證據：842沿用未受影響5209來源、278當前來源新PASS；不是同版本新跑1120。原Chrome320失敗已排除並由真實focused1PASS取代，新WebKit support275PASS及390雙engine各1PASS（取代舊slot不重複算）；scope64/248實際BDDsteps與全部規定瀏覽器/尺寸保留。詳ignored t262-final-coverage.json與raw。其餘21檔相同、JSbundle byteexact，compiledCSS忽略舊末尾單一LF後47297規則bytes前綴完全相同，唯一新增≤360media；既有390/1440畫面不受影響，design-v7比對與44/36/34張圖/metrics manifests可沿用。格式/build PASS；85worker退出、ownedDB[]、browser無。最近pressure1/swap5137MiB。
+
+T262已[X]，262/292；T263開始前維持單task/heavy1/worker1/既有readonly reviewer。使用者明確允許warning2續跑，13GB非單獨停止條件；critical4/OOM/系統終止或無法回收才停。此次只放寬session執行，不改skills。沿用使用者精準回歸指示：T263只整理兩個圖片預覽消費者共用objectURL生命週期，完整本scope64＋受影響縮圖92與相應圖片預覽證據；未動的管理/舊web/support/API有效證據明記沿用，不因source hash重跑。未commit/push/truth/.env/skill變動。
+
+
+## 2026-11-17 T263 /bdd refactor 驗證中
+
+只將ThumbnailEditor原有usePreviewUrl函式body原樣抽到feature-local use-preview-url.ts，兩個原呼叫順序不變；TripImagePicker以usePreviewUrl(file,!invalid)替換同語意effect，File/invalid/移除/unmount仍各consumer管理並revoke capturedURL，沒有共享cache。其他20個既有source檔完全相同。固定23檔manifest 098d78d5d8fec7ed1858f287d08d454393b9792239de8d9c1ce8f76d527d1207；ignored t263-source/逐檔副本、t263-delta.json。
+
+獨立靜態review零open，尚待runtime/UI/final，不預勾。format/lint/web typecheck/web production build與兩scope生成均PASS，compiledCSS與入口dist完全byte相同（t263-css-equivalence.json）。唯一heavy runner session61324，t263-validate.py順序完整本scope64、另一hookconsumer92與精確受影響新建8/縮圖12 UI；worker1，Chrome→WebKit，各scope四projects，不重全1120/後端。警告2續跑授權有效，當前swap5121MiB無增加；每個test命令後核退出/ownedDB。進度仍262/292，T263保持[ ]，T264未開始。
+
+
+### T263 受影響驗證完成，待獨立final
+
+同一098d78d5d8fec7ed1858f287d08d454393b9792239de8d9c1ce8f76d527d1207來源，18命令全部exit0；64新增旅行＋92縮圖編輯完整四projects，8建立預覽/鍵盤＋12縮圖預覽/鍵盤＝176新執行，無skip/flaky/error。raw與command帳在ignored t263-matrix.json、t263-runtime-summary.json。未重跑未受影響全1120/後端704，前證據明記來源沿用；完整plan交付回歸未取消。
+
+C呈現沿用design-v7 U07/U08/S10/S05/U04及原固定baseline，無設計/業務/樣式變更，compiledCSS入口與重構後byte完全相同。新16PNG/16metrics在t263-ui與t263-thumbnail-ui：U08照片、S05無效/建立失敗、U04現圖/照片、S09預設、S03照片失敗、S05照片unknown D/M。各幀欄位位置/間距/按鈕/標題/可視範圍相同；14metrics原值全同，invalid D/M唯一差異是隱藏fileinput真隨機UUID檔名（原JSON保留）；16份geometry全同。10PNG byteexact；createfailureD25/M47像素最大2、failurephotoM8像素最大1屬邊緣；invalidD3188/M3005像素限定真隨機filename行；unknownphotoD8005像素為同文同位置繪製差異，非全圖max2。主代理已逐看六差異圖，無新增UI差異；繼承T262已批准的desktop工具列垂直適配/既有Name初焦、320單欄，無重批需求。像素/逐檔對照在t263-ui-comparison及兩pixel-diff.json，保留sha256。
+
+runner61324已exit0，12登記worker均不存在、ownedDB[]、browser0，pressure1 normal/swap5121MiB；warning2期間照使用者例外繼續，沒有critical/OOM/系統kill。工具環境agent→PID映射未知，不宣稱工具記憶體全部釋放。固定reviewer核對runtime/圖/cleanup中，T263仍[ ]，264未開始。
+
+
+T263已正式獨立APPROVED/zeroopen，reportSHA 4482c4c999da92de75cda266ee7ad31ecf6cb765ddf62ba5d6e7d45d2ac0e546；完整176PASS/18命令、23來源/32 UI entries/cleanup已核，回寫[X]，263/292。下一筆T264 green縮圖限制與選圖錯誤，維持同資源/精準回歸契約。
+
+
+## 2026-11-17 T264 /bdd green slices進行中
+
+只ThumbnailEditor相對T263改動，其他22source未動：F098真RED缺visible完整policy（2FAIL）→支援單張靜態JPG/.jpg/.jpeg/PNG/WebP及手機HEIC轉檔，2PASS；F099 HEIC本地應拒卻POST真RED→宣告unsupported MIME本地guard，1PASS。拒絕probe8PASS後APNG RED動畫原因不明→415文案列格式/動畫與轉檔改選，APNG/WebP2PASS；文字偽裝PNG RED422被誤分unknown→422確定拒絕＋INVALID_IMAGE損壞/尺寸/改選文案，4corrupt/zero例PASS。empty/size/count3真RED應local卻server→native FileList單張/非空/≤10MiB檢查，3PASS。前端不以MIME當真正內容驗證，合法宣告但壞內容仍由後端真解碼拒絕，helpers/contract/truth不改。
+
+目前唯一heavy session8798檢驗3個像素/邊長拒絕文案；T264未完成、不可累加preliminary為完整GREEN。最終保持48×4=192executions（Given部分覆寫viewport，實際unique engine/案例/viewport 138組另核）與受影響Thumbnail92、D/M policy及錯誤預覽比對/獨立review；未改create/管理/oldweb/API依精準影響範圍沿用有效前證據。C依原design-v7 U04/U07/S03/原baseline，不加prototype。263/292，T264 [ ]，warning2本session可繼續、critical/OOM/不可回收停；單heavy/worker1/固定readonly reviewer。資源audit每命令後退出/DB[]。
+
+
+### T264 固定來源全範圍驗證進行中
+
+像素/寬/高3真RED證明泛稱超限不足→IMAGE_TOO_LARGE顯示10MiB、總像素2500萬、最長邊16384與縮小改選，3focusedPASS。固定23檔SHA fab7917c12923939aa9efeb3a1979ccaac78e3cfdb88d14303ab54551da998b3（t264-files.sha256/source/），相對T263只有ThumbnailEditor一檔/其餘22byteexact。獨立凍結靜態review零open，未final。品質format/lint/webTS/build/gen2已6命令全0，CSS入口實檔完全byteequal。唯一heavy21289正式16cmd/192scope+92thumbnail+20精確policy/preview/rejection/keyboard UI＝304executions；目前ChromeD48全PASS、ChromeM續跑。新UI將36PNG/metrics在t264-ui，不覆寫前證據。raw報告可讀執行Given device/設定viewport對照，會另產實際組合帳，192不是192不同尺寸行為；同tag重覆project不混稱額外覆蓋。
+
+尚待3scopeprojects、thumbnail4projects、UI D/M、逐圖/資源回收/獨立final。263/292，T264仍[ ]，T265未開始；不因精準縮減取消完整TestScope/原交付完整回歸。
+
+
+### T264 原完整304通過，R264-01本地破圖補修中
+
+原fab7同版本16命令全0/304PASS，full192/660BDDsteps、Thumbnail92、UI20與36entries俱齊，viewport ledger由raw executedGiven/設定推導138有效組合，非獨立runtime telemetry。原UImanifest bf500cd243e03f8afff458e417846d478495ca57d15a24527a30d03f4591c7f0保留，原t264-ui/raw/source不覆寫。
+
+root與reviewer逐看真圖確認R264-01：損壞本地File露broken icon+alt。新增真QA RED1（placeholder不存在）後修為URL-keyed本地預覽占位：failedPreviewUrl各instance，需非空source/File/非busyunknown且source===preview===failedURL；img key=source防舊error污染改選。只本地草稿有onError，confirmed/current私有圖片無handler（不偷做266）；保File/原operation與真POST/422/receipt/DB，placeholder中性不偽稱後端結果。第一focused1PASS後補嚴格非null guard，再固定cb0fca6de02f8ae377aa55e397b91e18e3ecf1574a6240ebc4c5fae7177fcad7。
+
+獨立static新guard/key零open，唯一heavy5073 t264-preview-validate.py：品質4＋56影響BDD（5壞內容F099/F100各四projects40＋合法格式F10116）＋4新UI（壞PNG/合法photo D/M）；snapshot/manifest/raw/newt264-preview-ui分開。原有效244slots將依影響保留、60新結果取代，不重全304、不宣稱不同版單版全跑。新畫面與回收/final尚待，T264仍[ ]，263/292。記憶體正常/warning依授權繼續，swap5113MiB穩定。
+
+
+### T264 R264-01補驗完成，待獨立final
+
+cb0f固定來源10新命令全部exit0，56影響BDD（40壞輸入拒絕/改選+16合法格式）及4新UI全部PASS。t264-final-coverage.json逐raw單次PASS對照304必要slots完整＝244未受影響fab7＋60本次cb0f（wholefeature192=136+56、前Thumbnail92沿用、UI20=16+4）；非單版新跑304。原完整304與後60執行分開，preliminary/中途改動結果不混成final。新UI raw實際key保留並明列coverageSlotKey替代baseline等價流程+更強占位斷言，沒有冒稱同一檔案。
+
+原UI36manifest保留不動；新preview-ui8entries SHA13dca89e67cd31d6a3ba453af1d6e5705747c1f792bd7212fd8baf8e512ed26c，effective t264-final-ui.json36entries/18PNG逐列來源與hash：baseline破圖/photo四幀排除，改新四幀。新CSS入口與fab7 byteequal。root逐看新四圖及原六類代表，broken icon已由中性占位取代，原File/尚未保存badge/錯誤/真422仍保留；合法照片正常。
+
+| 畫面/設計預期 | 實際呈現 | 差異/影響與處理 |
+| --- | --- | --- |
+| U04-D/M 固定預覽、選圖工具、限制區與48px CTA | D dialog668×715@(386,92.5)，M358×720@(16,62)，current/photo幀與T263 frame/CTA座標完全同 | policy補.jpg/.jpeg與HEIC轉檔不改資訊位置；無幾何變化 |
+| S03-D/M 本地格式、空檔、容量、多檔拒絕 | 畫面維持已保存圖、明確原因/下一步、保存disabled、可改選 | 不建立invalid草稿，不發POST；長原因自然換行 |
+| S03-D/M 動畫、損壞、解碼尺寸超限 | 真後端拒絕後錯誤與尚未保存File/版本保持；無busy或成功誤示 | 保後端權威；損壞local preview中性占位不代替判斷，R264-01修正 |
+| S03長錯誤與真UUID長檔名 D/M | D CTA y711.03125高48、M y706.875高48，均完整在frame底807.5/782內，scrollTop0/無橫溢出 | 長檔名兩行及原因自然換行，未推掉footer/主要操作，原字型/色彩/佈局保持 |
+| U07與未變管理/帳務/導覽 | 22其餘source檔完全不變，沿用T262/T263已批准證據 | 不因本地預覽改動重跑未受影響create64/oldweb/support/API；最終plan完整交付回歸仍保留 |
+
+設計仍design-v7原批准6c33…abc與固定baseline8fc9…，不製prototype；資料真fixture、預覽彩色矩形是真bytes非設計富士山插畫。35登記worker皆退出、ownedDB[]、browser0，5073exit0，pressure1正常/swap5081MiB；工具agent→PID回收未知維持註記。固定reviewer正在核最終case/圖/回收，T264仍[ ]，263/292、T265未開始。
+
+
+T264正式獨立APPROVED/zeroopen，reportSHA a0493c783a83328de52903fd25a7d79ba89940e2bb9e35a79b6361d178172601；304有效slots來源/18有效PNG/36entries/35worker回收均核，R264-01 CLOSED。已回寫[X]，264/292；續T265 refactor，只整理已綠選圖與錯誤映射私有邊界，後續未開始。
+
+
+## 2026-11-17 T265 /bdd refactor固定來源驗證中
+
+只ThumbnailEditor抽兩個private純函式selectionError(FileList)與rejectionMessage(ApiError)，消除元件內巢狀ternary；count→空檔→大小→宣告MIME優先序、字串、fallback message、外層selected/busy/attempt/取消guard完全不變。未改任何State/previewkey/本地onError/UUID/backend/DSL/設計。獨立靜態零open。23source manifest03eaa3d092f2248fe904425106db50a66cbcaff779d5cbde69e94d21e7aba7bf，副本t265-source/；其他22檔與cb0f完全同。
+
+format/lint/webTS/build/gen2已6cmd全0，入口CSS byteequal。唯一heavy77101，t265-validate.py正式16命令/預期192當前整檔＋92既有Thumbnail＋8代表policy/photo/損壞占位/像素錯誤UI D/M＝292新執行，worker1順序跑。此重構實際經所有選圖/拒絕，故完整本scope必要；未動create/管理/oldweb/support/API仍按影響保留，不因hash加跑。尚待完整scope/UI16entries、回收/獨立final，T265保持[ ]、264/292，T266未開始。pressure1入口/swap5081MiB，warning2例外續跑、critical/OOM/無法回收停。

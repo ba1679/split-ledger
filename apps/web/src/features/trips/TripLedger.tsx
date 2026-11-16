@@ -103,9 +103,13 @@ export function TripLedger() {
             navigate('/trips', { state: { message: '旅行已移至垃圾桶，可從垃圾桶復原。' } });
           }}
         />
-      ) : managementDialog === 'thumbnail' ? (
-        <ThumbnailEntryDialog trip={trip.data} onClose={() => setManagementDialog(null)} />
       ) : null}
+      <ThumbnailEntryDialog
+        key={`${account!.id}:${trip.data.id}`}
+        trip={trip.data}
+        open={managementDialog === 'thumbnail'}
+        onClose={() => setManagementDialog(null)}
+      />
       <Link className="back" to="/trips">
         <Icon name="back" />
         <span>我的旅行</span>

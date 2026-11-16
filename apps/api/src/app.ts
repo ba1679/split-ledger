@@ -16,7 +16,7 @@ import { registerSettlementRecordRoute } from './modules/settlement/record.js';
 import { registerRepaymentCreateRoute } from './modules/repayments/create.js';
 import { registerRepaymentReadRoutes } from './modules/repayments/read.js';
 import { registerMemberRoutes } from './modules/members/index.js';
-import { checkOrigin, HttpError, invalid } from './http.js';
+import { checkOrigin, HttpError, invalid, postgresError } from './http.js';
 import type { SplittingHooks } from './modules/splitting/dependencies.js';
 
 export interface AppOptions {
@@ -82,14 +82,15 @@ export function buildApp(options: AppOptions = {}) {
       });
 
     const failure = error as { validation?: unknown; statusCode?: number; code?: string };
+    const code = postgresError(error)?.code ?? failure.code;
 
     if (
       failure.validation ||
       failure.statusCode === 400 ||
       failure.statusCode === 415 ||
-      failure.code === '23514' ||
-      failure.code === '22007' ||
-      failure.code === '22008'
+      code === '23514' ||
+      code === '22007' ||
+      code === '22008'
     ) {
       return reply.code(400).send({ code: 'VALIDATION_ERROR', message: '輸入資料格式不正確。' });
     }

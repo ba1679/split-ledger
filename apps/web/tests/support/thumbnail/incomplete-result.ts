@@ -19,7 +19,7 @@ export async function assertIncompleteUploadFailed(world: LedgerWorld): Promise<
   // Only a definitive formal rejection qualifies; a transport error/receipt404 alone does not.
   expect(response.status()).toBe(400);
   expect(await response.json()).toMatchObject({
-    code: 'VALIDATION_ERROR',
+    code: 'UPLOAD_INCOMPLETE',
     message: expect.any(String),
   });
   const receipt = await ownerRead(
