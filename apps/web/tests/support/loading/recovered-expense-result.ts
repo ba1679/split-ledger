@@ -105,7 +105,18 @@ export async function assertRecoveredExpense(world: LedgerWorld): Promise<void> 
   for (const [path, authority] of Object.entries(state.authorities)) {
     const current = await ownerRead(world, path);
     expect(current.status()).toBe(200);
-    expect(await current.json()).toEqual(authority);
+    const expected =
+      path === '/api/categories'
+        ? {
+            ...authority,
+            items: authority.items.map((category) => ({
+              ...category,
+              usageCount:
+                Number(category.usageCount) + (category.id === expense.category_id ? 1 : 0),
+            })),
+          }
+        : authority;
+    expect(await current.json()).toEqual(expected);
   }
   expect(state.requests.length).toBe(3);
   expect(state.exchanges.length).toBe(3);

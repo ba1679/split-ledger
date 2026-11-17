@@ -9,6 +9,7 @@ import { TripLedger } from '../features/trips/TripLedger.js';
 import { Categories } from '../features/categories/Categories.js';
 import { ExpenseForm } from '../features/expenses/ExpenseForm.js';
 import { AppShell } from '../components/AppShell.js';
+import { BusyIndicator } from '../components/waiting/BusyIndicator.js';
 import { QueryState } from '../components/QueryState.js';
 import { TripSettlement } from '../features/settlement/TripSettlement.js';
 import { SettleArrangement } from '../features/settlement/SettleArrangement.js';
@@ -30,7 +31,7 @@ export function App() {
   if (session.pending || session.closing)
     return (
       <main className="session-state">
-        <QueryState pending />
+        <BusyIndicator accessibleLabel={session.closing ? '正在登出' : '正在確認身分'} />
       </main>
     );
   if (session.error && !session.account)

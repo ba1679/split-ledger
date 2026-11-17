@@ -21,7 +21,15 @@ export async function assertInitialFailed(world: LedgerWorld): Promise<void> {
     live = liveQueryAttempts(ui, state.query);
   expect(all.filter(isCancelledRead).length).toBeLessThanOrEqual(1);
   expect(live.length).toBe(1);
-  expect(live[0]!.failure()).not.toBeNull();
+  if (live[0]!.failure() === null) {
+    // WebKit may finish the transport after receiving headers and one truncated JSON byte.
+    const response = await live[0]!.response();
+    expect(response?.status()).toBe(200);
+    const body = await response!.body();
+    expect(body).toEqual(Buffer.from(JSON.stringify(state.authority)).subarray(0, 1));
+    expect(Number(response!.headers()['content-length'])).toBeGreaterThan(body.length);
+    await expect(response!.json()).rejects.toThrow();
+  }
   await expect.poll(() => state.finished).toBe(state.exchanges.length);
   const region = initialContentRegion(page, state);
   const error = region

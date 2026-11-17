@@ -81,7 +81,10 @@ export async function assertInitialResult(world: LedgerWorld, content: string): 
       for (const trip of items) {
         const heading = region.getByRole('heading', { name: trip.name, exact: true });
         await expect(heading).toHaveCount(1);
-        const card = region.locator('a,article,li').filter({ has: heading }).last();
+        const card = region
+          .locator('a,article,li')
+          .filter({ has: page.getByRole('heading', { name: trip.name, exact: true }) })
+          .last();
         await expect(card).toBeVisible();
         await expect(card.getByRole('button', { name: '復原旅行', exact: true })).toBeEnabled();
         await expect(card.getByRole('button', { name: '永久刪除', exact: true })).toBeEnabled();
@@ -212,7 +215,14 @@ export async function assertInitialResult(world: LedgerWorld, content: string): 
             .sort(),
         );
       }
-      await expect(page.getByRole('heading', { name: /日本旅行/ })).toBeVisible();
+      const tripId = new URL(page.url()).pathname.split('/')[2];
+      const trip = state.before.trips.find((row) => row.id === tripId)!;
+      expect(trip).toBeDefined();
+      const tripLink = page
+        .getByRole('main')
+        .getByRole('link', { name: String(trip.name), exact: true });
+      await expect(tripLink).toBeVisible();
+      await expect(tripLink).toHaveAttribute('href', `/trips/${tripId}/settlement`);
       break;
     }
     case '目前待結清安排': {

@@ -21,6 +21,8 @@ export function TripAccessState({
   if (authority.isPending || authority.error)
     return (
       <QueryState
+        label="旅行資料"
+        fetchStatus={authority.fetchStatus}
         pending={authority.isPending}
         error={authority.error}
         retry={() => {

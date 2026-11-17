@@ -86,6 +86,9 @@ export function IndependentRepayment() {
   if (!query.data)
     return (
       <QueryState
+        label="還款表單"
+        layout="form"
+        fetchStatus={query.fetchStatus}
         pending={query.isPending}
         error={query.error}
         retry={() => {
@@ -296,6 +299,7 @@ function RepaymentEditor({
         </strong>
       </section>
       <form
+        aria-label="還款表單"
         noValidate
         data-command-id={id}
         onSubmit={(event) => {

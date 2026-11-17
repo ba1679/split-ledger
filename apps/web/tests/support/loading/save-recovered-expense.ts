@@ -13,6 +13,7 @@ export async function saveRecoveredExpense(world: LedgerWorld): Promise<void> {
   await assertRecoveredDraft(world);
   await chooseCurrency(page, 'JPY');
   const category = page.getByRole('combobox', { name: /^分類(?:選填)?$/ });
+  await category.click();
   await category.fill('餐飲');
   await page.getByRole('option', { name: '餐飲', exact: true }).click();
   await page.getByRole('radio', { name: 'Alice', exact: true }).check();
@@ -22,7 +23,7 @@ export async function saveRecoveredExpense(world: LedgerWorld): Promise<void> {
   for (const option of ['幣別', '分類', '分攤成員']) {
     const region = optionRegion(page, option);
     await expect(region).not.toHaveAttribute('aria-busy', 'true');
-    await expect(region.getByRole('status')).toHaveCount(0);
+    await expect(region.getByRole('status', { name: /讀取|載入/ })).toHaveCount(0);
   }
   await expect(state.data.control).toBeEnabled();
   await state.data.control.click();

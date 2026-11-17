@@ -107,6 +107,9 @@ export function TripLedger() {
           <span>我的旅行</span>
         </Link>
         <QueryState
+          label="旅行資料"
+          layout="summary"
+          fetchStatus={trip.fetchStatus}
           pending={trip.isPending}
           error={trip.error}
           retry={() => {
@@ -124,7 +127,7 @@ export function TripLedger() {
         <Icon name="back" />
         <span>我的旅行</span>
       </Link>
-      <header className="page-head">
+      <header className="page-head" role="region" aria-label="旅行資料">
         <div>
           <div className="eyebrow">TRAVEL JOURNAL</div>
           <h1>{trip.data.name}</h1>
@@ -170,6 +173,9 @@ export function TripLedger() {
       ) : null}
       {totals.isPending || totals.error ? (
         <QueryState
+          label="分幣別總額"
+          layout="summary"
+          fetchStatus={totals.fetchStatus}
           pending={totals.isPending}
           error={totals.error}
           retry={() => {
@@ -235,13 +241,24 @@ export function TripLedger() {
         </section>
       ) : null}
       {expenses.isPending || !expenses.data ? (
-        <QueryState
-          pending={expenses.isPending}
-          error={expenses.error}
-          retry={() => {
-            void expenses.refetch();
-          }}
-        />
+        <>
+          {expenses.isPending && expenses.fetchStatus !== 'paused' ? (
+            <div className="section-head" aria-hidden="true">
+              <span className="list-heading-skeleton" />
+              <span className="list-count-skeleton" />
+            </div>
+          ) : null}
+          <QueryState
+            label="支出清單"
+            layout="list"
+            fetchStatus={expenses.fetchStatus}
+            pending={expenses.isPending}
+            error={expenses.error}
+            retry={() => {
+              void expenses.refetch();
+            }}
+          />
+        </>
       ) : totalCount === 0 ? (
         <div className="empty">
           <Icon name="note" />
@@ -257,7 +274,7 @@ export function TripLedger() {
             <h2>沿途的花費</h2>
             <span>{totalCount} 筆紀錄</span>
           </div>
-          <div className="ledger">
+          <div className="ledger" role="region" aria-label="支出清單">
             {rows.map((expense) => (
               <Link
                 className="expense-row"

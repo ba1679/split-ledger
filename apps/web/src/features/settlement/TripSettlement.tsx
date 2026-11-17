@@ -87,6 +87,14 @@ export function TripSettlement() {
     }
   }
 
+  const pageHead = (
+    <header className="page-head">
+      <div>
+        <h1>誰該付給誰</h1>
+        <p className="muted">查看每個人的應收、應付與付款安排。</p>
+      </div>
+    </header>
+  );
   const back = (
     <Link className="back" to={`/trips/${tripId}`}>
       <Icon name="back" />
@@ -97,7 +105,11 @@ export function TripSettlement() {
     return (
       <>
         {back}
+        {pageHead}
         <QueryState
+          label="付款安排"
+          layout="list"
+          fetchStatus={query.fetchStatus}
           pending={query.isPending}
           error={query.error}
           retry={() => {
@@ -124,12 +136,7 @@ export function TripSettlement() {
           {location.state.message}
         </p>
       ) : null}
-      <header className="page-head">
-        <div>
-          <h1>誰該付給誰</h1>
-          <p className="muted">查看每個人的應收、應付與付款安排。</p>
-        </div>
-      </header>
+      {pageHead}
       <section
         className="settlement-panel simplification-panel"
         aria-labelledby="simplification-title"

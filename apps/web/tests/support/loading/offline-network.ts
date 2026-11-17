@@ -24,6 +24,18 @@ export async function disconnectLoadedPage(page: Page): Promise<void> {
 
 export async function openOfflineTrips(page: Page): Promise<void> {
   expect(await page.evaluate(() => navigator.onLine)).toBe(false);
-  await page.getByRole('link', { name: '我的旅行', exact: true }).filter({ visible: true }).click();
+  const mobile = page.getByRole('navigation', { name: '行動導覽', exact: true });
+  if (await mobile.isVisible()) {
+    await mobile.getByRole('button', { name: '我的旅行', exact: true }).click();
+    await page
+      .getByRole('dialog', { name: '我的旅行', exact: true })
+      .getByRole('link', { name: '旅行清單', exact: true })
+      .click();
+  } else {
+    await page
+      .getByRole('navigation', { name: '主要導覽', exact: true })
+      .getByRole('link', { name: '我的旅行', exact: true })
+      .click();
+  }
   await expect(page).toHaveURL(/\/trips$/);
 }

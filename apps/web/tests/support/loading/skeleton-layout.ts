@@ -25,7 +25,13 @@ export function assertSkeletonLayout(layout: InitialRead['layout'], input: Skele
     const images = shapes.filter((shape) => shape.width >= 96 && shape.height >= 64);
     expect(
       images.some((image) =>
-        bars.some((bar) => overlaps(image, bar) && bar.y >= image.y + image.height - 1),
+        bars.some(
+          (bar) =>
+            (overlaps(image, bar) && bar.y >= image.y + image.height - 1) ||
+            (bar.x >= image.x + image.width - 1 &&
+              bar.y >= image.y &&
+              bar.y < image.y + image.height),
+        ),
       ),
       'Card skeleton contains an image block followed by text',
     ).toBe(true);

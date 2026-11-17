@@ -187,6 +187,9 @@ export function TrashTrips() {
       ) : null}
       {trash.isPending || trash.error ? (
         <QueryState
+          label="垃圾桶"
+          layout="media"
+          fetchStatus={trash.fetchStatus}
           pending={trash.isPending}
           error={trash.error}
           retry={() => {
@@ -195,7 +198,13 @@ export function TrashTrips() {
         />
       ) : null}
       {items.length ? <p className="trash-count">{items.length} 趟已刪旅行</p> : null}
-      <div className="trash-cards">
+      <div
+        className="trash-cards"
+        role="region"
+        aria-label={
+          trash.isPending || trash.error || !cards.length ? undefined : '已移入垃圾桶的旅行'
+        }
+      >
         {cards.map((trip) => (
           <TrashCard
             key={trip.id}
@@ -220,7 +229,7 @@ export function TrashTrips() {
         <p className="trash-note">移入垃圾桶不會結清欠款，也不會變更旅行帳務。</p>
       ) : null}
       {!cards.length && !trash.isPending && !trash.error ? (
-        <div className="empty">
+        <div className="empty" role="region" aria-label="已移入垃圾桶的旅行">
           <h2>沒有已刪旅行</h2>
           <p>移至垃圾桶的旅行會保留在這裡，直到你選擇復原或永久刪除。</p>
         </div>

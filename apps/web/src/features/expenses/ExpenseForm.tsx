@@ -18,6 +18,7 @@ import {
 import { DateField } from '../../components/DateField.js';
 import { dateOnly, localToday, parseDate } from '../../components/date.js';
 import { QueryState } from '../../components/QueryState.js';
+import { BusyIndicator } from '../../components/waiting/BusyIndicator.js';
 import { SearchCombo } from '../../components/SearchCombo.js';
 import { FormDialog } from '../../components/FormDialog.js';
 import { useSession } from '../auth/session.js';
@@ -78,6 +79,13 @@ export function ExpenseForm({ initialDraft }: { initialDraft?: ExpenseDraft } = 
           <span>返回旅行帳本</span>
         </Link>
         <QueryState
+          label="支出詳情與支出表單"
+          layout="form"
+          fetchStatus={
+            trip.fetchStatus === 'paused' || expense.fetchStatus === 'paused'
+              ? 'paused'
+              : trip.fetchStatus
+          }
           pending={trip.isPending || Boolean(expenseId && expense.isPending)}
           error={trip.error ?? expense.error}
           retry={() => {
@@ -284,9 +292,11 @@ function ExpenseEditor({
 
   function accepted(value: string) {
     return (
-      digits !== undefined &&
       value.length <= 25 &&
-      (digits === 0 ? /^\d*$/ : new RegExp(`^\\d*(?:\\.\\d{0,${digits}})?$`)).test(value)
+      (digits === undefined || digits === 0
+        ? /^\d*$/
+        : new RegExp(`^\\d*(?:\\.\\d{0,${digits}})?$`)
+      ).test(value)
     );
   }
 
@@ -512,7 +522,19 @@ function ExpenseEditor({
 
   function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (writing.current || unconfirmed || stateLocked || awaitingPreference) return;
+    if (
+      writing.current ||
+      unconfirmed ||
+      stateLocked ||
+      awaitingPreference ||
+      categories.isPending ||
+      categories.error ||
+      members.isPending ||
+      members.error ||
+      currencies.isPending ||
+      currencies.error
+    )
+      return;
 
     const validation: FieldErrors = {};
 
@@ -600,7 +622,13 @@ function ExpenseEditor({
           暫時無法更新已保存資料，請保留草稿後再試。
         </p>
       ) : null}
-      <form className="form-panel expense-form" data-command-id={id} noValidate onSubmit={submit}>
+      <form
+        aria-label="支出詳情與支出表單"
+        className="form-panel expense-form"
+        data-command-id={id}
+        noValidate
+        onSubmit={submit}
+      >
         <fieldset disabled={busy || Boolean(unconfirmed) || stateLocked}>
           <div className="field">
             <label htmlFor={itemId}>支出項目</label>
@@ -705,7 +733,8 @@ function ExpenseEditor({
                 }));
               }}
               error={errors.currency}
-              disabled={currencies.isPending || Boolean(currencies.error)}
+              pending={currencies.isPending}
+              disabled={Boolean(currencies.error)}
             />
             {currencies.error ? (
               <p className="error" role="alert">
@@ -733,7 +762,8 @@ function ExpenseEditor({
                 onChange={setCategory}
                 onSelect={(value) => saveCategoryPreference(account!.id, value)}
                 optional
-                disabled={categories.isPending || Boolean(categories.error)}
+                pending={categories.isPending}
+                disabled={Boolean(categories.error)}
               />
               {categories.error ? (
                 <p className="error" role="alert">
@@ -752,109 +782,120 @@ function ExpenseEditor({
               ) : null}
             </div>
           </div>
-          {members.data ? (
-            <div className="expense-sharing">
-              <fieldset
-                className="member-picker"
-                aria-describedby={errors.payerMemberId ? `${itemId}-payer-error` : undefined}
-              >
-                <legend>誰付款？</legend>
-                <div className="member-choices">
-                  {members.data.items
-                    .filter((member) => member.isActive || member.id === expense?.payerMemberId)
-                    .map((member) => (
-                      <label key={member.id} className="member-choice">
-                        <input
-                          type="radio"
-                          name={`${id}-payer`}
-                          value={member.id}
-                          checked={payerMemberId === member.id}
-                          disabled={!member.isActive}
-                          onChange={() => setPayerMemberId(member.id)}
-                          aria-invalid={Boolean(errors.payerMemberId)}
-                        />
-                        <span>{member.name}</span>
-                      </label>
-                    ))}
-                </div>
-                <p id={`${itemId}-payer-error`} className="error" role="alert">
-                  {errors.payerMemberId}
-                </p>
-              </fieldset>
-              <fieldset
-                className="member-picker"
-                aria-describedby={errors.shareMemberIds ? `${itemId}-shares-error` : undefined}
-              >
-                <legend>誰一起平均分攤？</legend>
-                <div className="member-choices">
-                  {members.data.items
-                    .filter(
-                      (member) =>
-                        member.isActive ||
-                        expense?.shares.some((share) => share.memberId === member.id),
-                    )
-                    .map((member) => (
-                      <label key={member.id} className="member-choice">
-                        <input
-                          type="checkbox"
-                          value={member.id}
-                          checked={shareMemberIds.includes(member.id)}
-                          disabled={!member.isActive}
-                          onChange={(event) =>
-                            setShareMemberIds((previous) =>
-                              event.target.checked
-                                ? [...previous, member.id]
-                                : previous.filter((value) => value !== member.id),
-                            )
-                          }
-                          aria-invalid={Boolean(errors.shareMemberIds)}
-                        />
-                        <span>{member.name}</span>
-                      </label>
-                    ))}
-                </div>
-                <p id={`${itemId}-shares-error`} className="error" role="alert">
-                  {errors.shareMemberIds}
-                </p>
-              </fieldset>
-              <p className="field-hint">付款人可以不參與分攤。</p>
-              {shareMemberIds.length && precision !== undefined
-                ? (() => {
-                    try {
-                      const display = `${currency} ${formatShareAmount({ numerator: parseMoney(amount, precision).toString(), denominator: String(shareMemberIds.length), minorUnit: precision })}`;
+          <section
+            aria-label="分攤成員"
+            aria-busy={members.isPending || undefined}
+            tabIndex={members.isPending ? 0 : -1}
+          >
+            {members.data ? (
+              <div className="expense-sharing">
+                <fieldset
+                  className="member-picker"
+                  aria-describedby={errors.payerMemberId ? `${itemId}-payer-error` : undefined}
+                >
+                  <legend>誰付款？</legend>
+                  <div className="member-choices">
+                    {members.data.items
+                      .filter((member) => member.isActive || member.id === expense?.payerMemberId)
+                      .map((member) => (
+                        <label key={member.id} className="member-choice">
+                          <input
+                            type="radio"
+                            name={`${id}-payer`}
+                            value={member.id}
+                            checked={payerMemberId === member.id}
+                            disabled={!member.isActive}
+                            onChange={() => setPayerMemberId(member.id)}
+                            aria-invalid={Boolean(errors.payerMemberId)}
+                          />
+                          <span>{member.name}</span>
+                        </label>
+                      ))}
+                  </div>
+                  <p id={`${itemId}-payer-error`} className="error" role="alert">
+                    {errors.payerMemberId}
+                  </p>
+                </fieldset>
+                <fieldset
+                  className="member-picker"
+                  aria-describedby={errors.shareMemberIds ? `${itemId}-shares-error` : undefined}
+                >
+                  <legend>誰一起平均分攤？</legend>
+                  <div className="member-choices">
+                    {members.data.items
+                      .filter(
+                        (member) =>
+                          member.isActive ||
+                          expense?.shares.some((share) => share.memberId === member.id),
+                      )
+                      .map((member) => (
+                        <label key={member.id} className="member-choice">
+                          <input
+                            type="checkbox"
+                            value={member.id}
+                            checked={shareMemberIds.includes(member.id)}
+                            disabled={!member.isActive}
+                            onChange={(event) =>
+                              setShareMemberIds((previous) =>
+                                event.target.checked
+                                  ? [...previous, member.id]
+                                  : previous.filter((value) => value !== member.id),
+                              )
+                            }
+                            aria-invalid={Boolean(errors.shareMemberIds)}
+                          />
+                          <span>{member.name}</span>
+                        </label>
+                      ))}
+                  </div>
+                  <p id={`${itemId}-shares-error`} className="error" role="alert">
+                    {errors.shareMemberIds}
+                  </p>
+                </fieldset>
+                <p className="field-hint">付款人可以不參與分攤。</p>
+                {shareMemberIds.length && precision !== undefined
+                  ? (() => {
+                      try {
+                        const display = `${currency} ${formatShareAmount({ numerator: parseMoney(amount, precision).toString(), denominator: String(shareMemberIds.length), minorUnit: precision })}`;
 
-                      return (
-                        <div className="share-preview">
-                          <div>
-                            每人分攤
-                            <p className="field-hint">
-                              {members.data.items
-                                .filter((member) => shareMemberIds.includes(member.id))
-                                .map((member) => member.name)
-                                .join('、')}
-                            </p>
+                        return (
+                          <div className="share-preview">
+                            <div>
+                              每人分攤
+                              <p className="field-hint">
+                                {members.data.items
+                                  .filter((member) => shareMemberIds.includes(member.id))
+                                  .map((member) => member.name)
+                                  .join('、')}
+                              </p>
+                            </div>
+                            <output aria-label={display}>{display}</output>
                           </div>
-                          <output aria-label={display}>{display}</output>
-                        </div>
-                      );
-                    } catch {
-                      return null;
-                    }
-                  })()
-                : null}
-              {expense && !stateLocked ? (
-                <ExpenseShares expense={expense} members={members.data.items} />
-              ) : null}
-            </div>
-          ) : (
-            <QueryState
-              pending={members.isPending}
-              error={members.error}
-              retry={() => {
-                void members.refetch();
-              }}
-            />
-          )}
+                        );
+                      } catch {
+                        return null;
+                      }
+                    })()
+                  : null}
+                {expense && !stateLocked ? (
+                  <ExpenseShares expense={expense} members={members.data.items} />
+                ) : null}
+              </div>
+            ) : (
+              <>
+                {members.isPending ? (
+                  <BusyIndicator accessibleLabel="正在讀取分攤成員" />
+                ) : (
+                  <QueryState
+                    error={members.error}
+                    retry={() => {
+                      void members.refetch();
+                    }}
+                  />
+                )}
+              </>
+            )}
+          </section>
         </fieldset>
         <p className="error" role="alert">
           {saveError}
@@ -908,7 +949,9 @@ function ExpenseEditor({
               members.isPending ||
               Boolean(members.error) ||
               currencies.isPending ||
-              Boolean(currencies.error)
+              Boolean(currencies.error) ||
+              categories.isPending ||
+              Boolean(categories.error)
             }
           >
             {mutation.isPending ? '儲存中…' : '儲存支出'}

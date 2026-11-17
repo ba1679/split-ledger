@@ -55,6 +55,10 @@ export function Trips() {
           ) : null}
           {trips.isPending || trips.error ? (
             <QueryState
+              label="旅行清單"
+              pendingMessage="正在整理你的旅程…"
+              layout="cards"
+              fetchStatus={trips.fetchStatus}
               pending={trips.isPending}
               error={trips.error}
               retry={() => {
@@ -62,7 +66,7 @@ export function Trips() {
               }}
             />
           ) : trips.data.items.length ? (
-            <div className="grid">
+            <div className="grid" role="region" aria-label="旅行清單">
               {trips.data.items.map((trip, index) => (
                 <Link className="trip-card ds-trip-card" to={`/trips/${trip.id}`} key={trip.id}>
                   <div className={`landscape${index % 2 ? ' warm' : ''}`}>

@@ -156,6 +156,9 @@ export function SettleArrangement() {
   if (!query.data)
     return (
       <QueryState
+        label="結清表單"
+        layout="form"
+        fetchStatus={query.fetchStatus}
         pending={query.isPending}
         error={query.error}
         retry={() => {
@@ -194,7 +197,7 @@ function LoadedSettlement({
   );
   if (!arrangement)
     return (
-      <div className="settle-page">
+      <div className="settle-page" role="region" aria-label="結清表單">
         <p role="alert">付款安排已更新，請重新載入。</p>
         <Link to={`/trips/${snapshot.trip.id}/settlement`}>返回安排</Link>
       </div>
@@ -348,7 +351,7 @@ function SettleEditor({
   }
 
   return (
-    <div className="settle-page">
+    <div className="settle-page" role="region" aria-label="結清表單">
       <Link className="back" to={`/trips/${trip.id}/settlement`}>
         <Icon name="back" />
         <span>返回安排</span>

@@ -9,8 +9,9 @@ export interface BusyIndicatorProps {
 }
 
 export interface SkeletonProps {
-  layout: 'cards' | 'list' | 'form' | 'summary';
+  layout: 'cards' | 'media' | 'list' | 'form' | 'summary';
   accessibleLabel: string;
+  caption?: string;
 }
 
 export interface VerifyOutcomeProps {
