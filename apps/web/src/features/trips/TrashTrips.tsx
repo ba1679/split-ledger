@@ -8,9 +8,11 @@ import { Button } from '../../components/ui/button.js';
 import { Icon } from '../../components/Icon.js';
 import { QueryState } from '../../components/QueryState.js';
 import { TripCommandDialog } from './TripCommandDialog.js';
+import { TripThumbnail } from './TripThumbnail.js';
 import { useLifecycleCommand, type TrashTrip } from './management-api.js';
 
 function TrashCard({ trip, onMessage }: { trip: TrashTrip; onMessage: (message: string) => void }) {
+  const { account } = useSession();
   const [confirming, setConfirming] = useState(false);
   const restore = useLifecycleCommand(trip, 'restore', () =>
     onMessage('旅行已復原，可以從我的旅行重新開啟。'),
@@ -18,11 +20,16 @@ function TrashCard({ trip, onMessage }: { trip: TrashTrip; onMessage: (message: 
 
   return (
     <article className="trash-card">
-      <div className="trash-card-image" aria-hidden="true">
+      <div className="trash-card-image">
         {trip.hasThumbnail ? (
-          <img src={`/api/trips/trash/${trip.id}/thumbnail/${trip.thumbnailRevision}`} alt="" />
+          <TripThumbnail
+            key={`${account!.id}:${trip.id}:${trip.thumbnailRevision}`}
+            src={`/api/trips/trash/${trip.id}/thumbnail/${trip.thumbnailRevision}`}
+          >
+            <Mountain size={52} strokeWidth={1.8} aria-hidden="true" />
+          </TripThumbnail>
         ) : (
-          <Mountain size={52} strokeWidth={1.8} />
+          <Mountain size={52} strokeWidth={1.8} aria-hidden="true" />
         )}
       </div>
       <div className="trash-card-content">

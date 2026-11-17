@@ -5,7 +5,7 @@ import {
 } from '../../../support/thumbnail/card-result.js';
 
 Then('縮圖區域保留位置且旅行識別與入口可用', async ({ world }) => {
-  const { state, card } = await assertCardIdentity(world);
+  const { state, card, page } = await assertCardIdentity(world);
   expect(state.result).toBe('延遲');
   expect(state.requests).toBeGreaterThan(0);
   expect(state.settled).toBe(0);
@@ -18,10 +18,15 @@ Then('縮圖區域保留位置且旅行識別與入口可用', async ({ world })
   expect(await spinner.getAttribute('tabindex')).not.toBe('0');
   await expect(spinner.locator('button,a,input,[tabindex="0"]')).toHaveCount(0);
   const box = await spinner.boundingBox();
+  const scroll = await page.evaluate(() => ({ x: scrollX, y: scrollY }));
   expect(box).not.toBeNull();
-  expect(box!.x).toBeGreaterThanOrEqual(state.imageBox.x);
-  expect(box!.y).toBeGreaterThanOrEqual(state.imageBox.y);
-  expect(box!.x + box!.width).toBeLessThanOrEqual(state.imageBox.x + state.imageBox.width);
-  expect(box!.y + box!.height).toBeLessThanOrEqual(state.imageBox.y + state.imageBox.height);
+  expect(box!.x + scroll.x).toBeGreaterThanOrEqual(state.imageBox.x + state.scroll.x);
+  expect(box!.y + scroll.y).toBeGreaterThanOrEqual(state.imageBox.y + state.scroll.y);
+  expect(box!.x + scroll.x + box!.width).toBeLessThanOrEqual(
+    state.imageBox.x + state.scroll.x + state.imageBox.width,
+  );
+  expect(box!.y + scroll.y + box!.height).toBeLessThanOrEqual(
+    state.imageBox.y + state.scroll.y + state.imageBox.height,
+  );
   await assertReadOnlyThumbnail(world);
 });

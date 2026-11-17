@@ -16,6 +16,21 @@ import { objectUrls } from '../thumbnail/object-urls.js';
 import { deferOwnerRead } from '../loading/deferred-owner-read.js';
 
 export async function arrangeAccountSwitch(page: Page, world: LedgerWorld): Promise<void> {
+  const navigateTrips = async (trash = false) => {
+    const mobile = page.getByRole('navigation', { name: '行動導覽', exact: true });
+    if (await mobile.isVisible()) {
+      await mobile.getByRole('button', { name: '我的旅行', exact: true }).click();
+      await page
+        .getByRole('dialog', { name: '我的旅行', exact: true })
+        .getByRole('link', { name: trash ? '垃圾桶' : '旅行清單', exact: true })
+        .click();
+    } else {
+      await page
+        .getByRole('navigation', { name: '主要導覽', exact: true })
+        .getByRole('link', { name: trash ? '垃圾桶' : '我的旅行', exact: true })
+        .click();
+    }
+  };
   await arrangeManagementPage(page, world, '帳本');
   const activeId = managementTripId(world),
     trashId = world.tripManagement.ids.trips.get('台南旅行')!,
@@ -26,20 +41,20 @@ export async function arrangeAccountSwitch(page: Page, world: LedgerWorld): Prom
   );
   world.set('management:sharedBefore', await sharedSnapshot(world));
   // All navigation stays in one SPA so the old account has genuine cached projections.
-  await page.getByRole('link', { name: '我的旅行', exact: true }).first().click();
+  await navigateTrips();
   const activeCard = page
     .getByRole('link')
     .filter({ has: page.getByRole('heading', { name: '日本旅行', exact: true }) });
   await renderedImage(activeCard.locator('img:visible'));
   const activeUrl = await activeCard.locator('img:visible').getAttribute('src');
-  await page.getByRole('link', { name: /垃圾桶/ }).click();
+  await navigateTrips(true);
   await expect(page.getByRole('heading', { name: /垃圾桶/ })).toBeVisible();
   await expect(page.getByText('台南旅行', { exact: true })).toBeVisible();
   const trashImage = page.locator(`img[src*="/trips/trash/${trashId}/thumbnail/"]:visible`);
   await renderedImage(trashImage);
   const trashUrl = await trashImage.getAttribute('src');
   await waitForManagementReads(managementUI(world));
-  await page.getByRole('link', { name: '我的旅行', exact: true }).first().click();
+  await navigateTrips();
   await expect(activeCard).toBeVisible();
   await waitForManagementReads(managementUI(world));
   const deferred = deferOwnerRead(world, activeId);

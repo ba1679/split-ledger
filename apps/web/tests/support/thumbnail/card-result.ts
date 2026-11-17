@@ -20,12 +20,17 @@ export async function assertCardIdentity(world: LedgerWorld) {
   ).toBeVisible();
   await expect(card.getByText(`${state.item.expenseCount} 筆支出`, { exact: true })).toBeVisible();
   await expect(card.getByText('開啟旅行帳本', { exact: true })).toBeVisible();
-  await card.click({ trial: true });
+  // Measure before the trial click can scroll or trigger the card's hover transform.
   const box = await card.boundingBox();
+  const scroll = await page.evaluate(() => ({ x: scrollX, y: scrollY }));
   expect(box).not.toBeNull();
   for (const key of ['x', 'y', 'width', 'height'] as const)
     expect(
-      Math.abs(box![key] - state.cardBox[key]),
+      Math.abs(
+        box![key] +
+          (key === 'x' || key === 'y' ? scroll[key] : 0) -
+          (state.cardBox[key] + (key === 'x' || key === 'y' ? state.scroll[key] : 0)),
+      ),
       `Card ${key} must not shift due to image loading`,
     ).toBeLessThanOrEqual(1);
   const text = await heading.evaluate((element) => {
@@ -45,6 +50,14 @@ export async function assertCardIdentity(world: LedgerWorld) {
   expect(text.height).toBeGreaterThanOrEqual(text.lineHeight * 1.9);
   expect(text.scrollWidth).toBeLessThanOrEqual(text.clientWidth + 1);
   expect(text.scrollHeight).toBeLessThanOrEqual(text.clientHeight + 1);
+  await card.click({ trial: true });
+  world.set('management:cardGeometry', {
+    reference: state.cardBox,
+    referenceScroll: state.scroll,
+    actual: box,
+    actualScroll: scroll,
+    afterTrialScroll: await page.evaluate(() => ({ x: scrollX, y: scrollY })),
+  });
 
   return { state, page, card };
 }

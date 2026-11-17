@@ -5,6 +5,7 @@ import { apiRequest, type Trip, type ItemList } from '../../api/index.js';
 import { useSession } from '../auth/session.js';
 import { QueryState } from '../../components/QueryState.js';
 import { TripForm } from './TripForm.js';
+import { TripThumbnail } from './TripThumbnail.js';
 import { Button } from '../../components/ui/button.js';
 import { ArrowRight, FileText, Plus } from 'lucide-react';
 
@@ -64,15 +65,16 @@ export function Trips() {
             <div className="grid">
               {trips.data.items.map((trip, index) => (
                 <Link className="trip-card ds-trip-card" to={`/trips/${trip.id}`} key={trip.id}>
-                  <div className={`landscape${index % 2 ? ' warm' : ''}`} aria-hidden="true">
+                  <div className={`landscape${index % 2 ? ' warm' : ''}`}>
                     {trip.hasThumbnail ? (
-                      <img
-                        className="trip-thumbnail"
+                      <TripThumbnail
+                        key={`${account!.id}:${trip.id}:${trip.thumbnailRevision}`}
                         src={`/api/trips/${trip.id}/thumbnail/${trip.thumbnailRevision}`}
-                        alt=""
                       />
                     ) : (
-                      <span className="word">JOURNEY</span>
+                      <span className="word" aria-hidden="true">
+                        JOURNEY
+                      </span>
                     )}
                   </div>
                   <div className="card-content">

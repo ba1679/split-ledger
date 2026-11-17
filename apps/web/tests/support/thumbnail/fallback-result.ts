@@ -3,7 +3,7 @@ import type { LedgerWorld } from '../../../../api/tests/support/world.js';
 import { assertCardIdentity, assertReadOnlyThumbnail } from './card-result.js';
 
 export async function assertThumbnailFallback(world: LedgerWorld): Promise<void> {
-  const { state, card } = await assertCardIdentity(world);
+  const { state, card, page } = await assertCardIdentity(world);
   expect(state.result).toBe('明確失敗');
   expect(state.requests).toBeGreaterThan(0);
   expect(state.settled).toBe(state.requests);
@@ -17,6 +17,12 @@ export async function assertThumbnailFallback(world: LedgerWorld): Promise<void>
   expect(box).not.toBeNull();
   expect(box!.height).toBeGreaterThanOrEqual(state.imageBox.height - 1);
   expect(box!.width).toBeGreaterThanOrEqual(state.imageBox.width - 1);
-  await expect(card.getByText(/(?:無法|失敗|重試).*(?:旅行資料|帳本)/)).toBeHidden();
+  // Do not concatenate the image-failure caption with the normal ledger CTA
+  // by matching the whole card; independent ledger error messages still fail.
+  await expect(
+    card
+      .getByText(/(?:無法|失敗|重試).*(?:旅行資料|帳本)/)
+      .filter({ hasNot: page.getByRole('heading') }),
+  ).toBeHidden();
   await assertReadOnlyThumbnail(world);
 }

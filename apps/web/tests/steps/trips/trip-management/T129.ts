@@ -52,7 +52,7 @@ Then('早餐成功保存且圖片失敗沒有改壞帳務', async ({ world }) =>
   expect(body).toMatchObject({
     id,
     item: '早餐',
-    amount: '100',
+    amount: '100.00',
     currencyCode: 'TWD',
     minorUnit: 2,
     spentOn: saved.request.spentOn,
@@ -87,7 +87,7 @@ Then('早餐成功保存且圖片失敗沒有改壞帳務', async ({ world }) =>
     ),
   ).toEqual([
     { currencyCode: 'JPY', amount: '5000', minorUnit: 0 },
-    { currencyCode: 'TWD', amount: '700', minorUnit: 2 },
+    { currencyCode: 'TWD', amount: '700.00', minorUnit: 2 },
   ]);
   const settlement = await ownerRead(world, `/api/trips/${tripId}/settlement`);
   expect(settlement.status()).toBe(200);

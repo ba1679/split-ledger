@@ -17,6 +17,7 @@ export interface ThumbnailRead {
   item: Record<string, unknown>;
   cardBox: { x: number; y: number; width: number; height: number };
   imageBox: { x: number; y: number; width: number; height: number };
+  scroll: { x: number; y: number };
   requests: number;
   settled: number;
   release(): void;
@@ -45,6 +46,7 @@ export async function arrangeThumbnailRead(
   await waitForManagementReads(ui);
   const cardBox = await card.boundingBox(),
     imageBox = await card.locator('img:visible').boundingBox();
+  const scroll = await page.evaluate(() => ({ x: scrollX, y: scrollY }));
   expect(cardBox).not.toBeNull();
   expect(imageBox).not.toBeNull();
   const response = await ownerRead(world, '/api/trips?limit=100');
@@ -66,6 +68,7 @@ export async function arrangeThumbnailRead(
     item,
     cardBox: cardBox!,
     imageBox: imageBox!,
+    scroll,
     requests: 0,
     settled: 0,
     release,
