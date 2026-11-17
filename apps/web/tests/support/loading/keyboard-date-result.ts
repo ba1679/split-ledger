@@ -55,7 +55,16 @@ export async function assertKeyboardDateResult(world: LedgerWorld, result: strin
       .getByRole('status')
       .filter({ hasText: /日期已更新|已儲存日期|儲存成功|保存成功/ });
     await expect(notice).toBeVisible();
-    await expect(notice).toHaveAccessibleName(/\S/);
+    await expect
+      .poll(() => notice.ariaSnapshot())
+      .toMatch(/status:.*(?:日期已更新|已儲存日期|儲存成功|保存成功)/);
+    await expect
+      .poll(
+        () =>
+          state.announcements.filter((text) => /日期已更新|已儲存日期|儲存成功|保存成功/.test(text))
+            .length,
+      )
+      .toBe(1);
     await expect(page.locator('[aria-busy="true"]')).toHaveCount(0);
     await expect(page.getByRole('progressbar')).toHaveCount(0);
     if (await wait.control.isVisible()) await expect(wait.control).toBeFocused();
@@ -63,8 +72,13 @@ export async function assertKeyboardDateResult(world: LedgerWorld, result: strin
     const response = await ownerRead(world, wait.path);
     expect(response.status()).toBe(200);
     expect(await response.json()).toMatchObject({ id: wait.tripId, ...state.target });
-    await expect(state.trigger).toContainText(/03[/.月-]0?9|3月9日/);
-    await expect(state.trigger).toContainText(/03[/.月-]16|3月16日/);
+    const dates = page
+      .getByRole('region', { name: '旅行資料', exact: true })
+      .locator('p')
+      .filter({ has: state.trigger });
+    await expect(dates).toContainText(/03[/.月-]0?9|3月9日/);
+    await expect(dates).toContainText(/03[/.月-]16|3月16日/);
+    await expect(state.trigger).toHaveAccessibleName('旅行日期');
   }
   for (const text of new Set(
     state.announcements.filter((text) => /日期|儲存|保存|成功/.test(text)),

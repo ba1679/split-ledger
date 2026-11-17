@@ -8,7 +8,7 @@ export async function assertKeyboardConfirmation(world: LedgerWorld): Promise<vo
   expect(world.get('loading:keyboardTrashOpened')).toBe(true);
   const dialog = page.getByRole('dialog');
   await expect(dialog).toHaveAccessibleName(/移至垃圾桶/);
-  await expect(dialog).toHaveAccessibleDescription(/日本旅行/);
+  await expect(dialog).toHaveAccessibleName(/日本旅行/);
   await expect(dialog).toHaveAccessibleDescription(/復原|還原/);
   await expect(dialog).toContainText(/移至垃圾桶/);
   const cancel = dialog.getByRole('button', { name: '取消', exact: true });

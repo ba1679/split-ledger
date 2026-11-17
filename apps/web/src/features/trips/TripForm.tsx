@@ -218,7 +218,7 @@ export function TripForm({
 
       return;
     }
-    await finish(saved);
+    await finish(saved, trip ? '旅行名稱與日期已更新。' : undefined);
   }
 
   const mutation = useMutation({
