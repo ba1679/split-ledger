@@ -2,6 +2,7 @@ import React, { type RefObject } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 import { QueryState } from '../../components/QueryState.js';
+import { Icon } from '../../components/Icon.js';
 import { useSession } from '../auth/session.js';
 import { expenseDraftKey, type RetainedExpenseDraft } from '../expenses/expense-draft.js';
 import type { TripState } from './management-api.js';
@@ -20,15 +21,23 @@ export function TripAccessState({
   const draft = client.getQueryData<RetainedExpenseDraft>(expenseDraftKey(account!.id, tripId));
   if (authority.isPending || authority.error)
     return (
-      <QueryState
-        label="旅行資料"
-        fetchStatus={authority.fetchStatus}
-        pending={authority.isPending}
-        error={authority.error}
-        retry={() => {
-          void authority.refetch();
-        }}
-      />
+      <>
+        {authority.error ? (
+          <Link className="back" to="/trips">
+            <Icon name="back" />
+            <span>我的旅行</span>
+          </Link>
+        ) : null}
+        <QueryState
+          label="旅行資料"
+          fetchStatus={authority.fetchStatus}
+          pending={authority.isPending}
+          error={authority.error}
+          retry={() => {
+            void authority.refetch();
+          }}
+        />
+      </>
     );
   const state = authority.data.state;
 

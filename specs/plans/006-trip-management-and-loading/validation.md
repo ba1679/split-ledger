@@ -2866,3 +2866,172 @@ T283 independently **APPROVED NOOP / session checkpoint**, t283-review.md; revie
 | `3ede547` | T282 | fix(trips): announce confirmed date changes for keyboard users |
 
 計畫 tasks／validation／handoff 另筆 `docs(plan-006): record validated frontend progress through T283` 提交。契約枚舉與 truth-delta 說明已同 T268 提交；原 HEAD `04f7208` 未改寫。完整提交前檔案 hash、分組內容及 commit SHA 帳在 `.cache/commit-006/` 保留；既有 ignored 測試證據仍在 implement cache。未 push／deploy，最終完整回歸仍待 T288。
+
+## 2026-11-17 T284 Linux compiled runtime
+
+本輪入口 HEAD `6ededa4`、branch `feat/006-trip-management`、working tree clean，實際 tasks T001–T283 已勾選；tasks 頁首舊 T271 摘要已更正。交接所指 `.cache/implement-006-resume` 與 Linux WebKit 容器不存在，未宣稱重新檢視歷史 raw；既有完成紀錄保留，本輪另建證據，不把舊 cache 當本輪驗證。ignore 已涵蓋 cache/dist/env/備份，無補強必要。
+
+T284 action 為 techstack ADD 圖片技術與部署工程驗證，不更動 truth/設計。新增 `tests/deployment/runtime.spec.ts` 的 compiled startup upgrade 回歸：只用正式001–003建舊庫，seed真旅行/支出/份額，啟動 `node apps/api/dist/server.js` 令正式啟動migration升級，再核對帳務逐列不變、歷史checksum、active初值與reservation、匿名401。其餘既有deployment測試保留，測試 helper 層可用TS，但被驗服務明確為編譯後production entry，非tsx/Vite。
+
+Linux同等環境：官方 `node:24.22.2-bookworm-slim`，manifest digest `sha256:01d566e8d94d8c619591d78652babfccd3c6992a3dffa9ed5ab39e11cf6c70e9`，實際image ID/arch見 `t284-image.log`；Debian12、aarch64、Node24.22.2/pnpm11.25.0，Linux kernel7.0.14。非Railpack實際部署，採相同 frozen install→workspace build→compiled node 啟動鏈、glibc預編譯sharp。隔離容器 `split-ledger-006-engineering`（本輪owned）、2CPU/2GiB僅為建置驗證預算，不能當Railway實際service容量。host RAM16GiB、入口free61%/swap6650.94MiB，low-memory-16gb、root直接執行、heavy1/worker1，未新增代理。
+
+命令及證據均在 `.cache/implement-006-resume/`：
+
+- `docker pull node:24.22.2-bookworm-slim` exit0，`t284-image-pull.log`。
+- Git tracked來源tar（不含本機env/node_modules/cache）到容器獨立 `/workspace`，`npm install -g pnpm@11.25.0 && pnpm install --frozen-lockfile && pnpm build` exit0，`t284-install-build.log`。
+- API scoped `pnpm --filter @split-ledger/api exec tsx tests/tools/image-smoke.ts`：sharp0.35.5、libvips8.18.7、Fastify5.12.8、multipart10.1.8，真PNG→WebP metadata與完整multipart解析200。初次root `pnpm exec tsx` 找不到scoped工具，exit1，保留 `t284-runtime.log`；修正命令範圍後成功，未改套件/產品。
+- `pnpm exec playwright test -c playwright.deployment.config.ts --workers=1` **7 passed / 0 skipped (5.8s)**；含empty migration、舊真帳務升級、health204無cookie、migration失敗/unreachable不ready、SPA/assets/匿名auth與teardown。`pnpm exec eslint tests/deployment/runtime.spec.ts`、Prettier check均exit0。全部結果 `t284-runtime-2.log`。
+- 最終1922檔manifest `t284-source.json` SHA256 `418c31dffcd47491fb439c0b125c0222eabb2f789477df24cd19f68355de2b51`；基於原tar，只同步新增runtime test後執行，產品碼未變。其後plan文件進度不計入產品版本。checksum與image/OS在各log。
+
+資源/回收：runner session73069與11482均exit0，fixture子DB查詢0列。`docker top`僅PID1 sleep，見 `t284-processes.log`；slim無ps是監測命令exit127，已改host docker top，不當產品失敗。容器與既有healthy testDB保留供下筆重用，未觸dev DB。agent→OS PID未知，無active重型runner。T284完成，下一筆T285；T287實機/讀屏、T288完整回歸及UI/baseline gates仍未完成，plan未交付。未commit/push/deploy。
+
+## 2026-11-17 T285 compiled image capacity
+
+使用者本輪明確回答「仍是 0.5 GB」，故正式量測服務以 `--memory=500000000 --memory-swap=500000000 --cpus=2` 限制；cgroup按page對齊實值499,998,720bytes。以T284 compiled workspace snapshot image `sha256:e455baa2167de738b1c16f7b084a01263f65925113bb88881300fc22888324b2` 執行 `node apps/api/dist/server.js`，Linux arm64/Node24/sharp與T284同版。產品碼/lockfile未變；此為同等Linux容量驗證，非真Railway CPU/流量或長期穩定性證據。
+
+初輪將fixture generator與server共置500MB，driver被OOM殺死exit137、服務仍存活；未把此當產品FAIL或PASS。保留 `t285-colocated-failed.log`，owned engineering容器restart釋放子服務、精確刪除其孤立DB `ledger_test_489_285`。改由host driver生成/完整解碼fixture、發真HTTP，服務獨立容器 `split-ledger-006-resource` 加輕量node監測，無產品hooks/假轉碼/縮短deadline；不能將最初OOM0宣稱為全輪0。
+
+正式命令 `./scripts/pnpm.sh --filter @split-ledger/api exec tsx <repo>/.cache/implement-006-resume/t285-harness.mts` exit0；harness以Docker啟動上述500MB/no額外swap服務，`t285-bootstrap.mjs`每20ms讀服務/proc status/stat/fd，最終正常停止。完整腳本、command log `t285-run-isolated.log`、真服務log `t285-server.log`、2790 samples `t285-runtime-metrics.json`與結果 `t285-results.json` 均存本輪cache。
+
+| 實際測量 | 結果 |
+| --- | --- |
+| 上限圖 | PNG真10,485,760bytes、5000×5000=25MP，合法CRC容器padding，先完整native decode；SHA a3e56dd7da00161cc563ffb2fc13259bde79a26cd61c1a658fe8596828b2aee1 |
+| 高熵圖 | 真隨機像素JPEG 1600×1200／5,605,702bytes；1200/80首候選620,608bytes超限，產品fallback960×720／315,172bytes |
+| 連續轉碼 | 兩圖交替8次全200，上限圖165–236ms、高熵373–401ms；上限輸出1200×1200／2640bytes，全部原生WebP再decode、≤512KiB |
+| Admission／stream | 保留1條真未完成multipart流，第二次真上傳503 UPLOAD_BUSY；不使用假job hook，黑箱證明第二工作未進入保存 |
+| Abort | 主動destroy持有流後26.7ms恢復上傳200，沒有原次receipt |
+| Timeout | 真等待60,039.5ms後408 UPLOAD_TIMEOUT；destroy/完成後74.8ms恢復200，原次沒有部分提交 |
+| CPU／RSS | 服務utime+stime共361 ticks（Linux100Hz=3.61 CPU s）；HWM/最高RSS260,784,128bytes，初始約94,789,632、最後約223,158,272bytes；保留native cache不等於未釋放job，不宣稱長期無成長 |
+| 容器 | memory.peak231,014,400bytes（包含輕量監測，與RSS共享頁統計不同不可相加），cgroup max/oom/oom_kill皆0；500MB容量有餘裕，沒有改admission/圖片授權界限 |
+| 權威結果 | 8次上限/高熵＋2次恢復共10成功、thumbnail revision10、receipt10；503/abort/timeout無額外receipt/revision。最終health服務仍可工作 |
+| 清理 | 服務SIGTERM exit0，samples sockets最高5、結束0；原始stream持有/abort/timeout均回收、容器--rm不再存在；隔離DB0。監測僅觀察socket與admission，不聲稱直接native內部工作計數 |
+
+host pressure1、heavy1/worker1；runner42365 exit0，engineering容器僅sleep供T286重用，無active重型工作。T285完成，下一筆T286。T288完整整合與人工/UI gates仍保留，無commit/push/deploy。
+
+## 2026-11-17 T286 isolated backup and restore
+
+沿用T284 compiled產品來源、Linux容器image及真PostgreSQL18.3，不修改產品/DSL/truth。host harness `t286-backup.mts` 使用正式migration建立source及完全未migration的空target，三組隔離虛構owner，各自完整3支出/7shares/4members/2repayments/1settlement/2adjustments與目前WebP；另有其他旅行及外帳號。active／trash／purged三組均從完整baseline建立，trash/purge用compiled真HTTP提交，不fake成功收據或tombstone。source/target皆專用 `ledger_test_<pid>_*`，沒有碰dev DB。
+
+`./scripts/pnpm.sh --filter @split-ledger/api exec tsx <repo>/.cache/implement-006-resume/t286-backup.mts` exit0。`docker exec split-ledger-test-db-1 pg_dump -U ledger_test -d <isolated-source> -Fc`、`docker exec -i ... pg_restore -U ledger_test -d <isolated-empty-target> --exit-on-error` 均exit0。備份只含虛構帳號/本機fixture session，不含真使用者資料；ignored `t286.dump` 及dump SHA、表/結構數量、每張圖片hash保存在 `t286-results.json`，命令不輸出連線secret。
+
+驗證包括：
+
+- 還原後 **public/auth全部table每列** `to_jsonb` 精確相同，含migration checksum、bytea的完整hex、metadata/timestamps、sessions、receipts、reservations及既有帳務。約束、非內建triggers、routine完整定義、索引逐項一致，見 `t286-before.json` / `t286-after.json`。
+- 啟動還原DB的compiled服務，active／trash私有圖片body逐byte等於備份來源；metadata/checksum一致，private no-store、外owner404、匿名401。
+- 還原trash旅行後active圖片仍逐byte相同；同restore命令/同purge命令重播200、receipt完全不增加；以已purged UUID新建旅行409，DB無復活。
+- 還原後嘗試改receipt、刪tombstone、刪一般repayment、刪owner及超512KiB bytea均被正式DB constraint/trigger以23514拒絕；未停用trigger/未設replication role。
+
+`./scripts/pnpm.sh --filter ...` 初次probe的cwd被切到apps/api，導致cache輸出路徑ENOENT；已finally停止服務/關閉兩子庫，raw保留 `t286-initial-path-failed.log`。修正harness repo root後重跑整輪PASS，未修改產品或降低斷言。結果與server/dump/restore raw均在 `.cache/implement-006-resume/t286-*`。
+
+runner53231 exit0、兩子DB0、restore服務容器已--rm，engineering容器僅sleep；heavy1/worker1，未新增代理。T286已完成。使用者可以協助T287但尚無實機結果，保持未勾；T288不依賴T287，可獨立繼續。UI gate與基準回填仍不得解鎖，plan未交付。未commit/push/deploy。
+
+## 2026-11-17 T287 / T288 current integration (in progress)
+
+T287：使用者已表示可協助真機/讀屏並選擇「使用本機測試入口」。步驟見 `manual-validation.md`；尚未有實機結果，保持未勾。只使用隔離測試資料的本機入口將於自動工程驗證收斂後交付，沒有部署或把舊線上版本當新版。
+
+T288起點T286通過，T287人工不阻擋本task。固定1493檔產品/測試來源manifest `.cache/implement-006-resume/t288-product-source.json` SHA256 `e32fe2098298140466bd57f82c309ddcfbfd3c9e32d9629a76a4e774b2cdc05e`，Linux實際copy逐檔核1493/1493相同（`t288-linux-source-check.log`）。不包含plan進度文件，產品不因文件回寫失效。兩端bddgen完整無undefined/ambiguous；API清單348/27files、Web357/28files。既有DSL有固定裝置者忠實由fixture設定；新增未固定者193例另390×844補驗，原scope以1440×900為預設，固定裝置35例由43/96/97/98/99/101 tags處理，不重複project灌計數。F100無固定裝置，21例保留桌手機皆跑，不因其前序錯誤在另一規格寫手機就擅自省略。
+
+Web wrapper configs只覆寫選測/預設尺寸、projects仍chromium/webkit、不更動step或truth。初版wrapper沿用相對testDir錯指cache/.features-gen導致--list exit1，修正為apps/web/.features-gen絕對定位後清單193/357成立；未skip任何案例。Linux官方Playwright1.64.1-noble arm64 image ID `sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f`，獨立容器2GiB/2CPU、Node24.22.2來自T284官方image。host API/quality與Linux browsers按heavy1/worker1序列，不同時跑；worker資料庫fixture重用同testDB、各自隔離。
+
+本task尚未完成。命令逐筆帳：`t288-host.py` / `t288-host-matrix.json`、`t288-linux.py` / `t288-linux-matrix.json`，各list及runtime有獨立JSON/log。最終需對照所有集合、無skip及回收，不能以目前部分PASS宣稱完成。host觀測pressure2/swap上升，沿前session已授權warning2續跑，critical4/OOM/owned無法回收才停止新工作；未終止其他使用者程序。
+
+### T288 Linux 環境修復與 OOM 分批重跑
+
+初次Linux複製的pnpm11入口檔缺execute bit（pnpm.cjs本身新版本只是載入pnpm.mjs的105bytes wrapper），導致exec127/permission denied；用絕對Node入口並補精確pnpm/pnpx execute位元後 install/build成功，沒有重寫lockfile。失敗帳分別保留 `t288-linux-initial-failed-matrix.json` / `t288-linux-mode-failed-matrix.json`。
+
+僅spread原web config的wrapper雖可--list，但playwright-bdd runtime未對覆寫的testDir登錄，產生 BDD config not found；中止exit130，所有此批前置失敗不算產品驗證。改用完整defineBddConfig、同一全部features/steps/fixtures閉包、獨立desktop/mobile生成目錄後，runtime已正常進入真產品步驟；原始timeout15s/expect3s、裝置/斷言/來源均不變，失敗raw在 `*-config-failed*`。
+
+其後Chromium單一全批跑到326PASS，第327個高像素選圖重試case worker被SIGKILL；2GiB測試容器 memory.events oom3/oom_kill1，殘留精確隔離DB `ledger_test_328_0`，非產品斷言失敗。此批 **exit1、326passed/1failed/30未跑，不是完整PASS**，raw保留 `t288-web-full-chromium-oom.{log,json}`、`t288-linux-oom-matrix.json`。停止新heavy、owned容器restart回收worker/browser與zeroRSS zombies，確認來源未變後精確DROP該DB。host pressure2/free43%，沿既有warning例外；沒有host OOM或碰使用者程序。
+
+恢復改以 **每個feature一個命令**、worker1、browser序列，測試容器3GiB（只有測試driver/native fixtures/browser，**不是產品service容量**），每個feature結束核子DB0/oom_kill0，再restart清所有owned程序。符合原矩陣可分feature合併規則；正式最終集合僅取新 `t288-shards.py` / `t288-shard-matrix.json` 的exit0 shards，前326歷史partial不混入新最終計數。完整357×2＋193×2集合、web-support/UI-quality/smoke/deployment仍保留，沒有skip、沒有放寬timeout或Oracle。T285獨立500MB compiled服務驗證維持原結果，不把測試driver OOM誤當該服務OOM0證據。
+
+### T288 WebKit fixture teardown incident
+
+WebKit分批 `settlement/date-selection-and-focus.feature` 的兩個產品案例都PASS，但worker級 `runtime` teardown超過原15s，命令exit1，沒有OOM（max/oom/oom_kill0）。該次 `ledger_test_44_0` 仍存在，無活躍連線。已保存 `t288-web-full-webkit-f19-teardown-failed.{log,json}` 與 `t288-shard-teardown-failed-matrix.json`，restart owned容器後精確移除該庫，不把這次2PASS當正式完整通過。
+
+載入 `/diagnosing-bugs`，紅訊號為原檔案例完成但worker teardown timeout；同配置先以date-selection-and-focus篩選到三份日期檔×3輪=18例（55.2s）全PASS/DB0，再縮為原settlement日期檔×5輪=10例（44.0s）全PASS/DB0。未得到可穩定重現的紅回饋，因此不進入推測性產品/fixture修正、不放寬15s、不增加測試retry設定。診斷到此保留「單次teardown故障，根因未確認」，不能稱已修復永久根因；raw `t288-wk-date-repro.*` / `t288-wk-settlement-date-repro.*`。
+
+正式分批續跑僅重跑原失敗檔，exit0、2PASS、DB0/oom_kill0，再續剩餘WebKit與mobile/support矩陣。同版已成功shards保留，失敗檔的舊2PASS與額外28診斷執行都不累加至最終集合。`t288-shards.py`依精確name/args/exit0恢復，runner48652。產品/測試來源仍未變；沒有新增debug instrumentation需清理。
+
+## T190/T240 incremental support alignment during T288
+
+`/tasks` owner loaded existing plan/approved waiting decisions and Phase3 rules/templates, identified a missed regression consumer of the already-added `操作等待以置中圖形保留尺寸與操作語意` row (design-system DSL/F006-078, switch simplifyDebts). Reopened **only T190 and T240** as a supplemental wave, retained original ADD/RED/binding/static/runtime history and every unaffected completed task; T288 now explicitly depends on supplemental T240. No new DSL binding, no truth/data/API/UI design edits, no new approval or session checkpoint. Original one-row task ownership and IDs remain.
+
+Original Chromium support batch:154PASS/1FAILED/120 unrun, status expected literal sr-only but received visible wait-indicator switch-spinner. Preserved raw as `t288-web-support-chromium*` before formal resumption. T190 only changes `apps/web/tests/support/splitting/owner-overview-feedback.spec.ts`: assert visible actual SVG≥16px, accessible update name, original switch name, no visible waiting text, centered geometry; retain every original amount/share/navigation/panel height/track24px/control44px/payment/DB/no-overflow assertion. Track selector now `.switch-track` because the added spinner is another span; the intermediate strict-mode selector RED is kept in `t190-supplement-selector-red.log`, not mistaken for product failure.
+
+Focused complete old file:375/1280 × Chromium/WebKit =4PASS, no skips/flaky;7.5s/9.9s, target ESLint/Prettier exit0; isolated DB0. `t190-supplement-chromium.{log,json}` / `t190-supplement-webkit.{log,json}`. Against the frozen1493 source, exactly this one support file differs (`t190-supplement-source-check.json`), every product/BDD binding source unchanged. Existing1100 frontendBDD +348API +356API-support remain applicable: none imports this standalone .spec. Only web-support275×2 and target lint/format require updated-file validation; final source manifest will explicitly record this test-only delta and its evidence lineage. T190 complete, T240 supplemental independent review pending; no product Green changes or assertion weakening.
+
+## T288 tablet overflow and second T190 support alignment
+
+Both full web-support275×2 now PASS after first independent T190/T240 alignment. UI-quality then exposed a **real product layout RED**: at768px ledger document808px. Minimal1.2s reproduction uses only one trip,768viewport, ledger route, same scrollWidth assertion; offending bbox right807.98 is management button170px inside ledger-actions. Other screen/width combinations did not overflow. Evidence `t288-overflow-red.log` / `t288-overflow-minimal-red.log`, archived trace/screenshots. Diagnosing-bugs followed original→minimal RED, three ranked hypotheses shared (header wrap breakpoint / shell minimum / unbreakable title); one-variable injected wrap probe PASS. UX skill targeted horizontal overflow guidance applied by fitting content, not hiding overflow.
+
+Product fix **in T288 before reentering Phase3 supplement**: move existing `.page-head:has(.ledger-actions){flex-wrap:wrap}` outside≤700px media rule; no other property or component changed. Selector has one JSX consumer (TripLedger). On insufficient intermediate space, actions wrap; original mobile grid and all button sizes/labels/menu anchoring remain. Existing full first UIquality scenario passes in both engines across4pages×375/768/1440. Independent debug comparison6cases (3 perengine) proves normal390/1440 old/new screenshots byte-identical, and768 actions/menu/editor/Escape focus usable. `t288-header-compare-{chromium,webkit}.{log,json}`;4 expected/actual PNG pairs, plus2 tablet PNGs. No design-intent change/reapproval: natural intermediate wrapping is allowed by shared UI contract, approved38frames remain.
+
+Source impact: one CSS selector in TripLedger header; unrelated API/transactions/forms/components untouched. Existing API/support semantics can retain evidence. Previous frontBDD includes1440/390 whose representative pixels are identical; plan final verification additionally reruns whole management feature atD/M and tablet, plus full UIquality including long names. These capture actual CSS consumers; no backend/full-unrelated rerun just for manifest hash.
+
+Separately, focused old UIquality pending/save test reproduced missing button named「儲存中…」, conflicting with F006-078/T190 stable original operation name/spinner-only. `/tasks` second scoped supplement reopensT190/T240, originalowner4case/review preserved. Only pending assertions in `ui-quality.spec.ts` updated: original save accessible name,disabled+aria-busy, actualstatusSVG through unchanged shared assertSpinnerOnly, painted label opacity0 and stablebbox. **All original offline/editability/unknown/recheck/success/two-expense DB assertions retained.** The intermediate new-oracle attempts incorrectly used Playwright visibility for opacity0, then spinner helper on focusablebutton; these were test-oracle errors, not product failures, preserved `t190-ui-quality-visibility-oracle-red.log` / `t190-ui-quality-root-oracle-red.log`. Final uses helper on status wrapper; original button focus retention is not forbidden.
+
+Focused full flow Chromium1PASS/WebKit1PASS (4.1s each), target lint/format0, DB0. `t190-ui-quality-{chromium,webkit}.{log,json}`. Source proof against initial1493: exactly2 standalone specs + management.css differ (`t190-second-supplement-source-check.json`); shared fixtures/BDD bindings/product JS/backend unchanged. T190 complete; T240 second independent supplemental review pending. No truth/DSL/design edits, no test weakening, no timeout changes. T287 actual device results and T288 remaining gates still incomplete.
+
+## T288 missing-trip return regression
+
+After tablet/pending alignment, full original UIquality first2 cases passed (including long names) but missing-trip case timed out clicking original main「我的旅行」link. DOM had onlyQueryState error/retry; there was no main return link. This is a valid product regression, **test unchanged**. A minimal375px one-trip/unknownUUID case asserts alert→mainlink within1s→click→real seededtrip heading: RED then GREEN1PASS3.3s total, actualtest1.2s. `t288-missing-trip-red.log` / `t288-missing-trip-green.{log,json}`. Three hypotheses shared: dropped shared-errorbranch link / changedlabel / wrongauthroute; DOM/API showedauthenticated404 with no link, confirming first.
+
+Fix in T288 REGRESSION: `TripAccessState.tsx` only adds existing-style `Icon back`+「我的旅行」link to/trips when **authority.error**; same QueryState/retry retained. Pending returns identicalDOM, confirmedtrash/purged branch unchanged; no request/effect/state/cache changes, no inference404=purged. Actual JSX consumer is onlyTripLedger (notExpenseForm). Vercel React guidance applied via directexistingIcon import and explicitconditional JSX; no new dependency/effect.
+
+Independent fixed reviewer `/root/review_006` **APPROVED/zero blocking** for this scoped fix and evidence/coverage: original missing-trip assertion intact; planned full first-read/old-link D/M×bothengines +fulloriginalUIquality/finalquality/build/smoke/deployment adequate; notT289 norplancomplete. Final source now4deltas frominitial1493 (2standalone testfiles,management.css,TripAccessState.tsx); prior59f21 manifest preserved separately. APIs/BDD bindings/sharedfixtures unchanged. Unaffected closed evidence retained under user-authorized precise impact strategy; affected consumer scopes are being freshly revalidated rather than rerunning unrelated suites for hash only.
+
+## T288 final integration complete — 2026-11-17
+
+Final1493source manifest `t288-product-source.json` SHA256 **be3e154698a3975b07977b1d3a2ebaa277fa7836e37c66fef1e145baf0cc01be**; host recalculation and Linux copy match all1493, no mismatches (`t288-linux-final-source-check.log`). Initiale32fe209, owner-only1fa24bf0, pre-access59f21cb0 snapshots retained with exact four-file delta and independently approved scope lineage. Historicalfailed/partial/config/OOM/probe results are excluded from the final runtime set; full successful scopes plus exact impact revalidation form the effective final-version evidence under the user's precise-regression rule. No unrelated API/BDD retesting solely for sourcehash.
+
+| Final basic matrix | PASS |
+| --- | ---: |
+| API27features |348|
+| API-support133files |356|
+| Frontend28features Chromium/WebKit |357+357|
+| Additional unfixed-device390×844 Chromium/WebKit |193+193|
+| Web-support120files Chromium/WebKit |275+275|
+| UI quality Chromium/WebKit |5+5|
+| Smoke Chromium/WebKit |2+2|
+| Linux compiled deployment |7|
+| **Playwright basic executions** |**2375**|
+| Unit tests |23|
+
+All final-runtime attempts1, passed; **0 skipped/flaky/unexpected/global errors**, and each available--list inventory exactly equals runtime keys, no duplicate cases within scope. Front basic+mobile1100 is distinct within its viewport contract. Separate **300 fresh impact executions** = management D/M/tablet88 + initial-read/old-link D/M212; these intentionally overlap basic scenarios and are **not added as300new basic cases** (tablet28 is additionalviewport coverage). Diagnostic18+10 etc also not inflated into finalcounts.
+
+Final quality after the last Reactfix: typecheck/lint/format:check/test:unit/build exit0; Linux finalbuild exit0 with rebuilt SPA assets. `t288-access-verify-matrix.json`/logs record latest quality and212case scopes; `t288-final-verify-matrix.json`/logs retain CSS-stage quality and88case scopes; `t288-shard-matrix.json` has all successful finalbasic commands (same-name failed attempts separately preserved). Audit script `t288-audit.py` checks source, list/runtime key sets, attempt statuses, counts and allsource stages; output `t288-final-audit.json` / log **PASS**.
+
+Meaningful fixes: tablet768 ledger overflow808 corrected by natural headerwrap; unknown-trip error regained original main return link without changing404meaning; legacyowner spinner/oldpendingbuttonname assertions aligned in T190 and independently reviewed T240 with all originalaccounting/DB/recovery checks retained. Original UIquality missing-trip test unchanged and nowpasses in both engines. Original fullUIquality final5×2PASS, smoke2×2 and compileddeployment7PASS. Scoped independent reviewer approvals are supporting reviews, **not the pending T289UI-family gate**.
+
+Resource: heavy1/worker1, latesthostpressure1, swap9450.81MiB is not treated as an isolatedfailure. All owned test processes exited0, lastcontainer docker top onlysleep, ledger_test_% query0rows; Linuxcontainer willbe stopped before manualentry. Root+fixedidle reviewer only, agent→OS PIDunknown. Testdatabase healthy, devdatabase untouched. Allraw/scripts/PNG/dump retained in ignored `.cache/implement-006-resume/`, no gitclean. T288 now[X], **287/292 tasks complete**; T287actualiOS/Android/readscreen pending, T289/290/291/292 stillpending. No commit/push/deploy and no plandelivery claim.
+
+## T287 local physical-device entry prepared — still manual pending
+
+User confirmed actualservice0.5GB, can assist iOS/Android/readscreen and requested local entry. Provided `manual-validation.md` with device/OS/browser/VoiceOver/TalkBack checklist and controlled exact second-stage image failure. Built an **isolated fake Alice/Carol** localharness around the final compiledSPA/API; not realGoogle login, not devDB or remote deployment.
+
+Initial LANHTTP protocol checks passed but actualbrowser probe caught `crypto.randomUUID is not a function` on ledger (insecureLAN origin). This is a manual-test-origin setup issue: production contract alreadyrequiresHTTPS. Did **not** patch product to weakenUUID or alter the passing regressionversion. Changed localharness to HTTPS frontend44287→loopbackHTTP44288 with locally generated3day self-signed cert; no systemroot install or externaltunnel. PriorHTTP PID39642 stopped normally, exactfakeDB removed. New metadata/PID/URLs in ignored `t287-local-server.json`, sourceBe3e1546 unchanged. Certificatevalidto2026-11-20 22:19Taipei; privatekey remains ignoredcache and was never printed/committed.
+
+Final localHTTPS PID44536/session57169, intentional `ledger_test_44536_287`. APIcheck `t287-entry-check-https.log` / JSON PASS: helper302→Alice authenticated200, compiledSPA200/health204, ~613ms controlleddelay; one-shot422imagefailure leavesoldbytes/revision, operationreceipt404, nextrequest normalvalidation400. RealChromium browsercheck HTTPS PASS (`t287-browser-check-https.log`/JSON): securecontext/UUIDavailable, redirect/session→travelcard→ledger→managementmenu. Browserclosedfinally, no ownedautomationrunner left. **Not physicaliOS/Android/readscreen evidence**, soT287 stays[ ]. InitialHTTP/Crypto/Acceptheader probe failures preserved, not reportedasdevicefailures or productregressions.
+
+Normalentry, failureentry and delaycontrols documented; chat requested actualdevices/OS/browser and per-item pass/fail/unmeasured. Only one deliberate manualDB remains; allT288childDBs hadbeen0 beforethisservice started. Do not treat this registered DB as an orphan or stopmanualservice while user is testing. Fixedreviewer idle, root+oneaux/heavy0/worker1conservativecontract. Linux testcontainers stopped, testDBhealthy, devDBuntouched. No commit/push/deploy; fivependingtasks287/289/290/291/292.
+
+
+## 2026-11-17 T287使用者略過決定
+
+使用者對完整人工驗收步驟的明確回覆：「這項先 skip」。本輪不執行T287，仍保留未完成框與真機選圖/觀感、鍵盤/VoiceOver/TalkBack/reduced-motion人工證據缺口，不將viewport自動化冒充人工通過。此使用者指示優先於skill的原前置限制，僅豁免T287本輪阻擋，T289仍須完整獨立UI審查、T290/T291基準回填與核對；交付保留例外，不能宣稱292/292皆驗證通過。無產品/truth變更。
+
+
+## 2026-11-17 工程交付與使用者UI暫緩決定（T292）
+
+最新使用者原文：「如果只是 UI 的話可以先跳過，我來人眼驗證就好」。依此停止T289自動視覺補證與review，T287真機/讀屏、T289完整UI家族審查不記PASS，T290/T291驗收後基準回填/核對暫緩，baseline完全未修改。T292按此明確交付範圍例外完成紀錄；288項已完成、4項暫緩，不宣稱292/292驗證通過。業務truth/批准design不因略過而變更。
+
+正式T289首輪獨立review已核38frame/32設計PNG與最終1493來源、逐圖核12張新compiled產品桌手機主畫面，未發現confirmed product defect。另指出部分後期歷史截圖在另一主機cache，目前本機不可讀，缺乏完整可獨立重看之最終視覺證據；不推翻已記錄T288功能PASS，也不冒稱完整視覺通過。review報告保留`.cache/implement-006-resume/t289-ui-family-review.md`，12圖及SHA/source/size在`t289-ui/manifest.json`。
+
+因使用者新指示，唯一補證BDD runner核對精確PID56691/starttime/command後SIGINT，session7830 exit130，82 passed/1 interrupted/15 did not run；這是主動停止，不是產品回歸失敗，亦不算完整新scope通過。已取得PNG與per-case JSON在`t289-bdd-ui/`，保留待日後需要，不強迫再跑。worker57286及browser57325已退出，testDB僅剩登記的manualDB ledger_test_44536_287，無補拍orphanDB。固定reviewer停止後續審查。
+
+Pen MCP無open document，官方CLI headless另回報2.22格式與已達當期plan usage limit。未改寫/降版/偽造.pen或繞過限制；inspection session65750正常exit0。T290若日後恢復需有效設計工具（供應商billing：https://pen.dev/shinhuei1/settings?section=billing），目前使用者已暫緩UI工作，無新增付款或批准要求。
+
+原T288完整工程證據仍有效：產品/測試1493來源be3e154698a3975b07977b1d3a2ebaa277fa7836e37c66fef1e145baf0cc01be無改動；2375 Playwright基本執行+23unit均PASS，另300精準影響重驗，雙平台品質/build0。這輪僅增加plan紀錄與ignored視覺工具/證據。未commit、push、部署。保留HTTPS manual server供使用者自行檢視，URL見既有聊天與ignoredmetadata，無須Google登入；憑證有效至11/20 22:19台北。同Wi-Fi，第一次自簽提示詳細資訊後繼續。
+
+T292最終核對：1493檔來源逐檔SHA全部相符（0 mismatch），tasks292筆/288完成/4暫緩；git diff --check exit0；manualPID44536/starttime一致仍運行。沒有新增產品修改，無須重跑不受影響scope。

@@ -2,7 +2,7 @@
 
 **Plan package**: `specs/plans/006-trip-management-and-loading`  
 **建立日期**: 2026-11-14  
-**狀態**: T001–T271完成；下一筆T272 [BDD-GREEN]（既有共同支出修正與重算回歸），plan尚未交付。
+**狀態**: 288/292已完成；T001–T286、T288、T292 `[X]`。T287真機/讀屏與T289 UI審查依2026-11-17使用者指示略過；T290/T291 UI基準回填/核對暫緩。本輪工程範圍已收尾，未宣稱全部UI驗證通過。
 
 **核心輸入**: `spec.md`、`plan.md`、`research.md`、`truth-delta.md`、`dsl-refine-review.md`、`ui/ui-plan.md`，以及 `specs/truth/techstack.md`、`specs/truth/contracts/**`、`specs/truth/data/data-model.dbml`、受影響 `specs/truth/features/**`。
 
@@ -21,8 +21,8 @@
 - Prototype=不製作；不新增規劃期prototype、規劃期截圖比對或額外viewport矩陣。下列1440×900／390×844比對及瀏覽器矩陣是正式產品實作驗收，保留原交接要求。
 - 實作時每個C範圍記錄設計／產品固定版本、同尺寸同可比資料、預期與產品畫面、差異與處理到 `validation.md`；首個代表性桌機／手機checkpoint通過，才套用其共用樣式到後續畫面。沒有變更意圖時不另設USER-CONFIRM；若有重大設計偏差，停止依賴範圍並回交使用者確認，其他成果保留。
 - 基準回填適用：完成產品驗收與UI gate後，將已驗收旅行管理／縮圖／等待共享元件及受影響頁面更新到 `specs/ui-baseline/**`，保留最新基準的其他成果；另有獨立回填核對，不能把提案直接升為現況。
-- `profile=low-memory-16gb`；已觀測RAM16GiB。主代理逐筆處理，最多保留一位輔助代理做獨立審查（本輪主代理直接實作，未啟動審查者；規劃期 `/root/review_006` 不視為本輪存活代理），不spawn子代理；同時重型工作1、worker=1，Chromium後WebKit依序執行。不因[P]增加代理；代理到PID回收未知須明記。每次重型工作前核對壓力、程序與受管PID，服務/fixtures用finally teardown，勿終止使用者程序。
-- 規劃與目前實作快照已保存於Git；目前分支 `codex/006-trip-management-planning`，最新進度與續跑點以 `handoff.md` 為準。T001–T258已完成各筆適用驗證；Phase 3及已完成後端/前端管理scope的runtime與獨立審查見validation。T259以後仍待執行，plan尚未交付；使用者已明示授權先按scope提交目前成果，無push/deploy。
+- `profile=low-memory-16gb`；已觀測RAM16GiB。主代理逐筆處理，最多保留一位輔助代理做獨立審查（本輪root直接實作，依T240增量補驗啟動唯一定審查者 `/root/review_006`；舊規劃代理不視為本輪存活代理），不spawn子代理；同時重型工作1、worker=1，Chromium後WebKit依序執行。不因[P]增加代理；代理到PID回收未知須明記。每次重型工作前核對壓力、程序與受管PID，服務/fixtures用finally teardown，勿終止使用者程序。
+- 規劃與目前實作快照已保存於Git；目前分支 `feat/006-trip-management`，最新進度與續跑點以 `handoff.md` 為準。T001–T286與T288已完成各筆適用驗證；Phase3增量補驗及獨立審查、完整工程/產品回歸見validation。T287/T289人工UI驗證及T290/T291基準工作依使用者指示暫緩；T292已保存工程交付例外，原完整plan未全部驗證；歷史scope提交保留，本輪未commit/push/deploy。
 
 ## 執行入口與完整矩陣
 
@@ -1041,6 +1041,13 @@
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站操作忙碌與防重複.feature` → `@F006-078`。
   - Dependencies: T008。
   - Read: `specs/truth/features/frontend/design-system/dsl.md` → `操作等待以置中圖形保留尺寸與操作語意`；`apps/web/tests/steps/design-system/`（新句落 `apps/web/tests/steps/design-system/trip-management/`，避免覆蓋舊task同名檔）。
+  - 2026-11-17 `/tasks` 增量補驗：原ADD row/RED binding與已完成的BDD證據保留，沒有新DSL句或新binding；只補本句漏盤點的既有回歸 `apps/web/tests/support/splitting/owner-overview-feedback.spec.ts` 375/1280兩案例。T288實際RED為該檔期待status class=sr-only，但design-v7/S08與本句要求可見置中圖形；不改產品/DSL/truth、不鬆金額、導航、尺寸、防重複及付款斷言。以可見spinner/可及名稱/無可見等待文字/置中及尺寸穩定取代過期class契約。
+  - 補驗 Scope/Read：上述完整support檔；`spec.md` FR-014/015、`plan.md` UI等待決策、`ui/ui-plan.md` design-v7共用狀態；同row與F006-078切換簡化付款。root DSL新增句群不使用，無新根row。
+  - 完成證據：原失敗保留；新375/1280×Chromium/WebKit共4案例整檔、target lint/format；既有F006-078 desktop/mobile兩engine同版通過證據可沿用（本次只改未被BDD import的support檔）。實際實作者完成回寫後才解鎖T240補驗審查。不要求把已Green產品故意改紅。
+  - 第二補驗實跑：Chrome/WebKit各1完整empty/offline/pending/unknown/confirmed-save case PASS（各4.1s），target lint/format0，DB0。只改pending等待斷言；shared assertSpinnerOnly用於status spinner（不施加到可聚焦button），原label opacity0保持尺寸且不塗繪文字。原owner4case獨立審查維持。
+  - 第二補驗範圍（`/tasks`）：`apps/web/tests/support/ui-quality.spec.ts` 的empty/offline/pending/unknown/confirmed-save案例仍用「儲存中…」作button name，實際RED已保存；同一F006-078/T190 row要求原「儲存支出」名稱、busy/status可理解及spinner-only。只替換此過期pending斷言為原save disabled/aria-busy、可及名稱與可見圖形/隱藏可見label、尺寸穩定；保留所有離線/草稿/unknown/重新查證/成功/DB斷言。375px案例×兩engine整段通過及target lint/format後重回T240獨立補驗。既有owner4case及其獨立審查保留、不重做；此前T288單獨已完成的CSS tablet修正另列版本，不是本次Phase3產品改碼。
+  - 補驗實跑2026-11-17：Chromium2/2(7.5s)、WebKit2/2(9.9s)，lint/format0，子DB0；產品/既有BDD binding零變更。新可見/無可見文字/可及名稱/置中斷言通過，原軌道selector縮為.switch-track以排除新增spinner span；原24px/44px/帳務/付款/導航斷言完整保留。cache `t190-supplement-*`，T240待獨立review。
+
 
 - [X] T191 [P] [BDD-RED] `原次 "{操作}" 正在處理且完成屏障可釋放`
   - Test Scope（代表 RED 區塊）: `specs/truth/features/frontend/design-system/全站操作忙碌與防重複.feature` → `@F006-079`。
@@ -1289,6 +1296,9 @@
 
 - [X] T240 subagent review (phase quality gate)
   - Dependencies: T009–T239（231筆全部完成）。
+  - 第二補驗審查結果：2026-11-17同一固定reviewer APPROVED/zero blocking，核對UI quality保留原斷言、2新完整流程+4原案例、1493初始/中間manifest與3檔delta；另支持CSS狹域修正及D/M像素相同，要求全management D/M/tablet及完整UIquality。不是T289 UI家族gate，T288尚待完成。
+  - 補驗審查結果：2026-11-17固定未實作reviewer `/root/review_006` APPROVED/zero blocking；獨立核1493來源只有該support檔改動、4case JSON無skip/flaky/error、保留全部帳務等斷言，證據見validation T190/T240補驗及cache `t240-supplement-review.md`。
+  - 2026-11-17補驗波：原231 binding/static/runtime獨立審查與T241後所有未改的產品證據維持有效；本次僅審T190補充的owner-overview工程等待斷言/完整4case證據、保留其他斷言、無產品碼變動與唯一binding不變。由未實作補驗的固定reviewer執行；零blocking才恢復[X]並解鎖T288續跑。這是原Phase3漏面補驗，不重啟已完成的首次Phase3 session checkpoint，也不重跑無依賴Feature Green。
   - Read: 全部Phase 3 task的最新diff、各DSL完整row、20新增feature與既有expense受影響file、bddgen/RED證據。
   - Evidence: 未參與受審測試實作的既有審查者核對231句唯一binding、生成案例與測試碼語意完整、參數與表格正確、真DB與原子性/請求次數斷言完整、無產品碼混入；兩端全scope生成0undefined/ambiguous、預期RED不含環境/fixture缺陷；逐句記錄實際已執行與因產品schema未落地而runtime待驗的差別，不以靜態review冒稱全部可達。記錄findings，修正再審；本次static/binding審查通過只解鎖T241，runtime待驗責任轉入T241及各scope首Green，不宣稱231句已全部觀察RED。
 
@@ -1923,28 +1933,33 @@
 
 **來源**: spec.md NFR／成功標準、research.md後續驗證1～4、plan.md共通handoff與techstack測試矩陣。這些任務不以工程證據替代上述產品介面行為。
 
-- [ ] T284 [ENGINEERING] 驗證目標Linux的compiled runtime與sharp binary
+- [X] T284 [ENGINEERING] 驗證目標Linux的compiled runtime與sharp binary
+  - Evidence: 2026-11-17 Linux arm64 Debian12、Node24.22.2/pnpm11.25.0 frozen install/build exit0；sharp0.35.5/libvips8.18.7/multipart10.1.8 smoke200；compiled deployment 7/7 PASS（含空庫、001–003真帳務升級、checksum、SPA/health/auth與失敗啟動），lint/format exit0。來源及image hash、命令/環境見validation T284；隔離子DB0，容器僅sleep。未部署。
   - Dependencies: T283。
   - Read: `research.md` → 後續驗證1；`specs/truth/techstack.md` → 試用部署/圖片處理；tests/deployment/runtime.spec.ts與Railpack設定。
   - 在隔離Linux/Railpack同等環境用frozen lockfile建置/啟動，驗Node24/optional binary/multipart/sharp，migration從空庫及舊資料可啟動、靜態SPA與health/auth gate不退化；記錄image/OS/CPU架構/版本/命令/exit及checksum於validation.md。不得把macOS實驗代替此項，不部署正式服務。
 
-- [ ] T285 [ENGINEERING] 量測10MiB與25MP及連續轉碼的資源邊界
+- [X] T285 [ENGINEERING] 量測10MiB與25MP及連續轉碼的資源邊界
+  - Evidence: 使用者確認0.5GB，獨立compiled runtime容器硬限499,998,720bytes/2CPU/no額外swap；10MiB且25MP真PNG與高熵JPEG交替8次200、503/abort/60秒408後恢復200。服務HWM260,784,128bytes、CPU3.61s、10收據/10revision、OOM0、退出0；詳validation T285及新raw。fixture共置造成driver137的失敗探測另列，不當服務容量結論。
   - Dependencies: T284。
   - Read: `research.md` → 決策3/5及後續驗證1；API admission/timeouts、`specs/truth/features/backend/trips/縮圖傳輸與提交邊界.feature`。
   - 對compiled runtime真實上傳合法上限圖/高熵圖，記錄CPU、RSS/peak、耗時與工作/stream數、503/timeout/abort後釋放；先記錄實際目標service記憶體容量及可用預算，對照單工作與有界deadline無OOM/無未釋放工作。容量不足回交owner調整admission，不自行降低已授權圖片邊界或標PASS。
 
-- [ ] T286 [ENGINEERING] 驗證含圖片與垃圾桶資料的隔離備份還原
+- [X] T286 [ENGINEERING] 驗證含圖片與垃圾桶資料的隔離備份還原
+  - Evidence: PostgreSQL18.3 pg_dump/pg_restore至另一空隔離DB exit0；public/auth逐表JSON與constraint/trigger/function/index完全相同；active/trash圖片bytea/metadata/HTTP隔離、restore保圖、receipt重播、purged UUID409與五類DB保護均PASS。完整帳務/真purge fixtures與dump SHA見validation T286，兩子庫及服務均回收，無正式部署。
   - Dependencies: T285。
   - Read: `research.md` → 後續驗證4；`specs/truth/data/data-model.dbml` → 新表/receipt/tombstone及purge。
   - 使用虛構owner與active/trash/已purged識別/收據、目前WebP、完整帳務的隔離DB；pg_dump/pg_restore至另一空隔離DB。比對表/constraint/trigger、bytea checksum及metadata、復原圖片可讀與owner隔離、receipt去重與已刪UUID不可復活；記錄命令遮蔽連線secret、檔案hash及restore結果。歷史9表證據不算本次通過。
 
 - [ ] T287 [MANUAL-VERIFY] 完成真機選圖、縮圖觀感與輔助工具核對
+  - 本輪處置：2026-11-17使用者回覆「這項先 skip」，依指示略過並解除本輪後續前置；不記為PASS、不補造裝置/讀屏證據，保留人工驗證缺口與未完成框。後續UI/基準/交付必須附此例外。
   - Dependencies: T286。
   - Read: `research.md` → 後續驗證3；`spec.md` US2/US3及NFR；`ui/ui-plan.md`固定design-v7。
   - 由具實機的開發者/授權測試者在iOS與Android記錄裝置/OS/browser、實際選圖JPEG/PNG/WebP（HEIC拒絕/轉檔下一步）、新增兩階段/同trip重傳、取消/換圖/預設、記帳/垃圾桶復原及圖片方向/觀感。補實際鍵盤/讀屏、reduced-motion、狀態播報與焦點人工核對；真機/讀屏不可用則本task保持未完成並列缺口，viewport自動測試不替代。無新增設計批准要求。
 
-- [ ] T288 [REGRESSION] 完成全產品測試矩陣與編譯品質檢查
-  - Dependencies: T286。
+- [X] T288 [REGRESSION] 完成全產品測試矩陣與編譯品質檢查
+  - Dependencies: T286, T240（T190補驗獨立審查）。
+  - Evidence: 最終1493來源be3e1546…cc01be，host/Linux零差異；清單對照2375 Playwright基本執行（API348/API-support356/前端357×2+手機193×2/web-support275×2/UI5×2/smoke2×2/deployment7）及unit23均PASS/0skip/flaky/error；另300次精準影響重驗（管理88、初讀/舊連結212）不重複計入基本集合。最終typecheck/lint/format/build雙平台0；tablet溢出與unknown-trip返回修正、2獨立support斷言對齊及審查、完整版本沿用鏈見validation及t288-final-audit.json。所有owned runner/子DB回收，僅睡眠容器後停止；人工T287/UIgate/基準回填尚未完成。
   - Read: 本檔執行入口與完整矩陣、`dsl-refine-review.md`47模板覆蓋、全部truth features與既有NOOP。
   - 同一最終產品版本依序跑API全量27檔、Web全量28檔在Chromium/WebKit及新增DSL兩尺寸矩陣、test:unit、API support、web-support、ui-quality、deployment runtime、smoke，以及typecheck/lint/format:check/build。以當次--list清單對照executions/通過/失敗/skip，無遺漏且無skip才能通過；需要Linux執行WebKit時同版構建/資料/規格留證。
   - 在validation.md保存完整矩陣、版本/環境/exit/log及相關故障復原證據；新程式變更後重跑受影響scope，不能拼接不同版本結果。這是整體功能/工程驗收，不另新增truth家族review。
@@ -1961,7 +1976,8 @@
 **Boundary**: 不改truth、不加feature、不重跑GREEN當作review；原型不製作，沒有原型證據前置。未參與受審產品實作的既有審查者執行；重大差異未有開發者決策不得自行接受。
 
 - [ ] T289 subagent review (ui quality gate)
-  - Dependencies: T287, T288。
+  - 本輪處置：使用者2026-11-17明確回覆「如果只是 UI 的話可以先跳過，我來人眼驗證就好」，依指示停止自動補拍/審查，交由使用者人眼驗證，不標PASS。首輪review核對來源/設計及12張最終主畫面未發現confirmed product defect；其餘視覺責任未完成。
+  - Dependencies: T288；T287於2026-11-17由使用者明確回覆「這項先 skip」豁免本輪前置，非驗證通過。
   - Evidence: 核對38frame責任、桌機/手機完整主旅程與關鍵狀態、跨頁共享導航/按鈕/骨架一致性，名稱/日期/筆數/分攤/淨額各在已確認位置。差異全修正或有可追溯的使用者接受；不能只寫PASS、無溢出或功能綠燈。
 
 ## Phase 7: 驗收後基準回填
@@ -1969,18 +1985,21 @@
 **來源**: 共用UI交付契約Rule7；plan.md/UI已驗收變更納入現況。這是實作後交付任務，本輪規劃不寫入baseline。
 
 - [ ] T290 回填本次已驗收的共用UI基準
+  - 本輪處置：配合使用者暫略UI驗證，回填暫緩，現有baseline不變；未驗收範圍不升現況。Pen工具另有本期用量上限，已正常退出CLI，不繞過工具限制。
   - Dependencies: T289, T288。
   - Read: 上方固定baseline起點、實作時最新baseline及其diff、已通過validation.md/UI gate及產品版本。
   - 寫入範圍：`specs/ui-baseline/split-ledger.pen`、相關previews/、README.md與適用ledger/expense-create索引；將已驗收的旅行管理/垃圾桶/縮圖、新增選填圖片與全站等待共用元件/狀態回填，記錄產品commit、涵蓋frame、預覽hash、差異與更新紀錄。
   - 用支援.pen的設計工具編輯/儲存/核對，保留既有三區組織與baseline-v0.1/v0.2/v0.3未改成果；同畫面衝突回交owner，禁止用舊整檔覆蓋最新基準或將未驗收範圍升為現況。
 
 - [ ] T291 subagent review (baseline backfill)
+  - 本輪處置：T290暫緩，故本輪不執行回填核對。
   - Dependencies: T290。
   - Read: 基準diff、UI gate、產品驗收版本、.pen可編輯結構/預覽/README與其他plan整合差異。
   - Evidence: 未參與回填的審查者核對產品/設計/基準/索引同版一致、只回填已驗收範圍、保留其他成果，實際版本與findings落validation.md；這是回填核對，不再加第二個產品UI家族gate。
 
-- [ ] T292 保存最終交付與續跑/完成狀態
-  - Dependencies: T291。
+- [X] T292 保存最終交付與續跑/完成狀態
+  - 本輪交付例外：2026-11-17使用者明確將UI交其人眼驗證；本筆改為保存工程交付及T287/T289/T290/T291暫緩狀態，不宣稱原完整plan全部通過。已更新tasks/validation/handoff/manual-validation；核對產品1493來源未變、diff hygiene與程序退出，manual入口保留供使用者人工檢視，未commit/push/deploy。
+  - Dependencies: 原T291本輪依上述使用者指示豁免；工程T288已通過。
   - Dependencies之外亦核對所有任務與工程/人工證據完整；更新本plan/handoff/validation的版本、未提交變更、資源/受管程序、完整矩陣、基準回填與審查結果。所有要求通過才標plan完成；受阻/未跑保持未完成，需發布或正式部署另依使用者指示，不因本清單自動執行。
 
 ## 畫面／狀態到任務綁定

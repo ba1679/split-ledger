@@ -1,3 +1,6 @@
+.page-head:has(.ledger-actions) {
+  flex-wrap: wrap;
+}
 .ledger-actions {
   display: flex;
   gap: 12px;
@@ -50,9 +53,6 @@
   color: var(--green);
 }
 @media (max-width: 700px) {
-  .page-head:has(.ledger-actions) {
-    flex-wrap: wrap;
-  }
   .ledger-actions {
     width: 100%;
   }

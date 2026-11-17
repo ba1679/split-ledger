@@ -1,17 +1,17 @@
 # 006 目前交接
 
-- 更新：2026-11-17；branch `feat/006-trip-management`；已依功能範圍逐筆提交，產品來源提交 `3ede547`，另有計畫紀錄提交。未 push／deploy。
-- **283/292 完成**：T001–T283 全部 `[X]`，T284–T292 保持 `[ ]`。本輪完成 T276–T283，達到 tasks 指定「其餘前端功能組」session checkpoint，依 implement/shared session-handoff 規則交接，尚未進入 Phase 5。
-- **下一筆 T284 [ENGINEERING]**：從 tasks.md 精確 Read 開始，驗證目標 Linux／Railpack 同等環境 compiled runtime、Node24／sharp optional binary、frozen lockfile、空庫／舊資料 migration、SPA／health／auth gate。既有 Linux Playwright／tsx／Vite 通過不等於 T284 完成；不重開已批准前端任務。
-- **當前產品版本**：81 檔 `.cache/implement-006-resume/t282-source.json`，SHA256 `2aa4ea253912788e549c7a88735b25858d1dd1d3198b348bf51d953272a54cfd`；同版 tar／harness／32 UI 與 raw 完整，host／Linux hash 一致且 checkpoint 再核相同。精準沿用鏈見 [validation.md](validation.md) 末節，各 review 在 cache。
-- **本輪證據**：T276 268 distinct PASS／272 UI；T278 68 成功執行、60 distinct／64 UI；T280 100 成功執行、70 distinct／70 UI；T282 32 同版 fresh distinct／32 UI。各 task 有各自重疊 scope，不能相加宣稱無重複全站矩陣。Green 均固定獨立審查 APPROVED／0 blocking。T277／279／281／283 是 source 不變／影響集合空的已批准 NOOP，各自 **0 新 E2E**，依使用者已授權精準影響回歸沿用；T288 完整最終回歸保留。
-- **已修重點**：22操作／登入穩定 busy、防同步重複；旅行名稱／日期三欄原ID及未知只讀查證；S10 手機圖片重試不跳版；支出20＋5分頁與背景更新保留內容、可見錯誤／重試；實付 POST／查證分相位、原兩UUID不重送、15s POST／各5s proof、逾時停動畫／同步讀取鎖／卸載晚回應防護；手機查證 CTA 避開固定底導覽；日期成功有單次可讀完成通知。
-- **品質／程序**：最新 format／lint／web typecheck／build／Doctor exit0，Doctor85/4 同四項已triage提醒，無新抑制；runtime／render guards0。最新9個 owned host worker 全退、childDB0、own Linux restart 清 zeroRSS zombies 後只 sleep／ps；沒有 active heavy runner。各 task 程序回收帳保留。low-memory-16gb（實測18GiB），root＋固定 `/root/review_006`，heavy1／worker1；pressure2 warning 已授權可續跑，critical4／OOM／owned不可回收才停，不能只憑數字 swap 停止。
-- **受管服務**：`./scripts/pnpm.sh` Node24.22.2／pnpm11.25.0。官方 arm64 Playwright1.64.1-noble `split-ledger-006-webkit` 的 `/workspace` 是可寫來源／依賴副本，Node `/opt/node24/bin`，`/evidence` 綁 host cache；owned healthy test DB `split-ledger-test-db-1`，未動 dev DB。macOS14.8.1 原生 WK2251 PushAPIEnabled 環境錯誤以同版官方 Linux WK 覆蓋，不刪 WK。其他專案 Vitest 曾併行，未停止或修改；失敗 raw／helper 修正與環境候選完整留證，未放寬 timeout 或 oracle。
-- **提交／工作目錄**：產品與測試依九份已驗證 milestone 快照提交（縮圖、未知結果恢復、狀態邊界、支出查證、初載、操作防重複、分頁背景更新、付款查證、日期完成通知）；任務／驗證／交接另筆提交。對應 commit 清單見 validation.md 末節。81 檔最終產品與上述 t282-source.json 完全一致；`.cache/implement-006-resume/t283-checkpoint*` 是提交前歷史快照，包含當時 HEAD／dirty 狀態，勿當作目前 HEAD。ignored cache 證據仍保留，不 clean。沒有 active runner session；固定 reviewer 已完成本輪審查，可續用不另增代理。
-- **剩餘工作**：T284 Linux compiled runtime；T285 圖片上限資源量測；T286 含圖片／trash／receipt／tombstone 隔離備份還原；T287 真 iOS／Android 選圖與實際讀屏人工驗證；T288 同一最終版本全產品／兩引擎／新DSL兩尺寸及品質矩陣；T289 一次獨立 UI 家族 gate；T290 已驗收 .pen 基準回填；T291 回填獨立核對；T292 最終交付。真機與實際讀屏不可由 viewport 自動測試替代；目前未宣稱人工通過，UI gate／baseline backfill 尚未開始。
-- **UI 契約**：混合 A/C，前端 C 沿用 design-v7／38 frame／32 preview；有效原確認與不做 prototype 決定不變。`.pen` hash `6c33bce25da872057d253a44bd0e59dec1f0e41f974873fb6db0dfe10b6c1abc`、固定 baseline 起點 `8fc9f94134c66ffd29918014b950894b1007aa86`；索引／批准見 ui/ui-plan.md。各逐畫面對照／修正見 validation，不因本次換 session 新增批准要求。
-- **恢復指示**：核 Git／81 hash／raw 與 review、環境與 owned 程序後直接接已授權 T284；不重問授權，不重跑 NOOP E2E，不把歷史 partial／failed probe 當最新版完整通過。同步 Linux 時 copy 當前實際來源；不要把舊 tar 當最終 runtime。整個 plan 尚未完成。
+- 更新：2026-11-17；branch `feat/006-trip-management`、HEAD `6ededa4`；未commit/push/deploy。
+- **本輪工程範圍已收尾，288/292完成**：T001–T286、T288、T292 `[X]`。T287真機/讀屏與T289完整UI家族審查依使用者指示略過；T290/T291 UI基準回填/獨立核對暫緩，四項維持 `[ ]`，不宣稱全部UI驗證通過。
+- **使用者決策**：先對T287回覆「這項先 skip」，再回覆「如果只是 UI 的話可以先跳過，我來人眼驗證就好」。不再自動補拍或要求裝置報告；後續僅在使用者要求時續接人工結果及基準工作。這是本輪明確例外，不改truth或設計意圖。
+- **工程證據**：T288基本2375 Playwright＋23unit均PASS，0skip/flaky/unexpected/globalerror；另精準影響重驗300（管理88、初讀/舊連結212）。API348/API-support356/Web357×2+手機193×2/web-support275×2/UI5×2/smoke2×2/deployment7。品質/typecheck/lint/format/build雙平台exit0。歷史中止/失敗不計PASS，細節與來源沿用鏈在validation及ignored `t288-final-audit.json`。
+- **固定來源**：1493檔manifest SHA `be3e154698a3975b07977b1d3a2ebaa277fa7836e37c66fef1e145baf0cc01be`；本輪UI補證/文件未改產品測試來源。後續產品變更按實際依賴重驗，不因整體hash改變重跑無關scope。
+- **交付修正**：compiled startup升級測試；實際0.5GB隔離資源/連續圖片與timeout/abort恢復；17表含圖片/垃圾桶/收據/tombstone備份還原；768px帳本header自然換行修溢出；unknown-trip錯誤恢復我的旅行返回、不誤判purged；兩支support等待斷言對齊且保留帳務/DB/恢復保護。T190/T240增量均獨立審查zero blocking。
+- **UI局部證據**：T289首輪核38frame/32設計預覽/最終1493來源與12張新compiled D/M畫面，無confirmed product defect；後期歷史PNG部分在另一主機cache、此處不可讀，完整視覺證據仍缺。`.cache/implement-006-resume/t289-ui-family-review.md`及`t289-ui/manifest.json`保留，不冒稱正式gate通過。
+- **補拍停止/回收**：依使用者新指示，已核對ownedPID56691/starttime/command後SIGINT；session7830 exit130，82passed/1interrupted/15未跑，不計fullscope通過。worker57286/browser57325退出、補拍子DB回收；單一manualDB刻意保留。Pen inspection session65750正常exit0，官方工具本期usage limit，另舊CLI不支援2.22；未繞過限制或修改baseline。
+- **人工入口保留**：HTTPS `https://192.168.0.125:44287`，完整URL在聊天與ignored `.cache/implement-006-resume/t287-local-server.json`；PID44536、session57169，唯一fakeDB `ledger_test_44536_287`。同Wi-Fi，首次本機自簽提示詳細資訊後繼續，無系統root安裝/公開隧道；憑證至2026-11-20 22:19台北。隔離Alice/Carol與日本完整帳務，無需真Google登入；操作參考`manual-validation.md`僅為可選，不要求回報。要停server時先核PID/starttime/command再SIGTERM，腳本正常關閉並DROP精確fakeDB；不要殺無關程序/動devDB。
+- **資源**：low-memory16gb、root+固定idle reviewer `/root/review_006` only，heavy0/worker1；warning2依先前使用者授權可續，critical/OOM必停；agent→OS PID未知。Linux兩測試容器停止，devDB未動、testDB健康。
+- **Git dirty**：TripAccessState.tsx、management.css、owner-overview-feedback.spec.ts、ui-quality.spec.ts、tests/deployment/runtime.spec.ts，本plan tasks/validation/handoff與新manual-validation.md；無truth/skill/lockfile/env變更，cache原證據保留。
+- **UI權威**：混合A/C；原design-v7批准仍有效，38frames/32PNG，SHA `6c33bce25da872057d253a44bd0e59dec1f0e41f974873fb6db0dfe10b6c1abc`；固定baseline `8fc9f94134c66ffd29918014b950894b1007aa86`，本輪未回填。使用者日後需要恢復時：人工UI確認→補足同一T289未完成責任→T290工具恢復後整合最新基準→T291獨立核對，保留原其他成果。
 
 以下為歷史交接，舊branch/HEAD、進度、資源數與working tree不得覆蓋上方當前狀態。
 
