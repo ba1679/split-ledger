@@ -19,6 +19,7 @@ import { DateField } from '../../components/DateField.js';
 import { dateOnly, localToday, parseDate } from '../../components/date.js';
 import { QueryState } from '../../components/QueryState.js';
 import { BusyIndicator } from '../../components/waiting/BusyIndicator.js';
+import { ActionButton } from '../../components/waiting/ActionButton.js';
 import { SearchCombo } from '../../components/SearchCombo.js';
 import { FormDialog } from '../../components/FormDialog.js';
 import { useSession } from '../auth/session.js';
@@ -939,7 +940,9 @@ function ExpenseEditor({
               取消
             </Link>
           </Button>
-          <Button
+          <ActionButton
+            busy={busy}
+            label="儲存支出"
             variant="default"
             disabled={
               busy ||
@@ -953,9 +956,7 @@ function ExpenseEditor({
               categories.isPending ||
               Boolean(categories.error)
             }
-          >
-            {mutation.isPending ? '儲存中…' : '儲存支出'}
-          </Button>
+          />
         </div>
       </form>
       {deleting && expense && !unavailable ? (
@@ -984,7 +985,9 @@ function ExpenseEditor({
             >
               取消
             </Button>
-            <Button
+            <ActionButton
+              busy={busy}
+              label="確認刪除"
               variant="destructive"
               type="button"
               disabled={busy || Boolean(unconfirmed) || stateLocked}
@@ -994,9 +997,7 @@ function ExpenseEditor({
                   deletion.mutate();
                 }
               }}
-            >
-              {deletion.isPending ? '刪除中…' : '確認刪除'}
-            </Button>
+            />
           </div>
         </FormDialog>
       ) : null}

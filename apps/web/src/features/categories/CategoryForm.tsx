@@ -1,5 +1,6 @@
 import { Input } from '../../components/ui/input.js';
 import { Button } from '../../components/ui/button.js';
+import { ActionButton } from '../../components/waiting/ActionButton.js';
 import React, { useId, useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest, ApiError, type Category } from '../../api/index.js';
@@ -143,9 +144,12 @@ export function CategoryForm({
           <Button type="button" variant="outline" disabled={busy} onClick={onClose}>
             取消
           </Button>
-          <Button variant="default" disabled={busy || Boolean(unconfirmed)}>
-            {save.isPending ? '儲存中…' : '儲存'}
-          </Button>
+          <ActionButton
+            busy={busy}
+            label="儲存"
+            variant="default"
+            disabled={busy || Boolean(unconfirmed)}
+          />
         </div>
       </form>
     </FormDialog>

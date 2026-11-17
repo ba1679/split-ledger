@@ -12,6 +12,7 @@ import { useSession } from '../auth/session.js';
 import type { SettlementView } from '../settlement/types.js';
 import { formatShareAmount } from '../expenses/ExpenseShares.js';
 import { Button } from '../../components/ui/button.js';
+import { ActionButton } from '../../components/waiting/ActionButton.js';
 import { Input } from '../../components/ui/input.js';
 import { QueryState } from '../../components/QueryState.js';
 import { FormDialog } from '../../components/FormDialog.js';
@@ -185,10 +186,12 @@ function MemberNameForm({
           </Button>
         </div>
       ) : null}
-      <Button type="submit" disabled={pending || Boolean(unknown)}>
-        {member ? '儲存名稱' : '新增同行者'}
-      </Button>
-      {pending ? <p role="status">正在確認保存結果…</p> : null}
+      <ActionButton
+        busy={pending}
+        label={member ? '儲存名稱' : '新增同行者'}
+        type="submit"
+        disabled={pending || Boolean(unknown)}
+      />
     </form>
   );
 }
@@ -216,6 +219,7 @@ export function TripMembers() {
   });
   const [action, setAction] = useState<MemberAction | null>(null);
   const [busy, setBusy] = useState(false);
+  const [activationId, setActivationId] = useState<string | null>(null);
   const [failure, setFailure] = useState('');
   const [message, setMessage] = useState('');
   const writing = useRef(false);
@@ -246,6 +250,7 @@ export function TripMembers() {
     if (writing.current) return;
     writing.current = true;
     setBusy(true);
+    setActivationId(isActive ? member.id : null);
     setFailure('');
     try {
       const saved = await apiRequest<TripMember>(`${base}/members/${member.id}`, {
@@ -263,6 +268,7 @@ export function TripMembers() {
     } finally {
       writing.current = false;
       setBusy(false);
+      setActivationId(null);
     }
   }
 
@@ -424,16 +430,17 @@ export function TripMembers() {
                       停用
                     </Button>
                   ) : (
-                    <Button
+                    <ActionButton
+                      busy={busy && activationId === member.id}
+                      label={`重新啟用 ${member.name}`}
                       variant="ghost"
-                      aria-label={`重新啟用 ${member.name}`}
                       disabled={busy}
                       onClick={() => {
                         void changeStatus(member, true);
                       }}
                     >
                       重新啟用
-                    </Button>
+                    </ActionButton>
                   )}
                   <Button
                     variant="ghost"
@@ -488,15 +495,15 @@ export function TripMembers() {
                 <Button variant="outline" disabled={busy} onClick={() => setAction(null)}>
                   取消
                 </Button>
-                <Button
+                <ActionButton
+                  busy={busy}
+                  label={action.kind === 'delete' ? '刪除' : '停用'}
                   disabled={busy}
                   onClick={() => {
                     if (action.kind === 'delete') void remove(action.member);
                     else void changeStatus(action.member, false);
                   }}
-                >
-                  {action.kind === 'delete' ? '刪除' : '停用'}
-                </Button>
+                />
               </div>
             </>
           )}

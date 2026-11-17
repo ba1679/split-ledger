@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, LoaderCircle, Mountain } from 'lucide-react';
+import { ArrowRight, Mountain } from 'lucide-react';
 import type { Trip } from '../../api/index.js';
-import { Button } from '../../components/ui/button.js';
+import { ActionButton } from '../../components/waiting/ActionButton.js';
 
 export function CreatedTripResult({
   trip,
@@ -24,6 +24,13 @@ export function CreatedTripResult({
   onVerify: () => void;
 }) {
   const heading = useRef<HTMLHeadingElement>(null);
+  const previousError = useRef(error);
+
+  useEffect(() => {
+    if (error) previousError.current = error;
+  }, [error]);
+
+  const reservedError = !error && busy ? previousError.current : null;
 
   useEffect(() => {
     heading.current?.focus({ preventScroll: true });
@@ -56,25 +63,24 @@ export function CreatedTripResult({
               </>
             )}
           </p>
-          {error ? <p>{error}</p> : null}
+          {error || reservedError ? (
+            <p
+              aria-hidden={reservedError ? true : undefined}
+              style={reservedError ? { visibility: 'hidden' } : undefined}
+            >
+              {error ?? reservedError}
+            </p>
+          ) : null}
           {unknown && draftName ? <p>照片草稿：{draftName}（待查證）</p> : null}
         </div>
-        <Button
-          aria-disabled={busy}
-          aria-busy={busy}
-          aria-label={busy ? (unknown ? '正在查證圖片保存' : '正在重新上傳圖片') : undefined}
+        <ActionButton
+          busy={busy}
+          label={unknown ? '再次查證' : '重新上傳'}
+          busyLabel={unknown ? '正在查證圖片保存' : '正在重新上傳圖片'}
           onClick={() => {
             if (!busy) (unknown ? onVerify : onRetry)();
           }}
-        >
-          {busy ? (
-            <LoaderCircle size={20} className="action-spinner" aria-hidden="true" />
-          ) : unknown ? (
-            '再次查證'
-          ) : (
-            '重新上傳'
-          )}
-        </Button>
+        />
       </section>
       <h2 className="created-trip-section-title">已建立的旅行</h2>
       <Link className="trip-card create-result-card" to={`/trips/${trip.id}`}>

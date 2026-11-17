@@ -1,5 +1,5 @@
-import { Button } from '../../components/ui/button.js';
-import React, { useState } from 'react';
+import { ActionButton } from '../../components/waiting/ActionButton.js';
+import React, { useRef, useState } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { authClient, useSession } from './session.js';
 
@@ -7,11 +7,14 @@ export function Login() {
   const { account } = useSession();
   const [params] = useSearchParams();
   const [busy, setBusy] = useState(false);
+  const starting = useRef(false);
   const [error, setError] = useState('');
 
   if (account) return <Navigate to="/trips" replace />;
 
   async function signIn() {
+    if (starting.current) return;
+    starting.current = true;
     setBusy(true);
     setError('');
 
@@ -25,10 +28,12 @@ export function Login() {
       if (result.error) {
         setError(result.error.message ?? '登入尚未完成，請重新嘗試。');
         setBusy(false);
+        starting.current = false;
       }
     } catch {
       setError('目前無法連線，登入尚未完成。請重新嘗試。');
       setBusy(false);
+      starting.current = false;
     }
   }
 
@@ -66,17 +71,17 @@ export function Login() {
             從這裡開始。
           </h2>
           <p>登入你的個人旅行帳本，隨手記下沿途的花費。</p>
-          <Button
+          <ActionButton
+            busy={busy}
+            label="使用 Google 帳號登入"
+            busyLabel="正在進行 Google 登入"
             variant="outline"
             className="google"
             disabled={busy}
-            aria-busy={busy}
             onClick={() => {
               void signIn();
             }}
-          >
-            {busy ? '正在登入…' : '使用 Google 帳號登入'}
-          </Button>
+          />
           <p className="error" role="alert">
             {error || (params.has('error') ? '登入尚未完成，請重新嘗試。' : '')}
           </p>

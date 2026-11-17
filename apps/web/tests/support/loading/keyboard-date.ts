@@ -35,7 +35,7 @@ export async function arrangeKeyboardDate(world: LedgerWorld, result: string): P
     await page.keyboard.press('Tab');
     await expect(input).toHaveValue(value!);
   }
-  const control = dialog.getByRole('button', { name: '儲存日期', exact: true });
+  const control = dialog.getByRole('button', { name: '儲存變更', exact: true });
   await tabTo(page, control);
   const name = (await control.innerText()).trim();
   await arrangeOperationWait(page, world, '保存旅行名稱與日期', {

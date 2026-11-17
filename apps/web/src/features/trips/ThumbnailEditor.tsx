@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { LoaderCircle, Mountain } from 'lucide-react';
+import { Mountain } from 'lucide-react';
+import { ActionButton } from '../../components/waiting/ActionButton.js';
 import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { requestThumbnail, type ThumbnailCommandInput } from '../../api/thumbnail.js';
@@ -450,20 +451,15 @@ export function ThumbnailEntryDialog({
         <Button ref={cancel} variant="outline" onClick={onClose}>
           取消
         </Button>
-        <Button
+        <ActionButton
+          label="保存圖片"
+          busy={busy && !refreshing}
+          busyLabel="正在保存圖片"
           disabled={!draft || busy || unknown || conflict || unavailable}
-          aria-busy={busy && !refreshing}
-          aria-label={busy && !refreshing ? '正在保存圖片' : undefined}
           onClick={() => {
             void save();
           }}
-        >
-          {busy && !refreshing ? (
-            <LoaderCircle size={20} className="action-spinner" aria-hidden="true" />
-          ) : (
-            '保存圖片'
-          )}
-        </Button>
+        />
       </div>
     </FormDialog>
   );

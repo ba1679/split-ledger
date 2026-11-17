@@ -30,7 +30,29 @@ export async function executeOperation(world: LedgerWorld, operation: string): P
   state.box = (await state.control.boundingBox())!;
   expect(state.box).not.toBeNull();
   expect(state.name).not.toBe('');
+  const originalControl = await state.control.elementHandle();
+  expect(originalControl).not.toBeNull();
+  // Native click may scroll past a fixed mobile navigation bar after scrollIntoView.
+  // Measure at pointerdown, before the click can submit or change busy state.
+  const pointerMeasurement = await originalControl!.evaluateHandle((element) => {
+    const measurement: { box: ReturnType<HTMLElement['getBoundingClientRect']> | null } = {
+      box: null,
+    };
+    element.addEventListener(
+      'pointerdown',
+      () => {
+        measurement.box = element.getBoundingClientRect();
+      },
+      { once: true, capture: true },
+    );
+
+    return measurement;
+  });
   await state.control.click();
+  const pointerBox = await pointerMeasurement.evaluate((measurement) => measurement.box?.toJSON());
+  await pointerMeasurement.dispose();
+  expect(pointerBox, 'Native pointerdown must be observed before submission').toBeDefined();
+  state.box = pointerBox;
   await expect.poll(() => state.after !== undefined || state.errors.length > 0).toBe(true);
   expect(state.errors.map(String)).toEqual([]);
   expect(state.exchanges.length).toBe(1);
@@ -40,7 +62,8 @@ export async function executeOperation(world: LedgerWorld, operation: string): P
   const request = ui.writes[0]!;
   expect(request.method()).toBe(state.method);
   expect(new URL(request.url()).pathname).toBe(state.path);
-  const headers = await request.allHeaders();
+  // allHeaders can wait for response headers, which this scenario deliberately holds.
+  const headers = request.headers();
   let body: Record<string, unknown> = {};
   if (headers['content-type']?.includes('application/json'))
     body = request.postDataJSON() as Record<string, unknown>;
@@ -113,7 +136,7 @@ export async function executeOperation(world: LedgerWorld, operation: string): P
     id: body.id,
     repaymentId: body.repaymentId,
   });
-  state.focus = await state.control.evaluate((element) =>
+  state.focus = await originalControl!.evaluate((element) =>
     element === document.activeElement ? 'control' : null,
   );
 }

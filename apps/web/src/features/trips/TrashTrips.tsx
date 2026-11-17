@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { LoaderCircle, Mountain } from 'lucide-react';
+import { Mountain } from 'lucide-react';
+import { ActionButton } from '../../components/waiting/ActionButton.js';
 import { apiRequest, type ItemList } from '../../api/index.js';
 import { useSession } from '../auth/session.js';
 import { Button } from '../../components/ui/button.js';
@@ -109,21 +110,15 @@ function TrashCard({
             }).format(new Date(trip.deletedAt))}
           </p>
           <div className="trash-card-actions">
-            <Button
+            <ActionButton
+              label="復原旅行"
+              busy={restore.isPending}
               disabled={restore.isPending || restore.unknown || purgeUnknown || confirming}
-              aria-busy={restore.isPending}
-              aria-label={restore.isPending ? '正在復原旅行' : undefined}
               onClick={() => {
                 onRetain();
                 restore.submit();
               }}
-            >
-              {restore.isPending ? (
-                <LoaderCircle size={20} className="action-spinner" aria-hidden="true" />
-              ) : (
-                '復原旅行'
-              )}
-            </Button>
+            />
             <Button
               variant="ghost"
               className="trash-purge"

@@ -18,10 +18,14 @@ function unchanged(
       expect(after[key], `Only declared operation data may change: ${key}`).toEqual(before[key]);
 }
 
-function accounting(before: TripManagementSnapshot, after: TripManagementSnapshot) {
-  expect(omitFields(after.trips[0]!, ['accounting_revision', 'updated_at'])).toEqual(
-    omitFields(before.trips[0]!, ['accounting_revision', 'updated_at']),
-  );
+function accounting(
+  before: TripManagementSnapshot,
+  after: TripManagementSnapshot,
+  changedFields: string[] = [],
+) {
+  expect(
+    omitFields(after.trips[0]!, ['accounting_revision', 'updated_at', ...changedFields]),
+  ).toEqual(omitFields(before.trips[0]!, ['accounting_revision', 'updated_at', ...changedFields]));
   expect(String(after.trips[0]!.accounting_revision)).toBe(
     String(BigInt(String(before.trips[0]!.accounting_revision)) + 1n),
   );
@@ -126,7 +130,8 @@ export async function assertOperationBusiness(
       op,
     )
   ) {
-    unchanged(before, after, ['members']);
+    unchanged(before, after, ['trips', 'members']);
+    accounting(before, after);
     expect(after.members.filter((row) => row.id !== target)).toEqual(
       before.members.filter((row) => row.id !== target),
     );
@@ -166,9 +171,7 @@ export async function assertOperationBusiness(
   } else if (op === '切換簡化付款') {
     unchanged(before, after, ['trips']);
     expect(after.trips[0]!.simplify_debts).toBe(true);
-    expect(omitFields(after.trips[0]!, ['simplify_debts', 'updated_at'])).toEqual(
-      omitFields(before.trips[0]!, ['simplify_debts', 'updated_at']),
-    );
+    accounting(before, after, ['simplify_debts']);
   } else if (['記錄獨立還款', '保存實付結清'].includes(op)) {
     unchanged(
       before,

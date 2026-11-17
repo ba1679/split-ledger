@@ -16,6 +16,7 @@ import {
   type CurrencyList,
 } from '../../api/index.js';
 import { Button } from '../../components/ui/button.js';
+import { ActionButton } from '../../components/waiting/ActionButton.js';
 import { Input } from '../../components/ui/input.js';
 import { DateField } from '../../components/DateField.js';
 import { dateOnly, localToday, parseDate } from '../../components/date.js';
@@ -451,9 +452,12 @@ function SettleEditor({
           </p>
         ) : null}
         <div className="settle-actions">
-          <Button type="submit" disabled={locked}>
-            {partialDraft ? '記錄部分還款' : '結清這筆安排'}
-          </Button>
+          <ActionButton
+            busy={busy}
+            label={partialDraft ? '記錄部分還款' : '結清這筆安排'}
+            type="submit"
+            disabled={locked}
+          />
           <Button asChild type="button" variant="outline">
             <Link to={`/trips/${trip.id}/settlement`}>返回安排</Link>
           </Button>

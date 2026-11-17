@@ -35,7 +35,8 @@ export async function repeatOperation(world: LedgerWorld): Promise<void> {
   const response = await original.response();
   expect(response?.status()).toBe(state.status);
   expect(await response!.finished()).toBeNull();
-  if (state.status === 204) expect((await response!.body()).length).toBe(0);
+  // A 204 has no browser body resource; inspect the genuine upstream bytes retained by the proxy.
+  if (state.status === 204) expect(state.exchanges[0]!.body.length).toBe(0);
   else expect(await response!.json()).toEqual(state.body);
   await expect.poll(() => state.finished).toBe(1);
   await waitForManagementReads(ui);

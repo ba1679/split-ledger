@@ -167,7 +167,7 @@ export async function arrangeOperationData(
       await field.fill(value!);
       await field.press('Tab');
     }
-    control = button('儲存日期');
+    control = button('儲存變更');
     method = 'PATCH';
   } else if (['移至垃圾桶', '復原旅行', '永久刪除旅行'].includes(operation)) {
     if (operation === '移至垃圾桶') {

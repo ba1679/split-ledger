@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { LoaderCircle } from 'lucide-react';
+import { ActionButton } from '../../components/waiting/ActionButton.js';
 import { Button } from '../../components/ui/button.js';
 import { FormDialog } from '../../components/FormDialog.js';
 import { TripOperationCheck } from './TripOperationCheck.js';
@@ -108,24 +108,19 @@ export function TripCommandDialog({
         <Button ref={cancel} variant="outline" disabled={command.isPending} onClick={onClose}>
           {command.unknown ? '關閉視窗' : '取消'}
         </Button>
-        <Button
+        <ActionButton
+          label={copy.label}
+          busy={command.isPending}
+          busyLabel={copy.busyLabel}
           variant={copy.variant}
           disabled={command.isPending || command.unknown}
-          aria-busy={command.isPending}
-          aria-label={command.isPending ? copy.busyLabel : undefined}
           onClick={() => {
             if (!command.isPending && !command.unknown) {
               onSubmit?.();
               command.submit();
             }
           }}
-        >
-          {command.isPending ? (
-            <LoaderCircle size={20} className="action-spinner" aria-hidden="true" />
-          ) : (
-            copy.label
-          )}
-        </Button>
+        />
       </div>
       <p className="dialog-escape">
         {command.isPending ? (

@@ -1,4 +1,6 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
+import { ActionButton } from '../../components/waiting/ActionButton.js';
+import { TripOperationCheck } from './TripOperationCheck.js';
 import { LoaderCircle } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -15,6 +17,17 @@ import { CreatedTripResult } from './CreatedTripResult.js';
 import type { OperationOutcome, TripState } from './management-api.js';
 
 type PhotoAttempt = ThumbnailCommandInput & { file: File };
+
+type TripEditIntent = Pick<Trip, 'name' | 'startDate' | 'endDate'>;
+
+class UnconfirmedTripEdit extends Error {
+  constructor(
+    readonly intent: TripEditIntent,
+    cause: unknown,
+  ) {
+    super('保存結果尚未確認，請再次查證。', { cause });
+  }
+}
 
 export function TripForm({
   trip,
@@ -43,6 +56,14 @@ export function TripForm({
   const [currentImageAvailable, setCurrentImageAvailable] = useState(true);
   const [photoAttempt, setPhotoAttempt] = useState<PhotoAttempt | null>(null);
   const [createUnknown, setCreateUnknown] = useState(false);
+  const [editAttempt, setEditAttempt] = useState<TripEditIntent | null>(null);
+  const [editChecking, setEditChecking] = useState(false);
+  const [editMessage, setEditMessage] = useState('');
+  const editCheckLocked = useRef(false);
+  const editOutcome = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (editAttempt) editOutcome.current?.querySelector('button')?.focus();
+  }, [editAttempt]);
   const [createVerifying, setCreateVerifying] = useState(false);
   const createLocked = useRef(false);
   const createIntent = useRef<{
@@ -214,8 +235,10 @@ export function TripForm({
         return await apiRequest<Trip>(trip ? `/api/trips/${id}` : '/api/trips', {
           method: trip ? 'PATCH' : 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify(trip ? dates : { id, name: name.trim(), ...dates }),
-          signal: trip ? undefined : AbortSignal.timeout(15000),
+          body: JSON.stringify(
+            trip ? { name: name.trim(), ...dates } : { id, name: name.trim(), ...dates },
+          ),
+          signal: AbortSignal.timeout(15000),
         });
       } catch (error) {
         if (!trip) {
@@ -227,32 +250,68 @@ export function TripForm({
 
           return await lookupCreation();
         }
-        if (error instanceof ApiError) throw error;
+        if (error instanceof ApiError && error.status < 500) throw error;
         // A lost response is checked using the original UUID instead of issuing another mutation.
         try {
-          const saved = await apiRequest<Trip>(`/api/trips/${id}`);
+          const saved = await apiRequest<Trip>(`/api/trips/${id}`, {
+            signal: AbortSignal.timeout(5000),
+          });
 
           if (
             saved.startDate === dates.startDate &&
             saved.endDate === dates.endDate &&
-            (trip || saved.name === name.trim())
+            saved.name === name.trim()
           )
             return saved;
         } catch {
           /* Keep the original draft and UUID when the result cannot be verified. */
         }
-        throw new Error('保存結果尚未確認，請重新整理確認。', { cause: error });
+        throw new UnconfirmedTripEdit({ name: name.trim(), ...dates }, error);
       }
     },
     onSuccess: afterCreation,
-    onSettled: () => {
-      createLocked.current = false;
+    onError: (error) => {
+      if (alive.current && error instanceof UnconfirmedTripEdit) setEditAttempt(error.intent);
+    },
+    onSettled: (_saved, error) => {
+      if (!(error instanceof UnconfirmedTripEdit)) createLocked.current = false;
     },
   });
+
+  async function recheckEdit() {
+    if (!editAttempt || editCheckLocked.current || !alive.current) return;
+    editCheckLocked.current = true;
+    setEditChecking(true);
+    setEditMessage('');
+    try {
+      const saved = await apiRequest<Trip>(`/api/trips/${id}`, {
+        signal: AbortSignal.timeout(5000),
+      });
+      if (!alive.current) return;
+      if (
+        saved.id === id &&
+        saved.name === editAttempt.name &&
+        saved.startDate === editAttempt.startDate &&
+        saved.endDate === editAttempt.endDate
+      ) {
+        await finish(saved, '已確認目前的旅行名稱與日期。');
+      } else {
+        setEditMessage(
+          '目前資料尚未與本次變更一致，仍無法確認保存結果。請稍後再次查證，或關閉視窗查看目前旅行。',
+        );
+      }
+    } catch {
+      if (alive.current) setEditMessage('目前無法取得旅行資料，請稍後再查證。本次草稿仍保留。');
+    } finally {
+      editCheckLocked.current = false;
+      if (alive.current) setEditChecking(false);
+    }
+  }
 
   function submit(event: React.FormEvent) {
     event.preventDefault();
     if (
+      createLocked.current ||
       mutation.isPending ||
       photoPending ||
       createUnknown ||
@@ -286,14 +345,11 @@ export function TripForm({
     }
 
     setValidation('');
-    if (!trip) {
-      if (createLocked.current) return;
-      createLocked.current = true;
-    }
+    createLocked.current = true;
     mutation.mutate({ startDate, endDate });
   }
 
-  const busy = mutation.isPending || photoPending || createVerifying;
+  const busy = mutation.isPending || photoPending || createVerifying || editChecking;
 
   if (created)
     return (
@@ -320,8 +376,8 @@ export function TripForm({
 
   return (
     <FormDialog
-      title={trip ? '旅行日期' : '新增旅行'}
-      description={trip ? undefined : '旅行名稱為必填；日期和縮圖可稍後設定。'}
+      title={trip ? '旅行名稱與日期' : '新增旅行'}
+      description={trip ? '旅行名稱與日期會一併保存。' : '旅行名稱為必填；日期和縮圖可稍後設定。'}
       className={
         trip
           ? undefined
@@ -333,20 +389,21 @@ export function TripForm({
       busy={busy}
     >
       <form noValidate onSubmit={submit} className={trip ? undefined : 'ds-trip-form'}>
-        <fieldset className="trip-form-fields" disabled={!trip && (busy || createUnknown)}>
-          {!trip ? (
-            <div className="field">
-              <label htmlFor={inputId}>旅行名稱</label>
-              <Input
-                id={inputId}
-                ref={nameInput}
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                placeholder="例如：京都賞楓"
-                required
-              />
-            </div>
-          ) : null}
+        <fieldset
+          className="trip-form-fields"
+          disabled={busy || createUnknown || Boolean(editAttempt)}
+        >
+          <div className="field">
+            <label htmlFor={inputId}>旅行名稱</label>
+            <Input
+              id={inputId}
+              ref={nameInput}
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              placeholder="例如：京都賞楓"
+              required
+            />
+          </div>
           <div className="two-col">
             <DateField
               label="開始日"
@@ -403,32 +460,43 @@ export function TripForm({
             </Button>
           </section>
         ) : null}
+        {editAttempt ? (
+          <section ref={editOutcome} className="operation-outcome" aria-label="旅行變更查證">
+            <p>本次草稿已保留。再次查證只讀取這趟旅行，不會重送保存。</p>
+            <p>關閉只會收起視窗，不會撤回已送出的保存。</p>
+            {editMessage ? <p role="status">{editMessage}</p> : null}
+            <TripOperationCheck
+              busy={editChecking}
+              label="再次查證"
+              busyLabel="正在查證旅行變更"
+              onCheck={recheckEdit}
+            />
+          </section>
+        ) : null}
         <div className="form-actions">
           {trip ? (
             <>
               <Button type="button" variant="outline" disabled={busy} onClick={onClose}>
-                取消
+                {editAttempt ? '關閉視窗' : '取消'}
               </Button>
-              <Button variant="default" disabled={mutation.isPending}>
-                {mutation.isPending ? '儲存中…' : '儲存日期'}
-              </Button>
+              <ActionButton
+                variant="default"
+                busy={mutation.isPending}
+                label="儲存變更"
+                disabled={Boolean(editAttempt)}
+              />
             </>
           ) : (
             <>
               <Button type="button" variant="secondary" disabled={busy} onClick={onClose}>
                 取消
               </Button>
-              <Button
+              <ActionButton
+                busy={busy}
+                label="建立旅行"
+                busyLabel={photoPending ? '正在保存旅行圖片' : '正在建立旅行'}
                 disabled={busy || createUnknown || Boolean(photoError)}
-                aria-busy={busy}
-                aria-label={busy ? (photoPending ? '正在保存旅行圖片' : '正在建立旅行') : undefined}
-              >
-                {busy ? (
-                  <LoaderCircle size={20} className="action-spinner" aria-hidden="true" />
-                ) : (
-                  '建立旅行'
-                )}
-              </Button>
+              />
             </>
           )}
         </div>

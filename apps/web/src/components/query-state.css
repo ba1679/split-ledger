@@ -167,3 +167,25 @@
   width: 60px;
   height: 12px;
 }
+
+.action-button {
+  position: relative;
+}
+.action-button-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: inherit;
+}
+.action-button[aria-busy='true'] > .action-button-label {
+  opacity: 0;
+}
+.action-button[aria-busy='true'] {
+  cursor: wait;
+}
+.action-button .action-button-spinner {
+  position: absolute;
+  inset: 0;
+  color: inherit;
+  pointer-events: none;
+}

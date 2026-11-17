@@ -15,6 +15,7 @@ import { formatShareAmount } from '../expenses/ExpenseShares.js';
 import type { SettlementView } from '../settlement/types.js';
 import type { CreateRepaymentRequest, OverpaymentConfirmation, Repayment } from './types.js';
 import { Button } from '../../components/ui/button.js';
+import { ActionButton } from '../../components/waiting/ActionButton.js';
 import { Input } from '../../components/ui/input.js';
 import { Select } from '../../components/ui/select.js';
 import { DateField } from '../../components/DateField.js';
@@ -464,11 +465,13 @@ function RepaymentEditor({
           </section>
         ) : null}
         <div className="repayment-actions">
-          <Button type="submit" disabled={saving || Boolean(unknown) || Boolean(warning)}>
-            儲存還款
-          </Button>
+          <ActionButton
+            busy={saving}
+            label="儲存還款"
+            type="submit"
+            disabled={saving || Boolean(unknown) || Boolean(warning)}
+          />
         </div>
-        {saving ? <p role="status">正在確認還款…</p> : null}
       </form>
       <p className="muted">若還款超過目前應付，會先告知結果，確認後才保存。</p>
     </div>
