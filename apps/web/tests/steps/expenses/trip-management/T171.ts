@@ -29,6 +29,7 @@ Then('支出刪除查證呈現 {string}', async ({ world }, result: string) => {
   } else {
     await expect(
       page
+        .getByRole('main')
         .getByText(
           result === '旅行在垃圾桶'
             ? /旅行[^。]*垃圾桶/
@@ -46,7 +47,7 @@ Then('支出刪除查證呈現 {string}', async ({ world }, result: string) => {
       .all())
       if (await button.isVisible()) await expect(button).toBeDisabled();
     if (result === '旅行在垃圾桶') {
-      const next = page.getByRole('link', { name: /垃圾桶|復原/ });
+      const next = page.getByRole('main').getByRole('link', { name: /垃圾桶|復原/ });
       await expect(next).toHaveAttribute('href', '/trips/trash');
       await next.click({ trial: true });
     }

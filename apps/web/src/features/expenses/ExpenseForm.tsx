@@ -25,6 +25,8 @@ import { displayAmount } from './money.js';
 import { ExpenseShares, formatShareAmount } from './ExpenseShares.js';
 import {
   definitelyRejected,
+  currentTripState,
+  UnavailableTrip,
   OfflineWrite,
   UnconfirmedWrite,
   unconfirmedMessage,
@@ -33,6 +35,8 @@ import {
   type SaveIntent,
   type WriteIntent,
 } from './save-outcome.js';
+import { TripOperationCheck } from '../trips/TripOperationCheck.js';
+import type { TripState } from '../trips/management-api.js';
 import { readCategoryPreference, saveCategoryPreference } from '../categories/preference.js';
 import { Icon } from '../../components/Icon.js';
 import { readCurrencyPreference, saveCurrencyPreference } from './currency-preference.js';
@@ -154,6 +158,67 @@ function ExpenseEditor({
     [saveError, setSaveError] = useState('');
   const [deleting, setDeleting] = useState(false);
   const [unconfirmed, setUnconfirmed] = useState<WriteIntent | null>(null);
+  const [stateReadRequired, setStateReadRequired] = useState(false);
+  const [checkingTrip, setCheckingTrip] = useState(false);
+  const stateNotice = useRef<HTMLElement>(null);
+  const alive = useRef(true);
+  useEffect(() => {
+    alive.current = true;
+
+    return () => {
+      alive.current = false;
+    };
+  }, []);
+  const sameOwner = () =>
+    alive.current && client.getQueryData<{ id: string }>(['session'])?.id === account!.id;
+  const stateKey = ['account', account!.id, 'trip', tripId, 'entry-state', 'expense', id];
+  const authority = useQuery<TripState | null>({
+    queryKey: stateReadRequired
+      ? stateKey
+      : ['account', account!.id, 'expense-state-unobserved', tripId, id],
+    queryFn: () => null,
+    enabled: false,
+    gcTime: 0,
+  });
+  const unavailable = authority.data && authority.data.state !== 'active' ? authority.data : null;
+  const stateLocked = stateReadRequired && authority.data?.state !== 'active';
+
+  async function readTripState() {
+    setStateReadRequired(true);
+    try {
+      const current = await currentTripState(tripId);
+      if (sameOwner()) client.setQueryData(stateKey, current);
+
+      return current;
+    } catch (error) {
+      if (sameOwner()) client.setQueryData(stateKey, null);
+      throw error;
+    }
+  }
+
+  function showWriteError(error: Error) {
+    if (!sameOwner()) return;
+    setSaveError(error instanceof UnavailableTrip ? '' : error.message);
+    if (error instanceof UnavailableTrip) {
+      setDeleting(false);
+      void client.cancelQueries({
+        predicate: (query) =>
+          query.queryKey[0] === 'account' &&
+          query.queryKey[1] === account!.id &&
+          query.queryKey.includes(tripId) &&
+          !query.queryKey.includes('entry-state') &&
+          query.queryKey[2] !== 'expense-draft',
+      });
+    }
+    const observed = client.getQueryData<TripState | null>(stateKey);
+    if (
+      observed !== undefined &&
+      observed?.state !== 'active' &&
+      !(error instanceof UnconfirmedWrite)
+    )
+      requestAnimationFrame(() => stateNotice.current?.focus());
+  }
+
   const currencies = useQuery({
     queryKey: ['currencies'],
     queryFn: ({ signal }) => apiRequest<CurrencyList>('/api/currencies', { signal }),
@@ -247,6 +312,7 @@ function ExpenseEditor({
     });
 
   async function saved(message: string) {
+    if (!sameOwner()) return;
     client.removeQueries({ queryKey: expenseDraftKey(account!.id, tripId), exact: true });
     await Promise.all(
       [
@@ -262,7 +328,7 @@ function ExpenseEditor({
         client.invalidateQueries({ queryKey: ['account', account!.id, resource] }),
       ),
     );
-    navigate(`/trips/${tripId}`, { state: { message } });
+    if (sameOwner()) navigate(`/trips/${tripId}`, { state: { message } });
   }
 
   const mutation = useMutation({
@@ -310,7 +376,23 @@ function ExpenseEditor({
           },
         );
       } catch (error) {
-        if (definitelyRejected(error)) throw error;
+        if (definitelyRejected(error)) {
+          if (
+            error instanceof ApiError &&
+            ['TRIP_TRASHED', 'TRIP_PURGED', 'NOT_FOUND'].includes(error.code)
+          ) {
+            let current: TripState;
+            try {
+              current = await readTripState();
+            } catch {
+              throw new Error('這次支出未保存，目前無法確認旅行狀態，請重新讀取後再試。', {
+                cause: error,
+              });
+            }
+            if (current.state !== 'active') throw new UnavailableTrip(current);
+          }
+          throw error;
+        }
         // The original UUID is queried after an unavailable response; no mutation is retried.
         const confirmed = await verifiedSave(intent);
 
@@ -321,7 +403,7 @@ function ExpenseEditor({
     },
     onSuccess: () => saved('支出已保存'),
     onError: (error) => {
-      setSaveError(error.message);
+      showWriteError(error);
       if (error instanceof UnconfirmedWrite) setUnconfirmed(error.intent);
       if (error instanceof ApiError && error.field) {
         const field =
@@ -353,15 +435,16 @@ function ExpenseEditor({
         // An unavailable response does not justify a second DELETE.
         const intent = { kind: 'delete' as const, id, tripId };
 
-        if (await verifiedDelete(intent)) return;
+        if (await verifiedDelete(intent, readTripState)) return;
 
         throw new UnconfirmedWrite(intent, error);
       }
     },
     onSuccess: () => saved('支出已刪除'),
     onError: (error) => {
-      setSaveError(error.message);
+      showWriteError(error);
       if (error instanceof UnconfirmedWrite) setUnconfirmed(error.intent);
+      if (error instanceof UnavailableTrip) setUnconfirmed({ kind: 'delete', id, tripId });
     },
     onSettled: () => {
       writing.current = false;
@@ -369,19 +452,23 @@ function ExpenseEditor({
   });
 
   const verification = useMutation({
+    networkMode: 'always',
     mutationFn: async (intent: WriteIntent) =>
-      intent.kind === 'save' ? Boolean(await verifiedSave(intent)) : verifiedDelete(intent),
+      intent.kind === 'save'
+        ? Boolean(await verifiedSave(intent))
+        : verifiedDelete(intent, readTripState),
     onSuccess: async (confirmed, intent) => {
       if (confirmed) {
         await saved(intent.kind === 'save' ? '支出已保存' : '支出已刪除');
       } else setSaveError(unconfirmedMessage(intent.kind));
     },
+    onError: showWriteError,
     onSettled: () => {
       writing.current = false;
     },
   });
 
-  const busy = mutation.isPending || deletion.isPending || verification.isPending;
+  const busy = mutation.isPending || deletion.isPending || verification.isPending || checkingTrip;
   const categoryOptions = [
     { value: '', label: '未分類' },
     ...(categories.data?.items.map((option) => ({ value: option.id, label: option.name })) ?? []),
@@ -394,16 +481,38 @@ function ExpenseEditor({
   )
     categoryOptions.push(submittedCategory);
 
-  function recheck() {
+  async function recheck() {
     if (unconfirmed && !writing.current) {
       writing.current = true;
-      verification.mutate(unconfirmed);
+      try {
+        await verification.mutateAsync(unconfirmed);
+      } catch {
+        /* Rendered by onError. */
+      }
+    }
+  }
+
+  async function checkTripState() {
+    if (writing.current) return;
+    writing.current = true;
+    setCheckingTrip(true);
+    try {
+      const current = await readTripState();
+      if (!sameOwner()) return;
+      setSaveError(current.state === 'active' ? '旅行目前可用，請確認保留的草稿後再保存。' : '');
+      if (current.state === 'active')
+        requestAnimationFrame(() => itemInput.current?.focus({ preventScroll: true }));
+    } catch {
+      if (sameOwner()) setSaveError('目前無法確認旅行狀態，請稍後再查證。');
+    } finally {
+      writing.current = false;
+      if (alive.current) setCheckingTrip(false);
     }
   }
 
   function submit(event: React.FormEvent) {
     event.preventDefault();
-    if (writing.current || unconfirmed || awaitingPreference) return;
+    if (writing.current || unconfirmed || stateLocked || awaitingPreference) return;
 
     const validation: FieldErrors = {};
 
@@ -457,13 +566,42 @@ function ExpenseEditor({
           </p>
         </div>
       </header>
+      {stateLocked ? (
+        <section ref={stateNotice} tabIndex={-1} className="operation-outcome" role="status">
+          <p>
+            {unavailable
+              ? new UnavailableTrip(unavailable).message
+              : '目前無法確認旅行狀態，草稿保留，請先查證。'}
+          </p>
+          <p>
+            {unconfirmed
+              ? '原次操作結果仍未確認，這裡不會重送原次操作。'
+              : '這筆支出尚未保存，草稿已保留。'}
+          </p>
+          <div className="expense-state-actions">
+            {unavailable ? (
+              <Link to={unavailable.state === 'trash' ? '/trips/trash' : '/trips'}>
+                {unavailable.state === 'trash' ? '前往垃圾桶復原' : '返回旅行清單'}
+              </Link>
+            ) : null}
+            {!unconfirmed ? (
+              <TripOperationCheck
+                busy={busy}
+                onCheck={checkTripState}
+                label="重新讀取旅行狀態"
+                busyLabel="正在查證旅行狀態"
+              />
+            ) : null}
+          </div>
+        </section>
+      ) : null}
       {readError ? (
         <p className="error" role="alert">
           暫時無法更新已保存資料，請保留草稿後再試。
         </p>
       ) : null}
       <form className="form-panel expense-form" data-command-id={id} noValidate onSubmit={submit}>
-        <fieldset disabled={busy || Boolean(unconfirmed)}>
+        <fieldset disabled={busy || Boolean(unconfirmed) || stateLocked}>
           <div className="field">
             <label htmlFor={itemId}>支出項目</label>
             <Input
@@ -704,7 +842,9 @@ function ExpenseEditor({
                     }
                   })()
                 : null}
-              {expense ? <ExpenseShares expense={expense} members={members.data.items} /> : null}
+              {expense && !stateLocked ? (
+                <ExpenseShares expense={expense} members={members.data.items} />
+              ) : null}
             </div>
           ) : (
             <QueryState
@@ -720,9 +860,12 @@ function ExpenseEditor({
           {saveError}
         </p>
         {unconfirmed && !deleting ? (
-          <Button variant="outline" type="button" disabled={busy} onClick={recheck}>
-            {verification.isPending ? '查證中…' : '重新查證'}
-          </Button>
+          <TripOperationCheck
+            busy={busy}
+            onCheck={recheck}
+            label="重新查證"
+            busyLabel="正在查證原次支出操作"
+          />
         ) : null}
         <div className="form-actions">
           {expense ? (
@@ -730,7 +873,7 @@ function ExpenseEditor({
               variant="ghost"
               className="text-btn danger delete-expense"
               type="button"
-              disabled={busy || Boolean(unconfirmed)}
+              disabled={busy || Boolean(unconfirmed) || stateLocked}
               onClick={() => {
                 setSaveError('');
                 setDeleting(true);
@@ -760,6 +903,7 @@ function ExpenseEditor({
             disabled={
               busy ||
               Boolean(unconfirmed) ||
+              stateLocked ||
               awaitingPreference ||
               members.isPending ||
               Boolean(members.error) ||
@@ -771,7 +915,7 @@ function ExpenseEditor({
           </Button>
         </div>
       </form>
-      {deleting && expense ? (
+      {deleting && expense && !unavailable ? (
         <FormDialog title="刪除這筆支出？" onClose={() => setDeleting(false)} busy={busy}>
           <p>
             確定刪除「{expense.item}」{expense.currencyCode} {displayAmount(expense.amount)}
@@ -781,9 +925,12 @@ function ExpenseEditor({
             {saveError}
           </p>
           {unconfirmed ? (
-            <Button variant="outline" type="button" disabled={busy} onClick={recheck}>
-              {verification.isPending ? '查證中…' : '重新查證'}
-            </Button>
+            <TripOperationCheck
+              busy={busy}
+              onCheck={recheck}
+              label="重新查證"
+              busyLabel="正在查證原次支出操作"
+            />
           ) : null}
           <div className="form-actions">
             <Button
@@ -797,9 +944,9 @@ function ExpenseEditor({
             <Button
               variant="destructive"
               type="button"
-              disabled={busy || Boolean(unconfirmed)}
+              disabled={busy || Boolean(unconfirmed) || stateLocked}
               onClick={() => {
-                if (!writing.current && !unconfirmed) {
+                if (!writing.current && !unconfirmed && !stateLocked) {
                   writing.current = true;
                   deletion.mutate();
                 }

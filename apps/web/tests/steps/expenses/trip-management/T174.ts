@@ -12,8 +12,13 @@ Then('舊表單說明垃圾桶狀態並提供復原下一步', async ({ world })
   const state = world.get<StaleExpenseDraft>('expense:staleDraft');
   const ui = managementUI(world),
     page = ui.page;
-  await expect(page.getByText(/旅行[^。]*垃圾桶/).first()).toBeVisible();
-  const next = page.getByRole('link', { name: /垃圾桶|復原/ });
+  await expect(
+    page
+      .getByRole('main')
+      .getByText(/旅行[^。]*垃圾桶/)
+      .first(),
+  ).toBeVisible();
+  const next = page.getByRole('main').getByRole('link', { name: /垃圾桶|復原/ });
   await expect(next).toHaveAttribute('href', '/trips/trash');
   await next.click({ trial: true });
   await waitForManagementReads(ui);

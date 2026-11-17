@@ -54,7 +54,6 @@ export async function arrangeStaleExpenseDraft(
   browser: Browser,
   world: LedgerWorld,
 ): Promise<void> {
-  await page.setViewportSize({ width: 1440, height: 900 });
   await arrangeManagementPage(page, world, '帳本');
   const tripId = managementTripId(world);
   await page.getByRole('link', { name: '記一筆', exact: true }).click();

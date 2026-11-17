@@ -27,6 +27,7 @@ export function TripOperationCheck({
 
   return (
     <Button
+      type="button"
       variant="outline"
       className="trip-operation-check"
       aria-disabled={busy}

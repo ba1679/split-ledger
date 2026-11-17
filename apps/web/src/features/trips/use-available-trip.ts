@@ -1,5 +1,5 @@
-import { useSyncExternalStore } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useSyncExternalStore } from 'react';
+import { notifyManager, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSession } from '../auth/session.js';
 import { apiRequest, type Trip } from '../../api/index.js';
 import type { TripState } from './management-api.js';
@@ -9,12 +9,14 @@ export function useAvailableTrip(tripId: string | undefined) {
   const { account } = useSession();
   const client = useQueryClient();
   const entryStateKey = ['account', account!.id, 'trip', tripId, 'entry-state'];
-  const entryUnavailable = useSyncExternalStore(
-    (notify) => client.getQueryCache().subscribe(notify),
-    () =>
-      client
-        .getQueriesData<TripState>({ queryKey: entryStateKey })
-        .some(([, state]) => state?.state !== 'active'),
+  const subscribe = useCallback(
+    (notify: () => void) => client.getQueryCache().subscribe(notifyManager.batchCalls(notify)),
+    [client],
+  );
+  const entryUnavailable = useSyncExternalStore(subscribe, () =>
+    client
+      .getQueriesData<TripState>({ queryKey: entryStateKey })
+      .some(([, state]) => state?.state !== 'active'),
   );
   const trip = useQuery({
     queryKey: ['account', account!.id, 'trip', tripId],

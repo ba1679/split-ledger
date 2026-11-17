@@ -230,6 +230,12 @@ fieldset {
   padding: 0;
   max-width: none;
 }
+.expense-state-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
 .expense-form .form-actions {
   justify-content: flex-start;
   border-top: 0;
