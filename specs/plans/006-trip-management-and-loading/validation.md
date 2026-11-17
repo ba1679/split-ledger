@@ -2419,3 +2419,450 @@ T264正式獨立APPROVED/zeroopen，reportSHA a0493c783a83328de52903fd25a7d79ba8
 只ThumbnailEditor抽兩個private純函式selectionError(FileList)與rejectionMessage(ApiError)，消除元件內巢狀ternary；count→空檔→大小→宣告MIME優先序、字串、fallback message、外層selected/busy/attempt/取消guard完全不變。未改任何State/previewkey/本地onError/UUID/backend/DSL/設計。獨立靜態零open。23source manifest03eaa3d092f2248fe904425106db50a66cbcaff779d5cbde69e94d21e7aba7bf，副本t265-source/；其他22檔與cb0f完全同。
 
 format/lint/webTS/build/gen2已6cmd全0，入口CSS byteequal。唯一heavy77101，t265-validate.py正式16命令/預期192當前整檔＋92既有Thumbnail＋8代表policy/photo/損壞占位/像素錯誤UI D/M＝292新執行，worker1順序跑。此重構實際經所有選圖/拒絕，故完整本scope必要；未動create/管理/oldweb/support/API仍按影響保留，不因hash加跑。尚待完整scope/UI16entries、回收/獨立final，T265保持[ ]、264/292，T266未開始。pressure1入口/swap5081MiB，warning2例外續跑、critical/OOM/無法回收停。
+
+
+## 2026-11-17 T265 精準回歸恢復（本輪）
+
+- 使用者授權依影響範圍續跑 implement；不改永久 skills、不自動 commit。HEAD `04f7208`，T265 函式抽取已包含在該提交；本輪尚未修改產品碼。`ThumbnailEditor.tsx` SHA256 `13528bb6f67120f02f572c277b3546973b50a17b98a67705d7fbf356f13817a7`。原 `.cache/implement-006` 不存在，先前報告僅為歷史紀錄，不宣稱重新檢查過其 raw 或前後 byteequal。
+- 本筆 requested step=refactor；單一 Test Scope=`frontend/trips/縮圖限制與選圖錯誤.feature`。兩私有純函式的直接/間接使用均在本 editor，本 feature 覆蓋本地 count/empty/size/MIME、後端三類拒絕、改選恢復與四格式保存；未改 hook/cleanup、管理、帳務或 API，故不重跑鄰近92/94或全站。固定唯讀 `/root/review_006` 已審核影響集合無具體遺漏；final 尚待。
+- 完整48 Examples各按Given指定裝置，Chromium48PASS（1.5m），新 log `.cache/implement-006-resume/t265-chromium.log`。不以重複project增加虛假的viewport覆蓋。
+- macOS14.8.1 WebKit batch在page fixture setup出現 `Unknown setting: PushAPIEnabled`，中止exit130；單例max-failures=1再次確認，exit1、尚未進產品步驟。安裝命令只確認mac14 frozen2251。官方問題 https://github.com/microsoft/playwright/issues/42964 確認相同client/browser不相容。無放寬timeout或修改依賴/產品/斷言。
+- 使用既有官方 `mcr.microsoft.com/playwright:v1.64.1-noble`（arm64，image SHA `2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f`），容器 `split-ledger-006-webkit` 內 Node24.22.2/pnpm11.25.0/frozen install、shared build及bddgen PASS。tracked來源tar不含本機env/credentials/node_modules，manifest在resume目錄。Linux WebKit完整scope正在跑，單worker；不是以Chromium替代WebKit。
+- UI仍沿用design-v7與固定baseline；補D/M policy、HEIC、損壞、25MP錯誤真資料畫面/CTA檢查，等待runtime與逐圖比對。T265維持[ ]、T266未解鎖。
+- low-memory-16gb，觀測RAM18GiB但沿用原保守契約，主+固定reviewer，heavy1/worker1。Docker test-db由本輪啟動；Linux container登記在上。warning2依先前session使用者例外續跑，critical/OOM/不可回收停。最近swap17309MiB上升、pressure2；不以swap數字單獨停止，持續序列觀測。舊本機WebKit登記PID已不在ps；工具agent→OS PID映射未知。
+
+
+### T265 本輪完成
+
+完整Test Scope：Chromium48＋Linux WebKit48；D/M policy/HEIC/損壞/25MP UI兩engine各8，合計112PASS、無skip/flaky。每個feature案例依Given指定viewport，沒有把重複project當新增覆蓋。ESLint source、web typecheck、source Prettier均exit0；命令結果與log hashes在 `.cache/implement-006-resume/t265-results.json`。固定來源1553檔manifest保留，本輪產品零變更；沒有沿用不存在的舊raw。
+
+設計比對仍為design-v7 U04/S03及固定baseline：桌手機保留標題/預覽/檔名/選圖工具/限制/錯誤/footer順序，CTA均在viewport；手機長UUID檔名與錯誤自然換行。損壞local File顯示中性占位與尚未保存，未偽稱保存結果；合法fixture為真彩色圖片bytes，與設計風景照的資料差異不視為版面變更。既有桌機工具列適配沿用T264已記錄方案，本輪未改CSS，無新設計偏差。截圖16張存resume目錄，主代理與reviewer分別核代表圖。
+
+固定reviewer `/root/review_006` APPROVED/zeroopen；macOS WebKit環境失敗不算產品RED，Linux同版本補驗通過。所有本輪runner exit0（環境probe另記），test-db無ledger_test_%子庫；Linux容器restart後ps只sleep/ps，清掉已結束的5個zombie，不宣稱殘留程序仍在執行。host相關runner/browser已退出。pressure2/swap16917.56MiB較前下降，warning例外有效；agent到PID映射未知。受管Linux容器與test-db暫保留供後續使用，不新增第二heavy。
+
+T265已[X]，265/292；下一筆T266（縮圖讀取與帳號清理）green。保留T288完整回歸、真機與最後UI gate；未commit/push/deploy。
+
+
+## T266 green 續跑紀錄（2026-11-17）
+
+- Scope=`縮圖讀取與帳號清理.feature`，C沿design-v7 U01/U02/U03/S07與原baseline。F069真RED缺status→新增TripThumbnail圖形等待；F070真RED失敗後殘留busy→onError default；trash補充UI真RED仍露img→共用同元件與Mountain fallback。兩consumer用owner:trip:revision key隔離本地狀態；未加objectURL、圖片快取或改session/API，既有editor草稿unmount回收由F072驗。
+- S07設計比對要求可見失敗caption，已在既有固定圖區底部補上，保卡片/名稱/日期/筆數/入口不位移，不另增高度。spinner非聚焦、只有圖形與accessible name，沿用action-spinner/reduced-motion。
+- 首次runtime找到四項測試實作問題，均保留失敗log並交獨立reviewer確認後最小修正：T129 TWD API金額固定兩小數（100.00/700.00，DB10000minor/2等完整帳務斷言不變）；card bbox在trial click捲動後拿viewport座標比初始（改先量document coords，仍≤1且保trial可點）；mobile account-switch Given直接找桌機垃圾桶link（改走實際行動導覽sheet，保同SPA/cache/deferred）；fallback負向文字locator串起圖片失敗caption與正常開帳本CTA而匹配整卡（排除含heading的aggregate祖先，仍查獨立錯誤元素）。以上不是修改truth或放寬產品條件。
+- 最新10檔manifest `.cache/implement-006-resume/t266-source.json`；前兩freeze/raw分別attempt1/attempt2保存，focused RED/green分開。F069/F070及桌手機F072與F071 focused均已可達且PASS，尚不可將preliminary累加成最終完整GREEN。
+- 唯一heavy runner執行t266-run.py，整檔4×4project=16、具直接卡片依賴的F040/041/042/049/051回歸8×4=32、D/M延遲/fallback與trash fallback UI6×2=12，預期60執行；Chromium本機、WebKit同版官方Linux，均worker1串行。最終raw=`t266-final-*`、逐命令帳=`t266-final-commands.json`；品質/圖像/獨立final/資源回收尚待。T266仍[ ]，T267未開始。
+- RAM18GiB沿low-memory-16gb契約，主+固定readonly reviewer `/root/review_006`，重型1；pressure2依session授權續跑，critical/OOM/不可回收停。受管Linux/test-db保留供本scope；工具agent→PID未知。
+
+
+### T266 最終完成（2026-11-17）
+
+最後10檔固定來源的16命令全exit0；完整feature4×4=16PASS、實際卡片依賴回歸7×4=28PASS、UI6×2=12PASS，合計56PASS，無skip/flaky。原預估60已由當次實際清單修正（F049兩列，非三列），未用重複或未跑案例湊數。逐命令/通過數/hash=`.cache/implement-006-resume/t266-results.json`；source manifest與frozen tar同目錄，前兩attempt獨立保留，未混成final。
+
+ESLint、web typecheck、source格式與web production build均PASS；ReactDoctor最初對origin/main的86/14警告屬分支既有，精確本輪 `--scope changed --base HEAD --include-untracked --no-parallel` 掃9檔、93/100、No issues、exit0，見t266-react-doctor-current-delta.log。未為既有warning改動無關程式。
+
+設計v7 U01/U03/S07：等待指示位於固定圖區，只有圖形與accessible name；失敗caption位於固定圖區底端白色帶，符合設計圖下/名稱上的資訊順序並維持卡片bbox。桌手機名稱可換行，日期/筆數/開帳本入口及垃圾桶CTA保留，圖片失敗不擋早餐保存。卡片長度可捲動，手機viewport截圖不代表整頁內容同時可見；native trial可點擊與真記帳均PASS。所有12張UI圖片及geometry JSON在resume目錄。Chrome mobile reference/actual bbox同y611.546875/height389.15625，trial後scroll156，明確證實先前的viewport假位移，無放寬≤1容許值。
+
+固定獨立reviewer APPROVED/zeroopen，報告t266-review.md。Linux容器restart後ps僅sleep/ps，清掉已結束Z程序；隔離DB子庫空，host相關browser/runner退出，工具agent到PID未知。維持warning2使用者例外、單heavy/worker1，無critical/OOM。Linux/test-db保留復用。T266已[X]，266/292，下一T267 refactor；尚未開始T268，plan未交付、未commit/push/deploy。
+
+
+### T267 refactor：NOOP完成
+
+T266完成後選取本筆refactor，讀取同feature/DSL、green raw及元件邊界。TripThumbnail僅管理目前單圖的loaded/failed與原生load/error事件，父層owner:trip:revision key重建隔離；兩consumer只組裝src與default，無共享cache、無需額外hook或合併state。維持零產品/測試改動，避免為重構新增風險。獨立reviewer核對NOOP合理、zeroopen；10檔hash與T266最終manifest全部一致。
+
+本筆沒有新跑測試；明確沿用同來源、同環境的t266-results.json與t266-final-*：完整scope16＋依賴回歸28＋UI12=56PASS、品質與ReactDoctor delta93/No issues。UI/設計來源、12PNG、資源清理證據皆未失效，不將沿用宣稱為新執行。使用者本輪已批准精準回歸/NOOP策略，T288完整交付矩陣仍保留。T267已[X]，267/292，下一筆T268 green旅行結果查證與舊連結；無commit/push/deploy。
+
+
+## T268 green 進行中（2026-11-17）
+
+Scope=`旅行結果查證與舊連結.feature`，C沿design-v7 S05/S06、原固定baseline，不製prototype；完整19例×兩browser/兩尺寸應76。前置T267已完成。
+
+- F062生命週期未知真RED：缺unknown原操作查證；useLifecycleCommand新增75000ms寫入與5000ms receipt/state有界GET、unknown防重送、Dialog再次查證。獨立預審指出verify Promise.all早退重疊與跨帳completion風險，已allSettled+ref lock+核對operationID/kind、每個complete await後核目前session owner。purge背景同名trigger在confirming禁用；focused2PASS。
+- F065真RED原結果/目前文案缺失，分開顯示原次成功與目前state；圖片verify成功維持editor以顯示最新權威圖/提示（直接save仍close），notice只在false→true開啟或新選圖時清；新建附圖verify finish透過route state保留原結果/目前說明。focused5PASS，舊縮圖關閉/返回/直接保存須最終受影響回歸。
+- F067真RED：舊nav成員入口、MutationObserver證舊ledger flash、草稿遺失。TripLedger每entry owner/trip/entryUUID state query（gc0）先驗authority，非active時不啟動帳務queries並取消清除舊trip查詢（排除本地draft和authority）。AppShell訂閱entry-state完成並拒用pending/nonactive authority的舊metadata導航。ExpenseForm把完整未提交draft（id/item/amount/currency/date/category/payer/shares）保留在owner scoped query memory、gcInfinity，session clear可清除；保存後清除。非active只顯示不可提交草稿摘要與復原/返回出口。focusedtrash/purged兩例PASS，原DB/其他旅行不變。
+- T120的下一步link locator原本同時匹配sidebar與content造成strict violation，已精確限main區，仍核href與trial；不刪斷言、不改truth。
+- 新raw `.cache/implement-006-resume/t268-*`，目前F068/F102/F108其餘邊界執行中（唯一heavy）。T268仍[ ]，上述皆preliminary，不拼接宣稱完整scope GREEN；品質/完整browser-size/設計圖/獨立final未跑。
+- 受管Docker Linux/test-db保留，主+固定readonly reviewer，worker1/heavy1，warning2沿session授權，最近swap18317.88MiB/pressure2；無critical/OOM，程序與工具PID對應未知。未commit/push/deploy。
+
+
+### T268 續跑檢查點（2026-11-17，尚未完成）
+
+已完成19例Chrome桌面focused邊界（32.9s），尚不能宣稱76例完整通過。補上關閉後原次查證controller、背景refresh移除垃圾桶列時仍保留controller、非active保留同一File與fresh read後明確手動保存，原operationId不因unknown重送。T149移除契約禁止的409.currentState假設、T161分開last-confirmed預覽與未送出File草稿雜湊；原DB/request count斷言保留，已經獨立預審。API owner已另依/api-plan同步shared ApiError.code既有13codes枚舉，/truth-delta記MODIFY+NOOP shape（非本task擅改truth）。
+
+最新預審指出pending POST仍顯示取消不更改旅行，已依階段修正提示。TripOperationCheck只統一目前三處原次查證/讀取控制，保留按鈕尺寸、鍵盤焦點及同步防重；不提前實作後續全域Button重構。來源25檔凍結manifest=`.cache/implement-006-resume/t268-source.json` SHA256 `78b9250dbdcaaae87dcaf650d393085acd99e231deb8fe65df71614bec2f85a7`，相同tar與Linux source。`t268-run.py`序列執行，raw=`t268-final-*`，passing BDD的After直接取畫面避免另重跑同流程，`t268-ui-final`每張記source/hash/viewport/CTA bounds。完整結果/設計比對/獨立final與清理未齊前T268維持[ ]；不得把focused當最終GREEN。
+
+回歸邊界：完整本feature76；實際共同hook/holder影響旅行管理、縮圖預覽保存、新增選填附圖、讀取/帳號清理；AppShell及ExpenseForm影響既有16英文feature，兩browser各跑一次；expense-form/save-outcomes支援；額外關閉+背景refresh、nonactive File、busy焦點QA。date-picker本身與API runtime未變不重複整批，T288仍完整。主+固定reviewer、heavy1/worker1，pressure2沿既有授權、critical4立即停；受管Linux WebKit官方容器與testDB保留。無commit/push/deploy。
+
+
+### T268 最新驗證來源（接續上述檢查點）
+
+先前78b925…來源與其19PASS/59PASS僅preliminary，已封存`t268-attempt2/`，不冒充最終全綠。實際回歸發現F039關閉purge失焦、審查發現409→nonactive nav未訂閱資料更新，已用專用ref+RAF return focus與useSyncExternalStore修正；focused F0394PASS、close-first/refresh-first8PASS、nav真RED→nonactive4PASS。另F113 reselect時新File與舊blob URL短暫錯配造成間歇fetch failure，usePreviewUrl以{value,url}綁定目前File，保留cleanup；新source F113×5=5PASS（t268-preview-reselection-green2.log），不修改hash oracle。中間首次hook未處理undefined、當場修正，該次失敗未當通過證據。
+
+最新26檔manifest SHA256 `dec74ffba95c88eee7c6d615ea9bcb2c47be015f8203a5882595085cf7e3df68`；`t268-source.json`/tar與新`t268-final-*`/`t268-ui-final`對應此來源，runner session12460仍序列執行。最後type/lint/format/build、雙引擎D/M、UI手機CTA、獨立final、清理皆待完成；T268仍[ ]。warning2、swap17930.50MiB，無critical。重啟後只恢復未驗完範圍，勿混用attempt1/2為最終同源證據。
+
+
+### T268 UI 比對（dec74ff…來源，Chrome D/M已完成）
+
+C類；設計依據design-v7 `.pen` SHA256 `6c33bce25da872057d253a44bd0e59dec1f0e41f974873fb6db0dfe10b6c1abc`、2026-11-13使用者完整38frames批准，S05-D/M、S06-D/M共用狀態預覽；固定整合baseline=`8fc9f94134c66ffd29918014b950894b1007aa86`，不製prototype。行為依目前feature/DSL及UI111，實作manifest=`dec74ffba95c88eee7c6d615ea9bcb2c47be015f8203a5882595085cf7e3df68`，HEAD04f7208＋dirty diff。passing BDD After直接保存當輪畫面，非再執行第二份相同功能流程。
+
+- S05-D/M預期：等待不重送；耗盡停止busy、保留原次查證；原收據成功與目前狀態分開；409先讀狀態且保留照片草稿。實際：原次Again與fresh read皆保留，unknown圖片只有最後確認畫面/新建中性placeholder，本地草稿清楚標示尚未保存；不提前宣稱預設成功。桌面unknown/衝突圖=`t268-ui-final/chromium-desktop-b655bca7e54910.png`、`0c9484c7ca4cfe.png`，手機=`chromium-mobile-db287f75286a42.png`、`10f64060c596cd.png`。手機Again y661–707、fresh read y640–686，viewport390×844內完整可見；桌面1440×900內亦可見。政策/工具/底部保存沿既有dialog結構，未遮CTA。所有38張Chrome final中的查證/讀取button bounds皆在viewport內。
+- S06-D/M預期：trash明確復原、purged回清單、拒顯舊帳務。實際：state-first阻擋帳務與過期nav，單一狀態卡順序為狀態→原因→下一步，再列唯讀未保存支出草稿；不是三種狀態同時顯示。trash桌面=`chromium-desktop-7bbf9c2b803786.png`，手機=`chromium-mobile-b5decb74eb2b3f.png`；purged=`chromium-desktop-c43941bd3752ed.png`、`chromium-mobile-1e908110ae8ed1.png`。背景舊cache/inflight不重現帳務由BDD MutationObserver/DB與nav assertions共同查證，畫面無舊帳本。
+- 差異與處理：S05/S06 PNG是多狀態共用總表，產品依當前狀態嵌入既有shell/dialog與一張結果卡，不同時複製整份總表；屬已確認D/M自然適配，未更改資訊意圖。獨立reviewer逐看上述桌面/手機圖片，無須另調整資訊位置，mobile待決已關閉。這只完成Chrome視覺適配，不等同task final：WebKit畫面與其餘完整矩陣/quality尚待完成。
+
+
+### T268 WebKit測試觀察差異與精準續跑
+
+產品來源dec74ff…的26檔hash完全一致。WK桌面feature19PASS，regression遇兩個test helper差異：F106真201headers+首byte截斷，WK Response.finished()可null但JSON不完整，newTripRequestOutcome於finished後讀取Playwright Response.json並只catch不可讀JSON，照原語意記failures，不改browser bytes；F043真GET取消字串為`Load request cancelled`，原classifier不認可選request字，現只對GET擴精確取消辨識。ERR_FAILED/timeout/連線拒絕不忽略；19個classification檢查PASS。原DB、唯一write、state-first、owner lists及失敗attempt保留。
+
+原failed raw=t268-linux-desktop-regression-helper-red.log與t268-linux-desktop-regression-cancel-red.log；不把14/30部分通過當乾淨完整regression。新manifest28檔SHA256 `3a7466a2580088e25bc7ce425c1d2d1fb126370da70a9d4b09b886330a372c28`。沿用已綠Chrome與WK桌面feature，產品hash不動，變動僅new-trip-flow/query-attempts兩helper；依賴/前後source hashes見t268-helper-delta-1.json及t268-helper-delta.json。Chrome僅重驗F043/F106/F111×兩尺寸6例來替代原6例，不重跑整份已綠Chrome矩陣。WK從未完成desktop regression續跑（60整檔）及剩餘矩陣，最終UI metadata保留實際來源hash，不偽造為全部新版fresh。獨立reviewer確認JSON判定修正不弱化未知結果驗證，取消辨識待其最終核對。
+
+
+### T268 WebKit畫面與完整主scope核對
+
+主feature的Chrome D/M與Linux WebKit D/M各19例=76已全部PASS；同輪After保存76個唯一testId/PNG，hash校驗全通過。產品來源dec74ff…保持，測試helper修正後部分畫面來源tag為3a7466…，其餘57張保留原實際來源，不把沿用當新版fresh；全部產品檔hash一致的相容證據見前段delta圖。76張的查證/重新讀取CTA rect皆在對應CSS viewport內。
+
+主agent另逐看WK desktop trash/unknown與WK mobile unknown/conflict：`webkit-desktop-da519f85606b0e.png`、`webkit-desktop-52c5c2083a3673.png`、`webkit-mobile-c74794df1ac305.png`、`webkit-mobile-ee652db1150cd8.png`。與已審查Chrome的S05/S06資訊順序及草稿/已確認界線相同，CTA完整露出，無需要改設計意圖的差異；DesktopSafari deviceScaleFactor2造成PNG實體2880×1800/780×1688，CSS viewport仍1440×900/390×844，不混淆為新尺寸。手機未保存與未知badge、原因/查證/刷新出口清楚；S06導向復原或返回清單，舊帳務不露。完整task仍待QA/既有WK回歸/品質/最終review。
+
+
+### T268 最終驗證完成，待獨立final批准（2026-11-17）
+
+- branch feat/006-trip-management，HEAD04f7208＋28檔dirty source manifest=`3a7466a2580088e25bc7ce425c1d2d1fb126370da70a9d4b09b886330a372c28`。主scope76、四受影響旅行feature240、既有16英文feature兩引擎258、close/nonactive/busy QA32、expense-form/save-outcomes support12，合計**618 distinct coverage**。兩helper修正後Chrome補F043/F106/F107兩尺寸替代原6case；最終接受帳共**624 PASS executions / 30命令exit0**，不是單一source fresh618，版本相容/沿用依據如前述兩份delta。`t268-results.json`/`t268-final-commands.json`保存逐命令數量、原指令與實際source。先前grep寫F111實際無該恢復scenario，聚合時發現，已補真正F107 D/M兩例各PASS；proof affectedScope校正107，未虛報原2×2為3×2。
+- lint、web typecheck、28檔prettier、web build皆exit0；git diff --check無差異錯誤。ReactDoctor changed/baseHEAD/include-untracked掃26檔，score87，5warnings（無error）：Navigation及TripCommandDialog複雜度、TripLedger giant、named section的冗餘region role，交已排下一筆T269作最小有用整理；ThumbnailEditor關閉時reset-effect由獨立審查確認是有意的狀態轉換，unknown attempt保留而明確關閉才放棄，非runtime bug。不改doctor配置/不suppress。T268功能green與此維護待辦分開；commit前須處理可確認regression。
+- UI依據/逐項比對見上述S05/S06三節；76 passing BDD After PNG唯一testId與檔案SHA全驗證，兩browser/twoCSSsizes皆19，查證/讀取button bounds皆在viewport內。獨立視覺審查Chrome/WK D/M無未決呈現差異；沒有prototype或設計重批。
+- 資源audit=`t268-resource-audit.json`：13個host log workerPID全部已退出；Linux先確認僅sleep＋Z children後restart自己的容器，剩sleep/ps；隔離childDB0。testDB healthy重用、dev DB未動；pressure2/swap17654.56MiB沿既有授權、無critical/OOM，沒有活heavy runner。fixed reviewer正做最終獨立核對；通過前T268維持[ ]。無commit/push/deploy。
+
+
+T268 final：固定獨立reviewer已寫`t268-review.md`，APPROVED/0blocking，重新計數/逐檔hash/76PNG/source相容鏈/QA/品質與回收核對均通過。已回寫T268[X]，268/292；下一筆T269 refactor。ReactDoctor維護提醒由T269在綠燈保護下處理，不提前宣稱已清零。
+
+
+## T269 refactor 進行中（2026-11-17）
+
+承T268已批准GREEN（624PASS/618distinct），本筆只整理同feature共用狀態，C沿design-v7 S05/S06、baseline8fc9f941…、兩尺寸，不改truth/DSL/API/帳務計算/資訊意圖。參照codebase-design、React composition及ReactDoctor兩條canonical規則，未以改config/suppress求分。
+
+- 7個實際delta：AppShell authority/subscription/metadata移useAvailableTrip，TripLedger entry state+focus移useLedgerEntryState、cache清除移useUnavailableLedgerCleanup但保持帳務queries之後呼叫、三管理state/close/兩dialog移useLedgerManagement。所有hook每次render固定順序，dialogs在所有分支保first/second slots與owner:trip key；onComplete/RAF focus/fresh metadata fallback不變。TripAccessState直接輸出原pending/error或S06 section，owner-scoped draft與h1 ref保留；named section不另寫冗餘region role。確認Dialog的固定description/class/variant/labels集中靜態copy map，不改字串/DOM/事件。帳務render/數學/decimal/parser/上傳/command controller均未動。
+- 初次抽取後Doctor發現通用hook的heading ref dependency，已列入依賴；傳入父useRef穩定，不增有效執行。完整accountingJSX未為降行數移出；本功能的access/command責任集中後原giant警告自然消失。final Doctor changed/baseHEAD/includeuntracked掃描87/1warning只剩ThumbnailEditor:88有意關閉reset；四項維護/ARIA警告清除，未新增實際bug，未suppress。
+- 來源32檔manifest=`14bbcced54868227fc7fa174543f6c50379bc1827e80bf1a774d7c86028c9c66`，tar與t269-delta.json保存7變動/25不變檔；preflight格式/lint/type0。來源比對用`t269-before/`三個T268原檔，無commit。獨立靜態review確認hookorder/stateowner/ownerkey/copy文字/guard輸出等價。
+- 本筆完整scope76必跑；依實際提取與review建議，加F036移入確認文案/F038purge確認/F040移入完成導覽、F039取消焦點、F043導覽及另頁active nav，共32；close/nonactive/busy QA32。預計140，未跑舊129/API/日期整批，T268原證據沿用未動範圍，T288保完整交付矩陣。runner27596正在序列執行，passing BDD After保存t269-ui-final，須比對T268同狀態/資料/尺寸後再final。T269[ ]，不可把preflight/靜態審查當全綠。
+
+
+### T269 最終驗證（待獨立final）
+
+實測**148PASS / 20命令exit0**：完整scope76＋受影響F036/F038/F039/F040/F043管理40＋close/nonactive/busy QA32；原預估140把F039取消方式算4而實際6，從raw逐條核後校正為每project管理10例。沒有縮減案例，原失敗是彙總腳本expected計數錯誤，修腳本不重跑已完成綠燈。source32files14bbcc…完整hash不變；t269-results.json/commands逐一列實際指令、時間與source。lint/web type/prettier/build全0，Doctor same source87/1已審查的intentional reset，沒有新增已確認問題，不改設定/不suppress。
+
+UI版次仍design-v7＋固定baseline。t269-ui-final76唯一案例PNG/SHA/viewport皆校驗；與T268同狀態/資料/尺寸的76張比對=t269-ui-comparison.json：73張RGB逐像素相同（WK38全相同），3張Chrome有93/17/8個像素差異，最大比例0.0283%；主agent逐圖看最大差異的mobile restore卡，文字、圖片區、CTA與版位完全相同；桌面17px最大channel差1、8px在圖像/邊緣，未見需調整設計意圖的差異。整頁/dialog結構、unknown草稿與原操作、S06下一步、焦點/手機操作均有本scope與補充QA保護。與T268沿用的API/日期/舊129未因純提取重新跑，T288完整回歸仍保留。
+
+資源audit：7個host logged workerPID全退出；Linux無活worker/browser、只Z children後已restart own container，剩sleep/ps；childDB0；pressure2/swap17052.50MiB，授權內，無critical/OOM。無commit/push/deploy。固定reviewer最終核對中；T269尚[ ]，批准後才解鎖T270。
+
+
+T269 final：固定reviewer獨立重算source/commands/148PASS/UI/delta/資源，t269-review.md APPROVED/0blocking；已回寫[X]，269/292。下一筆T270 green，未commit/push/deploy。
+
+
+## T270 green 進行中（2026-11-17）
+
+Scope frontend/expenses/旅行生命週期下的刪除查證.feature，4例、兩引擎D/M16，C沿design-v7 S05/S06/S08、baseline8fc9f941…，不製prototype。已讀模組DSL118–120/128–130、實際steps T169–T174、trip-management/expenses契約、planWave2/3、research6/9/10、techstack與ui-plan；不改truth/DSL。
+
+真RED=t270-state-first-red.log，原先先查expense；active先state後expense已focusedGREEN。新增currentTripState有界5s、UnavailableTrip及verifiedDelete readState injection；state讀404/失敗false未知，不把purged後普通404當成功。獨立審查指出兩讀間競態，現expense404/TRIP_TRASHED後再read state，仍active且404才true、nonactive丟UnavailableTrip、後讀失敗false。受控race QA先讓原DELETE在trash真409 response loss、restore使首讀active，再在expense GET前真trash/purge；原ID/draft保留，無delete成功、原DELETE仍1；後讀失敗仍unknown後可同意圖再查。Chrome6PASS preliminary，兩引擎final正在跑。
+
+ExpenseForm保留欄位/UUID、暫存owner draft，required後才以disabled gc0 authority query發布真state/null，正常form用unobserved key避免誤擋原nav。sameOwner+alive防換帳/卸載晚回應更新cache或導航；nonactive停止busy/關delete modal、聚焦status，禁用寫入、隱藏已保存shares，給垃圾桶/返回link；unknown仍保intent。已明確save TRIP_TRASHED/NOT_FOUND拒絕只GETstate、不重送；讀失敗鎖draft有state-only重讀，restore後明確讀active才手動保存sameUUID。恢復active時focus回項目欄。查證/狀態讀取復用原TripOperationCheck保寬與焦點、spinner-only，該控件補type=button防form隱式提交，原三consumer均不在form，用既有busy QA8精準回歸。
+
+測試校正：T171/T174復原link由全頁精確scope main（原sidebar＋content兩links造成strict violation），狀態文字亦scope main防nav字串假陽性；不改href/trial/DB/assertions。F110 fixture去除強制1440，保project真D/M，另一phone context仍390，獨立審查確認跨裝置語意不變。preflight控制QA同時對console React render警告及pageerror斷言；抓到Navigation同步cache notify在ExpenseEditor/TripLedger render中更新，useAvailableTrip改TanStack原始useBaseQuery相同的notifyManager.batchCalls並穩定subscribe，2個恢復QA已驗無React error。來源引用在本機固定套件5.105.3的src/useBaseQuery.ts，未升包/未改config。
+
+完整freeze初次preflight新增members.enabled誤引用較後stateLocked造成TS2448/2454，已移除這個非必要option、typecheck0；該次UI未能載入form，全部raw/source移`t270-preflight-ordering/`，未當PASS。最新36檔source=`cef07bf302f1e0f6a2b9960bd08b04f1c781f65fabfe19a08641e6af712155ac`及harness hashes綁定t270-run.py/session66657，之後source無變。初次Doctor對read-only stateCheck useMutation誤認需要invalidate；改直接async read＋local busy，減少無寫入的mutation abstraction，preflight Doctor87/1只有未動的有意Thumbnail reset。
+
+當前Chrome/WK D/M主scope16PASS，受控QA/prior與後續只跑實際支出/登入舊5features、support及F043/F067；不重跑無影響日期/其他舊頁/API，T288保完整。final UI16/quality/resource/獨立review未齊前T270[ ]，不以focused或預期數宣稱交付。無commit/push/deploy。
+
+
+### T270 最終 UI 比對與精準補驗（待獨立final）
+
+原cef來源完整矩陣**150PASS**＝主scope16＋F043/F067 prior12＋race/state-retry/busy/prior-busy QA28＋5個舊expenses/auth feature41×兩引擎82＋expense-form/save-outcomes support12，28命令0；所有接受log無React跨render更新/無限hook警告。原S05/S06語意與草稿/命令數都成立，但主agent逐圖發現purged手機維持原表單底部，status雖focused卻被preventScroll留在畫外。新增race.viewport rect QA真RED=t270-state-notice-offscreen-red.log；允許原生focus scroll，known state/null read failure且不是UnconfirmedWrite才聚焦，未知DELETE原modal不偷焦；next/re-read actions用12px flex gap/自然換行。只有ExpenseForm.tsx/ledger.css兩UI檔變動，其他35個既有source hash不變，API/intent/cache判定未改，delta與before-source/tar保留。
+
+最新source37檔SHA256 `b9e327a2b59b32ec51079408535cb362ae88444da89e66c961c9d3eb61d2eece`。focused手機purged先1PASS，再同source整scope16＋race12＋state-retry4＝32PASS替代舊32；接受帳**182PASS / 150 distinct / 42命令exit0**（不是單版fresh150）。t270-results.json與t270-ui-delta.json保留沿用/影響/前後source，未重跑無影響舊41×2、日期、別頁或API；T288完整交付回歸保留。新lint/web type/prettier/build皆0，Doctor87/1只未改ThumbnailEditor的有意close reset，不suppress。
+
+C類依design-v7 S05-D/M、S06-D/M、S08-D/M1/M2（同版共用PNG），有效原批准2026-11-13、.pen hash6c33bce…與baseline8fc9f941…不變。S05預期不重送、忙碌spinner-only、耗盡可再查；S06 trash復原/purge回清單、不把普通404歸因單筆成功；S08原表單保draft而只鎖受影響操作。實際：狀態與下一步在原page-head後、原form前；保字段值/原UUID、disable業務、hide saved sharing，無成功假回饋；先state及404/hidden後再state由真API順序/DB oracle驗，只有最新active＋單筆404才舊語意成功。保留本地草稿而非畫舊帳務。原一般save/delete pending全站呈現改造由後續loading task處理，本筆新增查證/狀態讀取已spinner-only/固定尺寸/aria busy、typebutton及同步防重。
+
+新16 passing BDD After PNG，四project各4例，CSS viewport1440×900/390×844（F110已不強制桌寬），唯一testId/來源/檔案SHA都校驗。主agent逐圖看Chrome D/M、WK D/M：`chromium-mobile-d91067e2ae9215.png` purge與`412a16fb4e67b2.png`舊form、`chromium-desktop-ee32b49fd6ded4.png`、`webkit-mobile-5540f3df281b17.png`、`webkit-desktop-f80512c24f8a77.png`；提示與下一步現完整在頁首viewport，actions分隔清楚，normal form仍用固定baseline兩欄/手機堆疊，長form自然scroll而無自訂新資訊位置。WK native DPR2，CSS尺寸不變。不可用提示focus/viewport幾何由race D/M×兩engine保護；busy4及prior-busy8驗svg/可見text空/寬高/焦點/no第二write；恢復active焦點回item、same UUID/draft手動POST201且DB僅一筆由state-retry4驗證。差異僅原form與共用狀態總表的實際整合，無需重批design/prototype。
+
+資源audit=t270-resource-audit.json：14個host logged worker全退出；Linux僅Z children後已重啟own container、餘sleep/ps；隔離childDB0，pressure2/swap17093.06MiB授權內，無critical/OOM或活heavy。未commit/push/deploy，固定reviewer final待回，T270仍[ ]。
+
+
+T270 final：固定reviewer已獨立核37檔hash、182PASS/150distinct/42命令、current16PNG、UI沿用與資源，t270-review.md APPROVED/0blocking。已回寫[X]，270/292；下一筆T271 refactor。
+
+
+## T271 refactor NOOP 完成
+
+主agent及固定reviewer檢查後無必要整理：state IO/active及404後重驗已有save-outcome單一落點，UI單一editor持有draft/intent/authority/owner-alive/focus；不為新provider或薄helper增介面，也不提前吞全站等待task。37檔全部與T270 b9e327… hash一致，t271-source-reuse.json記錄0新測試，承接原150distinct/182接受PASS、current16PNG、品質/資源。t271-review.md獨立APPROVED；已[X]，271/292，下一筆T272，不宣稱沿用為新執行。
+
+
+## T272 既有共同支出刪除與精確重算回歸
+
+產品37檔仍為T270來源`b9e327a2b59b32ec51079408535cb362ae88444da89e66c961c9d3eb61d2eece`，無新產品／測試改動。先逐項核對原raw：T270兩引擎legacy41各包含本scope共同支出修正8＋pagination3，support6各包含save-outcomes4，合計沿用30PASS。原cef→b9e只調整unavailable提示scroll/focus/action gap，正常共同支出及原UUID查證未改，適用性由t270-ui-delta及固定reviewer獨立確認；不宣稱fresh執行。
+
+補跑兩引擎各手機11例＋缺少的deleted-dinner-result focused2例，**26新PASS＋30沿用＝56覆蓋**，6命令exit0，無skip/flaky。t272-source/harness/final-commands/results.json保留source與raw SHA。focused projection仍拒絕殘留shares/count/arrangement/nonzero balance/stale revision；真browser isolated Then先trip state active並核DB，再驗原expense UUID404與全source/精確帳務，沒有放寬原歷史款項或安排驗證。state-first非active/race及新狀態UI承接T270完整證據。
+
+C沿design-v7 S05/S06/S08/U02及固定baseline、原批准不變。本次passing After新增22PNG，兩engine各11，CSS390×844；每張testID、source及SHA均驗證，WK原生DPR2。主agent核Chrome唯一晚餐刪除無分攤安排、修改後Alice0/Amy100/Bob-100；WK未知結果保留draft及原已保存份額，未假稱完成重算。保留原帳本總額／表單份額／分帳安排各自位置、手機垂直捲動與底部導覽，無新增設計偏差；桌面與非active狀態用T270原有效UI，不重跑無變範圍。新config只覆寫ignored features270生成目錄，raw與PNG獨立t272，後續重跑原feature須按原config重新bddgen。
+
+品質沿用同37檔T270 current lint/type/format/build及Doctor87/1，不新增無意義掃描。資源t272-resource-audit.json：2host worker退出、Linux own container清Z後只sleep/ps，childDB0，pressure2/swap17687.81MiB，沿既有warning授權。T288完整交付回歸保留，未commit/push/deploy；獨立final待回，T272仍[ ]。
+
+T272 final：固定獨立reviewer APPROVED／0blocking，報告t272-review.md；已回寫[X]，272/292。下一T273 refactor，尚未開始。
+
+## T273 refactor NOOP 完成
+
+本筆requestedStep refactor核對typed原intent、state IO／active404再驗、single editor guards及既有精確資料oracle，無新增重複或應移動的精度邏輯；不抽薄wrapper。37檔與T272/T270 b9e來源完全一致，t273-source-reuse.json記錄0新執行，沿用T272完整56覆蓋、22mobilePNG與T270非active狀態UI/品質，未宣稱fresh。固定reviewer t273-review.md獨立APPROVED／0blocking；無新heavy及程序，沿用剛完成T272資源audit。已回寫[X]，273/292；下一T274全站初讀與局部等待green，T288完整回歸保留。
+
+
+## T274 全站初讀與局部等待 green 進行中
+
+requestedStep=green，前置T273完成，整檔34案例（先前預估35已由runtime清單更正）。C依design-v7 S04-D/M、S08-D/M1/M2與原固定baseline，原批准／.pen hash不變，不製prototype。已讀12內容各query/API truth、模組DSL及research6/9/10；不改帳本總額、表單份額、分帳安排的資訊責任。
+
+第一例真RED只有等待文字且缺內容region／結構骨架（t274-initial-red.log）。共用QueryState改依cards/list/form/summary顯示靜態結構骨架、busy與有名status，錯誤＋重試維持原語意；paused顯示等待連線/恢復下一步而無動畫/aria-busy。各正式內容增pending及ready可辨識region/form，不用全頁遮罩，held總額/支出只遮其區，其他已載入資料保留。身分初讀BusyIndicator spinner-only不露登入／私人內容。SearchCombo pending為可聚焦唯讀選項、禁改值/開選單且顯局部spinner；aria-expanded/activedescendant和實際listbox同守!pending。成員區保穩定section（pending可Tab、ready -1保節點），三必要query未齊／error時button及submit guard一致阻寫。
+
+probe4真RED幣別pending吞合法500草稿：原accepted依digits已知，現未知precision只接受≤25位非負整數，已知精度仍用既有regex，送出始終parseMoney真precision、未知不提交；不提前接受負號/小數或四捨五入。結清由既有due＋form共同named region，不搬資料。session本輪只改實際身分spinner，沒有為無可重現的啟站offline引入額外狀態。
+
+首次runtime另發現既有helper的五項錯誤，固定reviewer逐項核准，未改truth或弱化帳務斷言：trash card的filter.has改page-level heading避免相對locator再次要求region祖先；還款旅名原在backlink不是heading，改從DB snapshot取trip並核main精確link/href；重選既有餐飲先真click開選單，同值fill不必觸發change；成員區原output是金額結果的implicit status，等待結束只排除讀取/載入具名status，保所有busy檢查；分類usageCount在新增expense後應僅該categoryID+1，其他authority/DB category rows原樣全等。各次probe fail/raw原名保留，末兩例probe9 PASS不等同最終矩陣。
+
+來源50檔`t274-source.json` SHA256 `4f97597f6d967b12b49a08721a5d8a12256b0c345db8929a7c9c2dded3d470b4`，19delta/31既有檔不變；tar同步owned Linux，harness hashes獨立綁定。preflight lint/type/format/build全0，初lint blankline錯誤另存red不混成成功。唯一heavy t274-run.py/session55088，主scope136＋受影響管理/舊草稿44＋支出state16＋既有16英文feature258＋expense-form/save-outcomes support12，預期466新執行，兩引擎D/M依序worker1。After直接捕passing圖（預期196）並檢pageerror/React render warnings，不另重跑流程取圖；原source/PNG/viewport/hash綁定。T274仍[ ]，完整raw/UI/Doctor/資源與獨立final尚待。T288完整交付回歸保留，未commit/push/deploy。
+
+
+### T274 精準 UI 與 WebKit 傳輸補驗（尚待final）
+
+首來源50檔4f97597f…取得desktop34＋prior11＋expense4、mobile明確完成31＝80PASS；mobile F094舊fixture只找desktop link超時，F111/F112未跑。未把該exit1當成功命令。offline-network改走手機真原生次級選單（我的旅行→旅行清單），保同SPA/原query/cache/native offline事件；desktop仍主要導覽，並補兩分支受影響例。
+
+設計審查真差異：桌機cards用fullwidth白底加一個小placeholder，不保原雙欄；表單缺頁首輪廓。兩UI檔修cards沿原grid兩欄/700px單欄、210/145px圖片及三文字bar；form補頁首占位/第一欄全寬/後兩欄。Trash成功是210×185左圖右文（M110px上圖），獨立media變體保其既有結構，沒有把它套旅行清單grid。skeleton-layout原硬限圖片下文會拒合法橫列，改只接納圖片下方同水平範圍bar，或右方且在圖垂直範圍bar；仍驗大image、多shape、nonfocus/status/busy與所有DB不變，不依class或假樣式。固定reviewer批准oracle適配，並核新964a/77ea/6196桌圖確認差異收斂。
+
+source2=53檔604a9c70…、t274-adaptation-delta記6檔差異與50逐例沿用（33D/17M）；來源1兩browser未跑，不宣稱全綠。cards/form相關與offline必要例精準補16D＋17M，加mobile prior11/expense4及WKdesktop前29＝77PASS，之後WK F087在測試強制failure()!=null失敗；其餘4例尚未跑。50份沿用PNG各有source/唯一ID/hash，沒有把兩次failedsuite當exit0；獨立reviewer同意只沿用各自隔離且已完成、未受delta影響的PASS，不重跑已驗無變範圍。
+
+WebKit真原生diagnostic：HTTP200/content-length774/body僅一byte7b，request.failure()仍null，UI正確顯讀取錯誤。診斷1PASS不計產品scope；t274-wk-truncated-probe.log保實際metadata。initial-failed新增僅failure null分支：核200、body恰權威JSON首byte、宣告長度>實得、JSON解析必reject；原Chrome更強nonnull失敗路徑和單GET／取消上界／UIerror重試／無busy／DB快照／無write全保，無放寬普通200。source3=54檔42c8770e6c3f532844ad51f449010d1b5e9c2470afe35da100bfe82beccfff26，t274-transport-delta只此helper一檔、前53hash不變；產品build與品質沿用同產品source2，helper新format/lint/type全0。固定reviewer逐項批准helper／沿用語意，未提前批准整task。
+
+唯一heavy t274-finish.py/session38289只續剩339例；預期496 accepted PASS/466distinct（30UI replacements），不能寫成單一source fresh466。After UI預期196，來源50/77/69各自可比且hash綁定。完整scope/WK/既有英文功能/支持/Doctor/資源/獨立final齊前T274仍[ ]。既有Trips/Categories cache data＋background error仍可能被舊error分支取代，非本輪初讀scope已修，不宣稱全站背景完成；後續背景task按其精確範圍檢查，T288完整交付矩陣保留。
+
+
+### T274 最終候選：完整矩陣、逐內容 UI 與資源
+最新54檔固定來源 `b9b97c683c293e55002873dafaf0ba2ae7f1038a60c8537a151b4255be8ddbc3`；headers delta只4檔：Members/TripSettlement重用原靜態page-head供pending/error/ready，loaded DOM原樣；支出列表只pending非paused用aria-hidden heading/count占位，不猜非空。新24例及新lint/type/format/build、Doctor均0。此前不同來源不受影響案例依delta保留，未把failed suite當成功命令，也沒有把did-not-run納入。
+接受矩陣 **536 PASS / 466 distinct**＝主feature136＋prior44＋支出state16＋舊16英文feature258＋support12；70次UI替代執行保留原來源/raw，非單版fresh466。35接受命令全exit0，另三次partial suite的31/29/20個已完成PASS逐例沿用（失敗及未跑排除），diagnostic/probe不混scope。舊文字契約NOOP要求旅行清單可見status進度，故產品Trips獨自傳pendingMessage原文、在同role=status的Skeleton grid前可見，其他spinner區域不疊loading字；沒有改舊Then來就綠。
+t274-results.json逐log/PNG hash、來源、唯一testID、CSS尺寸及DPR核對通過：主UI196張，四project各49，來源分布38/61/57/16/24與各delta吻合。保持CSS D1440×900、M390×844，WK原生DPR2。為位於首屏下方的支出列表，補4個同source readonly UI proof（D/M×兩engine），使用原Genuine API/DB fixture與全部骨架oracle，再native scroll讓heading/count占位和列表同框；其4PNG/hash/geometry/QA harness獨立存t274-ui-detail與results.supplementalUi，不冒稱新增業務scope。
+C依design-v7 S04/S08、固定baseline、原批准／.pen hash不變。桌機卡片2欄/手機單欄、垃圾桶橫列/手機上圖、表單頁首與欄位輪廓均按既有版面；骨架用品牌soft、靜態無需新動畫或prototype。逐內容預期／實際如下，來源與權威資料均在同筆JSON，可對照相應F074成功圖；無新增剩餘設計差異。
+| 內容 | 預期／實際與差異處理 | D / M 證據 |
+| --- | --- | --- |
+| 旅行清單／一般旅行 | 保留標題/建立入口，圖卡D雙欄M單欄，原進度caption可見；完成後權威旅行替代，不假空。 | [D](/Users/render.hh.lai/Desktop/render/split-ledger/.cache/implement-006-resume/t274-ui-final/chromium-desktop-964a80407d0fba.png) / [M](/Users/render.hh.lai/Desktop/render/split-ledger/.cache/implement-006-resume/t274-ui-final/chromium-mobile-00c3d2099737e0.png) |
+| 垃圾桶／已移入垃圾桶的旅行 | D左210×185圖區右文/M110px上圖，保原垃圾桶標題；成功真空才空態。 | [D](/Users/render.hh.lai/Desktop/render/split-ledger/.cache/implement-006-resume/t274-ui-final/chromium-desktop-77ea529eeff90e.png) / [M](/Users/render.hh.lai/Desktop/render/split-ledger/.cache/implement-006-resume/t274-ui-final/chromium-mobile-411d93cc40f115.png) |
+| 旅行帳本／旅行資料 | 未知旅行標題/日期用summary層級占位；state先驗後才開帳務，不閃舊資料。 | [D](/Users/render.hh.lai/Desktop/render/split-ledger/.cache/implement-006-resume/t274-ui-final/chromium-desktop-7d867265e2bbc2.png) / [M](/Users/render.hh.lai/Desktop/render/split-ledger/.cache/implement-006-resume/t274-ui-final/chromium-mobile-7a60d0ddc344d3.png) |
+| 旅行帳本／各幣別總額 | 總額本區summary占位，已回旅行/支出保持可見，成功按真JPY/TWD分組，不移到表單。 | [D](/Users/render.hh.lai/Desktop/render/split-ledger/.cache/implement-006-resume/t274-ui-final/chromium-desktop-2ea0a6c64f4580.png) / [M](/Users/render.hh.lai/Desktop/render/split-ledger/.cache/implement-006-resume/t274-ui-final/chromium-mobile-32a6301f80395b.png) |
+| 旅行帳本／支出清單 | 本區標題/count裝飾占位＋列表列；其他權威總額/淨額保留，沒有先報0或預設非空；另有局部同框圖。 | [D](/Users/render.hh.lai/Desktop/render/split-ledger/.cache/implement-006-resume/t274-ui-final/chromium-desktop-bef21ef7634c0d.png) / [M](/Users/render.hh.lai/Desktop/render/split-ledger/.cache/implement-006-resume/t274-ui-final/chromium-mobile-501b1fb9fec1c5.png) |
+| 既有支出詳情／該筆支出與分攤 | 同正式編輯路由，頁首/標籤/欄位輪廓，不假填數據；成功保原payer/share精確金額。 | [D](/Users/render.hh.lai/Desktop/render/split-ledger/.cache/implement-006-resume/t274-ui-final/chromium-desktop-ef0af489356b50.png) / [M](/Users/render.hh.lai/Desktop/render/split-ledger/.cache/implement-006-resume/t274-ui-final/chromium-mobile-1032f531f133d1.png) |
+| 支出編輯表單／既有支出表單資料 | D首欄全寬/後兩欄、M垂直欄位，完成後完整草稿/原分攤，未搬資訊。 | [D](/Users/render.hh.lai/Desktop/render/split-ledger/.cache/implement-006-resume/t274-ui-final/chromium-desktop-6196b9c4d99de3.png) / [M](/Users/render.hh.lai/Desktop/render/split-ledger/.cache/implement-006-resume/t274-ui-final/chromium-mobile-e8fde61a2f41ae.png) |
+| 分類管理／分類清單 | 原標題/新增入口保留，名/用途列骨架，不先顯示無分類，權威引用數完成後呈現。 | [D](/Users/render.hh.lai/Desktop/render/split-ledger/.cache/implement-006-resume/t274-ui-final/chromium-desktop-ffe92dd369c98f.png) / [M](/Users/render.hh.lai/Desktop/render/split-ledger/.cache/implement-006-resume/t274-ui-final/chromium-mobile-8bcac7d19ab724.png) |
+| 同行者管理／同行者清單 | 原同行者靜態標題與引言保位，成員列表占位；成功按所有active/inactive權威成員呈現。 | [D](/Users/render.hh.lai/Desktop/render/split-ledger/.cache/implement-006-resume/t274-ui-final/chromium-desktop-b2136c878ceb42.png) / [M](/Users/render.hh.lai/Desktop/render/split-ledger/.cache/implement-006-resume/t274-ui-final/chromium-mobile-a45c21c9ae918a.png) |
+| 分帳畫面／付款安排 | 原誰該付給誰標題與引言保位，安排列表占位，成功依真revision/精確金額，不假結清。 | [D](/Users/render.hh.lai/Desktop/render/split-ledger/.cache/implement-006-resume/t274-ui-final/chromium-desktop-8493872052ed24.png) / [M](/Users/render.hh.lai/Desktop/render/split-ledger/.cache/implement-006-resume/t274-ui-final/chromium-mobile-fe7eed311626a4.png) |
+| 獨立還款表單／還款所需旅行與成員資料 | 頁首/欄位輪廓，成功後原backlink旅名、真active成員選項，保持原建議責任。 | [D](/Users/render.hh.lai/Desktop/render/split-ledger/.cache/implement-006-resume/t274-ui-final/chromium-desktop-0a75c650323026.png) / [M](/Users/render.hh.lai/Desktop/render/split-ledger/.cache/implement-006-resume/t274-ui-final/chromium-mobile-118812e9c7cf8d.png) |
+| 實付結清表單／目前待結清安排 | 表單頁首/欄位輪廓，成功due與form同一可辨識region，保真安排/原未付額與可編輯實付。 | [D](/Users/render.hh.lai/Desktop/render/split-ledger/.cache/implement-006-resume/t274-ui-final/chromium-desktop-42d4a944123d19.png) / [M](/Users/render.hh.lai/Desktop/render/split-ledger/.cache/implement-006-resume/t274-ui-final/chromium-mobile-189d8c8f8f5f53.png) |
+
+身分確認只有具名圖形、未露私人內容/誤報登出；必要幣別/分類/成員局部等待保draft，實際focus與readonly控制不開假空選單，未齊submit guard/disabled一致；完成後JPY100、shares各50、category精確增加1次引用，命令一次。native offline/online維持原query，paused無動畫/busy，恢復不殘留鎖。初讀error提供友善原因+重試，不把WK真短JSON解析失敗當HTTP成功或裸露SyntaxError。
+Doctor85/4已讀碼triage，未suppress：SearchCombo新必要pending鍵盤/readonly/ARIA控制與既有搜尋分支越複雜度門檻；TripMembers/TripLedger原單owner元件新增呈現markup越行數門檻，無狀態/Hook owner搬移或runtime correctness問題；ThumbnailEditor仍原有意close reset。前三列為T275可考慮的維護提醒，不為分數抽薄wrapper或改行為。
+最終資源t274-resource-audit.json：16個host logged API worker全退出；own Linux清Z後只sleep/ps；childDB0，pressure2/swap17335.62MiB，沿使用者既有warning授權，無critical/OOM/活heavy。主+固定reviewer、heavy1/worker1兩引擎序列。未commit/push/deploy，T288完整交付回歸仍保留；固定獨立final尚待前T274維持[ ]。
+
+T274 final：固定獨立reviewer t274-review.md APPROVED／0blocking；54來源、536接受PASS/466distinct、196主PNG＋4detail、所有來源delta與資源品質已獨立核對。已回寫[X]，274/292。下一筆T275 refactor，尚未開始，既有背景error缺口未冒稱完成。
+
+## T275 refactor NOOP 完成
+
+54檔目前SHA全等於T274最終b9b97…；呈現三元件與原page query/command/draft owner邊界清楚，SearchCombo各事件guard沒有重複業務state，靜態pageHead已同caller共用；無須因Doctor複雜度/行數提醒抽薄wrapper或搬hooks。t275-source-reuse.json記0新測試，沿用T274完整466distinct/536accepted、196+4圖、品質與資源，不冒稱fresh。固定reviewer t275-review.md獨立APPROVED，已[X]，275/292；下一T276全站操作忙碌與防重複。原背景error缺口及T288整合仍保留。
+
+
+## T276 全站操作忙碌與防重複 green 進行中
+
+Scope46例（22busy＋22once＋Google2）×Chrome/WK×D/M＝184，C依design-v7 S03/S08/S10與原baseline。前置T275已完成。初始full Chrome RED在22busy後累計26failed/1interrupted/19未跑，主代理SIGINT精確own Playwright CLI29667避免重複15s同一前置；27worker退、childDB0。**這批多數是harness互等，不能當已達Then的產品RED**：operation-act await request.allHeaders在response被proxy扣住時等待回應，直到timeout cleanup release才繼續。trace證實click38ms、之後13.4s空窗。修成request.headers（request event的真content-type/x-operation UUID/revisions）且原payload/UUID/source全驗；before click保原ElementHandle只記focus，原name/focus/bbox驗收留Then，不在When提前要求busy能按原name定位。後於Linux用T275原54檔逐hash不變產品＋僅新helper，F078建立旅行真RED已達Then（held exchanges1/finished0/releasedfalse成立，原accessible name消失3s），raw t276-baseline-corrected-harness-red.log。
+
+新增opt-in ActionButton，不改普通Button/asChild：required label鎖原名，保label節點opacity0維持intrinsic bbox，absolute具名status spinner；busy時以aria-disabled與click/key guard鎖啟動，保native focus，仍保caller原disabled/submit/writing ref約束。22類caller接入，switch保原裸48×44/role與native畫面class，busy不native disable，兩條change/confirm共用同步ref。Member只原activationId一列busy，Login加同步starting ref。TripForm edit原UI只dates但DSL明確要求name＋dates，已用原欄位位置開名稱、PATCH三欄、lookup核三欄，title旅行名稱與日期/CTA儲存變更/説明一併保存（保旅行日期入口位置）；accounts/keyboard-date/operation-data三helper只更新CTA selector，原業務驗證不變。edit/create共用同步ref；edit lost transport/5xx後有界GET確認三欄，仍未知持原intent/草稿、save鎖定，提供同頁只讀再次查證與明確關閉不撤回。GET舊值不足證明原PATCH已停止，故不解鎖盲重送；匹配當前同UUID三欄才顯已確認目前資料。metadataunknown新QA firstfocus真RED後effect聚焦只讀出口，未移owner或API。
+
+probe2來源63檔607ea29…，實際32PASS/43.7s（全22busy＋前10once），在expenseDELETE204上CDP無body resource失敗。repeat-operation只改204讀held proxy真upstream bytes length0，保browser204/finished-null/one command/UUID/DB，JSON分支不變；固定reviewer核准。probe3/4來源64檔d38550…（僅unknownfocus/CreatedResult/204 helper三delta）：metadata/switch Chrome D/M QA4PASS，真PATCH同tick兩activation僅1，GET失敗可再查、他次date不匹配不能假確認、恢復三欄後只讀finish、other source/history不變；switch版本恰+1。主probe4精準補4PASS（expenseDELETE/category3），新增memberThen錯把accounting_revision當不變；依既有members/trips契約修helper member5恰+1/其餘trip欄位exact，mode另外只允simplify_debts並恰+1；accounting helper默認空參數保原expense/payment逐字等效。固定reviewer逐項核，未改後端或truth。主scope目前36個已完成PASS可按分支delta沿用，未到10例不能稱GREEN。
+
+S10 CreatedTripResult重傳/再次查證也最小接ActionButton（同保存圖片操作），保原onRetry/onVerify/同trip UUID。精準UI/回歸應是新增旅行feature F060/F061/F064，不是格式feature F100/F101；政策/解碼未改不重跑無關邊界。將分retry與explicit verify階段held驗name/bbox/focus/單POST或verify零POST，不能把retry→unknown/verify的業務階段變化誤判單純busy文案漂移。metadata/switch QA資料已存t276-qa-ui-probe1；完整D/M/WK、S10 QA、相依green回歸、固定版畫面/品質/Doctor、final資源與獨立review尚待。T276仍[ ]，T288完整交付回歸保留、未commit/push/deploy。
+
+
+### T276 continued: desktop main and S10 precision repair (in progress)
+
+- probe5 source `8c3be4c5dc5f287c6171853a2e86790c78653490e88088a795c1abc4fc4c2287`: remaining10 PASS/23.7s; combined compatible Chrome desktop main46, not yet all184. Format/lint/typecheck0 in `t276-revision-preflight.json`. Earlier32+4 do not enter members/mode helper changed in probe5.
+- S10 supplementary uses canonical F060 rejection setup/F064 native committed response loss. Retry holds genuine same-trip POST200; verify holds genuine original receipt/state GET200; focus/name/box≤1/spinner/noextra mutation/noextra create exact, then canonical F060 full business+otherdevice or committed authority snapshot. Initial verify target typo confused photo name with actual trip name; corrected to canonical draft.name, no product change.
+- Actual mobile retry RED in `t276-s10-chrome-probe2.log`: y shifted20.796875 because old error paragraph removed on retry. CreatedTripResult retains previous error paragraph solely as invisible aria-hidden layout space while busy/current error absent; actual current errors remain visible, settled space disappears. No command/draft/image changes. `t276-s10-chrome-probe3.log`: all4 Chrome D/M retry/verify PASS/14.4s. Root/reviewer both verified cause and scope; original main46 do not enter this result branch, compatible.
+- Final frozen65 source `96ce48ddd95ef4468940a4900927fbd81e3bca7d5f036e6f82a182c486e50f29`, manifest/tar/harness and sequential command ledger `t276-final-commands.json`; Docker candidate synced from frozen tar (no longer baseline). Remaining mobile/WK/QA/S10/prior and final quality/UI/review pending. T276 remains unchecked.
+
+
+#### T276 native viewport baseline correction / current frozen source
+
+The first final mobile command has8 completed PASS; expense add bbox comparison failed81px. Ignored diagnostic `t276-expense-position-diag.log` proves pre-click scroll only: document height1522 unchanged, initial scroll597/y768.671875, actual native pointerdown/click scroll678/y687.671875, busy after remainsy687.671875. The fixed bottom nav causes Playwright native click to scroll after `scrollIntoViewIfNeeded`. `operation-act.ts` now records the original element rect at capture pointerdown (before click/React mutation), fails if absent, preserves every x/y/size≤1px/name/focus/one-write oracle. Reviewer approved measurement semantics; original stricter desktop passes compatible. The8 partial mobile and old source96ce artifacts are archived under `t276-before-pointer-*` / `t276-ui-before-pointer`. No product change for this fixture issue.
+
+Current65 source `e558912db78323fbdfdd8923b9754a4307ae86c8b01ad19818caae676d88f36a` syncs Linux; sequential final commands restarted. Ignore obsolete session16755; actual runner85947. No tests count from a failed/unrun case.
+
+Presentation comparison (design-v7 hash6c33… unchanged, no prototype/new approval):
+
+| Screen | Expected / actual checked | Difference / treatment |
+| --- | --- | --- |
+| S03-D/M create, metadata form | Original name/date/photo sections, choices, footer retained; original control box/name/focus, centered spinner while held, no success or percentage. Viewed Chrome mobile create capture `t276-ui-final/chromium-mobile-517057b8119371.png` plus main automated exact geometry across22 operations. | Busy label is visually hidden with original intrinsic size; original label remains accessible. Metadata now includes name explicitly required by DSL, title旅行名稱與日期/CTA儲存變更, same既定dialog position/fields. No dialog infrastructure redesign. |
+| S08-D/M1/M2 expense and payment | Confirmed sum JPY100 and payer Amy→Alice remain; fields/draft/date/arrangement remain in existing order; control in original footer while held. Viewed `chromium-mobile-039d6a647ea353.png`, desktop probe2 `a05bf0a3a683c2.png`, expense mobile `7f174f321265a4.png`. | Added opt-in busy rendering only; existing shared Button/asChild/nav/cancel semantics retained; 81px mobile pre-click native scroll is fixture measurement, not moved footer. |
+| S10-D/M created-result image retry / verify | Compared fixed mobile `F1Hwk.png` to `t276-s10-chromium-mobile-retry.png` and desktop retry. Page heading, yellowfeedback placement, created card/defaultlandscape and bottomnav retained; explicitunknown hides unconfirmed preview. | True mobile retry error-row removal had20.8px shift; invisible aria-hidden reserved row fixes≤1px while busy. Settled noerror removes placeholder. Spinner centered, name/focus retained; no false currenterror announced. Separate retry→unknown phase can legitimately change label. |
+
+These viewed representatives complement automated screen/geometry evidence; do not substitute blanket no-overflow for fixed design comparison. Full UI metadata/source/hash audit and independent final review still pending.
+
+
+#### T276 final verification ready for independent approval
+
+Frozen e558…65 hashes remain identical on host and Linux. Main184 distinct PASS (compatible Chrome desktop46 + final otherthree46each); prior17×4=68 PASS (F060/F061/F064, F039/F040/F041, complete old trip create/dates), supplementary metadata/switch8 + S10 retry/verify8 =16 PASS. Total268 distinct accepted; failed/unrun probes excluded; probe6 extra2 duplicates and firstmobile8 not added. This is a verified compatibility chain, not a claim all268 are freshly run on one source. Source changes/branches and raw commands retained in `t276-source-compatibility.json`, `t276-final-commands.json` and probe manifests.
+
+Main184 +prior68 screenshots +QA12 phase images +S10 8 images =272 accepted UI captures, exact uniqueIDs/phase/sha256/source/actual CSS1440×900 or390×844 and PNG DPR1/2 audited; ignored audit scripts and accepted manifests retained. WK supplementary unknownmetadata preserves3fields, failed and mismatched GET never permits another PATCH; actualcurrent match completes with current-confirmed message. Same-task switch/caller guards and main actualdoubleclick+Enter remain exactonewrite.
+
+Quality `t276-quality-results.json`: targeted format/lint, full webtypecheck/build and Doctor all exit0; Doctor85/4 same previously triaged SearchCombo complexity, TripMembers/TripLedger size, intentional ThumbnailEditor close-reset, no new diagnostics/suppressions. Runtime/render guards0. Aggregate `t276-results.json`. Twelve current host worker PIDs exited; test childDB0; only owned Playwright container restarted after allworkers finished to clear zeroRSS zombies, now sleep/ps only, pressure2 continuation authorized. No unrelated process/devDB changes, commit/push/deploy. Independent final approval pending, so T276 stillunchecked.
+
+T276 final independent reviewer `/root/review_006`: **APPROVED / no blocking findings**, `.cache/implement-006-resume/t276-review.md`; source/data/UI/compatibility/quality/resources verified. T276 now[X], next T277 refactor. T288 full final integration retained.
+
+
+### T277 bdd/refactor — NOOP proposed, independent review pending
+
+Single requested step/refactor of 全站操作忙碌與防重複. ActionButton already owns visual/name/event busy guarantees while caller-specific synchronous command locks retain domain ownership. TripForm metadata unknown intent and read-only equality, settlement switch ref and individual22 commands have different authority/lifecycle semantics; another shared controller/wrapper would expand ownership risk without removing meaningful duplication. Helpers have explicit data/hold/act/business/projection separation after precise oracle repairs. No further structural change is necessary for this scope.
+
+65 source hashes unchanged from T276 e558…, no product/test/style/dependency/truth changes; affectedset empty. Under the user's approved NOOP/precision revalidation policy, reused the complete just-approved T276268 distinct PASS/272UI/quality/resource chain with0 new executions, preserving T288 final integration. `t277-results.json` records unchangedhashes/emptyimpact; independent assessment pending, tasknotchecked.
+
+T277 independent review **APPROVED as NOOP**, `t277-review.md`; reviewer independently rehashed65/65 unchanged. `t277-source-reuse.json` records exact inherited268 PASS/272UI, emptydelta/0newtests. T277 now[X], next T278 green.
+
+
+### T278 bdd/green — 背景更新與分頁等待 (in progress)
+
+Scope five F082–086 cases × Chromium/WebKit ×1440×900/390×844; DSL63–76, truth-delta82/89 ADD, expenses PageLimit query contract, decision10, same approved design-v7 S04/S08 and no prototype. Low-memory root+fixedreviewer/heavy1/worker1 retained. T277 is approvedNOOP, T278 unmarked.
+
+RED/repair chain:
+
+- Initial Given expected20/5 but omitted limit, API truth default50 correctly returns25. Authority pagination/recovery/latest/result reads now explicitly limit20; APIdefault/truth unchanged. Corrected-harness RED showed actualUI25 vsrequired20. TripLedger now requests `?limit=20` on first and cursor pages.
+- First busy probe exposed captured rendered innerText (linebreaks) compared with default toHaveText textContent (no separators). Four totals comparisons useInnerText=true, still exactly comparing original confirmed renderedtotal; monetary/DB/oracle checks unchanged.
+- F082 true RED old button renamed 載入中 and lacks busy/name/spinner. Reuse ActionButton with stable載入更多 and accessible正在讀取更多支出. Existing isFetchingguard plus fetchNextPage(cancelRefetch:false) preserves one in-flight query. F082/F083 independently green.
+- F084 true RED missing local background status. Named 支出清單 section now includes original sectionhead/list; inline spinner besidecount only for isFetching&&!isFetchingNextPage, no overlay/initial skeleton/content replacement or new globalquerycontroller. F085 true RED error/retry outside namedregion; existing friendly error/retry now inside that same content region, retaining25 and confirmedtotals/focus. ChromeD all5 PASS14.2s before final freeze.
+- Old pagination RED expected50rows but actual20. DSL never specifies51/50: original fixture51 existed to crossdefault50 page. Adapt only fixture to21 (20+1), retainhiddenoldexpense01 untilnextpage, TWD9000 andJPY5000 via20×250, fulltotalCount21/exact21links/no extra totalquery/DB preservation. Reviewer approved no acceptance weakening. Initial-list proxy originally exactpathwithoutquery missed actuallimit20; only initial-read's帳本支出清單query nowmatcheslimit20, same realresponse/hold/oracle.
+- WK probe3 mainPASS then F085 failurewait expectedrequest.failure nonnull; actual WebKit reports transport completion for genuine HTTP200 headers plus truncatedJSONbyte, same observedT274. Test-only failed-json-read verifies either genuine nativefailure or status200 + actualbody===genuineupstreamfirstbyte + declaredlength>body + response.json rejects. Used onlybackground act/fail/latest; no product or authority data fabrication.
+
+Final77 source `fd9b89899d9cb19410dae1262c4993da77cc24663dd2082efaf7ad4b515a3cad`, exact14delta paths (2product+12test) in `t278-preflight-files.json`, source/tar/harness frozen and copiedLinux. Sequential `t278-final-run.py` session74284 targets20main+36prior=56fresh PASS, plus4 topviewport screenshots forF082 complementtail/confirmedtotal. Currentrun pending; failed/unrun probes not countedasfullgreen. Quality/UI/resource/finalreview still required. No Trips/Categories/background cache broadening; their separate preexisting observation is not claimed fixed.
+
+
+T278 final-run corrections (all failed attempts preserved, not accepted final evidence): first frozen attempt's F084 Act had3 unrelated pending browser reads past3s despite API200; external unrelated edu Vitest8workers were observed and not touched. After that work ended, unchanged focusedF084 PASS2.8s and next fullF084 PASS2.3s; environment/scheduling remains a plausible contributor, not a proven product defect. Originalraw2PASS in `t278-loaded-attempt-*` excludedfromfinal.
+
+Next fullattempt exposed my newfailed-json helper unconditionally awaiting `Response.finished()` on already failed truncated Chrome transport; stack held until15s. Fixed test-only ordering to wait existing native requestfinished/requestfailed observer first, then immediately accept actual Chromium transportfailure; WK failure=null alone checks genuine200/firstbyte/contentlength/JSONreject. Never wait Response.finished for truncated Chrome. FocusedF085/F0862PASS9.2s; original3PASS/rawsourcefd9 preserved `t278-finished-helper-attempt-*` and excludedfromfinal. Reviewer independently approved exactclassification/order without reduced assertions.
+
+Latest77 source `16af7ad65ef7c4174b40985019e8cf7e584e3ac42bd9c9544259492411f43148` differs fromfd9 onlytwo testhelpers; productunchanged. Currentsequentialrunner31201 reruns complete56fresh on finalsource; all stricttimeouts anddataoracles retained.
+
+
+T278 first complete frozen16af matrix **56/56 PASS**: main5+affectedprior9 per fourprojects, all12commands0;56 unique testcase screens+4 F082topimages60 verified source/hash/CSS/DPR. Prior9 = all3 oldpagination/saveoutcomes + 旅行帳本 initial3contents×pending/success6. This completed56 baseline is preserved, not conflatedwith earlierfailed batches.
+
+UI review then found real visibility defect: F085 error/retry after25rows was in DOM but viewport ratio0 while originalfirstrow remainedfocused; ignored `qa-t278-visibility.spec.ts` desktop genuinefailure RED in `t278-error-viewport-red.log`. Reviewer confirms S04/S08 requires local failure/nextstep accessible without stealingfocus. Move only existingerror/retry block within same namedsection to belowsectionhead and above rows; no query/command/style/total changes. Chrome desktop/mobile viewportQA2PASS6.5s, focus still originalrow, actualmessage/retry both inviewport.
+
+Final77source `689b3be1b17589e3bf970d41adf3b8cf4b2ef72c7f352ffd7c3ad1104e8c6f27`; `t278-error-position-delta.json` proves one productfile/error-only DOMorder delta from16af (allother76hashunchanged). Precisionreplacement scope F085/F086×4=8 plusviewportQA2WK (Chrome2alreadyPASS); reuse unaffected48 baselinecases, retainT288. Runner52151 currentlyinprogress, finalquality/audit/reviewpending. This is precisionrevalidation after actualUIrepair, not another full56 rerun.
+
+| UI | Expected / checked actual | Difference handled |
+| --- | --- | --- |
+| S04-D/M list tail + originalbooksummary | Original25totalcount/JPY1000,TWD500.00/confirmedbalances and first20IDs remain; capturetop andsameheldrequesttail, onlyload-morebusy at originalsize. ChromeMtail349b6088c8628e.png andF082top captures viewed. | explicitpage20 aligns scenario, no APIdefaultchange. ActionButtonsame原名稱/size/spinner, realcursorrequestonce. |
+| S08-D/M localbackground | Existing25rows +originalfocus +sumretained; spinner beside25筆 count, nooverlayorinitialskeleton. ChromeMa90de76880d150.png viewed. | Named支出清單region includesheader/rows/localfeedback; noothercontentlayoutchange. |
+| S08-D/M failure / recovery | Friendlyupdatefailure +retry visible near listheader while originalfirstrowfocusstays; nofakeempty/success. Viewed t278-error-visible-chromium-mobile.png. | Actualoffscreenerror RED fixed byexistingfeedbackblockorder only; viewportQA +precise8replacement refreshing evidence, other48 preserved. |
+
+
+T278 final evidence ready: baseline16af56PASS then final689errorposition8replacementPASS +4viewportQA PASS =68 successful executions /60 distinct latest accepted (main20+prior36+QA4). Unaffected48 baseline cases reused by exact1file/error-only delta; final8 replaceold8, not all56 freshlyrun689. AcceptedUI64 (baseline60 minus superseded8 plusnew8 plusQA4) uniqueidentity/phase/source/hash/CSS/DPR verified. Root viewed bothengine mobile correctederror/retry and originalfocusedrow, plus localspinner/tail/topsummary; fixeddesignscope differences resolved. Final77 hashes matchhost/Linux,14initialdelta2product+12test, lastdeltaonlyerrororder.
+
+12baselinecommands +7precisionrepaircommands +5qualitycommands all0. Format/lint/fullwebtypecheck/build/Doctor0; Doctor85/4 same4triagedpreexisting warnings, no new suppressions/diagnostics. Runtime/renderguards0. Twenty-one ownedhostworkerPIDs exited, childDB0; ownLinuxrestarted afteralltestworkersfinished to sleep/psonly, pressure2 continuationcontract preserved; otherprojectVitest/processes never touched. Aggregate `t278-results.json`, finalsource manifest **t278-error-source.json** (do notuseolder t278-source.json fornexttaskhash). No commit/push/deploy. Independentfinalreviewpending; T278 remains[ ].
+
+T278 final independent review **APPROVED / no blocking findings**, `t278-review.md`; reviewer recomputed77hashes0mismatch and audited full/precision source chain, UI/caller/transport fixture and cleanup. T278[X], next singleT279 refactor.
+
+
+### T279 refactor / NOOP proposed
+
+Same background/pagination feature and approveddesignscope. TanStack remains owner of pages/cache/inflight reads; existing ActionButton owns visual/accessibility activation guard, while TripLedger owns its list-local status/error position. No demonstrated duplication calls for another general controller, and further extraction would move ownership or affect unrelated initial-query scope. Pagination/build/business/failure helpers have explicit separate purposes. Current77hash689… unchanged; t279-source-reuse.json emptydelta/emptyimpact/0newtestexecutions, inherited68successful/60distinct/64UI and passingquality/cleanup. User-approved precision/NOOPpolicy applies; T288fullintegration remains. IndependentNOOPreview pending, T279[ ].
+
+T279 independently **APPROVED NOOP**, t279-review.md;77hashes checked byreviewer, exactinheritedevidence/0newruns confirmed. T279[X], nextT280green.
+
+
+### T280 bdd/green — 操作失敗與未知結果 (in progress)
+
+Single scope F089–093, ADDtruth83/89, DSL77–91, sameS05/S08design-v7/no prototype; existingexpense/settlement/repayment APIs remain truth owners unchanged. T279NOOP approved beforeentry.
+
+- InitialF089 failure was testregex mismatch: genuine400 API VALIDATION_ERROR correctly displays「輸入資料格式不正確。」 butregexonlyacceptedfailure/retryverbs. Helper now asserts exactgenuine responsecode/message plusidenticalfriendlyalert, retainsallfield/DB/originalnetshares/othercontext/requestchecks. Expenseproductunchanged; F089/F090pass.
+- F091 trueproductRED: firstsaved-response-loss proofGETheld butno「結果尚未確認」 because verify onlysetunknownafterbothGETfailed. SettleEditor nowsets originalcommand unknownbeforeproofreads; readonlychecking state/ref controlsstableActionButton, POSTbusy andproofchecking phases separated soonlyactualcontrolspins; saveblockedbyoriginalwriting/locked/unknown. Unknownfirstappeareffect focusesreadcontrolonce, sameoriginalcommand preventsrepeatedfocusonretry. BothUUIDs/draft/arrangement immutable.
+- POSTbounded15s; eachsameUUIDproofGETbounded5s. checkingref preventssame-taskduplicateproof; noautomaticPOSTretry. Aliveguardsafterawait andbeforeconfirmed/state/accountscopedinvalidation, keyedowner/trip/arrangement alreadyunmounts oldeditor. Confirmedrecord/payment stillmustmatchalloriginalauthorityfields; no backend/truth/precisionchange.
+- ChromeDfivecases PASS13.1s. WKpreprobeF089/F090PASS then nativefailure assertion failedforgenuinelytruncated201JSON (sameWKtransportsemanticsknownT274/T278). save-lost helpernowprovesoriginalproofqueryactuallybegan, then forfailure=null requiresgenuine201/exactupstreamfirstbyte/contentlengthgreater/JSONreject; nonnullnativefailurepath unchanged. This doesnotinferpaymentfromaquerytextor inventsuccessfuldata.
+- SupplementaryChrome5PASS30.8s: real2×5s deadlines endbusy andretainoriginaldraft/IDs; manualsame-taskdoubleDOMclick+Enter emitsoneGETwithnoextraPOST; desktopunmountbeforeheldgenuineproof200released producesnooldsuccessUIorqueryinvalidations. Usescanonicalrealcommit/rejection/proofhelpers andfullfactsstability, runtime/renderguards. QAfileignored, productbehaviortests no fakeclock/sleep.
+
+Final79frozen source `8b569af847bef3017e820415e972ac940a04aa3c77e3ed8e8c3f4da8f2544f2e`, exact3delta fromT278final(1product+2test). Sequentialrunner81627 plans20main+8affectedbusy+28oldsettlement14×twoenginedesktop+10QA =66fresh. BothCSSsizes coveredmain/busy/QA; monetaryoldbranches device-independentdesktop eachengine. Unrelatedrepaymentproductunchanged; T288fullintegration retained. Finalquality/UI/resource/review pending, T280[ ].
+
+
+T280 complete first frozen79 source8b569… matrix66/66PASS:20main+8savebusy+28old14×twoengine+10QA. All18commands0;66 unique screenshot/source/hash/CSS/DPR baseline audit complete. True10s deadlines/syncmanualread/no lateinvalidate QA all10PASS.
+
+Subsequent UI review exposed nativefocus occlusion: mobile initialreadcontrol recttop790.921875/bottom837.3125 butfixednavigationtop779; document.elementFromPoint(center) hit=false although generic toBeInViewport passed (partialviewport counts). `qa-t280-focus.spec.ts` trueRED mobile; desktopfirstcasePASS. This is a product operability defect, not ignoredfunctionalBDD failure.
+
+Minimalrepair onlyunknown-firsteffect: scrollIntoView(block=center,inline=nearest), thenfocus(preventScroll=true). No manualrecheckrescrolling (samecommandobject), normalPOST/success/4xx/data/UUID untouched. Final79source `1eed158650c230281b31dcd3f3ce8a37bb10b3db5278378135bfa5d844fbca74`, `t280-focus-delta.json` asserts onlySettleArrangement firstunknownfocus effect differs. Precise refreshedscope12mainF091–093 +8oldfull/partiallost/unknown +10existingQA +4newcenter-hit/fixednavQA =34, reusesunaffected36baseline includingexpensefail/retry andnormalpayments/busy. Latestlogicaldistinct70, totalexpected100PASSexecutions (66base+34refresh). Runner76867active; quality/finalUI/resources/reviewpending, T280still[ ].
+
+
+T280 designcomparison (sameapprovedv7S05/S08, no newprototype/globalstyle):
+
+| State | Expected / actual | Difference handled |
+| --- | --- | --- |
+| S05-D/M explicitexpense failure/retry | Newdraft200/date/payer/shares/category stays; original100/source50shares/API/DB unchanged; genuine400friendlycause and availableoriginalsave. | Productalreadycompliant, test nowchecksactualcauseexactly; noexpenseproduct/UIorderchange. |
+| S08-D/M savedresponse-lost proofpending | JPY100 Amy→Alice arrangement/date2027/03/12/originalUUIDs stay; visibleunknownpanel withsingleproofspinner anddisabledsave. | Unknownshownwhenproofstarts, notonlyafterfails. POSTbusy→readonlycheckingphase is explicit; nofakefailure/success ornewpayment. |
+| S08-D/M boundedunknown/recheck | Spinnerstopsaftertwoactual5sproofdeadlines; samecommandonlyGETrecheck, nosecondPOST; partial/fullbusinessresultsunchanged. | Initialrecheckfocus nativelyhiddenbyfixedmobileNavwasactualRED; firstunknownscrollcenter thenpreventScrollfocus repairscenter-hit/fullyabovenav withoutrefocusingmanualrechecks. Rootviewed ChromeM final `t280-ui-focus/chromium-mobile-ebaad52f0acb91.png`: panel/message/spinnerfullyvisible, amount/date/duecardretained, actionsabovebottomnav. |
+
+Neither absenceofoverflow nor allfunctionalBDDgreen substitutedforactualocclusionreview; 66baselinePASSwerefollowedbytargetedUIrepair, notprematuretaskcompletion.
+
+
+T280 finalready: baseline66 thenfocus-effect34refresh allPASS =100 successful executions /70distinctlatestaccepted (main20+busy8+old28+QA14). Thirty-sixunaffectedbaseline casesexplicitlyreused, 30oldcasesreplaced, 4newcenter-hitcases; no all70freshfinalclaim. SeventyacceptedUI screenshots uniqueIDs/source/hash/CSS/DPR verified; rootandreviewer comparedcorrectedmobilepanel/CTA hit/fullboundsabovenav plusdraft/arrangement. Final79hashes matchhost/Linux; currentmanifest **t280-focus-source.json** source1eed….
+
+18base+12precision+5qualitycommandsall0. Format/lint/fullwebtypecheck/build/Doctor0, Doctor85/4 identicalprevious4triagedwarnings; no newwarnings/suppressions. Runtime/renderguards0. Fifteenownedhostworkers exited/childDB0; ownLinuxrestart afterworkersfinish cleanszeroRSSzombies, now sleep/psonly/pressure2. Otherprojectprocessesnotchanged. Aggregate `t280-results.json`; independentfinalreviewpending, taskunchecked. No commit/push/deploy, no upstreamtruth/defaultmoney/precisionchange.
+
+T280 independent final **APPROVED / no blocking findings**, t280-review.md; reviewer recomputed79hashes, auditedphase/authority/focus/oracles/precisesourcechain/cleanup. T280[X], nextT281refactor.
+
+### T281 refactor / NOOP proposed
+
+SettleEditor now owns its original payment command and two bounded proofreads explicitly; ActionButton remains sharedpresentation, checkingref and aliveguards stay beside the actual operation. Generalizing with independent repayment or expense verification would combine different immutable/full/partial/paymentproof rules and expand authority ownership without eliminating a demonstrated defect. Existing testsupport separates commit/loss/draft/proof/confirmedfact assertions. No furtherstructurechange necessary. Final79hashes1eed… unchanged; emptyimpact/0newtestexecution in t281-source-reuse.json, inheritedT280100successful/70distinct/70UI+quality/resources. IndependentNOOPreviewpending, T281[ ], T288fullregressionretained.
+
+T281 independently **APPROVED NOOP**, t281-review.md; reviewer independently79hashes0mismatch/emptyimpact/0newexecution, source/evidence inheritedexplicitly. T281[X], nextT282green.
+
+
+### T282 bdd/green — 鍵盤與減少動態效果 (in progress)
+
+ScopeF096confirm2deviceExamples +F0972device×delay/success4Examples =6combinationsperengine/12distinct acrossChrome/WK. Each of4projects selects its explicitdeviceExamples (3each); no droppedscenario or crossviewportduplicates. DSL94–102/dateWhenrow, truth-delta84/89ADD; sameapprovedS01/S02/S08v7/noprototype, APItripsunchanged, lowmemheavy1worker1/root+fixedreviewer.
+
+- Initialconfirmation failure was an oracleplacingtripnameintodescriptionalthoughactualaccessibleName「將日本旅行移至垃圾桶？」alreadyidentifiestripanddescriptionexplainspreservation/restore. Helper nowchecks日本旅行inthedialogname andkeepsdescriptionrestore plusallbidirectionaltrap/safecancel/allcontrols/DBchecks. Reviewer approvescorrectcombinedreadscreencontext, no UIwordduplication needed.
+- Datewaitalreadygreenunderreduce: samebuttonname/focus/graphicalspinner, runninganimations0, no prematurecompletedstatus; no sharedCSS/datecalendar change. Success trueproductRED: datesupdatedbutTripForm.afterCreation hadfinish(saved)withoutmessage. Only productline nowfinish(saved,trip?'旅行名稱與日期已更新。':undefined), existingnavigationstate→TripLedger role=status used; createlogicunchanged.
+- Nextoracle `status.toHaveAccessibleName(nonempty)` failedbecausevisiblelive-status textisnotitsrequiredaccessible *name*. Correctedtoactual ariaSnapshot role+completiontext, retainvisiblemessage and observer, nowrequiresoneactualsuccessfulcompletionmutation (notvacuous), retainsnoidenticalrepeats. Datevaluesinadjacentheaderparagraph, originaltriggername旅行日期 remains; helperchecksexactheaderpdatevaluesandoriginaltriggerfocus/name separately ratherforcingdatesintobuttonlabel. Reviewer independentlyapprovedsemanticcorrectionwithoutaddingartificialaria-labeltoexistingstatus.
+- ChromeD3casesPASS8.1s preliminary. Final81source `2aa4ea253912788e549c7a88735b25858d1dd1d3198b348bf51d953272a54cfd`,3delta(1product+2test), frozenmanifest/tar/harness. Runner17451 targets12main+8affectedmetadata busy+12oldcreate/dates(twoengine desktop6each)=32fresh. SharedFormDialog/DateField/Button/reducedmotionstyles unchanged; no blanketunrelatedE2E repeat. AutomatedDOM/ARIA/focuschecks do **not** claim manualVoiceOver/NVDA speechtesting. UI/quality/resource/finalreviewpending, T282[ ].
+
+
+T282 presentation verification againstsameS01/S02/S08v7:
+
+| Screen/state | Expected / observed | Difference |
+| --- | --- | --- |
+| S01-D/M confirmation | Same existingtitletrip/action, preservation/restoreconsequence/nosettlementnote, safecancelinitialfocus, close/cancel/confirmkeyboardreachable/trapped. Rootviewed finalChromeM46e4f5bf91f684.png: compactdialogcentered, focusedcancelabovebottomnav, no inaccessibleoverflow; unchangedFormDialog/menu/dateinfrastructure inheritedpreviousapprovedUI. | No product/dialogcopypositionchange; onlya11yoracle nowchecksnameanddescriptioncorrectly. |
+| S02/S08-D/M datepending/reduce | Originalname/datefields andsubmitfooter preserved; graphicstatus remains withmotiondisabled, focus stayssameCTA andno prematuredate-successnotice. | SharedreducedmotionCSS/DateField/Button unchanged; actualrunninganimations0checked. |
+| S08-D/M datesuccess | Originaldialogcloses, focusreturnsnamed旅行日期opener withupdatedadjacentdates. Rootviewed ChromeM07a778dd5b4e5b.png: originalheader/nav intact andsoftgreen「旅行名稱與日期已更新。」statusbelowtripnavigation; totalsremainconfirmed. | Onlynewcompletionmessage viaexistingledgerfeedbackregion/style, realARIAstatusvisibletext andoneobservedlivechange; no extraautofocus/hiddenlabel/artificialanimation. |
+
+This is automatedkeyboard/DOM/ARIA/reducedmotionverification, not a claim that physicalscreenreader speechhasbeenmanuallytested. Baseline/v7approvalsunchanged, no prototype/approvalflowadded.
+
+
+T282 finalevidence ready: **32 distinct fresh PASS** on same81source2aa4… (main12 matchingexplicit6Examples×2engines, busy8, oldcreate/dates12). Mainexact3perproject includesallgivenviewportcombinationswithoutduplicatecrossdeviceprojects. Thirty-twoscreens uniqueID/source/hash/actualCSSviewport/PNG-DPR verified; regression's explicitcrossdevicecase mayusemobileprimarypageunderdesktopnamedproject, actualviewportrecordchecked, mainprojectCSSsizesstrictlymatch. RootviewedChromeM confirmation/success andWK mobiledatecompletion/focus; directlycomparedfixed S01M vkszC.png placement/controls/consequences withfinalconfirmation, existingnoticepositionstylematchesS08.
+
+16test/gencommands +5qualityall0; format/lint/fullwebtypecheck/build/Doctor0, Doctor85/4samepreexistingtriagedwarnings, no newdiagnostic/suppression. Runtime/renderguards0. Source81matchhost/Linux, nineownedhostworkers exited/childDB0; ownLinuxrestart sleep/psonly/pressure2 continuationauthorized, otherprojectVitestuntouched. Currentmanifest t282-source.json/source2aa4…, aggregate t282-results.json. No APItruth/precision/ownership change, no commit/push/deploy. Finalindependentreviewpending, T282unchecked.
+
+T282 independent final **APPROVED / no blocking findings**, t282-review.md; reviewer independently81hashes0mismatch and32fresh/32UI/keyboardrole/live/cleanup. T282[X], nextsingleT283refactor.
+
+### T283 refactor / NOOP proposed — session checkpoint
+
+Currentfeature's owner boundaries remain existingFormDialog modal/focus, DateField calendardraft, ActionButton busy and TripForm confirmedsave; no sharedcomponent/CSSchange wasneeded. Completionnotification nowusesexistingTripLedger status and exactnormalAPIauthority. Extra newwrapper/refactor would add scope for no demonstrated structural defect; helpername/description/live/date-position oracles nowfollowthoseboundaries. No product/test/style/dependency/truthdelta,81source2aa4… unchanged. t283-source-reuse.json emptyimpact/0newruns, inheritedT28232freshPASS/32UI/quality/cleanup. IndependentNOOPreviewpending; T283still[ ]. Afterapproval thisisrequiredOne-Shotcheckpoint; savehandoffandstopbeforePhase5/T284.
+
+T283 independently **APPROVED NOOP / session checkpoint**, t283-review.md; reviewer recomputed81hashes0mismatch, emptyimpact/0newexecution and inherited32PASS/32UI/quality/resources. T283[X]. One-Shot stops at prescribedT283; Phase5/T284notstarted, T288fullintegration stilloutstanding, no plancompleteclaim/commit/push/deploy.
+
+
+### 使用者授權之分組提交（2026-11-17）
+
+本次僅整理既有已驗證 changes，未增加功能或推進 T284–T292。使用 milestone tar／manifest 逐筆核對 index，再建立提交；每筆 source 均與其已驗證快照相同，產品工作目錄未被還原或覆寫。最後九筆產品／測試提交的合計內容與提交前81檔產品來源完全相同（T282 manifest SHA256 `2aa4ea253912788e549c7a88735b25858d1dd1d3198b348bf51d953272a54cfd`）。因此沿用既有瀏覽器／UI／品質證據，不因 commit 分組重跑相同 E2E。最新 Doctor85/4 為既有 triage 結果，未有產品碼變更。
+
+| Commit | 已驗證範圍 | 主題 |
+| --- | --- | --- |
+| `925365e` | T266 | feat(trips): render revision-scoped thumbnails with safe fallbacks |
+| `bd75bdc` | T268 | fix(trips): recover uncertain lifecycle operations and preserve drafts |
+| `5a0abc1` | T269 | refactor(trips): isolate entry authority and management controllers |
+| `b0dcac8` | T270 | fix(expenses): verify trip state before confirming uncertain deletions |
+| `13e6b19` | T274 | feat(web): add structured initial loading and offline states |
+| `92d289d` | T276 | feat(web): preserve action semantics and prevent duplicate operations |
+| `22f2457` | T278 | feat(expenses): retain ledger data during pagination and refresh |
+| `3b2bc00` | T280 | fix(settlement): bound verification and preserve original payment intent |
+| `3ede547` | T282 | fix(trips): announce confirmed date changes for keyboard users |
+
+計畫 tasks／validation／handoff 另筆 `docs(plan-006): record validated frontend progress through T283` 提交。契約枚舉與 truth-delta 說明已同 T268 提交；原 HEAD `04f7208` 未改寫。完整提交前檔案 hash、分組內容及 commit SHA 帳在 `.cache/commit-006/` 保留；既有 ignored 測試證據仍在 implement cache。未 push／deploy，最終完整回歸仍待 T288。

@@ -1,14 +1,19 @@
 # 006 目前交接
 
-- 日期：2026-11-17（Asia/Taipei）；分支codex/006-trip-management-planning；目前HEAD `78c3171942`。既有11個scope commits已完成；本輪未新commit/push/deploy，未改truth/.env/永久skill。
-- 進度：**264/292**，T001–T264 [X]；T265 [BDD-REFACTOR]開始，其他未開始。
-- T265固定來源03eaa3d092f2248fe904425106db50a66cbcaff779d5cbde69e94d21e7aba7bf，兩private helper抽取，品質6項與靜態review PASS，唯一heavy77101全scope/影響回歸進行中。T264已批准詳文末。
-- **使用者11/17側邊明確授權減少不必要重跑，優先於下方舊『每次hash改就全46』安排**：不改skill/不刪明定scope，只重驗實際受影響項目；Chromium/WebKit維持，真機gate另保留。5209有效PASS570（非support）＋ChromeSupport274未受窄rule影響；唯一320 FAIL由新Chrome1替代，再補新WK275＝1120 distinct覆蓋帳。必清楚列來源/影響，不宣稱單版fresh1120；不得把受影響partial拼假綠。不再無故重跑API/分帳/全部舊範圍，full舊矩陣中已接近完者不中止重開。需要改scope時看low-memory Rule6原有依影響重驗規則，無須改skill或再請常規確認。
-- **本輪記憶體授權例外優先於下方舊warning暫停敘述**：使用者11/16明示放寬，pressure2 warning可繼續，仍low-memory16GiB/heavy1/worker1/root+固定reviewer；critical4/OOM/owned資源不可回收才停。最新pressure2/swap4822.12MiB，無新增代理，不關閉使用者程序。兩容器db/test-db重用；先前Docker重啟已有使用者授權，不用重問同範圍例行步驟。
-- 新22圖及舊回歸圖已獨立逐圖核對，R262-01工具位置/R262-02結果焦點已關閉，等待完整同版矩陣/回收/獨立final；差異與歷次RED/partial均記validation及本檔末節。下方11/15與舊source段落為歷史，不可拿來覆蓋本段進度/資源門檻。
-- 已新增正式0004/0005及生命週期、圖片、purge能力；詳細已完成/待完成邊界見下節。
+- 更新：2026-11-17；branch `feat/006-trip-management`；已依功能範圍逐筆提交，產品來源提交 `3ede547`，另有計畫紀錄提交。未 push／deploy。
+- **283/292 完成**：T001–T283 全部 `[X]`，T284–T292 保持 `[ ]`。本輪完成 T276–T283，達到 tasks 指定「其餘前端功能組」session checkpoint，依 implement/shared session-handoff 規則交接，尚未進入 Phase 5。
+- **下一筆 T284 [ENGINEERING]**：從 tasks.md 精確 Read 開始，驗證目標 Linux／Railpack 同等環境 compiled runtime、Node24／sharp optional binary、frozen lockfile、空庫／舊資料 migration、SPA／health／auth gate。既有 Linux Playwright／tsx／Vite 通過不等於 T284 完成；不重開已批准前端任務。
+- **當前產品版本**：81 檔 `.cache/implement-006-resume/t282-source.json`，SHA256 `2aa4ea253912788e549c7a88735b25858d1dd1d3198b348bf51d953272a54cfd`；同版 tar／harness／32 UI 與 raw 完整，host／Linux hash 一致且 checkpoint 再核相同。精準沿用鏈見 [validation.md](validation.md) 末節，各 review 在 cache。
+- **本輪證據**：T276 268 distinct PASS／272 UI；T278 68 成功執行、60 distinct／64 UI；T280 100 成功執行、70 distinct／70 UI；T282 32 同版 fresh distinct／32 UI。各 task 有各自重疊 scope，不能相加宣稱無重複全站矩陣。Green 均固定獨立審查 APPROVED／0 blocking。T277／279／281／283 是 source 不變／影響集合空的已批准 NOOP，各自 **0 新 E2E**，依使用者已授權精準影響回歸沿用；T288 完整最終回歸保留。
+- **已修重點**：22操作／登入穩定 busy、防同步重複；旅行名稱／日期三欄原ID及未知只讀查證；S10 手機圖片重試不跳版；支出20＋5分頁與背景更新保留內容、可見錯誤／重試；實付 POST／查證分相位、原兩UUID不重送、15s POST／各5s proof、逾時停動畫／同步讀取鎖／卸載晚回應防護；手機查證 CTA 避開固定底導覽；日期成功有單次可讀完成通知。
+- **品質／程序**：最新 format／lint／web typecheck／build／Doctor exit0，Doctor85/4 同四項已triage提醒，無新抑制；runtime／render guards0。最新9個 owned host worker 全退、childDB0、own Linux restart 清 zeroRSS zombies 後只 sleep／ps；沒有 active heavy runner。各 task 程序回收帳保留。low-memory-16gb（實測18GiB），root＋固定 `/root/review_006`，heavy1／worker1；pressure2 warning 已授權可續跑，critical4／OOM／owned不可回收才停，不能只憑數字 swap 停止。
+- **受管服務**：`./scripts/pnpm.sh` Node24.22.2／pnpm11.25.0。官方 arm64 Playwright1.64.1-noble `split-ledger-006-webkit` 的 `/workspace` 是可寫來源／依賴副本，Node `/opt/node24/bin`，`/evidence` 綁 host cache；owned healthy test DB `split-ledger-test-db-1`，未動 dev DB。macOS14.8.1 原生 WK2251 PushAPIEnabled 環境錯誤以同版官方 Linux WK 覆蓋，不刪 WK。其他專案 Vitest 曾併行，未停止或修改；失敗 raw／helper 修正與環境候選完整留證，未放寬 timeout 或 oracle。
+- **提交／工作目錄**：產品與測試依九份已驗證 milestone 快照提交（縮圖、未知結果恢復、狀態邊界、支出查證、初載、操作防重複、分頁背景更新、付款查證、日期完成通知）；任務／驗證／交接另筆提交。對應 commit 清單見 validation.md 末節。81 檔最終產品與上述 t282-source.json 完全一致；`.cache/implement-006-resume/t283-checkpoint*` 是提交前歷史快照，包含當時 HEAD／dirty 狀態，勿當作目前 HEAD。ignored cache 證據仍保留，不 clean。沒有 active runner session；固定 reviewer 已完成本輪審查，可續用不另增代理。
+- **剩餘工作**：T284 Linux compiled runtime；T285 圖片上限資源量測；T286 含圖片／trash／receipt／tombstone 隔離備份還原；T287 真 iOS／Android 選圖與實際讀屏人工驗證；T288 同一最終版本全產品／兩引擎／新DSL兩尺寸及品質矩陣；T289 一次獨立 UI 家族 gate；T290 已驗收 .pen 基準回填；T291 回填獨立核對；T292 最終交付。真機與實際讀屏不可由 viewport 自動測試替代；目前未宣稱人工通過，UI gate／baseline backfill 尚未開始。
+- **UI 契約**：混合 A/C，前端 C 沿用 design-v7／38 frame／32 preview；有效原確認與不做 prototype 決定不變。`.pen` hash `6c33bce25da872057d253a44bd0e59dec1f0e41f974873fb6db0dfe10b6c1abc`、固定 baseline 起點 `8fc9f94134c66ffd29918014b950894b1007aa86`；索引／批准見 ui/ui-plan.md。各逐畫面對照／修正見 validation，不因本次換 session 新增批准要求。
+- **恢復指示**：核 Git／81 hash／raw 與 review、環境與 owned 程序後直接接已授權 T284；不重問授權，不重跑 NOOP E2E，不把歷史 partial／failed probe 當最新版完整通過。同步 Linux 時 copy 當前實際來源；不要把舊 tar 當最終 runtime。整個 plan 尚未完成。
 
-- 使用者2026-11-15要求「從T041繼續，然後不要停了」：持續逐筆推進，不以小組任務數結束；review、產品Green及必要人工關卡保持。
+以下為歷史交接，舊branch/HEAD、進度、資源數與working tree不得覆蓋上方當前狀態。
 
 ## 2026-11-15 checkpoint（歷史，最新以開頭與末節為準）
 
@@ -382,3 +387,81 @@ T264正式獨立APPROVED/zeroopen，reportSHA a0493c783a83328de52903fd25a7d79ba8
 只ThumbnailEditor抽兩個private純函式selectionError(FileList)與rejectionMessage(ApiError)，消除元件內巢狀ternary；count→空檔→大小→宣告MIME優先序、字串、fallback message、外層selected/busy/attempt/取消guard完全不變。未改任何State/previewkey/本地onError/UUID/backend/DSL/設計。獨立靜態零open。23source manifest03eaa3d092f2248fe904425106db50a66cbcaff779d5cbde69e94d21e7aba7bf，副本t265-source/；其他22檔與cb0f完全同。
 
 format/lint/webTS/build/gen2已6cmd全0，入口CSS byteequal。唯一heavy77101，t265-validate.py正式16命令/預期192當前整檔＋92既有Thumbnail＋8代表policy/photo/損壞占位/像素錯誤UI D/M＝292新執行，worker1順序跑。此重構實際經所有選圖/拒絕，故完整本scope必要；未動create/管理/oldweb/support/API仍按影響保留，不因hash加跑。尚待完整scope/UI16entries、回收/獨立final，T265保持[ ]、264/292，T266未開始。pressure1入口/swap5081MiB，warning2例外續跑、critical/OOM/無法回收停。
+
+
+## 2026-11-17 T265 精準回歸恢復（本輪）
+
+- 使用者授權依影響範圍續跑 implement；不改永久 skills、不自動 commit。HEAD `04f7208`，T265 函式抽取已包含在該提交；本輪尚未修改產品碼。`ThumbnailEditor.tsx` SHA256 `13528bb6f67120f02f572c277b3546973b50a17b98a67705d7fbf356f13817a7`。原 `.cache/implement-006` 不存在，先前報告僅為歷史紀錄，不宣稱重新檢查過其 raw 或前後 byteequal。
+- 本筆 requested step=refactor；單一 Test Scope=`frontend/trips/縮圖限制與選圖錯誤.feature`。兩私有純函式的直接/間接使用均在本 editor，本 feature 覆蓋本地 count/empty/size/MIME、後端三類拒絕、改選恢復與四格式保存；未改 hook/cleanup、管理、帳務或 API，故不重跑鄰近92/94或全站。固定唯讀 `/root/review_006` 已審核影響集合無具體遺漏；final 尚待。
+- 完整48 Examples各按Given指定裝置，Chromium48PASS（1.5m），新 log `.cache/implement-006-resume/t265-chromium.log`。不以重複project增加虛假的viewport覆蓋。
+- macOS14.8.1 WebKit batch在page fixture setup出現 `Unknown setting: PushAPIEnabled`，中止exit130；單例max-failures=1再次確認，exit1、尚未進產品步驟。安裝命令只確認mac14 frozen2251。官方問題 https://github.com/microsoft/playwright/issues/42964 確認相同client/browser不相容。無放寬timeout或修改依賴/產品/斷言。
+- 使用既有官方 `mcr.microsoft.com/playwright:v1.64.1-noble`（arm64，image SHA `2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f`），容器 `split-ledger-006-webkit` 內 Node24.22.2/pnpm11.25.0/frozen install、shared build及bddgen PASS。tracked來源tar不含本機env/credentials/node_modules，manifest在resume目錄。Linux WebKit完整scope正在跑，單worker；不是以Chromium替代WebKit。
+- UI仍沿用design-v7與固定baseline；補D/M policy、HEIC、損壞、25MP錯誤真資料畫面/CTA檢查，等待runtime與逐圖比對。T265維持[ ]、T266未解鎖。
+- low-memory-16gb，觀測RAM18GiB但沿用原保守契約，主+固定reviewer，heavy1/worker1。Docker test-db由本輪啟動；Linux container登記在上。warning2依先前session使用者例外續跑，critical/OOM/不可回收停。最近swap17309MiB上升、pressure2；不以swap數字單獨停止，持續序列觀測。舊本機WebKit登記PID已不在ps；工具agent→OS PID映射未知。
+
+
+### T265 本輪完成
+
+完整Test Scope：Chromium48＋Linux WebKit48；D/M policy/HEIC/損壞/25MP UI兩engine各8，合計112PASS、無skip/flaky。每個feature案例依Given指定viewport，沒有把重複project當新增覆蓋。ESLint source、web typecheck、source Prettier均exit0；命令結果與log hashes在 `.cache/implement-006-resume/t265-results.json`。固定來源1553檔manifest保留，本輪產品零變更；沒有沿用不存在的舊raw。
+
+設計比對仍為design-v7 U04/S03及固定baseline：桌手機保留標題/預覽/檔名/選圖工具/限制/錯誤/footer順序，CTA均在viewport；手機長UUID檔名與錯誤自然換行。損壞local File顯示中性占位與尚未保存，未偽稱保存結果；合法fixture為真彩色圖片bytes，與設計風景照的資料差異不視為版面變更。既有桌機工具列適配沿用T264已記錄方案，本輪未改CSS，無新設計偏差。截圖16張存resume目錄，主代理與reviewer分別核代表圖。
+
+固定reviewer `/root/review_006` APPROVED/zeroopen；macOS WebKit環境失敗不算產品RED，Linux同版本補驗通過。所有本輪runner exit0（環境probe另記），test-db無ledger_test_%子庫；Linux容器restart後ps只sleep/ps，清掉已結束的5個zombie，不宣稱殘留程序仍在執行。host相關runner/browser已退出。pressure2/swap16917.56MiB較前下降，warning例外有效；agent到PID映射未知。受管Linux容器與test-db暫保留供後續使用，不新增第二heavy。
+
+T265已[X]，265/292；下一筆T266（縮圖讀取與帳號清理）green。保留T288完整回歸、真機與最後UI gate；未commit/push/deploy。
+
+
+## T266 green 續跑紀錄（2026-11-17）
+
+- Scope=`縮圖讀取與帳號清理.feature`，C沿design-v7 U01/U02/U03/S07與原baseline。F069真RED缺status→新增TripThumbnail圖形等待；F070真RED失敗後殘留busy→onError default；trash補充UI真RED仍露img→共用同元件與Mountain fallback。兩consumer用owner:trip:revision key隔離本地狀態；未加objectURL、圖片快取或改session/API，既有editor草稿unmount回收由F072驗。
+- S07設計比對要求可見失敗caption，已在既有固定圖區底部補上，保卡片/名稱/日期/筆數/入口不位移，不另增高度。spinner非聚焦、只有圖形與accessible name，沿用action-spinner/reduced-motion。
+- 首次runtime找到四項測試實作問題，均保留失敗log並交獨立reviewer確認後最小修正：T129 TWD API金額固定兩小數（100.00/700.00，DB10000minor/2等完整帳務斷言不變）；card bbox在trial click捲動後拿viewport座標比初始（改先量document coords，仍≤1且保trial可點）；mobile account-switch Given直接找桌機垃圾桶link（改走實際行動導覽sheet，保同SPA/cache/deferred）；fallback負向文字locator串起圖片失敗caption與正常開帳本CTA而匹配整卡（排除含heading的aggregate祖先，仍查獨立錯誤元素）。以上不是修改truth或放寬產品條件。
+- 最新10檔manifest `.cache/implement-006-resume/t266-source.json`；前兩freeze/raw分別attempt1/attempt2保存，focused RED/green分開。F069/F070及桌手機F072與F071 focused均已可達且PASS，尚不可將preliminary累加成最終完整GREEN。
+- 唯一heavy runner執行t266-run.py，整檔4×4project=16、具直接卡片依賴的F040/041/042/049/051回歸8×4=32、D/M延遲/fallback與trash fallback UI6×2=12，預期60執行；Chromium本機、WebKit同版官方Linux，均worker1串行。最終raw=`t266-final-*`、逐命令帳=`t266-final-commands.json`；品質/圖像/獨立final/資源回收尚待。T266仍[ ]，T267未開始。
+- RAM18GiB沿low-memory-16gb契約，主+固定readonly reviewer `/root/review_006`，重型1；pressure2依session授權續跑，critical/OOM/不可回收停。受管Linux/test-db保留供本scope；工具agent→PID未知。
+
+
+### T266 最終完成（2026-11-17）
+
+最後10檔固定來源的16命令全exit0；完整feature4×4=16PASS、實際卡片依賴回歸7×4=28PASS、UI6×2=12PASS，合計56PASS，無skip/flaky。原預估60已由當次實際清單修正（F049兩列，非三列），未用重複或未跑案例湊數。逐命令/通過數/hash=`.cache/implement-006-resume/t266-results.json`；source manifest與frozen tar同目錄，前兩attempt獨立保留，未混成final。
+
+ESLint、web typecheck、source格式與web production build均PASS；ReactDoctor最初對origin/main的86/14警告屬分支既有，精確本輪 `--scope changed --base HEAD --include-untracked --no-parallel` 掃9檔、93/100、No issues、exit0，見t266-react-doctor-current-delta.log。未為既有warning改動無關程式。
+
+設計v7 U01/U03/S07：等待指示位於固定圖區，只有圖形與accessible name；失敗caption位於固定圖區底端白色帶，符合設計圖下/名稱上的資訊順序並維持卡片bbox。桌手機名稱可換行，日期/筆數/開帳本入口及垃圾桶CTA保留，圖片失敗不擋早餐保存。卡片長度可捲動，手機viewport截圖不代表整頁內容同時可見；native trial可點擊與真記帳均PASS。所有12張UI圖片及geometry JSON在resume目錄。Chrome mobile reference/actual bbox同y611.546875/height389.15625，trial後scroll156，明確證實先前的viewport假位移，無放寬≤1容許值。
+
+固定獨立reviewer APPROVED/zeroopen，報告t266-review.md。Linux容器restart後ps僅sleep/ps，清掉已結束Z程序；隔離DB子庫空，host相關browser/runner退出，工具agent到PID未知。維持warning2使用者例外、單heavy/worker1，無critical/OOM。Linux/test-db保留復用。T266已[X]，266/292，下一T267 refactor；尚未開始T268，plan未交付、未commit/push/deploy。
+
+
+### T267 refactor：NOOP完成
+
+T266完成後選取本筆refactor，讀取同feature/DSL、green raw及元件邊界。TripThumbnail僅管理目前單圖的loaded/failed與原生load/error事件，父層owner:trip:revision key重建隔離；兩consumer只組裝src與default，無共享cache、無需額外hook或合併state。維持零產品/測試改動，避免為重構新增風險。獨立reviewer核對NOOP合理、zeroopen；10檔hash與T266最終manifest全部一致。
+
+本筆沒有新跑測試；明確沿用同來源、同環境的t266-results.json與t266-final-*：完整scope16＋依賴回歸28＋UI12=56PASS、品質與ReactDoctor delta93/No issues。UI/設計來源、12PNG、資源清理證據皆未失效，不將沿用宣稱為新執行。使用者本輪已批准精準回歸/NOOP策略，T288完整交付矩陣仍保留。T267已[X]，267/292，下一筆T268 green旅行結果查證與舊連結；無commit/push/deploy。
+
+
+## T268 green 進行中（2026-11-17）
+
+Scope=`旅行結果查證與舊連結.feature`，C沿design-v7 S05/S06、原固定baseline，不製prototype；完整19例×兩browser/兩尺寸應76。前置T267已完成。
+
+- F062生命週期未知真RED：缺unknown原操作查證；useLifecycleCommand新增75000ms寫入與5000ms receipt/state有界GET、unknown防重送、Dialog再次查證。獨立預審指出verify Promise.all早退重疊與跨帳completion風險，已allSettled+ref lock+核對operationID/kind、每個complete await後核目前session owner。purge背景同名trigger在confirming禁用；focused2PASS。
+- F065真RED原結果/目前文案缺失，分開顯示原次成功與目前state；圖片verify成功維持editor以顯示最新權威圖/提示（直接save仍close），notice只在false→true開啟或新選圖時清；新建附圖verify finish透過route state保留原結果/目前說明。focused5PASS，舊縮圖關閉/返回/直接保存須最終受影響回歸。
+- F067真RED：舊nav成員入口、MutationObserver證舊ledger flash、草稿遺失。TripLedger每entry owner/trip/entryUUID state query（gc0）先驗authority，非active時不啟動帳務queries並取消清除舊trip查詢（排除本地draft和authority）。AppShell訂閱entry-state完成並拒用pending/nonactive authority的舊metadata導航。ExpenseForm把完整未提交draft（id/item/amount/currency/date/category/payer/shares）保留在owner scoped query memory、gcInfinity，session clear可清除；保存後清除。非active只顯示不可提交草稿摘要與復原/返回出口。focusedtrash/purged兩例PASS，原DB/其他旅行不變。
+- T120的下一步link locator原本同時匹配sidebar與content造成strict violation，已精確限main區，仍核href與trial；不刪斷言、不改truth。
+- 新raw `.cache/implement-006-resume/t268-*`，目前F068/F102/F108其餘邊界執行中（唯一heavy）。T268仍[ ]，上述皆preliminary，不拼接宣稱完整scope GREEN；品質/完整browser-size/設計圖/獨立final未跑。
+- 受管Docker Linux/test-db保留，主+固定readonly reviewer，worker1/heavy1，warning2沿session授權，最近swap18317.88MiB/pressure2；無critical/OOM，程序與工具PID對應未知。未commit/push/deploy。
+
+
+### T268 續跑檢查點（2026-11-17，尚未完成）
+
+已完成19例Chrome桌面focused邊界（32.9s），尚不能宣稱76例完整通過。補上關閉後原次查證controller、背景refresh移除垃圾桶列時仍保留controller、非active保留同一File與fresh read後明確手動保存，原operationId不因unknown重送。T149移除契約禁止的409.currentState假設、T161分開last-confirmed預覽與未送出File草稿雜湊；原DB/request count斷言保留，已經獨立預審。API owner已另依/api-plan同步shared ApiError.code既有13codes枚舉，/truth-delta記MODIFY+NOOP shape（非本task擅改truth）。
+
+最新預審指出pending POST仍顯示取消不更改旅行，已依階段修正提示。TripOperationCheck只統一目前三處原次查證/讀取控制，保留按鈕尺寸、鍵盤焦點及同步防重；不提前實作後續全域Button重構。來源25檔凍結manifest=`.cache/implement-006-resume/t268-source.json` SHA256 `78b9250dbdcaaae87dcaf650d393085acd99e231deb8fe65df71614bec2f85a7`，相同tar與Linux source。`t268-run.py`序列執行，raw=`t268-final-*`，passing BDD的After直接取畫面避免另重跑同流程，`t268-ui-final`每張記source/hash/viewport/CTA bounds。完整結果/設計比對/獨立final與清理未齊前T268維持[ ]；不得把focused當最終GREEN。
+
+回歸邊界：完整本feature76；實際共同hook/holder影響旅行管理、縮圖預覽保存、新增選填附圖、讀取/帳號清理；AppShell及ExpenseForm影響既有16英文feature，兩browser各跑一次；expense-form/save-outcomes支援；額外關閉+背景refresh、nonactive File、busy焦點QA。date-picker本身與API runtime未變不重複整批，T288仍完整。主+固定reviewer、heavy1/worker1，pressure2沿既有授權、critical4立即停；受管Linux WebKit官方容器與testDB保留。無commit/push/deploy。
+
+
+### T268 最新驗證來源（接續上述檢查點）
+
+先前78b925…來源與其19PASS/59PASS僅preliminary，已封存`t268-attempt2/`，不冒充最終全綠。實際回歸發現F039關閉purge失焦、審查發現409→nonactive nav未訂閱資料更新，已用專用ref+RAF return focus與useSyncExternalStore修正；focused F0394PASS、close-first/refresh-first8PASS、nav真RED→nonactive4PASS。另F113 reselect時新File與舊blob URL短暫錯配造成間歇fetch failure，usePreviewUrl以{value,url}綁定目前File，保留cleanup；新source F113×5=5PASS（t268-preview-reselection-green2.log），不修改hash oracle。中間首次hook未處理undefined、當場修正，該次失敗未當通過證據。
+
+最新26檔manifest SHA256 `dec74ffba95c88eee7c6d615ea9bcb2c47be015f8203a5882595085cf7e3df68`；`t268-source.json`/tar與新`t268-final-*`/`t268-ui-final`對應此來源，runner session12460仍序列執行。最後type/lint/format/build、雙引擎D/M、UI手機CTA、獨立final、清理皆待完成；T268仍[ ]。warning2、swap17930.50MiB，無critical。重啟後只恢復未驗完範圍，勿混用attempt1/2為最終同源證據。

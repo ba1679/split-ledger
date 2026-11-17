@@ -2,7 +2,7 @@
 
 **Plan package**: `specs/plans/006-trip-management-and-loading`  
 **建立日期**: 2026-11-14  
-**狀態**: T001–T264完成；下一筆T265 [BDD-REFACTOR]（縮圖限制與選圖錯誤），plan尚未交付。
+**狀態**: T001–T271完成；下一筆T272 [BDD-GREEN]（既有共同支出修正與重算回歸），plan尚未交付。
 
 **核心輸入**: `spec.md`、`plan.md`、`research.md`、`truth-delta.md`、`dsl-refine-review.md`、`ui/ui-plan.md`，以及 `specs/truth/techstack.md`、`specs/truth/contracts/**`、`specs/truth/data/data-model.dbml`、受影響 `specs/truth/features/**`。
 
@@ -25,6 +25,13 @@
 - 規劃與目前實作快照已保存於Git；目前分支 `codex/006-trip-management-planning`，最新進度與續跑點以 `handoff.md` 為準。T001–T258已完成各筆適用驗證；Phase 3及已完成後端/前端管理scope的runtime與獨立審查見validation。T259以後仍待執行，plan尚未交付；使用者已明示授權先按scope提交目前成果，無push/deploy。
 
 ## 執行入口與完整矩陣
+
+### 2026-11-17 使用者確認的精準回歸方式
+
+- 使用者確認續跑時，重構只重驗實際受影響範圍。每筆先記錄改動、直接及間接消費者、重驗集合與沿用證據理由；無依賴的鄰近功能不因 source hash 改變而整批重跑。
+- 保留當前完整 Feature Test Scope、Chromium/WebKit、DSL 指定裝置與最終 T288 完整整合回歸。DSL 已固定裝置的案例不因 project 名稱另重複計數；未指定裝置者依原契約補齊桌機/手機。
+- 重構檢查後無必要變更時可記錄 NOOP，不為完成 marker 額外改碼。共用元件、hook cleanup、權限或交易改動仍按真實消費者擴大回歸；無法確定影響則擴大驗證。
+- 歷史驗證紀錄保留；遺失的本機 raw 不宣稱已重新核對。新驗證存 `.cache/implement-006-resume/`。
 
 以下命令均從repo根目錄，以 `./scripts/pnpm.sh` 選用 `.cache/toolchain`（Node24.22.2／pnpm11.25.0）；缺工具時先完成Setup，不用預設shell Node20執行repo。不要輸出.env或cookie。
 
@@ -1632,7 +1639,7 @@
   - Dependencies: T263。
   - Evidence: 整檔產品BDD與權威資料一致，完成上述畫面/狀態比對、request count、鍵盤及手機操作所需證據；差異只在既定適配範圍內處理。
 
-- [ ] T265 [BDD-REFACTOR] 在綠燈下整理本功能與共用狀態邊界
+- [X] T265 [BDD-REFACTOR] 在綠燈下整理本功能與共用狀態邊界
   - Dependencies: T264。
   - 不改業務/設計意圖，重跑本整檔及受影響已綠scope，刷新受影響產品/畫面證據，保留未改範圍。
 
@@ -1659,11 +1666,11 @@
 
 - `specs/truth/features/frontend/trips/縮圖讀取與帳號清理.feature`（整檔、全部表列資料；Chromium、WebKit及DSL指定兩尺寸依序，worker=1）。
 
-- [ ] T266 [BDD-GREEN] 實作私有圖片占位、fallback及換帳清理
+- [X] T266 [BDD-GREEN] 實作私有圖片占位、fallback及換帳清理
   - Dependencies: T265。
   - Evidence: 整檔產品BDD與權威資料一致，完成上述畫面/狀態比對、request count、鍵盤及手機操作所需證據；差異只在既定適配範圍內處理。
 
-- [ ] T267 [BDD-REFACTOR] 在綠燈下整理本功能與共用狀態邊界
+- [X] T267 [BDD-REFACTOR] 在綠燈下整理本功能與共用狀態邊界
   - Dependencies: T266。
   - 不改業務/設計意圖，重跑本整檔及受影響已綠scope，刷新受影響產品/畫面證據，保留未改範圍。
 
@@ -1690,13 +1697,13 @@
 
 - `specs/truth/features/frontend/trips/旅行結果查證與舊連結.feature`（整檔、全部表列資料；Chromium、WebKit及DSL指定兩尺寸依序，worker=1）。
 
-- [ ] T268 [BDD-GREEN] 統一生命周期結果未知、衝突刷新及舊帳本限制
+- [X] T268 [BDD-GREEN] 統一生命周期結果未知、衝突刷新及舊帳本限制
   - Dependencies: T267。
-  - Evidence: 整檔產品BDD與權威資料一致，完成上述畫面/狀態比對、request count、鍵盤及手機操作所需證據；差異只在既定適配範圍內處理。
+  - Evidence: 整檔76PASS＋實際受影響回歸，618 distinct/624接受PASS（含6個helper替代補驗）；28檔manifest3a7466…、76PNG/兩browser兩尺寸及30命令exit0，品質與資源audit完成，t268-review.md獨立APPROVED/0blocking。ReactDoctor維護提醒交T269；詳validation.md。
 
-- [ ] T269 [BDD-REFACTOR] 在綠燈下整理本功能與共用狀態邊界
+- [X] T269 [BDD-REFACTOR] 在綠燈下整理本功能與共用狀態邊界
   - Dependencies: T268。
-  - 不改業務/設計意圖，重跑本整檔及受影響已綠scope，刷新受影響產品/畫面證據，保留未改範圍。
+  - Evidence: 32檔manifest14bbcc…、完整76＋管理40＋QA32＝148PASS/20命令0；76圖前後73像素完全相同、3微差逐圖無設計差異，Doctor四項清除只餘有意reset；品質/資源及t269-review.md獨立APPROVED/0blocking。未重跑無影響舊129/API，T288保完整。
 
 ## Phase 4.16: ADD Feature File - frontend/expenses/旅行生命週期下的刪除查證.feature
 
@@ -1721,11 +1728,11 @@
 
 - `specs/truth/features/frontend/expenses/旅行生命週期下的刪除查證.feature`（整檔、全部表列資料；Chromium、WebKit及DSL指定兩尺寸依序，worker=1）。
 
-- [ ] T270 [BDD-GREEN] 改為state-first支出刪除查證與舊表單垃圾桶回饋
+- [X] T270 [BDD-GREEN] 改為state-first支出刪除查證與舊表單垃圾桶回饋
   - Dependencies: T269。
-  - Evidence: 整檔產品BDD與權威資料一致，完成上述畫面/狀態比對、request count、鍵盤及手機操作所需證據；差異只在既定適配範圍內處理。
+  - Evidence: source37 b9e327…，整scope16＋受影響回歸150distinct/182接受PASS（UI修正替代32）、42命令0、current16PNG/S05/S06/S08/品質/資源齊，t270-review.md獨立APPROVED/0blocking；詳validation.md。
 
-- [ ] T271 [BDD-REFACTOR] 在綠燈下整理本功能與共用狀態邊界
+- [X] T271 [BDD-REFACTOR] 在綠燈下整理本功能與共用狀態邊界
   - Dependencies: T270。
   - 不改業務/設計意圖，重跑本整檔及受影響已綠scope，刷新受影響產品/畫面證據，保留未改範圍。
 
@@ -1749,11 +1756,11 @@
 - `specs/truth/features/frontend/expenses/shared-expense-corrections-and-recalculation.feature`（全檔，不只該Rule）。
 - `specs/truth/features/frontend/expenses/pagination-and-save-outcomes.feature`；`apps/web/tests/support/save-outcomes.spec.ts`、splitting/deleted-dinner-result.spec.ts。
 
-- [ ] T272 [BDD-GREEN] 以state-first查證維持既有共同支出刪除與帳務回歸
+- [X] T272 [BDD-GREEN] 以state-first查證維持既有共同支出刪除與帳務回歸
   - Dependencies: T271。
   - 落點save-outcome.ts/ExpenseForm.tsx；在新增scope之外補齊既有整檔、support focused，兩browser與受影響手機呈現通過。
 
-- [ ] T273 [BDD-REFACTOR] 收斂支出查證分支而保留原意圖
+- [X] T273 [BDD-REFACTOR] 收斂支出查證分支而保留原意圖
   - Dependencies: T272。
   - 不將任意404視成功，保持原UUID、付款歷史與精確重算，重跑同Test Scope。
 
@@ -1780,11 +1787,11 @@
 
 - `specs/truth/features/frontend/design-system/全站初讀與局部等待.feature`（整檔、全部表列資料；Chromium、WebKit及DSL指定兩尺寸依序，worker=1）。
 
-- [ ] T274 [BDD-GREEN] 將全站12種內容接入初載骨架與局部選項/身分等待
+- [X] T274 [BDD-GREEN] 將全站12種內容接入初載骨架與局部選項/身分等待
   - Dependencies: T273。
   - Evidence: 整檔產品BDD與權威資料一致，完成上述畫面/狀態比對、request count、鍵盤及手機操作所需證據；差異只在既定適配範圍內處理。
 
-- [ ] T275 [BDD-REFACTOR] 在綠燈下整理本功能與共用狀態邊界
+- [X] T275 [BDD-REFACTOR] 在綠燈下整理本功能與共用狀態邊界
   - Dependencies: T274。
   - 不改業務/設計意圖，重跑本整檔及受影響已綠scope，刷新受影響產品/畫面證據，保留未改範圍。
 
@@ -1811,11 +1818,11 @@
 
 - `specs/truth/features/frontend/design-system/全站操作忙碌與防重複.feature`（整檔、全部表列資料；Chromium、WebKit及DSL指定兩尺寸依序，worker=1）。
 
-- [ ] T276 [BDD-GREEN] 把22操作與站內登入接入穩定busy及防重複
+- [X] T276 [BDD-GREEN] 把22操作與站內登入接入穩定busy及防重複
   - Dependencies: T275。
   - Evidence: 整檔產品BDD與權威資料一致，完成上述畫面/狀態比對、request count、鍵盤及手機操作所需證據；差異只在既定適配範圍內處理。
 
-- [ ] T277 [BDD-REFACTOR] 在綠燈下整理本功能與共用狀態邊界
+- [X] T277 [BDD-REFACTOR] 在綠燈下整理本功能與共用狀態邊界
   - Dependencies: T276。
   - 不改業務/設計意圖，重跑本整檔及受影響已綠scope，刷新受影響產品/畫面證據，保留未改範圍。
 
@@ -1842,11 +1849,11 @@
 
 - `specs/truth/features/frontend/design-system/背景更新與分頁等待.feature`（整檔、全部表列資料；Chromium、WebKit及DSL指定兩尺寸依序，worker=1）。
 
-- [ ] T278 [BDD-GREEN] 實作局部更新與20+5筆分頁狀態
+- [X] T278 [BDD-GREEN] 實作局部更新與20+5筆分頁狀態
   - Dependencies: T277。
   - Evidence: 整檔產品BDD與權威資料一致，完成上述畫面/狀態比對、request count、鍵盤及手機操作所需證據；差異只在既定適配範圍內處理。
 
-- [ ] T279 [BDD-REFACTOR] 在綠燈下整理本功能與共用狀態邊界
+- [X] T279 [BDD-REFACTOR] 在綠燈下整理本功能與共用狀態邊界
   - Dependencies: T278。
   - 不改業務/設計意圖，重跑本整檔及受影響已綠scope，刷新受影響產品/畫面證據，保留未改範圍。
 
@@ -1873,11 +1880,11 @@
 
 - `specs/truth/features/frontend/design-system/操作失敗與未知結果.feature`（整檔、全部表列資料；Chromium、WebKit及DSL指定兩尺寸依序，worker=1）。
 
-- [ ] T280 [BDD-GREEN] 完善支出草稿與付款unknown的可恢復回饋
+- [X] T280 [BDD-GREEN] 完善支出草稿與付款unknown的可恢復回饋
   - Dependencies: T279。
   - Evidence: 整檔產品BDD與權威資料一致，完成上述畫面/狀態比對、request count、鍵盤及手機操作所需證據；差異只在既定適配範圍內處理。
 
-- [ ] T281 [BDD-REFACTOR] 在綠燈下整理本功能與共用狀態邊界
+- [X] T281 [BDD-REFACTOR] 在綠燈下整理本功能與共用狀態邊界
   - Dependencies: T280。
   - 不改業務/設計意圖，重跑本整檔及受影響已綠scope，刷新受影響產品/畫面證據，保留未改範圍。
 
@@ -1904,11 +1911,11 @@
 
 - `specs/truth/features/frontend/design-system/鍵盤與減少動態效果.feature`（整檔、全部表列資料；Chromium、WebKit及DSL指定兩尺寸依序，worker=1）。
 
-- [ ] T282 [BDD-GREEN] 完成兩尺寸確認與日期等待的鍵盤/讀屏語意
+- [X] T282 [BDD-GREEN] 完成兩尺寸確認與日期等待的鍵盤/讀屏語意
   - Dependencies: T281。
   - Evidence: 整檔產品BDD與權威資料一致，完成上述畫面/狀態比對、request count、鍵盤及手機操作所需證據；差異只在既定適配範圍內處理。
 
-- [ ] T283 [BDD-REFACTOR] 在綠燈下整理本功能與共用狀態邊界
+- [X] T283 [BDD-REFACTOR] 在綠燈下整理本功能與共用狀態邊界
   - Dependencies: T282。
   - 不改業務/設計意圖，重跑本整檔及受影響已綠scope，刷新受影響產品/畫面證據，保留未改範圍。
 
