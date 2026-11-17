@@ -36,7 +36,7 @@ export async function assertPaginationComplete(world: LedgerWorld): Promise<void
   for (let index = 0; index < 2; index++) {
     const response = await ownerRead(
       world,
-      `/api/trips/${state.tripId}/expenses${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ''}`,
+      `/api/trips/${state.tripId}/expenses?limit=20${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`,
     );
     expect(response.status()).toBe(200);
     const data = (await response.json()) as ExpenseList;
@@ -56,6 +56,7 @@ export async function assertPaginationComplete(world: LedgerWorld): Promise<void
   await expect(page.getByText(/^25\s*筆(?:紀錄|支出)?$/)).toBeVisible();
   await expect(page.getByRole('region', { name: '分幣別總額', exact: true })).toHaveText(
     state.totalsText,
+    { useInnerText: true },
   );
   await expect(page.getByRole('button', { name: '載入更多', exact: true })).toHaveCount(0);
   await waitForManagementReads(ui);

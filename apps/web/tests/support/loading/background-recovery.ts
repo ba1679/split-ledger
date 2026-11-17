@@ -70,7 +70,7 @@ export async function arrangeBackgroundRecovery(page: Page, world: LedgerWorld):
   for (const cursor of [null, state.pagination.cursor]) {
     const response = await ownerRead(
       world,
-      `/api/trips/${state.pagination.tripId}/expenses${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ''}`,
+      `/api/trips/${state.pagination.tripId}/expenses?limit=20${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`,
     );
     expect(response.status()).toBe(200);
     pages.push((await response.json()) as ExpenseList);

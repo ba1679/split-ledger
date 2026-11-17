@@ -133,14 +133,17 @@ export async function arrangePagination(page: Page, world: LedgerWorld): Promise
     { currency_code: 'TWD', amount: '100000' },
   ]);
   const base = `/api/trips/${tripId}/expenses`;
-  const firstResponse = await ownerRead(world, base);
+  const firstResponse = await ownerRead(world, `${base}?limit=20`);
   expect(firstResponse.status()).toBe(200);
   const first = (await firstResponse.json()) as ExpenseList;
   expect(first.items.length).toBe(20);
   expect(first.totalCount).toBe(25);
   expect(first.nextCursor).not.toBeNull();
   const cursor = first.nextCursor!;
-  const secondResponse = await ownerRead(world, `${base}?cursor=${encodeURIComponent(cursor)}`);
+  const secondResponse = await ownerRead(
+    world,
+    `${base}?limit=20&cursor=${encodeURIComponent(cursor)}`,
+  );
   expect(secondResponse.status()).toBe(200);
   const second = (await secondResponse.json()) as ExpenseList;
   expect(second.items.length).toBe(5);

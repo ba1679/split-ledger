@@ -246,3 +246,9 @@ fieldset {
     gap: 16px;
   }
 }
+
+.ledger-record-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}

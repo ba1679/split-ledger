@@ -12,6 +12,8 @@ import {
   type ItemList,
 } from '../../api/index.js';
 import { useSession } from '../auth/session.js';
+import { BusyIndicator } from '../../components/waiting/BusyIndicator.js';
+import { ActionButton } from '../../components/waiting/ActionButton.js';
 import { QueryState } from '../../components/QueryState.js';
 import { tripDates } from './Trips.js';
 import { TripForm } from './TripForm.js';
@@ -43,7 +45,7 @@ export function TripLedger() {
     initialPageParam: undefined as string | undefined,
     queryFn: ({ signal, pageParam }) =>
       apiRequest<ExpenseList>(
-        `/api/trips/${tripId}/expenses${pageParam ? `?cursor=${encodeURIComponent(pageParam)}` : ''}`,
+        `/api/trips/${tripId}/expenses?limit=20${pageParam ? `&cursor=${encodeURIComponent(pageParam)}` : ''}`,
         { signal },
       ),
     getNextPageParam: (page) => page.nextCursor ?? undefined,
@@ -270,65 +272,75 @@ export function TripLedger() {
         </div>
       ) : (
         <>
-          <div className="section-head">
-            <h2>沿途的花費</h2>
-            <span>{totalCount} 筆紀錄</span>
-          </div>
-          <div className="ledger" role="region" aria-label="支出清單">
-            {rows.map((expense) => (
-              <Link
-                className="expense-row"
-                to={`/trips/${tripId}/expenses/${expense.id}`}
-                key={expense.id}
-              >
-                <span className="category-icon">
-                  <Icon name="note" />
-                </span>
-                <div className="row-info">
-                  <div className="row-title">{expense.item}</div>
-                  <div className="row-sub">
-                    <span>{expense.spentOn}</span>
-                    {' · '}
-                    <span>{expense.category?.name ?? '未分類'}</span>
-                  </div>
-                </div>{' '}
-                <div className="row-amount">
-                  {expense.currencyCode} {displayAmount(expense.amount)}
-                </div>
-                <Icon name="arrow" />
-              </Link>
-            ))}
-          </div>
-          {expenses.error ? (
-            <p className="error" role="alert">
-              暫時無法更新支出清單，已載入的紀錄仍保留。
-              {!expenses.isFetchNextPageError ? (
-                <Button
-                  variant="ghost"
-                  type="button"
-                  className="text-btn"
-                  disabled={expenses.isFetching}
-                  onClick={() => {
-                    void expenses.refetch();
-                  }}
+          <section aria-label="支出清單">
+            <div className="section-head">
+              <h2>沿途的花費</h2>
+              <span className="ledger-record-count">
+                {totalCount} 筆紀錄
+                {expenses.isFetching && !expenses.isFetchingNextPage ? (
+                  <span aria-busy="true">
+                    <BusyIndicator accessibleLabel="正在更新支出清單" />
+                  </span>
+                ) : null}
+              </span>
+            </div>
+            {expenses.error ? (
+              <p className="error" role="alert">
+                暫時無法更新支出清單，已載入的紀錄仍保留。
+                {!expenses.isFetchNextPageError ? (
+                  <Button
+                    variant="ghost"
+                    type="button"
+                    className="text-btn"
+                    disabled={expenses.isFetching}
+                    onClick={() => {
+                      void expenses.refetch();
+                    }}
+                  >
+                    重新更新清單
+                  </Button>
+                ) : null}
+              </p>
+            ) : null}
+            <div className="ledger">
+              {rows.map((expense) => (
+                <Link
+                  className="expense-row"
+                  to={`/trips/${tripId}/expenses/${expense.id}`}
+                  key={expense.id}
                 >
-                  重新更新清單
-                </Button>
-              ) : null}
-            </p>
-          ) : null}
+                  <span className="category-icon">
+                    <Icon name="note" />
+                  </span>
+                  <div className="row-info">
+                    <div className="row-title">{expense.item}</div>
+                    <div className="row-sub">
+                      <span>{expense.spentOn}</span>
+                      {' · '}
+                      <span>{expense.category?.name ?? '未分類'}</span>
+                    </div>
+                  </div>{' '}
+                  <div className="row-amount">
+                    {expense.currencyCode} {displayAmount(expense.amount)}
+                  </div>
+                  <Icon name="arrow" />
+                </Link>
+              ))}
+            </div>
+          </section>
           {expenses.hasNextPage ? (
             <div className="load-more">
-              <Button
+              <ActionButton
                 type="button"
                 variant="outline"
+                label="載入更多"
+                busyLabel="正在讀取更多支出"
+                busy={expenses.isFetchingNextPage}
                 disabled={expenses.isFetching}
                 onClick={() => {
-                  void expenses.fetchNextPage();
+                  if (!expenses.isFetching) void expenses.fetchNextPage({ cancelRefetch: false });
                 }}
-              >
-                {expenses.isFetchingNextPage ? '載入中…' : '載入更多'}
-              </Button>
+              />
             </div>
           ) : null}
         </>

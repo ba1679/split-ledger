@@ -64,7 +64,7 @@ export async function arrangeInitialRead(
     '垃圾桶/已移入垃圾桶的旅行': ['/trips/trash', '/api/trips/trash', 'cards'],
     '旅行帳本/旅行資料': [`/trips/${tripId}`, base, 'summary'],
     '旅行帳本/各幣別總額': [`/trips/${tripId}`, `${base}/totals?scope=personal`, 'summary'],
-    '旅行帳本/支出清單': [`/trips/${tripId}`, `${base}/expenses`, 'list'],
+    '旅行帳本/支出清單': [`/trips/${tripId}`, `${base}/expenses?limit=20`, 'list'],
     '既有支出詳情/該筆支出與分攤': [
       `/trips/${tripId}/expenses/${expenseId}`,
       `${base}/expenses/${expenseId}`,

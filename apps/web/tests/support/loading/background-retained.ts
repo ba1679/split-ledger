@@ -17,6 +17,7 @@ export async function assertBackgroundRetained(world: LedgerWorld): Promise<void
   for (const row of await rows.all()) await expect(row).toBeVisible();
   await expect(page.getByRole('region', { name: '分幣別總額', exact: true })).toHaveText(
     state.totalsText,
+    { useInnerText: true },
   );
   await expect(page.getByText(/^(?:共\s*)?0\s*筆(?:紀錄|支出)?$/)).toHaveCount(0);
   await expect(page.getByRole('button', { name: '載入更多', exact: true })).toHaveCount(0);

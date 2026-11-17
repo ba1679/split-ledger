@@ -1,3 +1,4 @@
+import { assertFailedJsonRead } from './failed-json-read.js';
 import { expect } from '@playwright/test';
 import type { LedgerWorld } from '../../../../api/tests/support/world.js';
 import { managementSnapshot } from '../../../../api/tests/support/trip-management/baseline.js';
@@ -23,7 +24,7 @@ export async function assertLatestBackground(world: LedgerWorld): Promise<void> 
   expect(state.requests.length).toBe(3);
   expect(state.finished).toBe(3);
   expect(state.exchanges.length).toBe(3);
-  expect(state.requests[0]!.failure()).not.toBeNull();
+  await assertFailedJsonRead(state.requests[0]!, state.exchanges[0]!.body);
   for (const request of state.requests.slice(1)) expect(request.failure()).toBeNull();
   await expect(expenseRows(page, state.pagination.tripId)).toHaveCount(25);
   const ids = await visibleExpenseIds(page, state.pagination.tripId),
@@ -58,7 +59,7 @@ export async function assertLatestBackground(world: LedgerWorld): Promise<void> 
   for (const [index, cursor] of [null, state.pagination.cursor].entries()) {
     const response = await ownerRead(
       world,
-      `${base}/expenses${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ''}`,
+      `${base}/expenses?limit=20${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`,
     );
     expect(response.status()).toBe(200);
     expect((await response.json()) as ExpenseList).toEqual(state.expectedPages[index]);
@@ -92,6 +93,7 @@ export async function assertLatestBackground(world: LedgerWorld): Promise<void> 
   );
   await expect(page.getByRole('region', { name: '分幣別總額', exact: true })).toHaveText(
     state.totalsText,
+    { useInnerText: true },
   );
   const region = page.getByRole('region', { name: '支出清單', exact: true });
   await expect(region.getByRole('alert')).toHaveCount(0);

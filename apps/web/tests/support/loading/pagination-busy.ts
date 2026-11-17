@@ -28,7 +28,7 @@ export async function assertPaginationBusy(world: LedgerWorld): Promise<void> {
   for (const row of await rows.all()) await expect(row).toBeVisible();
   const totals = page.getByRole('region', { name: '分幣別總額', exact: true });
   await expect(totals).toBeVisible();
-  await expect(totals).toHaveText(state.totalsText);
+  await expect(totals).toHaveText(state.totalsText, { useInnerText: true });
   await expect(totals).not.toHaveAttribute('aria-busy', 'true');
   await expect(
     page.locator('[data-skeleton]:visible, .skeleton:visible, .query-skeleton:visible'),

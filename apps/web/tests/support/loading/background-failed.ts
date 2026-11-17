@@ -1,3 +1,4 @@
+import { assertFailedJsonRead } from './failed-json-read.js';
 import { expect } from '@playwright/test';
 import type { LedgerWorld } from '../../../../api/tests/support/world.js';
 import type { BackgroundRead } from './background-fixture.js';
@@ -11,7 +12,7 @@ export async function assertBackgroundFailed(world: LedgerWorld): Promise<void> 
   expect(state.result).toBe('明確失敗');
   expect(state.triggered).toBe(true);
   expect(state.requests.length).toBe(1);
-  expect(state.requests[0]!.failure()).not.toBeNull();
+  await assertFailedJsonRead(state.requests[0]!, state.exchanges[0]!.body);
   expect(state.released).toBe(true);
   expect(state.finished).toBe(1);
   await waitForManagementReads(ui);
