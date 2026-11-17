@@ -1,13 +1,11 @@
 import { Button } from '../components/ui/button.js';
-import React, { useState, useSyncExternalStore } from 'react';
+import React, { useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import { FormDialog } from './FormDialog.js';
 import { Link, NavLink, useLocation, useMatch } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSession } from '../features/auth/session.js';
-import { apiRequest, type Trip } from '../api/index.js';
 import { Icon } from './Icon.js';
-import type { TripState } from '../features/trips/management-api.js';
+import { useAvailableTrip } from '../features/trips/use-available-trip.js';
 
 type NavigationSection = 'trips' | 'members' | 'settlement' | null;
 
@@ -101,29 +99,14 @@ function TripNavigation({
 }
 
 function Navigation({ mobile = false }: { mobile?: boolean }) {
-  const { account, signOut, closing } = useSession();
+  const { signOut, closing } = useSession();
   const tripMatch = useMatch('/trips/:tripId/*');
   const matchedId = tripMatch?.params.tripId;
   const tripId = matchedId === 'trash' ? undefined : matchedId;
   const [tripsMenu, setTripsMenu] = useState(false);
   const { pathname } = useLocation();
   const section = navigationSection(pathname, tripId);
-  const client = useQueryClient();
-  const entryStateKey = ['account', account!.id, 'trip', tripId, 'entry-state'];
-  const entryUnavailable = useSyncExternalStore(
-    (notify) => client.getQueryCache().subscribe(notify),
-    () =>
-      client
-        .getQueriesData<TripState>({ queryKey: entryStateKey })
-        .some(([, state]) => state?.state !== 'active'),
-  );
-  const trip = useQuery({
-    queryKey: ['account', account!.id, 'trip', tripId],
-    queryFn: ({ signal }) => apiRequest<Trip>(`/api/trips/${tripId}`, { signal }),
-    enabled: Boolean(tripId),
-    retry: false,
-  });
-  const availableTrip = trip.error || entryUnavailable ? undefined : trip.data;
+  const availableTrip = useAvailableTrip(tripId);
 
   return (
     <>

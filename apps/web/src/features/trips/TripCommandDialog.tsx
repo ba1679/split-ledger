@@ -5,6 +5,40 @@ import { FormDialog } from '../../components/FormDialog.js';
 import { TripOperationCheck } from './TripOperationCheck.js';
 import { useLifecycleCommand, type ManagedTrip, type OperationOutcome } from './management-api.js';
 
+const confirmationCopy = {
+  trash: {
+    label: '移至垃圾桶',
+    busyLabel: '正在移至垃圾桶',
+    className: 'trash-confirmation',
+    variant: 'default',
+    description: (
+      <>
+        <p>旅行會先從我的旅行清單移除，保留完整帳務與照片。之後可以從垃圾桶復原。</p>
+        <p className="trip-command-note">移入垃圾桶不會結清欠款或更改帳務。</p>
+      </>
+    ),
+  },
+  purge: {
+    label: '永久刪除',
+    busyLabel: '正在永久刪除旅行',
+    className: 'purge-confirmation',
+    variant: 'destructive',
+    description: (
+      <>
+        <p>
+          <span className="desktop-confirm-copy">
+            這會永久刪除整趟旅行、同行者、支出、還款、結清紀錄及自訂縮圖，無法復原。
+          </span>
+          <span className="mobile-confirm-copy">
+            整趟旅行的同行者、支出、還款、結清與縮圖將永久刪除，無法復原。
+          </span>
+        </p>
+        <p className="trip-command-note purge-warning">永久刪除後，不能再開啟這趟旅行。</p>
+      </>
+    ),
+  },
+} as const;
+
 export function TripCommandDialog({
   trip,
   operation,
@@ -27,6 +61,7 @@ export function TripCommandDialog({
   const cancel = useRef<HTMLButtonElement>(null);
   const command = useLifecycleCommand(trip, operation, onComplete, onUnknownChange, onRejected);
   const purge = operation === 'purge';
+  const copy = confirmationCopy[operation];
   const outcome = command.unknown ? (
     <section className="operation-outcome" role="status">
       <p>「{trip.name}」操作結果尚未確認，請查證原次操作。</p>
@@ -60,27 +95,8 @@ export function TripCommandDialog({
       busy={command.isPending}
       showClose
       initialFocus={cancel}
-      className={`trip-command-dialog ${purge ? 'purge-confirmation' : 'trash-confirmation'}`}
-      description={
-        purge ? (
-          <>
-            <p>
-              <span className="desktop-confirm-copy">
-                這會永久刪除整趟旅行、同行者、支出、還款、結清紀錄及自訂縮圖，無法復原。
-              </span>
-              <span className="mobile-confirm-copy">
-                整趟旅行的同行者、支出、還款、結清與縮圖將永久刪除，無法復原。
-              </span>
-            </p>
-            <p className="trip-command-note purge-warning">永久刪除後，不能再開啟這趟旅行。</p>
-          </>
-        ) : (
-          <>
-            <p>旅行會先從我的旅行清單移除，保留完整帳務與照片。之後可以從垃圾桶復原。</p>
-            <p className="trip-command-note">移入垃圾桶不會結清欠款或更改帳務。</p>
-          </>
-        )
-      }
+      className={`trip-command-dialog ${copy.className}`}
+      description={copy.description}
     >
       {outcome}
       {!command.unknown && command.error ? (
@@ -93,12 +109,10 @@ export function TripCommandDialog({
           {command.unknown ? '關閉視窗' : '取消'}
         </Button>
         <Button
-          variant={purge ? 'destructive' : 'default'}
+          variant={copy.variant}
           disabled={command.isPending || command.unknown}
           aria-busy={command.isPending}
-          aria-label={
-            command.isPending ? (purge ? '正在永久刪除旅行' : '正在移至垃圾桶') : undefined
-          }
+          aria-label={command.isPending ? copy.busyLabel : undefined}
           onClick={() => {
             if (!command.isPending && !command.unknown) {
               onSubmit?.();
@@ -108,10 +122,8 @@ export function TripCommandDialog({
         >
           {command.isPending ? (
             <LoaderCircle size={20} className="action-spinner" aria-hidden="true" />
-          ) : purge ? (
-            '永久刪除'
           ) : (
-            '移至垃圾桶'
+            copy.label
           )}
         </Button>
       </div>
