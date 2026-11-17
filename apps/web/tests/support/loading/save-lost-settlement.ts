@@ -14,7 +14,6 @@ export async function saveLostSettlement(world: LedgerWorld): Promise<void> {
   expect(state.writes.length).toBe(1);
   expect(state.exchanges.length).toBe(1);
   expect(state.finished).toBe(1);
-  await expect.poll(() => state.writes[0]!.failure() !== null).toBe(true);
   const command = state.command!;
   await expect
     .poll(() =>
@@ -27,6 +26,15 @@ export async function saveLostSettlement(world: LedgerWorld): Promise<void> {
     .toBe(true);
   await expect.poll(() => state.pendingProofs).toBeGreaterThan(0);
   expect(state.proofMode).toBe('hold');
+  if (state.writes[0]!.failure() === null) {
+    // WebKit can complete the transport after the genuine 201 JSON was truncated.
+    const response = await state.writes[0]!.response();
+    expect(response?.status()).toBe(201);
+    const body = await response!.body();
+    expect(body).toEqual(state.exchanges[0]!.body.subarray(0, 1));
+    expect(Number(response!.headers()['content-length'])).toBeGreaterThan(body.length);
+    await expect(response!.json()).rejects.toThrow();
+  }
   expect(command.paidAmount).toBe(state.amount);
   expect(command.paidOn).toBe(state.date.replaceAll('/', '-'));
   expect(ui.writes.length).toBe(1);

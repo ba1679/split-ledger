@@ -16,14 +16,14 @@ export async function assertExpenseSaveFailed(world: LedgerWorld): Promise<void>
     page = ui.page;
   expect(state.responses.length).toBe(1);
   expect(state.responses[0]!.status()).toBe(400);
-  expect(await state.responses[0]!.json()).toMatchObject({ code: 'VALIDATION_ERROR' });
+  const rejection = await state.responses[0]!.json();
+  expect(rejection).toMatchObject({ code: 'VALIDATION_ERROR' });
+  expect(rejection.message).toBe('輸入資料格式不正確。');
   await waitForManagementReads(ui);
   await assertExpenseSaveDraft(world);
-  const error = page
-    .getByRole('alert')
-    .filter({ hasText: /無法|失敗|限制|檢查|重試/ })
-    .first();
+  const error = page.getByRole('alert').filter({ hasText: rejection.message }).first();
   await expect(error).toBeVisible();
+  await expect(error).toHaveText(rejection.message);
   await expect(error).not.toContainText(/23514|test_reject|isolated|constraint|postgres|SQLSTATE/i);
   await expect(state.data.control).toBeEnabled();
   await expect(page.getByLabel('金額', { exact: true })).toBeEnabled();
