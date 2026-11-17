@@ -37,16 +37,25 @@ Then('旅行操作停止忙碌且保留原次查證入口', async ({ world }) =>
         loss.operation === '新增附圖'
           ? world.get<NewTripDraft>('management:newTripDraft').file!
           : draft.file!;
-      const preview = page.locator('img[src^="blob:"]:visible');
-      await expect(preview).toHaveCount(1);
-      const hash = await preview.evaluate(async (element) => {
-        const bytes = await (await fetch((element as HTMLImageElement).src)).arrayBuffer();
+      // Unknown must retain the File without presenting an unconfirmed photo as saved.
+      // The approved UI shows the last confirmed image (or a neutral new-trip placeholder).
+      await expect(
+        page.getByText(file.name, { exact: loss.operation !== '新增附圖' }),
+      ).toBeVisible();
+      if (loss.operation !== '新增附圖') {
+        const input = page.getByRole('dialog').locator('input[type="file"]');
+        const hash = await input.evaluate(async (element) => {
+          const files = (element as HTMLInputElement).files;
+          if (!files || files.length !== 1) throw new Error('Original draft File is missing');
 
-        return [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))]
-          .map((byte) => byte.toString(16).padStart(2, '0'))
-          .join('');
-      });
-      expect(hash).toBe(file.asset.sha256);
+          return [
+            ...new Uint8Array(await crypto.subtle.digest('SHA-256', await files[0]!.arrayBuffer())),
+          ]
+            .map((byte) => byte.toString(16).padStart(2, '0'))
+            .join('');
+        });
+        expect(hash).toBe(file.asset.sha256);
+      }
     }
   }
   if (loss.operation === '新增附圖')

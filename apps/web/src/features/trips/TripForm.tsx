@@ -67,7 +67,7 @@ export function TripForm({
     };
   }, []);
 
-  async function finish(saved: Trip) {
+  async function finish(saved: Trip, message?: string) {
     if (!alive.current) return;
     if (trip) client.setQueryData(['account', account!.id, 'trip', saved.id], saved);
     await Promise.all([
@@ -78,7 +78,7 @@ export function TripForm({
     ]);
     if (!alive.current) return;
     onClose();
-    navigate(`/trips/${saved.id}`);
+    navigate(`/trips/${saved.id}`, message ? { state: { message } } : undefined);
   }
 
   async function verifyPhoto(saved: Trip, original: PhotoAttempt) {
@@ -106,7 +106,10 @@ export function TripForm({
       const current = await apiRequest<Trip>(`/api/trips/${saved.id}`, {
         signal: AbortSignal.timeout(5000),
       });
-      await finish(current);
+      await finish(
+        current,
+        `原次圖片保存已確認成功。目前縮圖${current.hasThumbnail ? '已保存，以目前圖片為準' : '使用預設圖'}。`,
+      );
     } catch {
       // Keep the original operation and File while its current projection is unavailable.
     } finally {
@@ -300,6 +303,7 @@ export function TripForm({
         busy={photoPending}
         unknown={photoUnknown}
         currentImageAvailable={currentImageAvailable}
+        draftName={file?.name}
         onVerify={() => {
           if (photoAttempt && !photoLocked.current) {
             photoLocked.current = true;

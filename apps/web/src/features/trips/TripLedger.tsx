@@ -1,8 +1,8 @@
 import { TripCommandDialog, ThumbnailEntryDialog } from './TripCommandDialog.js';
 import { TripManagementMenu } from './TripManagementMenu.js';
 import { Button } from '../../components/ui/button.js';
-import React, { useState } from 'react';
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import React, { useEffect, useRef, useState } from 'react';
+import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useLocation, useParams, useNavigate } from 'react-router-dom';
 import {
   apiRequest,
@@ -20,20 +20,56 @@ import { displayAmount } from '../expenses/money.js';
 import { formatShareAmount } from '../expenses/ExpenseShares.js';
 import type { SettlementView } from '../settlement/types.js';
 import { Icon } from '../../components/Icon.js';
+import { lifecycleOutcomeMessage, type TripState, type ManagedTrip } from './management-api.js';
+import { expenseDraftKey, type RetainedExpenseDraft } from '../expenses/expense-draft.js';
 
 export function TripLedger() {
   const { tripId } = useParams(),
     { account } = useSession();
   const [editing, setEditing] = useState(false);
   const [managementDialog, setManagementDialog] = useState<'thumbnail' | 'trash' | null>(null);
+  const [commandTrip, setCommandTrip] = useState<ManagedTrip | null>(null);
+  const [thumbnailTrip, setThumbnailTrip] = useState<ManagedTrip | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const client = useQueryClient();
+  const unavailableHeading = useRef<HTMLHeadingElement>(null);
+
+  function closeManagement() {
+    setManagementDialog(null);
+    requestAnimationFrame(() => {
+      if (document.activeElement === document.body)
+        unavailableHeading.current?.focus({ preventScroll: true });
+    });
+  }
+
+  // Each ledger entry verifies authority afresh before exposing cached accounting.
+  const [entryId] = useState(() => crypto.randomUUID());
+  const authority = useQuery({
+    queryKey: ['account', account!.id, 'trip', tripId, 'entry-state', entryId],
+    queryFn: ({ signal }) => apiRequest<TripState>(`/api/trips/${tripId}/state`, { signal }),
+    retry: false,
+    gcTime: 0,
+  });
+  useEffect(() => {
+    if (
+      authority.data?.state &&
+      authority.data.state !== 'active' &&
+      (!document.activeElement ||
+        document.activeElement === document.body ||
+        !document.activeElement.isConnected)
+    ) {
+      unavailableHeading.current?.focus({ preventScroll: true });
+    }
+  }, [authority.data?.state]);
   const trip = useQuery({
     queryKey: ['account', account!.id, 'trip', tripId],
     queryFn: ({ signal }) => apiRequest<Trip>(`/api/trips/${tripId}`, { signal }),
+    enabled: authority.data?.state === 'active',
   });
 
   const expenses = useInfiniteQuery({
+    enabled: authority.data?.state === 'active',
     queryKey: ['account', account!.id, 'expenses', tripId],
     initialPageParam: undefined as string | undefined,
     queryFn: ({ signal, pageParam }) =>
@@ -45,18 +81,21 @@ export function TripLedger() {
   });
 
   const members = useQuery({
+    enabled: authority.data?.state === 'active',
     queryKey: ['account', account!.id, 'members', tripId],
     queryFn: ({ signal }) =>
       apiRequest<ItemList<TripMember>>(`/api/trips/${tripId}/members`, { signal }),
   });
 
   const settlement = useQuery({
+    enabled: authority.data?.state === 'active',
     queryKey: ['account', account!.id, 'settlement', tripId, 'ledger'],
     queryFn: ({ signal }) =>
       apiRequest<SettlementView>(`/api/trips/${tripId}/settlement`, { signal }),
   });
 
   const totals = useQuery({
+    enabled: authority.data?.state === 'active',
     queryKey: ['account', account!.id, 'totals', tripId, 'personal'],
     queryFn: ({ signal }) =>
       apiRequest<{ totals: PersonalCurrencyTotal[] }>(
@@ -73,10 +112,100 @@ export function TripLedger() {
     ).values(),
   ];
   const totalCount = expenses.data?.pages.at(-1)?.totalCount ?? 0;
+  useEffect(() => {
+    if (!authority.data || authority.data.state === 'active') return;
+    const predicate = (query: { queryKey: readonly unknown[] }) =>
+      query.queryKey[0] === 'account' &&
+      query.queryKey[1] === account!.id &&
+      query.queryKey[2] !== 'expense-draft' &&
+      query.queryKey.includes(tripId) &&
+      !query.queryKey.includes('entry-state');
+    void client.cancelQueries({ predicate }).then(() => client.removeQueries({ predicate }));
+  }, [client, account, tripId, authority.data]);
+  const retainedDraft = client.getQueryData<RetainedExpenseDraft>(
+    expenseDraftKey(account!.id, tripId!),
+  );
+  const lifecycleDialog = commandTrip ? (
+    <TripCommandDialog
+      key={`${account!.id}:${commandTrip.id}`}
+      trip={commandTrip}
+      operation="trash"
+      open={managementDialog === 'trash'}
+      onClose={closeManagement}
+      onComplete={(result, verified) => {
+        setCommandTrip(null);
+        setManagementDialog(null);
+        navigate('/trips', {
+          state: {
+            message: verified
+              ? lifecycleOutcomeMessage(result)
+              : '旅行已移至垃圾桶，可從垃圾桶復原。',
+          },
+        });
+      }}
+    />
+  ) : null;
+  const thumbnailDialog = thumbnailTrip ? (
+    <ThumbnailEntryDialog
+      key={`${account!.id}:${thumbnailTrip.id}`}
+      trip={trip.data ?? thumbnailTrip}
+      open={managementDialog === 'thumbnail'}
+      availability={authority.data?.state ?? 'active'}
+      onClose={closeManagement}
+    />
+  ) : null;
+
+  if (authority.isPending || authority.error)
+    return (
+      <>
+        {lifecycleDialog}
+        {thumbnailDialog}
+        <QueryState
+          pending={authority.isPending}
+          error={authority.error}
+          retry={() => {
+            void authority.refetch();
+          }}
+        />
+      </>
+    );
+
+  if (authority.data.state !== 'active')
+    return (
+      <>
+        {lifecycleDialog}
+        {thumbnailDialog}
+        <section className="state">
+          <h1 ref={unavailableHeading} tabIndex={-1}>
+            {authority.data.state === 'trash' ? '旅行已在垃圾桶' : '找不到這趟旅行'}
+          </h1>
+          <p>
+            {authority.data.state === 'trash'
+              ? '請先從垃圾桶復原，再繼續記帳。'
+              : '旅行已永久刪除，無法再開啟帳本。'}
+          </p>
+          <Link to={authority.data.state === 'trash' ? '/trips/trash' : '/trips'}>
+            {authority.data.state === 'trash' ? '前往垃圾桶復原' : '返回旅行清單'}
+          </Link>
+          {retainedDraft ? (
+            <section role="region" aria-label="尚未保存的支出草稿">
+              <h2>尚未保存的支出草稿</h2>
+              <p>{retainedDraft.item}</p>
+              <p>
+                {retainedDraft.amount} {retainedDraft.currencyCode}
+              </p>
+              <p>{retainedDraft.spentOn}</p>
+            </section>
+          ) : null}
+        </section>
+      </>
+    );
 
   if (trip.isPending || trip.error)
     return (
       <>
+        {lifecycleDialog}
+        {thumbnailDialog}
         <Link className="back" to="/trips">
           <Icon name="back" />
           <span>我的旅行</span>
@@ -93,23 +222,8 @@ export function TripLedger() {
 
   return (
     <>
-      {managementDialog === 'trash' ? (
-        <TripCommandDialog
-          trip={trip.data}
-          operation="trash"
-          onClose={() => setManagementDialog(null)}
-          onComplete={() => {
-            setManagementDialog(null);
-            navigate('/trips', { state: { message: '旅行已移至垃圾桶，可從垃圾桶復原。' } });
-          }}
-        />
-      ) : null}
-      <ThumbnailEntryDialog
-        key={`${account!.id}:${trip.data.id}`}
-        trip={trip.data}
-        open={managementDialog === 'thumbnail'}
-        onClose={() => setManagementDialog(null)}
-      />
+      {lifecycleDialog}
+      {thumbnailDialog}
       <Link className="back" to="/trips">
         <Icon name="back" />
         <span>我的旅行</span>
@@ -132,7 +246,13 @@ export function TripLedger() {
               <span>記一筆</span>
             </Link>
           </Button>
-          <TripManagementMenu onSelect={setManagementDialog} />
+          <TripManagementMenu
+            onSelect={(action) => {
+              if (action === 'trash') setCommandTrip(trip.data);
+              if (action === 'thumbnail') setThumbnailTrip(trip.data);
+              setManagementDialog(action);
+            }}
+          />
         </div>
       </header>
       <nav aria-label="旅行內導覽" className="trip-navigation">

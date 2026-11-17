@@ -29,6 +29,8 @@
 
 | 動作 | Truth 規格 | 改動摘要 | 原因 |
 | --- | --- | --- | --- |
+| MODIFY | `specs/truth/contracts/components/schemas/shared.yaml` -> `ApiError.code.enum`（T268 runtime 回交） | 補入既已由本 plan 的 trip-management group 定義的 13 個旅行生命週期、收據與圖片錯誤碼；僅同步共享枚舉，不新增錯誤行為或改動 response shape。 | T268 首次 runtime 發現共用 schema 未同步既定 006 code；group description、backend/frontend DSL 與產品語意已一致，屬低風險契約同步，沿用原需求批准，無新產品決策。 |
+| NOOP | `specs/truth/contracts/groups/trip-management.yaml` -> 圖片版本衝突 `409 ApiError` 與 `GET /api/trips/{tripId}/state` | 保留 409 的 code/message 錯誤形狀；不加入 currentState，前端另 GET state 取得最新權威狀態。 | T149 測試曾額外期待 409.currentState，與既有契約不符；修正測試 oracle，不以擴張 API response 遷就測試。 |
 | MODIFY | `specs/truth/contracts/openapi.yaml` -> `info.title/version/description` | 契約標題由 Phase 1B 改為整體旅帳 API、規劃文件版本升至 0.3.0；修正「整體尚未實作」為既有帳務程式已存在、006 新契約待實作。 | 006 擴充同一權威契約；契約版本不是產品發布或驗收宣告。 |
 | MODIFY | `specs/truth/contracts/openapi.yaml` -> 寫入 Origin／Content-Type 與未確認結果規則 | 精確 Origin 檢查沿用，新增唯一 multipart POST 例外；旅行建立改用專用 state 查證，生命週期與圖片命令以持久收據去重、查原結果與目前狀態；單筆刪除未知結果先查 trip state，purged/trash 的普通子資源 404 不得誤判成功。 | 使用者 `1B／2A` 要可復原、永久清除與上傳；舊 `verifiedDelete` 對任何 404 推斷刪除完成，必須有可區分查證契約。 |
 | ADD | `specs/truth/contracts/groups/trip-management.yaml` -> `GET /api/trips/trash`、`GET /api/trips/{tripId}/state` | 新增 owner scoped 分頁垃圾桶與 active/trash/purged 狀態投影；purged 僅從本人 UUID reservation 得知，不回帳務或圖片內容。 | 垃圾桶須可辨識及復原，且 purge 後仍可與未知／他人 404 分辨。 |

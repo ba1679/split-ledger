@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { LoaderCircle } from 'lucide-react';
 import { Button } from '../../components/ui/button.js';
 import { FormDialog } from '../../components/FormDialog.js';
+import { TripOperationCheck } from './TripOperationCheck.js';
 import { useLifecycleCommand, type ManagedTrip, type OperationOutcome } from './management-api.js';
 
 export function TripCommandDialog({
@@ -9,15 +10,34 @@ export function TripCommandDialog({
   operation,
   onClose,
   onComplete,
+  open = true,
+  onSubmit,
+  onUnknownChange,
+  onRejected,
 }: {
   trip: ManagedTrip;
   operation: 'trash' | 'purge';
   onClose: () => void;
-  onComplete: (result: OperationOutcome) => void;
+  onComplete: (result: OperationOutcome, verified?: boolean) => void;
+  open?: boolean;
+  onSubmit?: () => void;
+  onUnknownChange?: (unknown: boolean) => void;
+  onRejected?: () => void;
 }) {
   const cancel = useRef<HTMLButtonElement>(null);
-  const command = useLifecycleCommand(trip, operation, onComplete);
+  const command = useLifecycleCommand(trip, operation, onComplete, onUnknownChange, onRejected);
   const purge = operation === 'purge';
+  const outcome = command.unknown ? (
+    <section className="operation-outcome" role="status">
+      <p>「{trip.name}」操作結果尚未確認，請查證原次操作。</p>
+      <TripOperationCheck
+        busy={command.isPending}
+        onCheck={command.verify}
+        busyLabel="正在查證旅行操作"
+      />
+    </section>
+  ) : null;
+  if (!open) return outcome;
 
   return (
     <FormDialog
@@ -62,23 +82,29 @@ export function TripCommandDialog({
         )
       }
     >
-      {command.error ? (
+      {outcome}
+      {!command.unknown && command.error ? (
         <p role="alert" className="error">
           {command.error.message}
         </p>
       ) : null}
       <div className="form-actions trip-command-actions">
         <Button ref={cancel} variant="outline" disabled={command.isPending} onClick={onClose}>
-          取消
+          {command.unknown ? '關閉視窗' : '取消'}
         </Button>
         <Button
           variant={purge ? 'destructive' : 'default'}
-          disabled={command.isPending}
+          disabled={command.isPending || command.unknown}
           aria-busy={command.isPending}
           aria-label={
             command.isPending ? (purge ? '正在永久刪除旅行' : '正在移至垃圾桶') : undefined
           }
-          onClick={command.submit}
+          onClick={() => {
+            if (!command.isPending && !command.unknown) {
+              onSubmit?.();
+              command.submit();
+            }
+          }}
         >
           {command.isPending ? (
             <LoaderCircle size={20} className="action-spinner" aria-hidden="true" />
@@ -90,8 +116,16 @@ export function TripCommandDialog({
         </Button>
       </div>
       <p className="dialog-escape">
-        <span className="desktop-dialog-hint">按 Esc 也可取消</span>
-        <span className="mobile-dialog-hint">取消或關閉不會更改旅行</span>
+        {command.isPending ? (
+          '操作已送出，請等待查證結果；關閉不會撤回操作。'
+        ) : command.unknown ? (
+          '關閉只會收起視窗，原次操作仍須查證。'
+        ) : (
+          <>
+            <span className="desktop-dialog-hint">按 Esc 也可取消</span>
+            <span className="mobile-dialog-hint">取消或關閉不會更改旅行</span>
+          </>
+        )}
       </p>
     </FormDialog>
   );

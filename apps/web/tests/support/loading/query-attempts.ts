@@ -8,7 +8,7 @@ export function isCancelledRead(request: Request): boolean {
   const message = request.failure()?.errorText ?? '';
 
   return (
-    /net::ERR_ABORTED|\bLoad cancelled\b|\bLoad canceled\b/i.test(message) ||
+    /net::ERR_ABORTED|\bLoad (?:request )?cancell?ed\b/i.test(message) ||
     /^(?:cancelled|canceled)$/i.test(message)
   );
 }

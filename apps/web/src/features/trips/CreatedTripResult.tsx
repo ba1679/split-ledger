@@ -10,6 +10,7 @@ export function CreatedTripResult({
   busy,
   unknown,
   currentImageAvailable,
+  draftName,
   onRetry,
   onVerify,
 }: {
@@ -18,6 +19,7 @@ export function CreatedTripResult({
   busy: boolean;
   unknown: boolean;
   currentImageAvailable: boolean;
+  draftName?: string;
   onRetry: () => void;
   onVerify: () => void;
 }) {
@@ -55,6 +57,7 @@ export function CreatedTripResult({
             )}
           </p>
           {error ? <p>{error}</p> : null}
+          {unknown && draftName ? <p>照片草稿：{draftName}（待查證）</p> : null}
         </div>
         <Button
           aria-disabled={busy}

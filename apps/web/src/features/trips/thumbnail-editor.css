@@ -152,15 +152,25 @@
 .thumbnail-actions .ds-button {
   min-height: 48px;
 }
-.thumbnail-outcome {
+.thumbnail-outcome,
+.operation-outcome {
   margin-top: 12px;
   padding: 12px;
   border-left: 3px solid #b69c65;
   background: var(--warning-surface);
   font-size: 14px;
 }
-.thumbnail-outcome p {
+.thumbnail-outcome p,
+.operation-outcome p {
   margin-bottom: 8px;
+}
+.trip-operation-check {
+  position: relative;
+}
+.trip-operation-check .action-spinner {
+  position: absolute;
+  left: calc(50% - 10px);
+  top: calc(50% - 10px);
 }
 .thumbnail-actions .ds-button:last-child {
   min-width: 166px;

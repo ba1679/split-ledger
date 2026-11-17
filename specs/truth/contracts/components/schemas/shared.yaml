@@ -18,6 +18,19 @@ ApiError:
         - ARRANGEMENT_NOT_FOUND
         - OVERPAYMENT_CONFIRMATION_REQUIRED
         - REQUEST_ORIGIN_REJECTED
+        - TRIP_NOT_TRASHED
+        - TRIP_TRASHED
+        - TRIP_PURGED
+        - TRIP_STATE_CHANGED
+        - THUMBNAIL_UPDATED
+        - OPERATION_ID_CONFLICT
+        - OPERATION_NOT_FOUND
+        - UPLOAD_INCOMPLETE
+        - UPLOAD_TIMEOUT
+        - IMAGE_TOO_LARGE
+        - UNSUPPORTED_IMAGE_TYPE
+        - INVALID_IMAGE
+        - UPLOAD_BUSY
         - INTERNAL_ERROR
     message:
       type: string

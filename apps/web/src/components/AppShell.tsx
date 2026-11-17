@@ -1,12 +1,13 @@
 import { Button } from '../components/ui/button.js';
-import React, { useState } from 'react';
+import React, { useState, useSyncExternalStore } from 'react';
 import { Trash2 } from 'lucide-react';
 import { FormDialog } from './FormDialog.js';
 import { Link, NavLink, useLocation, useMatch } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSession } from '../features/auth/session.js';
 import { apiRequest, type Trip } from '../api/index.js';
 import { Icon } from './Icon.js';
+import type { TripState } from '../features/trips/management-api.js';
 
 type NavigationSection = 'trips' | 'members' | 'settlement' | null;
 
@@ -107,12 +108,22 @@ function Navigation({ mobile = false }: { mobile?: boolean }) {
   const [tripsMenu, setTripsMenu] = useState(false);
   const { pathname } = useLocation();
   const section = navigationSection(pathname, tripId);
+  const client = useQueryClient();
+  const entryStateKey = ['account', account!.id, 'trip', tripId, 'entry-state'];
+  const entryUnavailable = useSyncExternalStore(
+    (notify) => client.getQueryCache().subscribe(notify),
+    () =>
+      client
+        .getQueriesData<TripState>({ queryKey: entryStateKey })
+        .some(([, state]) => state?.state !== 'active'),
+  );
   const trip = useQuery({
     queryKey: ['account', account!.id, 'trip', tripId],
     queryFn: ({ signal }) => apiRequest<Trip>(`/api/trips/${tripId}`, { signal }),
     enabled: Boolean(tripId),
     retry: false,
   });
+  const availableTrip = trip.error || entryUnavailable ? undefined : trip.data;
 
   return (
     <>
@@ -122,7 +133,7 @@ function Navigation({ mobile = false }: { mobile?: boolean }) {
       >
         <TripNavigation
           section={section}
-          tripId={trip.data ? tripId : undefined}
+          tripId={availableTrip ? tripId : undefined}
           mobile={mobile}
           trash={pathname === '/trips/trash'}
           openTrips={() => setTripsMenu(true)}
@@ -148,8 +159,8 @@ function Navigation({ mobile = false }: { mobile?: boolean }) {
       {mobile && tripsMenu ? (
         <FormDialog
           title="我的旅行"
-          className={`mobile-trips-menu${trip.data ? ' has-current-trip' : ''}`}
-          description={trip.data ? `目前：${trip.data.name}` : undefined}
+          className={`mobile-trips-menu${availableTrip ? ' has-current-trip' : ''}`}
+          description={availableTrip ? `目前：${availableTrip.name}` : undefined}
           onClose={() => setTripsMenu(false)}
           showClose
         >

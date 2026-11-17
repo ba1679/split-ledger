@@ -1,9 +1,10 @@
 import { Input } from '../../components/ui/input.js';
 import { Button } from '../../components/ui/button.js';
-import React, { useId, useRef, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { parseMoney } from '@split-ledger/shared';
+import { expenseDraftKey, type RetainedExpenseDraft } from './expense-draft.js';
 import {
   apiRequest,
   ApiError,
@@ -168,6 +169,44 @@ function ExpenseEditor({
     (categories.data?.items.some((option) => option.id === preferredCategory)
       ? preferredCategory!
       : '');
+
+  useQuery({
+    queryKey: expenseDraftKey(account!.id, tripId),
+    queryFn: (): RetainedExpenseDraft | null => null,
+    enabled: false,
+    gcTime: Infinity,
+  });
+  useEffect(() => {
+    if (client.getQueryData<{ id: string }>(['session'])?.id !== account!.id) return;
+    const key = expenseDraftKey(account!.id, tripId);
+    if (!item && !amount) {
+      client.removeQueries({ queryKey: key, exact: true });
+
+      return;
+    }
+    client.setQueryData<RetainedExpenseDraft>(key, {
+      id,
+      item,
+      amount,
+      currencyCode: currency,
+      spentOn: date,
+      categoryId: category || null,
+      payerMemberId,
+      shareMemberIds,
+    });
+  }, [
+    client,
+    account,
+    tripId,
+    id,
+    item,
+    amount,
+    currency,
+    date,
+    category,
+    payerMemberId,
+    shareMemberIds,
+  ]);
   const awaitingPreference =
     categoryChoice === null &&
     Boolean(preferredCategory) &&
@@ -208,6 +247,7 @@ function ExpenseEditor({
     });
 
   async function saved(message: string) {
+    client.removeQueries({ queryKey: expenseDraftKey(account!.id, tripId), exact: true });
     await Promise.all(
       [
         'trip',
@@ -704,6 +744,11 @@ function ExpenseEditor({
               aria-disabled={busy}
               onClick={(event) => {
                 if (busy) event.preventDefault();
+                else if (!unconfirmed)
+                  client.removeQueries({
+                    queryKey: expenseDraftKey(account!.id, tripId),
+                    exact: true,
+                  });
               }}
               to={`/trips/${tripId}`}
             >

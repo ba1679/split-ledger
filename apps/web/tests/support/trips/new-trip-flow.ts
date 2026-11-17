@@ -201,6 +201,14 @@ export async function newTripRequestOutcome(
 
       return undefined;
     }
+    // WebKit can finish the headers successfully even when the JSON body was truncated.
+    try {
+      await response.json();
+    } catch (error) {
+      flow.failures.set(request, error instanceof Error ? error.message : String(error));
+
+      return undefined;
+    }
   }
 
   return response;

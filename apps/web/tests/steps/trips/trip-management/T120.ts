@@ -21,13 +21,13 @@ Then('舊連結只提供 {string} 的下一步而不顯示帳務', async ({ worl
   expect(state).toBe(stale.state);
   if (state === '垃圾桶') {
     await expect(page.getByText(/旅行已在垃圾桶/).first()).toBeVisible();
-    const next = page.getByRole('link', { name: /垃圾桶|復原/ });
+    const next = page.getByRole('main').getByRole('link', { name: /垃圾桶|復原/ });
     await expect(next).toHaveAttribute('href', '/trips/trash');
     await next.click({ trial: true });
   } else {
     expect(state).toBe('已永久刪除');
     await expect(page.getByText(/旅行不存在|找不到這趟旅行|旅行已永久刪除/).first()).toBeVisible();
-    const next = page.getByRole('link', { name: /返回旅行清單|回旅行清單/ });
+    const next = page.getByRole('main').getByRole('link', { name: /返回旅行清單|回旅行清單/ });
     await expect(next).toHaveAttribute('href', '/trips');
     await next.click({ trial: true });
   }

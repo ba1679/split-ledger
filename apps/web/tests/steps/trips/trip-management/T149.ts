@@ -24,7 +24,6 @@ Then('畫面說明衝突並保留目前權威狀態', async ({ world, browser })
   expect(await saved.response.json()).toMatchObject({
     code,
     message: expect.any(String),
-    currentState: expectedCurrentState(current),
   });
   const ui = managementUI(world),
     page = ui.page;

@@ -1,7 +1,7 @@
 import { TrashTrips } from '../features/trips/TrashTrips.js';
 import { Button } from '../components/ui/button.js';
 import React from 'react';
-import { Navigate, Route, Routes, Link } from 'react-router-dom';
+import { Navigate, Route, Routes, Link, useLocation } from 'react-router-dom';
 import { useSession } from '../features/auth/session.js';
 import { Login } from '../features/auth/Login.js';
 import { Trips } from '../features/trips/Trips.js';
@@ -25,6 +25,7 @@ function PrivatePage({ children }: { children: React.ReactNode }) {
 
 export function App() {
   const session = useSession();
+  const location = useLocation();
 
   if (session.pending || session.closing)
     return (
@@ -62,7 +63,7 @@ export function App() {
         path="/trips/:tripId"
         element={
           <PrivatePage>
-            <TripLedger />
+            <TripLedger key={location.pathname} />
           </PrivatePage>
         }
       />

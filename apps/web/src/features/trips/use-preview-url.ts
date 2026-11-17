@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react';
 
 export function usePreviewUrl(value: Blob | null | undefined, open: boolean) {
-  const [url, setUrl] = useState<string | null>(null);
+  const [preview, setPreview] = useState<{ value: Blob; url: string } | null>(null);
 
   useEffect(() => {
     if (!value || !open) {
-      setUrl(null);
+      setPreview(null);
 
       return;
     }
     const objectUrl = URL.createObjectURL(value);
-    setUrl(objectUrl);
+    setPreview({ value, url: objectUrl });
 
     return () => URL.revokeObjectURL(objectUrl);
   }, [value, open]);
 
-  return url;
+  return open && preview && preview.value === value ? preview.url : null;
 }
