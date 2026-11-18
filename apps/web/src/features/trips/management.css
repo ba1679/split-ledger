@@ -45,7 +45,7 @@
   cursor: pointer;
 }
 .trip-management-menu button:hover,
-.trip-management-menu button:focus {
+.trip-management-menu button:focus-visible {
   background: var(--soft);
   outline: 2px solid transparent;
 }
@@ -221,6 +221,9 @@
 }
 .trash-purge {
   color: var(--danger);
+}
+.trash-card-actions .trash-purge:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--danger) 10%, var(--panel));
 }
 .trash-note {
   font-size: 14px;
