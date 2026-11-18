@@ -52,6 +52,7 @@ export function registerRepaymentReadRoutes({ app, db, auth }: SplittingModuleDe
           200: Type.Object({ items: Type.Array(RepaymentSchema) }, { additionalProperties: false }),
           401: ErrorResponse,
           404: ErrorResponse,
+          409: ErrorResponse,
         },
       },
     },
@@ -79,24 +80,36 @@ export function registerRepaymentReadRoutes({ app, db, auth }: SplittingModuleDe
     {
       schema: {
         params: Type.Object({ tripId: Uuid, repaymentId: Uuid }, { additionalProperties: false }),
-        response: { 200: RepaymentSchema, 401: ErrorResponse, 404: ErrorResponse },
+        response: {
+          200: RepaymentSchema,
+          401: ErrorResponse,
+          404: ErrorResponse,
+          409: ErrorResponse,
+        },
       },
     },
     async (request, reply) => {
       const user = await requireUser(auth, request, reply);
-      const [row] = await db
-        .select()
-        .from(repayments)
-        .where(
-          and(
-            eq(repayments.ownerId, user.id),
-            eq(repayments.tripId, request.params.tripId),
-            eq(repayments.id, request.params.repaymentId),
-          ),
-        );
-      if (!row) throw notFound();
 
-      return repaymentView(row);
+      return db.transaction(
+        async (tx) => {
+          await requireOwnedTrip(tx, user.id, request.params.tripId);
+          const [row] = await tx
+            .select()
+            .from(repayments)
+            .where(
+              and(
+                eq(repayments.ownerId, user.id),
+                eq(repayments.tripId, request.params.tripId),
+                eq(repayments.id, request.params.repaymentId),
+              ),
+            );
+          if (!row) throw notFound();
+
+          return repaymentView(row);
+        },
+        { isolationLevel: 'repeatable read', accessMode: 'read only' },
+      );
     },
   );
 }

@@ -32,3 +32,7 @@ Thumbs.db
 # Deployment backup artifacts
 backups/
 *.dump
+
+# Python tool caches
+__pycache__/
+*.py[cod]

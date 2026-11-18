@@ -24,6 +24,12 @@ members:
         content:
           application/json:
             schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '409':
+        description: 本人旅行在垃圾桶；code=TRIP_TRASHED。普通子資源不可用 404 偽裝操作成功。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
   post:
     tags: [members]
     operationId: createTripMember
@@ -63,7 +69,7 @@ members:
           application/json:
             schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
       '409':
-        description: MEMBER_NAME_CONFLICT 或 ID_CONFLICT；不揭露衝突資源。
+        description: MEMBER_NAME_CONFLICT 或 ID_CONFLICT；不揭露衝突資源；本人垃圾桶旅行回 code=TRIP_TRASHED。
         content:
           application/json:
             schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
@@ -93,6 +99,12 @@ member:
         content:
           application/json:
             schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
+      '409':
+        description: 本人旅行在垃圾桶；code=TRIP_TRASHED。普通子資源不可用 404 偽裝操作成功。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
   patch:
     tags: [members]
     operationId: updateTripMember
@@ -132,7 +144,7 @@ member:
           application/json:
             schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
       '409':
-        description: 名稱衝突；code=MEMBER_NAME_CONFLICT。
+        description: 名稱衝突；code=MEMBER_NAME_CONFLICT；本人垃圾桶旅行回 code=TRIP_TRASHED。
         content:
           application/json:
             schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
@@ -166,7 +178,7 @@ member:
           application/json:
             schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
       '409':
-        description: 已被歷史引用；code=MEMBER_IN_USE。
+        description: 已被歷史引用；code=MEMBER_IN_USE；本人垃圾桶旅行回 code=TRIP_TRASHED。
         content:
           application/json:
             schema: {$ref: ../components/schemas/shared.yaml#/ApiError}

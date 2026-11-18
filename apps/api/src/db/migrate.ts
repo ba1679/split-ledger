@@ -5,8 +5,8 @@ import type pg from 'pg';
 export const migrationsDirectory = new URL('../../drizzle/', import.meta.url);
 
 /** Apply the same archived SQL migrations in production and isolated test databases. */
-export async function migrate(pool: pg.Pool): Promise<void> {
-  const files = (await readdir(migrationsDirectory)).filter((file) => file.endsWith('.sql')).sort();
+export async function migrate(pool: pg.Pool, directory = migrationsDirectory): Promise<void> {
+  const files = (await readdir(directory)).filter((file) => file.endsWith('.sql')).sort();
   const client = await pool.connect();
 
   try {
@@ -19,7 +19,7 @@ export async function migrate(pool: pg.Pool): Promise<void> {
       applied_at timestamptz NOT NULL DEFAULT now()
     )`);
     for (const name of files) {
-      const sql = await readFile(new URL(name, migrationsDirectory), 'utf8');
+      const sql = await readFile(new URL(name, directory), 'utf8');
       const checksum = createHash('sha256').update(sql).digest('hex');
       const prior = await client.query<{ sha256: string }>(
         'SELECT sha256 FROM _ledger_migrations WHERE name=$1',

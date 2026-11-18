@@ -1,6 +1,7 @@
 import { test as apiTest } from '../../../api/tests/support/fixtures.js';
 import { createBdd } from 'playwright-bdd';
-import { createServer } from 'vite';
+import { createServer, type ViteDevServer } from 'vite';
+import { registerResponseProxy, forwardProxyResponse } from './loading/response-proxy.js';
 import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
@@ -8,30 +9,46 @@ import tailwindcss from '@tailwindcss/vite';
 export const test = apiTest.extend<Record<never, never>, { webServer: string }>({
   webServer: [
     async ({ runtime }, use) => {
-      const server = await createServer({
-        root: fileURLToPath(new URL('../../', import.meta.url)),
-        cacheDir: fileURLToPath(
-          new URL(
-            `../../../../.cache/vite-${process.pid}-${new URL(runtime.webOrigin).port}/`,
-            import.meta.url,
-          ),
-        ),
-        configFile: false,
-        plugins: [react(), tailwindcss()],
-        server: {
-          host: '127.0.0.1',
-          port: Number(new URL(runtime.webOrigin).port),
-          strictPort: true,
-          proxy: { '/api': runtime.origin },
-        },
-        logLevel: 'error',
-      });
-
+      const responseProxy = registerResponseProxy(runtime.webOrigin);
+      let server: ViteDevServer | undefined;
       try {
+        server = await createServer({
+          root: fileURLToPath(new URL('../../', import.meta.url)),
+          cacheDir: fileURLToPath(
+            new URL(
+              `../../../../.cache/vite-${process.pid}-${new URL(runtime.webOrigin).port}/`,
+              import.meta.url,
+            ),
+          ),
+          configFile: false,
+          plugins: [react(), tailwindcss()],
+          server: {
+            host: '127.0.0.1',
+            port: Number(new URL(runtime.webOrigin).port),
+            strictPort: true,
+            proxy: {
+              '/api': {
+                target: runtime.origin,
+                selfHandleResponse: true,
+                configure(proxy) {
+                  proxy.on('proxyRes', (response, request, reply) =>
+                    forwardProxyResponse(response, request, reply, responseProxy.controls),
+                  );
+                },
+              },
+            },
+          },
+          logLevel: 'error',
+        });
+
         await server.listen();
         await use(runtime.webOrigin);
       } finally {
-        await server.close();
+        try {
+          await server?.close();
+        } finally {
+          responseProxy.dispose();
+        }
       }
     },
     { scope: 'worker' },

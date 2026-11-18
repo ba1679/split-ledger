@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { Page } from '@playwright/test';
 import { test, expect } from './fixtures.js';
 import { login } from './browser.js';
+import { assertSpinnerOnly } from './loading/spinner-result.js';
 import { seedCategory, seedExpense, seedTrip } from '../../../api/tests/support/seed.js';
 
 async function fits(page: Page) {
@@ -176,8 +177,21 @@ test('empty, offline, pending, unknown and confirmed-save feedback is visible an
   });
 
   try {
+    const before = await save.boundingBox();
+
     await save.click();
-    await expect(page.getByRole('button', { name: '儲存中…', exact: true })).toBeDisabled();
+    await expect(save).toBeDisabled();
+    await expect(save).toHaveAccessibleName('儲存支出');
+    await expect(save).toHaveAttribute('aria-busy', 'true');
+    const spinner = save.getByRole('status', { name: '正在處理儲存支出', exact: true });
+
+    await assertSpinnerOnly(spinner, /^正在處理儲存支出$/);
+    await expect(save.locator('svg')).toBeVisible();
+    await expect(save.getByText('儲存支出', { exact: true })).toHaveCSS('opacity', '0');
+    const during = await save.boundingBox();
+
+    expect(during!.width).toBe(before!.width);
+    expect(during!.height).toBe(before!.height);
     await expect(item).toBeDisabled();
   } finally {
     release();

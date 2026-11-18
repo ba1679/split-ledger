@@ -1,8 +1,11 @@
+import type { TripManagementHooks } from './management/dependencies.js';
+import { registerTripThumbnailRoutes } from './management/image-routes.js';
+import { registerTripManagementRoutes } from './management/routes.js';
 import { Type } from '@sinclair/typebox';
 import { randomUUID } from 'node:crypto';
 import type { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
 import type { FastifyInstance } from 'fastify';
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, isNull, sql } from 'drizzle-orm';
 import type { Database } from '../../db/index.js';
 import { trips, expenses, tripMembers } from '../../db/schema.js';
 import {
@@ -13,9 +16,11 @@ import {
   HttpError,
   invalid,
   notFound,
+  postgresError,
 } from '../../http.js';
-import { decodeTripCursor, encodeTripCursor } from '../../pagination.js';
+import { decodeTripCursor, encodeTripCursor, tripPageLimit } from '../../pagination.js';
 import { requireUser, type Auth, type AuthConfig } from '../auth/index.js';
+import { assertActiveTrip } from '../splitting/trip-scope.js';
 
 const Trip = Type.Object(
   {
@@ -27,6 +32,9 @@ const Trip = Type.Object(
     ownerMemberId: Uuid,
     simplifyDebts: Type.Boolean(),
     accountingRevision: Type.String({ pattern: '^(?:0|[1-9][0-9]*)$' }),
+    lifecycleRevision: Type.String({ pattern: '^(?:0|[1-9][0-9]*)$' }),
+    thumbnailRevision: Type.String({ pattern: '^(?:0|[1-9][0-9]*)$' }),
+    hasThumbnail: Type.Boolean(),
     createdAt: Timestamp,
     updatedAt: Timestamp,
   },
@@ -69,6 +77,10 @@ const projection = {
   ownerMemberId: sql<string>`(SELECT id FROM trip_members WHERE trip_id=${trips.id} AND owner_id=${trips.ownerId} AND role='owner')`,
   simplifyDebts: trips.simplifyDebts,
   accountingRevision: trips.accountingRevision,
+  lifecycleRevision: trips.lifecycleRevision,
+  thumbnailRevision: trips.thumbnailRevision,
+  hasThumbnail: sql<boolean>`EXISTS(SELECT 1 FROM trip_thumbnails WHERE owner_id=${trips.ownerId} AND trip_id=${trips.id})`,
+  deletedAt: trips.deletedAt,
   cursorTime: sql<string>`${trips.createdAt}::text`,
 };
 const countJoin = and(eq(expenses.ownerId, trips.ownerId), eq(expenses.tripId, trips.id));
@@ -85,12 +97,18 @@ function view(row: {
   ownerMemberId: string;
   simplifyDebts: boolean;
   accountingRevision: bigint;
+  lifecycleRevision: bigint;
+  thumbnailRevision: bigint;
+  hasThumbnail: boolean;
+  deletedAt: Date | null;
 }) {
-  const { cursorTime: _cursorTime, ...rest } = row;
+  const { cursorTime: _cursorTime, deletedAt: _deletedAt, ...rest } = row;
 
   return {
     ...rest,
     accountingRevision: row.accountingRevision.toString(),
+    lifecycleRevision: row.lifecycleRevision.toString(),
+    thumbnailRevision: row.thumbnailRevision.toString(),
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
@@ -111,8 +129,11 @@ export function registerTripRoutes(
   db: Database,
   auth: Auth,
   config: AuthConfig,
+  hooks?: TripManagementHooks,
 ) {
   const api = app.withTypeProvider<TypeBoxTypeProvider>();
+  registerTripManagementRoutes(app, db, auth, config);
+  registerTripThumbnailRoutes(app, db, auth, hooks);
 
   api.post(
     '/api/trips',
@@ -135,34 +156,40 @@ export function registerTripRoutes(
         request.body.startDate ?? null,
         request.body.endDate ?? null,
       );
-      const created = await db.transaction(async (tx) => {
-        const [inserted] = await tx
-          .insert(trips)
-          .values({ id: request.body.id, ownerId: user.id, ...fields })
-          .onConflictDoNothing()
-          .returning({ id: trips.id });
+      const created = await db
+        .transaction(async (tx) => {
+          const [inserted] = await tx
+            .insert(trips)
+            .values({ id: request.body.id, ownerId: user.id, ...fields })
+            .onConflictDoNothing()
+            .returning({ id: trips.id });
 
-        if (!inserted)
-          throw new HttpError(409, 'ID_CONFLICT', '這次建立的識別碼已被使用，請重新確認。');
+          if (!inserted)
+            throw new HttpError(409, 'ID_CONFLICT', '這次建立的識別碼已被使用，請重新確認。');
 
-        await tx.insert(tripMembers).values({
-          id: randomUUID(),
-          ownerId: user.id,
-          tripId: inserted.id,
-          role: 'owner',
-          name: user.name.trim(),
-          isActive: true,
+          await tx.insert(tripMembers).values({
+            id: randomUUID(),
+            ownerId: user.id,
+            tripId: inserted.id,
+            role: 'owner',
+            name: user.name.trim(),
+            isActive: true,
+          });
+
+          const [row] = await tx
+            .select(projection)
+            .from(trips)
+            .leftJoin(expenses, countJoin)
+            .where(and(eq(trips.ownerId, user.id), eq(trips.id, inserted.id)))
+            .groupBy(trips.id);
+
+          return view(row!);
+        })
+        .catch((error: unknown) => {
+          if (postgresError(error)?.code === '23505')
+            throw new HttpError(409, 'ID_CONFLICT', '這次建立的識別碼已被使用，請重新確認。');
+          throw error;
         });
-
-        const [row] = await tx
-          .select(projection)
-          .from(trips)
-          .leftJoin(expenses, countJoin)
-          .where(and(eq(trips.ownerId, user.id), eq(trips.id, inserted.id)))
-          .groupBy(trips.id);
-
-        return view(row!);
-      });
 
       return reply.code(201).send(created);
     },
@@ -185,10 +212,7 @@ export function registerTripRoutes(
     },
     async (request, reply) => {
       const user = await requireUser(auth, request, reply);
-      const limit = request.query.limit === undefined ? 50 : Number(request.query.limit);
-
-      if (!Number.isSafeInteger(limit) || limit > 100)
-        throw invalid('每頁筆數須為 1 到 100 的整數。');
+      const limit = tripPageLimit(request.query.limit);
 
       const cursor = request.query.cursor
         ? decodeTripCursor(request.query.cursor, user.id, config.secret)
@@ -200,6 +224,7 @@ export function registerTripRoutes(
         .where(
           and(
             eq(trips.ownerId, user.id),
+            isNull(trips.deletedAt),
             cursor
               ? sql`(${trips.createdAt},${trips.id}) < (${cursor.time}::timestamptz,${cursor.id}::uuid)`
               : undefined,
@@ -227,7 +252,7 @@ export function registerTripRoutes(
     {
       schema: {
         params: TripParams,
-        response: { 200: Trip, 401: ErrorResponse, 404: ErrorResponse },
+        response: { 200: Trip, 401: ErrorResponse, 404: ErrorResponse, 409: ErrorResponse },
       },
     },
     async (request, reply) => {
@@ -240,6 +265,7 @@ export function registerTripRoutes(
         .groupBy(trips.id);
 
       if (!trip) throw notFound();
+      assertActiveTrip(trip);
 
       return view(trip);
     },
@@ -257,6 +283,7 @@ export function registerTripRoutes(
           401: ErrorResponse,
           403: ErrorResponse,
           404: ErrorResponse,
+          409: ErrorResponse,
         },
       },
     },
@@ -269,7 +296,7 @@ export function registerTripRoutes(
         const [prior] = await tx.select().from(trips).where(owner).for('update');
 
         if (!prior) throw notFound();
-
+        assertActiveTrip(prior);
         const fields = validatedTripFields(
           patch.name === undefined ? prior.name : patch.name,
           patch.startDate === undefined ? prior.startDate : patch.startDate,

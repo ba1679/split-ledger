@@ -1,6 +1,8 @@
 @import '../styles/base.css';
 @import '../components/app-shell.css';
 @import '../features/trips/journeys.css';
+@import '../features/trips/management.css';
+@import '../features/trips/thumbnail-editor.css';
 @import '../features/categories/category-list.css';
 @import '../components/ui/forms.css';
 @import '../features/expenses/ledger.css';
@@ -8,3 +10,4 @@
 @import '../features/auth/login.css';
 @import '../components/query-state.css';
 @import '../styles/responsive.css';
+@import '../features/trips/create-trip.css';

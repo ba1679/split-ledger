@@ -2,8 +2,8 @@
 # 修改本來源及 groups/components，預覽檔不手動維護。
 openapi: 3.0.3
 info:
-  title: 旅帳 Phase 1B API
-  version: 0.2.0
+  title: 旅帳 API 契約
+  version: 0.3.0
   description: |-
     Owner 管理的旅行記帳與分帳 API；此文件與 groups/components 是唯一可維護來源。
 
@@ -14,15 +14,16 @@ info:
     - 自動測試控制外部 Google 身分回應，保留真實本地 session/資料權限；真實 Google 另測。
 
     寫入規則
-    - POST/PATCH 限 application/json（可帶 charset），DELETE 不帶本文；不符回 400 VALIDATION_ERROR。
+    - POST/PATCH 限 application/json（可帶 charset），DELETE 不帶本文；唯一例外為 POST /api/trips/{tripId}/thumbnail 的 multipart/form-data 單檔上傳。命令的 operationId 與預期版本依各端點 schema 或 header 傳入；不符回 400 VALIDATION_ERROR。
     - 寫入前完整比對 Origin 的 scheme/host/port 與明確允許的對外 origin；缺少、null 或不符回 403 REQUEST_ORIGIN_REJECTED。
     - 來源檢查先於本文驗證；不信任 Host/未受信任轉送標頭，不只依賴 CORS 或 SameSite。HTTP 測試須送合法 Origin 並驗證拒絕情境。
     - 本文拒絕額外欄位與寬鬆型別轉換；Fastify 關閉 removeAdditional/coerceTypes，query limit 另做嚴格解析。
 
     未確認結果
-    - 建立前保留客戶端 UUID；回應遺失先以單筆 GET 查證。查到視為已保存，暫時 404 仍可能正在處理。
+    - 建立前保留客戶端 UUID；回應遺失以本人旅行狀態查證。active 或 trash 代表該 UUID 已建立，purged 代表曾建立後已永久清除；暫時 404 仍可能正在處理。永久刪除後 UUID 全系統保留，不得重用。
     - 畫面保留草稿與原 UUID，顯示「保存結果尚未確認」及重新整理入口，不自動重送或產生新 UUID。這不是 exactly-once 保證。
-    - PATCH/DELETE 結果不明也先重新讀取資源/統計；不先宣稱成功或失敗。
+    - 006 旅行生命週期與縮圖命令以持久 operationId 收據查證；同 operationId、同請求指紋先重播原提交結果，再判斷過期版本；相同 ID 不同請求拒絕。查證回應將原提交結果與目前狀態分開，未知收據的 404 不代表操作失敗。
+    - 普通旅行與所有子資源讀寫先以 session 查 owner 與生命週期，再查子資源；本人垃圾桶旅行一律回 409 TRIP_TRASHED，包含子資源識別不存在時；不存在／他人旅行統一回 404 NOT_FOUND。單筆刪除結果不明時，先讀專用 trip state：trash/purged 代表旅行生命週期已改變，該單筆 404 不足以證明單筆刪除成功；active 時才重新查子資源。不得單用普通子資源 404 推斷單筆刪除完成。
 
     分帳與一致性
     - 同行者只是旅行內帳務成員，沒有登入或讀取權限；所有新端點均檢查目前 session 的旅行 owner。
@@ -31,7 +32,7 @@ info:
     - 所有影響帳務的寫入在旅行鎖內遞增 accountingRevision；結算讀取使用一致來源快照。
     - 結清需比對安排識別及 revision，保存正數實付與成對差額；獨立還款的超額需先取得警告並明確確認。兩者均不收或存取整方式。
 
-    金額與日期的格式見各 schema；目前是規劃契約，尚未實作服務。
+    金額與日期的格式見各 schema；既有帳務 API 有程式實作，006 新增契約仍待實作與驗收。
 servers:
   - url: /
     description: 同 origin 提供網頁與 /api，開發與正式環境共用相對路徑。
@@ -61,8 +62,26 @@ paths:
     $ref: ./groups/account.yaml#/me
   /api/trips:
     $ref: ./groups/trips.yaml#/trips
+  /api/trips/trash:
+    $ref: ./groups/trip-management.yaml#/trashTrips
   /api/trips/{tripId}:
     $ref: ./groups/trips.yaml#/trip
+  /api/trips/{tripId}/state:
+    $ref: ./groups/trip-management.yaml#/tripState
+  /api/trips/{tripId}/trash:
+    $ref: ./groups/trip-management.yaml#/trashTrip
+  /api/trips/{tripId}/restore:
+    $ref: ./groups/trip-management.yaml#/restoreTrip
+  /api/trips/{tripId}/purge:
+    $ref: ./groups/trip-management.yaml#/purgeTrip
+  /api/trips/{tripId}/operations/{operationId}:
+    $ref: ./groups/trip-management.yaml#/tripOperation
+  /api/trips/{tripId}/thumbnail:
+    $ref: ./groups/trip-management.yaml#/thumbnail
+  /api/trips/{tripId}/thumbnail/{thumbnailRevision}:
+    $ref: ./groups/trip-management.yaml#/activeThumbnailBytes
+  /api/trips/trash/{tripId}/thumbnail/{thumbnailRevision}:
+    $ref: ./groups/trip-management.yaml#/trashThumbnailBytes
   /api/trips/{tripId}/expenses:
     $ref: ./groups/expenses.yaml#/expenses
   /api/trips/{tripId}/expenses/{expenseId}:
@@ -96,6 +115,16 @@ components:
   parameters:
     TripId:
       $ref: ./components/parameters.yaml#/TripId
+    OperationId:
+      $ref: ./components/parameters.yaml#/OperationId
+    ThumbnailRevision:
+      $ref: ./components/parameters.yaml#/ThumbnailRevision
+    UploadOperationId:
+      $ref: ./components/parameters.yaml#/UploadOperationId
+    ExpectedLifecycleRevision:
+      $ref: ./components/parameters.yaml#/ExpectedLifecycleRevision
+    ExpectedThumbnailRevision:
+      $ref: ./components/parameters.yaml#/ExpectedThumbnailRevision
     ExpenseId:
       $ref: ./components/parameters.yaml#/ExpenseId
     MemberId:
@@ -125,6 +154,10 @@ components:
       $ref: ./components/schemas/account.yaml#/Me
     Trip:
       $ref: ./components/schemas/trips.yaml#/Trip
+    TripState:
+      $ref: ./components/schemas/trips.yaml#/TripState
+    TripOperationOutcome:
+      $ref: ./components/schemas/trips.yaml#/TripOperationOutcome
     Expense:
       $ref: ./components/schemas/expenses.yaml#/Expense
     TripMember:

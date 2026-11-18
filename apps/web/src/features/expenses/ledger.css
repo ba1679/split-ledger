@@ -230,6 +230,12 @@ fieldset {
   padding: 0;
   max-width: none;
 }
+.expense-state-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
 .expense-form .form-actions {
   justify-content: flex-start;
   border-top: 0;
@@ -239,4 +245,10 @@ fieldset {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 16px;
   }
+}
+
+.ledger-record-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }

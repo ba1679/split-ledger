@@ -1,6 +1,7 @@
 import type pg from 'pg';
 import type { APIRequestContext, APIResponse } from '@playwright/test';
 import type { SplittingWorldState } from './splitting/types.js';
+import { createTripManagementContext } from './trip-management/context.js';
 
 export interface Identity {
   id: string;
@@ -10,6 +11,7 @@ export interface Identity {
 }
 
 export class LedgerWorld {
+  readonly tripManagement = createTripManagementContext();
   readonly splitting: SplittingWorldState;
   readonly state = new Map<string, unknown>();
   readonly users = new Map<string, Identity>();

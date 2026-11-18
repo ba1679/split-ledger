@@ -1,6 +1,7 @@
+import { TrashTrips } from '../features/trips/TrashTrips.js';
 import { Button } from '../components/ui/button.js';
 import React from 'react';
-import { Navigate, Route, Routes, Link } from 'react-router-dom';
+import { Navigate, Route, Routes, Link, useLocation } from 'react-router-dom';
 import { useSession } from '../features/auth/session.js';
 import { Login } from '../features/auth/Login.js';
 import { Trips } from '../features/trips/Trips.js';
@@ -8,6 +9,7 @@ import { TripLedger } from '../features/trips/TripLedger.js';
 import { Categories } from '../features/categories/Categories.js';
 import { ExpenseForm } from '../features/expenses/ExpenseForm.js';
 import { AppShell } from '../components/AppShell.js';
+import { BusyIndicator } from '../components/waiting/BusyIndicator.js';
 import { QueryState } from '../components/QueryState.js';
 import { TripSettlement } from '../features/settlement/TripSettlement.js';
 import { SettleArrangement } from '../features/settlement/SettleArrangement.js';
@@ -24,11 +26,12 @@ function PrivatePage({ children }: { children: React.ReactNode }) {
 
 export function App() {
   const session = useSession();
+  const location = useLocation();
 
   if (session.pending || session.closing)
     return (
       <main className="session-state">
-        <QueryState pending />
+        <BusyIndicator accessibleLabel={session.closing ? '正在登出' : '正在確認身分'} />
       </main>
     );
   if (session.error && !session.account)
@@ -50,10 +53,18 @@ export function App() {
         }
       />
       <Route
+        path="/trips/trash"
+        element={
+          <PrivatePage>
+            <TrashTrips />
+          </PrivatePage>
+        }
+      />
+      <Route
         path="/trips/:tripId"
         element={
           <PrivatePage>
-            <TripLedger />
+            <TripLedger key={location.pathname} />
           </PrivatePage>
         }
       />

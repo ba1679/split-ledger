@@ -28,3 +28,114 @@
 | `旅行清單恢復顯示既有旅行` | 無 | 不支援 | 既有日本旅行 | 真實讀取後卡片可見，錯誤消失，權威資料與失敗前快照相同。 |
 | `焦點進入新增旅行表單，欄位與操作有可理解名稱` | 無 | 不支援 | 無 | 具名稱對話框可見，旅行名稱獲焦，日期與取消/建立控制項具名稱且可用；不驗提交。 |
 | `焦點回到新增旅行操作` | 無 | 不支援 | 表單已關閉 | 對話框移除，焦點回到先前保存的新增入口。 |
+
+## 006 旅行管理與等待契約
+
+沿用真實 API 與隔離資料庫、Playwright BDD 與 page object；延遲／失敗／回應遺失使用可控制屏障，不以任意 sleep 判定。Given 準備已完成前序與畫面狀態；When 為唯一操作；Then 等待指定結果並對應真實 API／DB 權威資料，請求監測確認不該送出的命令為零。只讀再查核不是第二個受測動作。
+
+| DSL 句型 | Gherkin 參數 | Data Table 參數 | 預設參數 | StepDef 實作語意 |
+| --- | --- | --- | --- | --- |
+| `全站 "{畫面}" 的 "{內容}" 初讀為 "{結果}"` | 畫面:string，Examples12畫面；內容:string，對應資料；結果:string，上述5狀態 | 不支援 | 無 | Given：隔離owner有非空指定資料與精確帳務oracle，空結果則專設成功空scope；無該query cache。依UI位置（帳本總額、支出詳情份額、分帳淨額）安排真API讀取屏障：延遲／成功／成功空／明確失敗／無網路。記錄各query與DB快照、只攔指定內容，不以整頁假資料替代。 |
+| `owner 開啟全站 "{畫面}"` | 畫面:string，Examples頁面 | 不支援 | 無 | When：只導航目標頁或開指定表單一次（依page object與正式路由）；不提交mutation，觀察本次初讀狀態。 |
+| `指定內容顯示結構骨架且不提前顯示空值` | 無 | 不支援 | 無 | Then：指定區域按其卡片/列表/表單結構骨架，非僅loading文字或空白；未顯示無資料/0筆/0金額/錯誤，讀屏有合宜busy/status、骨架不可focus。DB確有資料且未變；其他已載入區域不遮住。 |
+| `該內容已在等待且本次讀取即將成功` | 無 | 不支援 | 無 | Given：已開對應頁、原本骨架，API response停在釋放屏障；資料真實存在或空scope依本例設定。記錄request，不先完成。 |
+| `原次資料讀取完成` | 無 | 不支援 | 無 | When：只釋放該次讀取回應並等待UI完成同一query，不另導航/刷新/重送。 |
+| `畫面顯示 "{內容}" 的權威資料且骨架結束` | 內容:string，Examples12資料 | 不支援 | 無 | Then：指定內容以API/DB精確資料顯示，skeleton/busy消失；筆數/日期/成員/總額/份額/安排按對應畫面責任比對，不任意搬到帳本總覽，DB無寫入。 |
+| `垃圾桶顯示已確認空狀態且沒有等待` | 無 | 不支援 | 無 | Then：API items=[]與DB trash零筆，畫面顯示沒有已刪旅行、無骨架/spinner；成功回覆前不顯示空，其他active旅行未變。 |
+| `站內身分確認尚未完成` | 無 | 不支援 | 無 | Given：Alice有效本地session，但session query回應被屏障延遲；不預先渲染私人內容，保存auth權威狀態。 |
+| `使用者開啟網站` | 無 | 不支援 | 無 | When：一次開站觸發既有session query，維持指定延遲，不另按登入。 |
+| `身分確認有圖形與輔助語意且不洩漏私人內容` | 無 | 不支援 | 無 | Then：spinner-only，沒有可見loading文字；讀屏可辨識正在確認身分，不顯示已登出或私人帳本。API/DB session仍有效，無額外登入命令。 |
+| `新增支出必要選項 "{選項}" 尚在讀取` | 選項:string，幣別／分類／分攤成員 | 不支援 | 無 | Given：owner active旅行、已開新增表單，指定幣別／分類／分攤成員query延遲，其餘成功；保留合法草稿，所有選項權威資料非空。 |
+| `owner 檢視新增支出選項` | 無 | 不支援 | 無 | When：在已開表單聚焦指定選項一次，維持本次query狀態，不保存支出。 |
+| `局部選項等待且必要內容未齊不能保存` | 無 | 不支援 | 無 | Then：指定選項有一致spinner-only及accessible name/busy，不顯示沒有選項；必要資料未齊保存不可用且請求監測無POST expense，草稿保持、DB未變。 |
+| `owner 已備妥 "{操作}" 且命令將延遲後成功` | 操作:string，22種操作，詳006操作資料對照 | 不支援 | 無 | Given：依本檔006操作資料對照建立各操作合法資料、最新revision與必要確認已開；保存原IDs/DB帳務快照。攔該次真API命令完成回應，勿攔身分或其他query代替busy。每例獨立初始狀態，其他操作不串入When。 |
+| `owner 執行全站操作 "{操作}"` | 操作:string，22種操作 | 不支援 | 無 | When：在相應已開表單／確認／切換控制完成一次合法送出；依006操作資料對照輸入內容與命令，記錄尺寸、名稱、請求ID/數量及response屏障，不進行第二次受測操作。 |
+| `操作等待以置中圖形保留尺寸與操作語意` | 無 | 不支援 | 無 | Then：有進行中圖形、無可見loading動詞，按鈕bbox與操作前一致且圖形置中；原操作名稱仍為accessible name，aria-busy/status可理解。無假百分比、無成功假象，原內容與焦點保持，不因busy改變帳務。 |
+| `原次 "{操作}" 正在處理且完成屏障可釋放` | 操作:string，22種操作 | 不支援 | 無 | Given：相應合法操作已送出一次，留在busy UI，記錄原request/operation UUID及提交前快照；When重複觸發期間釋放原回應。不先造成第二命令。 |
+| `owner 在等待中連續再次觸發相同操作` | 無 | 不支援 | 無 | When：針對同一控制連點／Enter觸發，然後由fixture釋放已在途原請求（環境完成不是第二個使用者Act）；記錄所有mutation，以辨識被guard攔住而非只看disabled。 |
+| `操作只得到一個 "{結果}" 的已確認結果` | 結果:string，22種成功結果，依操作資料對照 | 不支援 | 無 | Then：原busy結束、UI成功與API/DB一致；原命令只有一次、UUID/receipt與資料筆數無重複。依006操作資料對照驗精確金額、成員ID、歷史、原圖清除與範圍外快照；不得僅驗toast。 |
+| `使用者未登入且站內Google登入將延遲` | 無 | 不支援 | 無 | Given：無session，僅站內登入啟動handler由可控外部身分fixture延遲，第三方頁不在UI修改範圍。保留登入請求計數；不mock本地成功session為文字。 |
+| `使用者開始站內Google登入` | 無 | 不支援 | 無 | When：點登入一次，停在本地待啟動/返回狀態；只觀察本次本地流程。 |
+| `登入控制顯示圖形與可理解的登入狀態` | 無 | 不支援 | 無 | Then：spinner-only、accessible name仍為Google登入並說明busy，無私人內容、不宣告已登入；本地啟動一次。 |
+| `原次站內登入正在等待且隨後會成功返回` | 無 | 不支援 | 無 | Given：第一次登入已啟動且延遲，fixture允許成功返回並由真本地auth建立session；僅一次外部流程，保留啟動計數。 |
+| `登入只啟動一次且成功返回後結束等待` | 無 | 不支援 | 無 | Then：本地啟動只有一次、API session為指定帳號且畫面已登入，login busy結束；不以第三方UI文字作證據。 |
+| `支出已有 20 筆與確認總額且另有 5 筆未顯示` | 無 | 不支援 | 無 | Given：API/DB恰25筆且總額含全25，頁面已顯示前20/總額；只延遲第二頁cursor請求，保存IDs與oracle。 |
+| `owner 選擇載入更多支出` | 無 | 不支援 | 無 | When：只點load more一次，等待尾端busy，保留回應屏障。 |
+| `原有支出與總額保持可見且只有尾端忙碌` | 無 | 不支援 | 無 | Then：原20筆IDs/文字/分幣別全帳總額仍可見、未被初載骨架蓋住，只有load-more spinner-only與busy；不顯示0、不追加重複資料。API/DB無變。 |
+| `第二頁支出正在讀取且原次回應可完成` | 無 | 不支援 | 無 | Given：頁面已有20筆，第二頁在途且可釋放5筆，保存cursor/ID及讀取數；原query未重送。 |
+| `列表恰有 25 筆不同支出且總額保持` | 無 | 不支援 | 無 | Then：相同cursor請求一次、25個唯一ID與API完整資料集合相等，load-more等待結束且總額仍含全帳；DB原始資料未變，無重複追加。 |
+| `已載入 25 筆支出且背景更新將 "{結果}"` | 結果:string，延遲／明確失敗／成功 | 不支援 | 無 | Given：頁面25筆及已確認總額，背景refetch設延遲或明確失敗或成功；保存IDs/數值與焦點。不是第一次讀取，不清cache。 |
+| `系統進行本次背景資料更新` | 無 | 不支援 | 無 | When：觸發一次既有query refetch機制（環境事件），按Given屏障取得結果；不另外按重試或重新導航。 |
+| `更新僅顯示局部等待而保留全部已載入資料` | 無 | 不支援 | 無 | Then：25筆及確認總額可見、局部spinner-only，未變全頁骨架/零/成功；API/DB未被讀取寫入，焦點原位。 |
+| `舊內容保持且局部等待結束並可重試` | 無 | 不支援 | 無 | Then：25筆與確認總額保持，明示尚未取得更新與重試入口、busy結束；不顯示假成功或空結果，DB無修改。 |
+| `背景更新已失敗且連線恢復` | 無 | 不支援 | 無 | Given：準備上述失敗後UI及25筆；原query現在真實成功，保留同一資料ID，不重新清cache。 |
+| `owner 重試本次讀取` | 無 | 不支援 | 無 | When：點對應重試一次，只執行該讀取、不送mutation；等待權威response。 |
+| `最新已保存資料完整顯示且沒有重複` | 無 | 不支援 | 無 | Then：畫面完整唯一ID集合與最新API/DB相等、25筆不重複、各幣別總額oracle一致，局部錯誤/等待消失，DB不被讀取改動。 |
+| `初讀等待結束並顯示讀取錯誤與重試` | 無 | 不支援 | 無 | Then：顯示原因與重試、無殘留骨架/spinner、不顯示無旅行；API/DB確有資料，無寫入。 |
+| `旅行初讀已失敗且現在可成功取得清單` | 無 | 不支援 | 無 | Given：旅行頁錯誤狀態與重試入口，原資料確存在，解除讀取拒絕；不在Given執行重試。 |
+| `支出編輯草稿已修改且本次保存將明確失敗` | 無 | 不支援 | 無 | Given：真實expense原值與新draft分離，保留payer/share/date/amount/category原oracle；正式拒絕確認未提交，不用斷線代替明確拒絕。 |
+| `owner 保存目前支出編輯草稿` | 無 | 不支援 | 無 | When：按保存一次，真PATCH expense；記錄原ID、輸入、response，不另重試。 |
+| `保存等待結束且原帳務與修改草稿均保留` | 無 | 不支援 | 無 | Then：原因與可重試入口可讀，busy結束、無成功/已重算假象；欄位保留新draft，API/DB仍原expense與oracle、無額外付款。 |
+| `前次支出保存明確失敗已解除且草稿保留` | 無 | 不支援 | 無 | Given：失敗後UI有相同draft/expense ID，解除拒絕；原DB未改。 |
+| `原支出恰更新一次且呈現已確認結果` | 無 | 不支援 | 無 | Then：PATCH成功，UI值與API/DB新expense一致、同一ID、oracle精確重算，無新增第二支出、等待與錯誤結束。 |
+| `實付結清已填合法草稿且保存會成功但回應遺失` | 無 | 不支援 | 無 | Given：真實安排與最新accountingRevision、合法amount，提交完成後丟response並阻擋既有付款查證；保留原付款UUID與draft/安排，DB仍由正式命令寫入。 |
+| `owner 保存本次實付結清` | 無 | 不支援 | 無 | When：按保存一次POST settlement，等待開始原次查證；不另送付款或清除草稿。 |
+| `實付結果尚未確認且不能重複新增` | 無 | 不支援 | 無 | Then：可見unknown與查證狀態，spinner-only查證中且有輔助語意，不能說失敗/已結清；原UUID/草稿保留、命令僅一次，DB只一付款事實。 |
+| `原次實付正在查證但本輪仍無法確認` | 無 | 不支援 | 無 | Given：原付款UUID及draft保留，真實提交已完成但查證端不可用；有界查證屏障即將結束，不自動重送mutation。 |
+| `本輪結果查證結束仍未知` | 無 | 不支援 | 無 | When：釋放本輪查證失敗回應/達有界查證終點，讓狀態機進unknown；不新增使用者命令。 |
+| `停止持續動畫並保留再次查證入口及草稿` | 無 | 不支援 | 無 | Then：busy/spinner停止，可見結果尚未確認＋再次查證，原draft/UUID保持、不可重新新增同付款、mutation數仍1；DB原提交結果無變，不誤報失敗。 |
+| `原次實付結果未知且現在可查證` | 無 | 不支援 | 無 | Given：準備unknown後UI、原UUID/draft；恢復既有repayment/settlement只讀查證回真資料。不先執行查證或重送。 |
+| `owner 再次查證原實付` | 無 | 不支援 | 無 | When：點再次查證，按原UUID只讀查證；不得送POST repayment/settlement，等待權威結果。 |
+| `原實付已確認且恰有一筆付款事實` | 無 | 不支援 | 無 | Then：UI結果與DB原repayment/settlement/adjustments及有理數淨額一致，付款UUID相同且只有一份事實；query結束，無新POST或重算新付款。 |
+| `畫面顯示等待連線而非無限處理中` | 無 | 不支援 | 無 | Then：paused文案與可恢復下一步，無永遠busy動畫、不顯示0/空/成功；DB無命令，不把paused當明確伺服器失敗。 |
+| `owner 使用 "{裝置}" 與鍵盤讀屏且偏好減少動態效果` | 裝置:string，手機／桌面電腦 | 不支援 | 無 | Given：browser viewport手機390x844／桌面1440x900，reducedMotion=reduce；以真實DOM accessibility與鍵盤可觀測狀態驗，不宣稱自動化等於實際讀屏人工測試。合法旅行有圖/帳務，保存原focus與快照。 |
+| `owner 以鍵盤開啟移至垃圾桶確認` | 無 | 不支援 | 無 | When：鍵盤從管理旅行dropdown選移至垃圾桶一次，等待dialog；不確認。 |
+| `確認的名稱後果與安全焦點可辨識` | 無 | 不支援 | 無 | Then：accessible dialog名稱/描述含trip與可復原，初始focus在取消/安全控制、Tab焦點限dialog，所有入口可達；圖形非聚焦、不以顏色單獨傳達；無寫入且DB原態。 |
+| `日期保存已送出且即將 "{結果}"` | 結果:string，延遲／成功 | 不支援 | 無 | Given：以鍵盤日期表單送出一次有效PATCH，原focus與按鈕名記錄，API屏障為延遲或成功；保留原日期與目標值。 |
+| `可理解 "{結果}" 且焦點未無故移走` | 結果:string，延遲／成功 | 不支援 | 無 | Then：延遲時無旋轉/shimmer但保留圖形與accessible busy；成功時狀態通知可讀、與API/DB日期一致且busy結束。無反覆live播報、不是只靠顏色；focus留原控制或已關閉dialog的合理trigger，不跳頁頂。 |
+
+| DSL 句型 | Gherkin 參數 | Data Table 參數 | 預設參數 | StepDef 實作語意 |
+| --- | --- | --- | --- | --- |
+| `日期保存進入本例指定狀態` | 無 | 不支援 | 狀態由 Given 延遲／成功決定。 | When：延遲例只觀察已送出的同一PATCH忙碌狀態，成功例釋放該PATCH回應；不操作query屏障、不再送出保存。等待accessible狀態可觀測，保留原焦點。 |
+
+## 006 旅行管理與等待契約
+
+沿用真實 API 與隔離資料庫、Playwright BDD 與 page object；延遲／失敗／回應遺失使用可控制屏障，不以任意 sleep 判定。Given 準備已完成前序與畫面狀態；When 為唯一操作；Then 等待指定結果並對應真實 API／DB 權威資料，請求監測確認不該送出的命令為零。只讀再查核不是第二個受測動作。
+
+| DSL 句型 | Gherkin 參數 | Data Table 參數 | 預設參數 | StepDef 實作語意 |
+| --- | --- | --- | --- | --- |
+| `所有必要支出選項已由等待恢復成功` | 無 | 不支援 | 無 | Given：幣別/分類/成員先前延遲且現已由真API取得，頁面先前草稿點心JPY100、Alice付款與Alice/Amy分攤保留；不在Arrange保存。 |
+| `owner 保存選項恢復後的支出` | 無 | 不支援 | 無 | When：選擇已取得的JPY/餐飲/Alice付款與Alice/Amy分攤，按保存一次；目標Act為一次支出保存。 |
+| `選項等待結束且支出正常保存` | 無 | 不支援 | 無 | Then：各局部等待消失、可選項與API一致，支出保存一次且DBJPY100/shares各50/categoryID相符；無殘留disabled/empty/busy，原草稿未遺失。 |
+| `旅行清單正在等待連線且網路即將恢復` | 無 | 不支援 | 無 | Given：頁面paused且真資料非空，保留原query與owner，browser離線狀態即將恢復；不預先完成query。 |
+| `網路恢復並完成原次旅行讀取` | 無 | 不支援 | 無 | When：一次恢復網路事件，讓既有paused query取得真API資料；不送mutation或重建帳號。 |
+| `連線等待結束且旅行資料可正常使用` | 無 | 不支援 | 無 | Then：paused/busy消失、UI清單與API/DB資料一致，無假空或重複卡片；可開帳本與後續選圖，不殘留disabled。 |
+
+### 006 操作資料對照
+
+以下是上表 `owner 已備妥`、`owner 執行全站操作`、`原次操作正在處理` 與成功斷言的完整輸入／oracle；金額按 minorUnit 與獨立有理數計算。每例都是隔離資料，不承接另一案例。除案例明示裝置外，本輪新增前端 feature 在桌機 1440×900、手機 390×844 依序執行；這是產品行為驗證範圍，不新增規劃期 prototype 或截圖比對關卡。
+
+| 操作 | Arrange／一次 Act | 已確認結果與不變條件 |
+| --- | --- | --- |
+| 建立旅行 | 京都賞楓，日期空，無圖；POST trips一次 | 恰一trip UUID、唯一owner成員、預設圖；其他trip不變 |
+| 保存旅行名稱與日期 | active日本旅行；PATCH name=京都旅行、startDate=2027-03-10、endDate=2027-03-15 | 原trip ID，三欄一致；帳務/圖片不變 |
+| 移至垃圾桶 | active完整帳務，確認已開；POST trash | 同trip trash且生命週期版本+1、完整原始帳務/圖保留 |
+| 復原旅行 | trash完整帳務；POST restore | 同trip active且生命週期版本+1、不重建ID、不新增付款 |
+| 永久刪除旅行 | trash完整帳務與圖，確認已開；POST purge | 專屬表全部清除、最小收據/tombstone保留、他trip/帳號/分類不變 |
+| 保存新縮圖 | active default，合法神社PNG；POST thumbnail | 唯一當前WebP、縮圖版本+1、原帳務不變 |
+| 更換縮圖 | active富士山，神社draft；POST thumbnail | 神社目前圖、舊版404、原帳務不變 |
+| 保存預覽的預設縮圖 | 富士山已保存，default draft；DELETE thumbnail | 無目前圖片、hasThumbnail=false、舊版404 |
+| 新增支出 | 點心JPY100，2027-03-11，Alice付款，Alice/Amy分攤，分類餐飲；POST expense | 恰一expense，shares各50，Alice淨額+50、Amy-50的來源變化 |
+| 修改支出 | 原點心JPY100兩人均分；PATCH amount=200 | 同ID、shares各100，原實付/歷史不變 |
+| 刪除支出 | 唯一JPY100兩人均分點心；DELETE expense確認 | expense/shares刪、無其安排，各成員淨額歸零，既有實付不刪 |
+| 新增分類 | 新名稱伴手禮；POST category | 恰一category，未建立任何支出 |
+| 修改分類 | 原餐飲；PATCH name=餐食 | 同category ID、原expense分類FK不變 |
+| 刪除未被引用的分類 | 未使用伴手禮；DELETE category | 僅該category刪除，他分類/支出不變 |
+| 新增同行者 | 新名稱Carol；POST member | 恰一同trip同行者、active、無新帳號授權 |
+| 修改同行者名稱 | Amy；PATCH name=小艾 | 同member ID/歷史引用，僅顯示名變 |
+| 停用同行者 | Amy active且有歷史；PATCH isActive=false | 原ID與所有歷史保留，不再可供新支出選用 |
+| 啟用同行者 | Amy inactive；PATCH isActive=true | 原ID與歷史保留，恢復可選 |
+| 刪除未被引用的同行者 | Carol無歷史；DELETE member | 僅Carol刪，owner及其他成員/帳務不變 |
+| 切換簡化付款 | 原false且既有精確分帳；PATCH simplifyDebts=true | 模式true、來源/實付/每幣別淨額不變、安排按同來源重建 |
+| 記錄獨立還款 | Amy欠Alice JPY100；POST repayment amount=40、paidOn=2027-03-12 | 恰一還款40，剩餘60；不創settlement/adjustment，日期及ID正確 |
+| 保存實付結清 | Amy欠Alice JPY100、最新安排版本；POST settlement amount=100、paidOn=2027-03-12 | 恰一實付及其settlement，該安排餘額0，原來源支出不變；差額按契約為零 |

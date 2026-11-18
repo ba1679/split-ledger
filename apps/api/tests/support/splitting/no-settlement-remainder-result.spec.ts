@@ -1,6 +1,12 @@
 import { test, expect } from '../fixtures.js';
 import { runIsolatedStep } from './harness.js';
-import { seedSplittingExpenses } from './expense-fixture.js';
+import {
+  seedSplittingExpenses,
+  snapshotSplittingSources,
+  independentSplittingOracle,
+} from './expense-fixture.js';
+import { callApi } from '../seed.js';
+import { splittingTripId } from './members-fixture.js';
 import {
   captureCurrentAmyArrangement,
   type PendingSettlementSnapshot,
@@ -128,7 +134,9 @@ test('T101 exact cancellation for arbitrary positive cash preserves Bob and reje
   }
 });
 
-for (const amount of ['1', '33', '34', '100', '700'])
+// Only payments that close the obligation exercise the no-remainder assertion.
+// The current settlement contract preserves material underpayment as independent cash.
+for (const amount of ['33', '34', '100', '700'])
   test(`T101 real no reverse or residual after cash ${amount}`, async ({ world }) => {
     await seedSplittingExpenses(world, [
       amount === '700'
@@ -146,3 +154,55 @@ for (const amount of ['1', '33', '34', '100', '700'])
       world,
     );
   });
+
+test('T101 cash 1 preserves exact 97/3 debt without a settlement or adjustment', async ({
+  world,
+}) => {
+  await seedSplittingExpenses(world, [
+    { 項目: '點心', 幣別: 'JPY', 金額: '100', 付款人: 'Alice', 分攤者: 'Alice、Amy、Bob' },
+  ]);
+  await captureCurrentAmyArrangement(world);
+  await requestAmySettlement(world, '1');
+  expect(world.response!.status()).toBe(201);
+  const body = await world.response!.json();
+  const before = world.get<SourceSnapshot>('splitting:before');
+  const after = await snapshotSplittingSources(world);
+  const pending = world.get<PendingSettlementSnapshot>('splitting:settlementSnapshot');
+  const expected = { numerator: '97', denominator: '3', minorUnit: 0 };
+
+  expect(body.kind).toBe('partial');
+  expect(independentSplittingOracle.equal(body.remainingAmount, expected)).toBe(true);
+  for (const key of ['expenses', 'shares', 'members', 'settlements', 'adjustments'] as const)
+    expect(after[key]).toEqual(before[key]);
+  expect(after.repayments).toHaveLength(before.repayments.length + 1);
+  expect(after.repayments.find((row) => row.id === pending.repaymentId)).toMatchObject({
+    kind: 'independent',
+    settlement_id: null,
+    payer_member_id: pending.debtorMemberId,
+    payee_member_id: pending.creditorMemberId,
+    amount_minor: '1',
+  });
+  expect(BigInt(String(after.trips[0]!.accounting_revision))).toBe(
+    BigInt(String(before.trips[0]!.accounting_revision)) + 1n,
+  );
+  const tripId = splittingTripId(world);
+  const state = await callApi(world, 'GET', `/api/trips/${tripId}/settlement`);
+  expect(state.status()).toBe(200);
+  const view = await state.json();
+  const remaining = view.arrangements.filter(
+    (row: { debtorMemberId: string; creditorMemberId: string; currencyCode: string }) =>
+      row.debtorMemberId === pending.debtorMemberId &&
+      row.creditorMemberId === pending.creditorMemberId &&
+      row.currencyCode === 'JPY',
+  );
+  expect(remaining).toHaveLength(1);
+  expect(independentSplittingOracle.equal(remaining[0].amount, expected)).toBe(true);
+  const payment = await callApi(
+    world,
+    'GET',
+    `/api/trips/${tripId}/repayments/${pending.repaymentId}`,
+  );
+  expect(payment.status()).toBe(200);
+  expect(await payment.json()).toEqual(body.repayment);
+  expect(await snapshotSplittingSources(world)).toEqual(after);
+});

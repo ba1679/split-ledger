@@ -1,4 +1,12 @@
 import { test, expect, freePort, startProcess } from './fixtures.js';
+import { randomUUID } from 'node:crypto';
+import { copyFile, mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { migrate, migrationsDirectory } from '../../apps/api/src/db/migrate.js';
+import { LedgerWorld } from '../../apps/api/tests/support/world.js';
+import { seedTrip, seedExpense } from '../../apps/api/tests/support/seed.js';
 
 export async function launch(databaseUrl: string) {
   const port = await freePort();
@@ -15,6 +23,91 @@ export async function launch(databaseUrl: string) {
 
   return { ...runtime, origin: `http://127.0.0.1:${port}` };
 }
+
+test('compiled startup upgrades existing accounting and preserves migration checksums', async ({
+  database,
+  request,
+}) => {
+  const directory = await mkdtemp(join(tmpdir(), 'ledger-runtime-upgrade-'));
+  let runtime: Awaited<ReturnType<typeof launch>> | undefined;
+
+  try {
+    await database.pool.query(
+      'DROP SCHEMA public CASCADE; DROP SCHEMA IF EXISTS auth CASCADE; CREATE SCHEMA public',
+    );
+    const archive = pathToFileURL(`${directory}/`);
+
+    for (const name of [
+      '0001_currencies.sql',
+      '0002_accounts_and_ownership.sql',
+      '0003_trip_splitting.sql',
+    ])
+      await copyFile(new URL(name, migrationsDirectory), new URL(name, archive));
+    await migrate(database.pool, archive);
+    const world = new LedgerWorld(database.pool, request, 'http://127.0.0.1', randomUUID());
+    const trip = await seedTrip(world, '升級前旅行', 'Alice', {
+      startDate: '2027-03-10',
+      endDate: '2027-03-15',
+    });
+
+    await seedExpense(world, {
+      owner: 'Alice',
+      tripName: '升級前旅行',
+      item: '原有支出',
+      amount: '100',
+      currencyCode: 'JPY',
+      categoryName: '餐飲',
+    });
+    const tables = ['trip_members', 'expenses', 'expense_shares', 'categories'];
+    const before = new Map<string, unknown>();
+
+    for (const table of tables)
+      before.set(
+        table,
+        (await database.pool.query(`SELECT * FROM ${table} ORDER BY to_jsonb(${table})::text`))
+          .rows,
+      );
+    const archived = (
+      await database.pool.query('SELECT name,sha256 FROM _ledger_migrations ORDER BY name')
+    ).rows;
+
+    runtime = await launch(database.url);
+    await expect
+      .poll(async () => {
+        try {
+          return (await fetch(`${runtime!.origin}/healthz`)).status;
+        } catch {
+          return 0;
+        }
+      })
+      .toBe(204);
+    for (const table of tables)
+      expect(
+        (await database.pool.query(`SELECT * FROM ${table} ORDER BY to_jsonb(${table})::text`))
+          .rows,
+      ).toEqual(before.get(table));
+    expect(
+      (
+        await database.pool.query('SELECT name,sha256 FROM _ledger_migrations ORDER BY name')
+      ).rows.slice(0, 3),
+    ).toEqual(archived);
+    expect(
+      (await database.pool.query('SELECT * FROM trips WHERE id=$1', [trip.id])).rows[0],
+    ).toMatchObject({ deleted_at: null, lifecycle_revision: '0', thumbnail_revision: '0' });
+    expect(
+      (
+        await database.pool.query(
+          'SELECT trip_id,purged_at FROM trip_id_reservations WHERE trip_id=$1',
+          [trip.id],
+        )
+      ).rows,
+    ).toEqual([{ trip_id: trip.id, purged_at: null }]);
+    expect((await fetch(`${runtime.origin}/api/me`)).status).toBe(401);
+  } finally {
+    await runtime?.stop();
+    await rm(directory, { recursive: true, force: true });
+  }
+});
 
 test('compiled production entry starts migrations and stops gracefully', async ({ database }) => {
   // Start against an empty schema, not the fixture's already-migrated schema.

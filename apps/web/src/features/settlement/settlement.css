@@ -47,7 +47,7 @@
   padding: 0;
   cursor: pointer;
 }
-.simplification-switch span {
+.simplification-switch .switch-track {
   position: absolute;
   top: 10px;
   left: 2px;
@@ -58,7 +58,7 @@
   background: var(--muted);
   transition: background-color 160ms ease;
 }
-.simplification-switch span::after {
+.simplification-switch .switch-track::after {
   content: '';
   position: absolute;
   top: 2px;
@@ -69,10 +69,10 @@
   background: var(--panel);
   transition: transform 160ms ease;
 }
-.simplification-switch[aria-checked='true'] span {
+.simplification-switch[aria-checked='true'] .switch-track {
   background: var(--green);
 }
-.simplification-switch[aria-checked='true'] span::after {
+.simplification-switch[aria-checked='true'] .switch-track::after {
   transform: translateX(20px);
 }
 .simplification-switch:focus-visible {
@@ -84,8 +84,8 @@
   cursor: wait;
 }
 @media (prefers-reduced-motion: reduce) {
-  .simplification-switch span,
-  .simplification-switch span::after {
+  .simplification-switch .switch-track,
+  .simplification-switch .switch-track::after {
     transition: none;
   }
 }
@@ -175,4 +175,14 @@
   .settlement-panel {
     padding: 24px;
   }
+}
+
+.simplification-switch[aria-busy='true'] .switch-track {
+  opacity: 0;
+}
+.simplification-switch .switch-spinner {
+  position: absolute;
+  inset: 0;
+  color: var(--ink);
+  pointer-events: none;
 }

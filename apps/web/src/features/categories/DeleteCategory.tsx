@@ -1,4 +1,5 @@
 import { Button } from '../../components/ui/button.js';
+import { ActionButton } from '../../components/waiting/ActionButton.js';
 import React, { useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest, ApiError, type Category } from '../../api/index.js';
@@ -102,7 +103,9 @@ export function DeleteCategory({
             <Button type="button" variant="outline" disabled={busy} onClick={onClose}>
               取消
             </Button>
-            <Button
+            <ActionButton
+              busy={busy}
+              label="確認刪除"
               type="button"
               variant="destructive"
               disabled={busy || unconfirmed}
@@ -112,9 +115,7 @@ export function DeleteCategory({
                   deletion.mutate();
                 }
               }}
-            >
-              {deletion.isPending ? '刪除中…' : '確認刪除'}
-            </Button>
+            />
           </div>
         </>
       )}

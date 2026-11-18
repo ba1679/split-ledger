@@ -1,5 +1,6 @@
+import { TripManagementMenu } from './TripManagementMenu.js';
 import { Button } from '../../components/ui/button.js';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import {
@@ -11,6 +12,8 @@ import {
   type ItemList,
 } from '../../api/index.js';
 import { useSession } from '../auth/session.js';
+import { BusyIndicator } from '../../components/waiting/BusyIndicator.js';
+import { ActionButton } from '../../components/waiting/ActionButton.js';
 import { QueryState } from '../../components/QueryState.js';
 import { tripDates } from './Trips.js';
 import { TripForm } from './TripForm.js';
@@ -18,41 +21,52 @@ import { displayAmount } from '../expenses/money.js';
 import { formatShareAmount } from '../expenses/ExpenseShares.js';
 import type { SettlementView } from '../settlement/types.js';
 import { Icon } from '../../components/Icon.js';
+import { useLedgerEntryState, useUnavailableLedgerCleanup } from './use-ledger-entry-state.js';
+import { useLedgerManagement } from './use-ledger-management.js';
+import { TripAccessState } from './TripAccessState.js';
 
 export function TripLedger() {
   const { tripId } = useParams(),
     { account } = useSession();
   const [editing, setEditing] = useState(false);
   const location = useLocation();
+  const unavailableHeading = useRef<HTMLHeadingElement>(null);
+
+  const authority = useLedgerEntryState(tripId, unavailableHeading);
   const trip = useQuery({
     queryKey: ['account', account!.id, 'trip', tripId],
     queryFn: ({ signal }) => apiRequest<Trip>(`/api/trips/${tripId}`, { signal }),
+    enabled: authority.data?.state === 'active',
   });
 
   const expenses = useInfiniteQuery({
+    enabled: authority.data?.state === 'active',
     queryKey: ['account', account!.id, 'expenses', tripId],
     initialPageParam: undefined as string | undefined,
     queryFn: ({ signal, pageParam }) =>
       apiRequest<ExpenseList>(
-        `/api/trips/${tripId}/expenses${pageParam ? `?cursor=${encodeURIComponent(pageParam)}` : ''}`,
+        `/api/trips/${tripId}/expenses?limit=20${pageParam ? `&cursor=${encodeURIComponent(pageParam)}` : ''}`,
         { signal },
       ),
     getNextPageParam: (page) => page.nextCursor ?? undefined,
   });
 
   const members = useQuery({
+    enabled: authority.data?.state === 'active',
     queryKey: ['account', account!.id, 'members', tripId],
     queryFn: ({ signal }) =>
       apiRequest<ItemList<TripMember>>(`/api/trips/${tripId}/members`, { signal }),
   });
 
   const settlement = useQuery({
+    enabled: authority.data?.state === 'active',
     queryKey: ['account', account!.id, 'settlement', tripId, 'ledger'],
     queryFn: ({ signal }) =>
       apiRequest<SettlementView>(`/api/trips/${tripId}/settlement`, { signal }),
   });
 
   const totals = useQuery({
+    enabled: authority.data?.state === 'active',
     queryKey: ['account', account!.id, 'totals', tripId, 'personal'],
     queryFn: ({ signal }) =>
       apiRequest<{ totals: PersonalCurrencyTotal[] }>(
@@ -69,15 +83,35 @@ export function TripLedger() {
     ).values(),
   ];
   const totalCount = expenses.data?.pages.at(-1)?.totalCount ?? 0;
+  useUnavailableLedgerCleanup(tripId, authority.data);
+  const { lifecycleDialog, thumbnailDialog, openManagement } = useLedgerManagement(
+    trip.data,
+    authority.data?.state ?? 'active',
+    unavailableHeading,
+  );
+
+  if (authority.isPending || authority.error || authority.data.state !== 'active')
+    return (
+      <>
+        {lifecycleDialog}
+        {thumbnailDialog}
+        <TripAccessState authority={authority} tripId={tripId!} heading={unavailableHeading} />
+      </>
+    );
 
   if (trip.isPending || trip.error)
     return (
       <>
+        {lifecycleDialog}
+        {thumbnailDialog}
         <Link className="back" to="/trips">
           <Icon name="back" />
           <span>我的旅行</span>
         </Link>
         <QueryState
+          label="旅行資料"
+          layout="summary"
+          fetchStatus={trip.fetchStatus}
           pending={trip.isPending}
           error={trip.error}
           retry={() => {
@@ -89,11 +123,13 @@ export function TripLedger() {
 
   return (
     <>
+      {lifecycleDialog}
+      {thumbnailDialog}
       <Link className="back" to="/trips">
         <Icon name="back" />
         <span>我的旅行</span>
       </Link>
-      <header className="page-head">
+      <header className="page-head" role="region" aria-label="旅行資料">
         <div>
           <div className="eyebrow">TRAVEL JOURNAL</div>
           <h1>{trip.data.name}</h1>
@@ -104,12 +140,19 @@ export function TripLedger() {
             </Button>
           </p>
         </div>
-        <Button asChild variant="default">
-          <Link to={`/trips/${trip.data.id}/expenses/new`}>
-            <Icon name="plus" />
-            <span>記一筆</span>
-          </Link>
-        </Button>
+        <div className="ledger-actions">
+          <Button asChild variant="default">
+            <Link to={`/trips/${trip.data.id}/expenses/new`}>
+              <Icon name="plus" />
+              <span>記一筆</span>
+            </Link>
+          </Button>
+          <TripManagementMenu
+            onSelect={(action) => {
+              openManagement(action, trip.data);
+            }}
+          />
+        </div>
       </header>
       <nav aria-label="旅行內導覽" className="trip-navigation">
         <Button asChild variant="outline">
@@ -132,6 +175,9 @@ export function TripLedger() {
       ) : null}
       {totals.isPending || totals.error ? (
         <QueryState
+          label="分幣別總額"
+          layout="summary"
+          fetchStatus={totals.fetchStatus}
           pending={totals.isPending}
           error={totals.error}
           retry={() => {
@@ -197,13 +243,24 @@ export function TripLedger() {
         </section>
       ) : null}
       {expenses.isPending || !expenses.data ? (
-        <QueryState
-          pending={expenses.isPending}
-          error={expenses.error}
-          retry={() => {
-            void expenses.refetch();
-          }}
-        />
+        <>
+          {expenses.isPending && expenses.fetchStatus !== 'paused' ? (
+            <div className="section-head" aria-hidden="true">
+              <span className="list-heading-skeleton" />
+              <span className="list-count-skeleton" />
+            </div>
+          ) : null}
+          <QueryState
+            label="支出清單"
+            layout="list"
+            fetchStatus={expenses.fetchStatus}
+            pending={expenses.isPending}
+            error={expenses.error}
+            retry={() => {
+              void expenses.refetch();
+            }}
+          />
+        </>
       ) : totalCount === 0 ? (
         <div className="empty">
           <Icon name="note" />
@@ -215,65 +272,75 @@ export function TripLedger() {
         </div>
       ) : (
         <>
-          <div className="section-head">
-            <h2>沿途的花費</h2>
-            <span>{totalCount} 筆紀錄</span>
-          </div>
-          <div className="ledger">
-            {rows.map((expense) => (
-              <Link
-                className="expense-row"
-                to={`/trips/${tripId}/expenses/${expense.id}`}
-                key={expense.id}
-              >
-                <span className="category-icon">
-                  <Icon name="note" />
-                </span>
-                <div className="row-info">
-                  <div className="row-title">{expense.item}</div>
-                  <div className="row-sub">
-                    <span>{expense.spentOn}</span>
-                    {' · '}
-                    <span>{expense.category?.name ?? '未分類'}</span>
-                  </div>
-                </div>{' '}
-                <div className="row-amount">
-                  {expense.currencyCode} {displayAmount(expense.amount)}
-                </div>
-                <Icon name="arrow" />
-              </Link>
-            ))}
-          </div>
-          {expenses.error ? (
-            <p className="error" role="alert">
-              暫時無法更新支出清單，已載入的紀錄仍保留。
-              {!expenses.isFetchNextPageError ? (
-                <Button
-                  variant="ghost"
-                  type="button"
-                  className="text-btn"
-                  disabled={expenses.isFetching}
-                  onClick={() => {
-                    void expenses.refetch();
-                  }}
+          <section aria-label="支出清單">
+            <div className="section-head">
+              <h2>沿途的花費</h2>
+              <span className="ledger-record-count">
+                {totalCount} 筆紀錄
+                {expenses.isFetching && !expenses.isFetchingNextPage ? (
+                  <span aria-busy="true">
+                    <BusyIndicator accessibleLabel="正在更新支出清單" />
+                  </span>
+                ) : null}
+              </span>
+            </div>
+            {expenses.error ? (
+              <p className="error" role="alert">
+                暫時無法更新支出清單，已載入的紀錄仍保留。
+                {!expenses.isFetchNextPageError ? (
+                  <Button
+                    variant="ghost"
+                    type="button"
+                    className="text-btn"
+                    disabled={expenses.isFetching}
+                    onClick={() => {
+                      void expenses.refetch();
+                    }}
+                  >
+                    重新更新清單
+                  </Button>
+                ) : null}
+              </p>
+            ) : null}
+            <div className="ledger">
+              {rows.map((expense) => (
+                <Link
+                  className="expense-row"
+                  to={`/trips/${tripId}/expenses/${expense.id}`}
+                  key={expense.id}
                 >
-                  重新更新清單
-                </Button>
-              ) : null}
-            </p>
-          ) : null}
+                  <span className="category-icon">
+                    <Icon name="note" />
+                  </span>
+                  <div className="row-info">
+                    <div className="row-title">{expense.item}</div>
+                    <div className="row-sub">
+                      <span>{expense.spentOn}</span>
+                      {' · '}
+                      <span>{expense.category?.name ?? '未分類'}</span>
+                    </div>
+                  </div>{' '}
+                  <div className="row-amount">
+                    {expense.currencyCode} {displayAmount(expense.amount)}
+                  </div>
+                  <Icon name="arrow" />
+                </Link>
+              ))}
+            </div>
+          </section>
           {expenses.hasNextPage ? (
             <div className="load-more">
-              <Button
+              <ActionButton
                 type="button"
                 variant="outline"
+                label="載入更多"
+                busyLabel="正在讀取更多支出"
+                busy={expenses.isFetchingNextPage}
                 disabled={expenses.isFetching}
                 onClick={() => {
-                  void expenses.fetchNextPage();
+                  if (!expenses.isFetching) void expenses.fetchNextPage({ cancelRefetch: false });
                 }}
-              >
-                {expenses.isFetchingNextPage ? '載入中…' : '載入更多'}
-              </Button>
+              />
             </div>
           ) : null}
         </>

@@ -12,6 +12,7 @@ import { useSession } from '../auth/session.js';
 import type { SettlementView } from '../settlement/types.js';
 import { formatShareAmount } from '../expenses/ExpenseShares.js';
 import { Button } from '../../components/ui/button.js';
+import { ActionButton } from '../../components/waiting/ActionButton.js';
 import { Input } from '../../components/ui/input.js';
 import { QueryState } from '../../components/QueryState.js';
 import { FormDialog } from '../../components/FormDialog.js';
@@ -185,10 +186,12 @@ function MemberNameForm({
           </Button>
         </div>
       ) : null}
-      <Button type="submit" disabled={pending || Boolean(unknown)}>
-        {member ? '儲存名稱' : '新增同行者'}
-      </Button>
-      {pending ? <p role="status">正在確認保存結果…</p> : null}
+      <ActionButton
+        busy={pending}
+        label={member ? '儲存名稱' : '新增同行者'}
+        type="submit"
+        disabled={pending || Boolean(unknown)}
+      />
     </form>
   );
 }
@@ -216,6 +219,7 @@ export function TripMembers() {
   });
   const [action, setAction] = useState<MemberAction | null>(null);
   const [busy, setBusy] = useState(false);
+  const [activationId, setActivationId] = useState<string | null>(null);
   const [failure, setFailure] = useState('');
   const [message, setMessage] = useState('');
   const writing = useRef(false);
@@ -246,6 +250,7 @@ export function TripMembers() {
     if (writing.current) return;
     writing.current = true;
     setBusy(true);
+    setActivationId(isActive ? member.id : null);
     setFailure('');
     try {
       const saved = await apiRequest<TripMember>(`${base}/members/${member.id}`, {
@@ -263,6 +268,7 @@ export function TripMembers() {
     } finally {
       writing.current = false;
       setBusy(false);
+      setActivationId(null);
     }
   }
 
@@ -294,6 +300,14 @@ export function TripMembers() {
     }
   }
 
+  const pageHead = (
+    <header className="page-head">
+      <div>
+        <h1>同行者</h1>
+        <p className="muted">新增同行者，或管理這趟旅行的成員。</p>
+      </div>
+    </header>
+  );
   const back = (
     <Link className="back" to={`/trips/${tripId}`}>
       <Icon name="back" />
@@ -304,7 +318,15 @@ export function TripMembers() {
     return (
       <>
         {back}
+        {pageHead}
         <QueryState
+          label="同行者清單"
+          layout="list"
+          fetchStatus={
+            members.fetchStatus === 'paused' || trip.fetchStatus === 'paused'
+              ? 'paused'
+              : members.fetchStatus
+          }
           pending={members.isPending || trip.isPending}
           error={members.error ?? trip.error}
           retry={() => {
@@ -318,12 +340,7 @@ export function TripMembers() {
   return (
     <div className="members-page">
       {back}
-      <header className="page-head">
-        <div>
-          <h1>同行者</h1>
-          <p className="muted">新增同行者，或管理這趟旅行的成員。</p>
-        </div>
-      </header>
+      {pageHead}
       <section className="member-add-panel" aria-labelledby="member-add-title">
         <h2 id="member-add-title">一起旅行的人</h2>
         <MemberNameForm
@@ -355,90 +372,93 @@ export function TripMembers() {
           }}
         />
       ) : null}
-      <ul className="member-list" aria-label="旅行成員">
-        {members.data.items.map((member) => (
-          <li key={member.id}>
-            <div className="member-person">
-              <span aria-hidden="true" className="member-avatar">
-                {[...member.name][0]}
-              </span>
-              <div>
-                <strong>{member.name}</strong>
-                <p className="muted">
-                  {member.role === 'owner' ? (
-                    '帳本擁有者 · 永久啟用'
-                  ) : member.isActive ? (
-                    '啟用中'
-                  ) : (
-                    <>
-                      <span>已停用</span> · 保留過去紀錄
-                    </>
-                  )}
-                </p>
-                {settlement.data?.balances
-                  .filter((row) => row.memberId === member.id)
-                  .map((row) => (
-                    <p className="member-balance" key={row.currencyCode}>
-                      {row.currencyCode} {formatShareAmount(row.netAmount)}
-                    </p>
-                  ))}
+      <section aria-label="同行者清單">
+        <ul className="member-list" aria-label="旅行成員">
+          {members.data.items.map((member) => (
+            <li key={member.id}>
+              <div className="member-person">
+                <span aria-hidden="true" className="member-avatar">
+                  {[...member.name][0]}
+                </span>
+                <div>
+                  <strong>{member.name}</strong>
+                  <p className="muted">
+                    {member.role === 'owner' ? (
+                      '帳本擁有者 · 永久啟用'
+                    ) : member.isActive ? (
+                      '啟用中'
+                    ) : (
+                      <>
+                        <span>已停用</span> · 保留過去紀錄
+                      </>
+                    )}
+                  </p>
+                  {settlement.data?.balances
+                    .filter((row) => row.memberId === member.id)
+                    .map((row) => (
+                      <p className="member-balance" key={row.currencyCode}>
+                        {row.currencyCode} {formatShareAmount(row.netAmount)}
+                      </p>
+                    ))}
+                </div>
               </div>
-            </div>
-            {member.role === 'owner' ? (
-              <span className="muted">你</span>
-            ) : (
-              <div className="member-actions">
-                <Button
-                  variant="ghost"
-                  aria-label={`改名 ${member.name}`}
-                  disabled={busy}
-                  onClick={() => {
-                    setFailure('');
-                    setAction({ member, kind: 'rename' });
-                  }}
-                >
-                  改名
-                </Button>
-                {member.isActive ? (
+              {member.role === 'owner' ? (
+                <span className="muted">你</span>
+              ) : (
+                <div className="member-actions">
                   <Button
                     variant="ghost"
-                    aria-label={`停用 ${member.name}`}
+                    aria-label={`改名 ${member.name}`}
                     disabled={busy}
                     onClick={() => {
                       setFailure('');
-                      setAction({ member, kind: 'deactivate' });
+                      setAction({ member, kind: 'rename' });
                     }}
                   >
-                    停用
+                    改名
                   </Button>
-                ) : (
+                  {member.isActive ? (
+                    <Button
+                      variant="ghost"
+                      aria-label={`停用 ${member.name}`}
+                      disabled={busy}
+                      onClick={() => {
+                        setFailure('');
+                        setAction({ member, kind: 'deactivate' });
+                      }}
+                    >
+                      停用
+                    </Button>
+                  ) : (
+                    <ActionButton
+                      busy={busy && activationId === member.id}
+                      label={`重新啟用 ${member.name}`}
+                      variant="ghost"
+                      disabled={busy}
+                      onClick={() => {
+                        void changeStatus(member, true);
+                      }}
+                    >
+                      重新啟用
+                    </ActionButton>
+                  )}
                   <Button
                     variant="ghost"
-                    aria-label={`重新啟用 ${member.name}`}
+                    aria-label={`刪除 ${member.name}`}
                     disabled={busy}
                     onClick={() => {
-                      void changeStatus(member, true);
+                      setFailure('');
+                      setAction({ member, kind: 'delete' });
                     }}
                   >
-                    重新啟用
+                    刪除
                   </Button>
-                )}
-                <Button
-                  variant="ghost"
-                  aria-label={`刪除 ${member.name}`}
-                  disabled={busy}
-                  onClick={() => {
-                    setFailure('');
-                    setAction({ member, kind: 'delete' });
-                  }}
-                >
-                  刪除
-                </Button>
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
       <p className="muted">同行者不用登入，由你統一管理這趟旅行的帳務。</p>
       {action ? (
         <FormDialog
@@ -475,15 +495,15 @@ export function TripMembers() {
                 <Button variant="outline" disabled={busy} onClick={() => setAction(null)}>
                   取消
                 </Button>
-                <Button
+                <ActionButton
+                  busy={busy}
+                  label={action.kind === 'delete' ? '刪除' : '停用'}
                   disabled={busy}
                   onClick={() => {
                     if (action.kind === 'delete') void remove(action.member);
                     else void changeStatus(action.member, false);
                   }}
-                >
-                  {action.kind === 'delete' ? '刪除' : '停用'}
-                </Button>
+                />
               </div>
             </>
           )}

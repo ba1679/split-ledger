@@ -50,6 +50,9 @@ export function Categories() {
       ) : null}
       {categories.isPending || categories.error ? (
         <QueryState
+          label="分類清單"
+          layout="list"
+          fetchStatus={categories.fetchStatus}
           pending={categories.isPending}
           error={categories.error}
           retry={() => {
@@ -57,7 +60,7 @@ export function Categories() {
           }}
         />
       ) : categories.data.items.length ? (
-        <div className="ledger">
+        <div className="ledger" role="region" aria-label="分類清單">
           {categories.data.items.map((category) => (
             <div className="category-row" key={category.id}>
               <span className="category-icon">

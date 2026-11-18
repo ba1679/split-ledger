@@ -24,7 +24,7 @@ Category:
     usageCount:
       type: integer
       minimum: 0
-      description: 目前帳號的所有旅行中，仍引用此分類的支出筆數。
+      description: 本人 active 與垃圾桶旅行中仍引用此分類的支出筆數；整趟 purge 後不計入。
     createdAt:
       $ref: ./shared.yaml#/IsoTimestamp
     updatedAt:

@@ -397,12 +397,14 @@ export function DateField({
   onChange,
   optional = false,
   error,
+  placeholder = 'YYYY/MM/DD',
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   optional?: boolean;
   error?: string;
+  placeholder?: string;
 }) {
   const id = useId(),
     fieldRef = useRef<HTMLDivElement>(null),
@@ -433,7 +435,7 @@ export function DateField({
           className="date-input"
           aria-label={label}
           value={value}
-          placeholder="YYYY/MM/DD"
+          placeholder={placeholder}
           autoComplete="off"
           spellCheck={false}
           required={!optional}

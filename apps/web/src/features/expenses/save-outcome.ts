@@ -1,5 +1,6 @@
 import { parseMoney } from '@split-ledger/shared';
 import { apiRequest, ApiError, type Expense } from '../../api/index.js';
+import type { TripState } from '../trips/management-api.js';
 
 export interface SaveIntent {
   kind: 'save';
@@ -44,6 +45,16 @@ export class OfflineWrite extends Error {
   }
 }
 
+export class UnavailableTrip extends Error {
+  constructor(readonly state: TripState) {
+    super(
+      state.state === 'trash'
+        ? '旅行已在垃圾桶，請先復原旅行再繼續記帳。'
+        : '旅行已永久刪除，無法再使用原帳本。',
+    );
+  }
+}
+
 export function definitelyRejected(error: unknown) {
   return error instanceof ApiError && error.status < 500;
 }
@@ -77,11 +88,42 @@ export async function verifiedSave(intent: SaveIntent): Promise<Expense | null> 
   return null;
 }
 
-export async function verifiedDelete(intent: DeleteIntent) {
+export function currentTripState(tripId: string) {
+  return apiRequest<TripState>(`/api/trips/${tripId}/state`, {
+    signal: AbortSignal.timeout(5000),
+  });
+}
+
+export async function verifiedDelete(
+  intent: DeleteIntent,
+  readState = () => currentTripState(intent.tripId),
+) {
+  let state: TripState;
   try {
-    await apiRequest<Expense>(`/api/trips/${intent.tripId}/expenses/${intent.id}`);
+    state = await readState();
+  } catch {
+    return false;
+  }
+  if (state.state !== 'active') throw new UnavailableTrip(state);
+
+  try {
+    await apiRequest<Expense>(`/api/trips/${intent.tripId}/expenses/${intent.id}`, {
+      signal: AbortSignal.timeout(5000),
+    });
   } catch (error) {
-    return error instanceof ApiError && error.status === 404;
+    const missing = error instanceof ApiError && error.status === 404;
+    const hidden = error instanceof ApiError && error.code === 'TRIP_TRASHED';
+    if (!missing && !hidden) return false;
+    // A trip can become unavailable between the first state read and the expense read.
+    let current: TripState;
+    try {
+      current = await readState();
+    } catch {
+      return false;
+    }
+    if (current.state !== 'active') throw new UnavailableTrip(current);
+
+    return missing;
   }
 
   return false;

@@ -253,6 +253,7 @@ export function registerExpenseRoutes(
           400: ErrorResponse,
           401: ErrorResponse,
           404: ErrorResponse,
+          409: ErrorResponse,
         },
       },
     },
@@ -329,6 +330,7 @@ export function registerExpenseRoutes(
           200: Type.Union([Totals, PersonalTotals]),
           401: ErrorResponse,
           404: ErrorResponse,
+          409: ErrorResponse,
         },
       },
     },
@@ -481,14 +483,18 @@ export function registerExpenseRoutes(
     {
       schema: {
         params: Params,
-        response: { 200: Expense, 401: ErrorResponse, 404: ErrorResponse },
+        response: { 200: Expense, 401: ErrorResponse, 404: ErrorResponse, 409: ErrorResponse },
       },
     },
     async (request, reply) => {
       const user = await requireUser(auth, request, reply);
 
       return db.transaction(
-        (tx) => readExpense(tx, user.id, request.params.tripId, request.params.expenseId),
+        async (tx) => {
+          await requireTrip(tx, user.id, request.params.tripId);
+
+          return readExpense(tx, user.id, request.params.tripId, request.params.expenseId);
+        },
         { isolationLevel: 'repeatable read', accessMode: 'read only' },
       );
     },
@@ -506,6 +512,7 @@ export function registerExpenseRoutes(
           401: ErrorResponse,
           403: ErrorResponse,
           404: ErrorResponse,
+          409: ErrorResponse,
         },
       },
     },
@@ -614,6 +621,7 @@ export function registerExpenseRoutes(
           401: ErrorResponse,
           403: ErrorResponse,
           404: ErrorResponse,
+          409: ErrorResponse,
         },
       },
     },

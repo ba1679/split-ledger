@@ -1,6 +1,7 @@
 import { ChevronDown } from 'lucide-react';
 import { Input } from '../components/ui/input.js';
 import React, { useId, useRef, useState } from 'react';
+import { BusyIndicator } from './waiting/BusyIndicator.js';
 
 export interface ComboOption {
   value: string;
@@ -16,6 +17,7 @@ export function SearchCombo({
   error,
   optional = false,
   disabled = false,
+  pending = false,
 }: {
   label: string;
   value: string;
@@ -25,6 +27,7 @@ export function SearchCombo({
   error?: string;
   optional?: boolean;
   disabled?: boolean;
+  pending?: boolean;
 }) {
   const id = useId(),
     root = useRef<HTMLDivElement>(null),
@@ -39,6 +42,7 @@ export function SearchCombo({
   const selected = options.find((option) => option.value === value);
 
   function select(option: ComboOption) {
+    if (pending || disabled) return;
     onChange(option.value);
     onSelect?.(option.value);
     setSearch(null);
@@ -65,6 +69,9 @@ export function SearchCombo({
   return (
     <div
       className="field"
+      role="group"
+      aria-label={`${label}選項`}
+      aria-busy={pending || undefined}
       ref={root}
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) {
@@ -76,6 +83,7 @@ export function SearchCombo({
       <label htmlFor={id}>
         {label}
         {optional ? <span className="optional">選填</span> : null}
+        {pending ? <BusyIndicator accessibleLabel={`正在讀取${label}選項`} /> : null}
       </label>
       <div className="combo">
         <Input
@@ -83,27 +91,38 @@ export function SearchCombo({
           ref={input}
           role="combobox"
           aria-autocomplete="list"
-          aria-expanded={open}
+          aria-expanded={open && !pending}
           aria-controls={`${id}-options`}
-          aria-activedescendant={open && filtered[active] ? `${id}-option-${active}` : undefined}
+          aria-activedescendant={
+            open && !pending && filtered[active] ? `${id}-option-${active}` : undefined
+          }
           aria-invalid={Boolean(error)}
           aria-describedby={error ? `${id}-error` : undefined}
           autoComplete="off"
           disabled={disabled}
+          readOnly={pending}
+          aria-disabled={pending || undefined}
           placeholder={`搜尋${label}${label === '幣別' ? '代碼或名稱' : ''}`}
           value={search ?? selected?.label ?? ''}
           onClick={() => {
+            if (pending) return;
             setSearch(null);
             setActive(0);
             setOpen(true);
           }}
           onChange={(event) => {
+            if (pending) return;
             setSearch(event.target.value);
             setActive(0);
             setOpen(true);
             onChange('');
           }}
           onKeyDown={(event) => {
+            if (pending) {
+              if (['Enter', 'ArrowDown', 'ArrowUp'].includes(event.key)) event.preventDefault();
+
+              return;
+            }
             if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
               event.preventDefault();
               move(event.key === 'ArrowDown' ? 1 : -1);
@@ -121,9 +140,9 @@ export function SearchCombo({
           type="button"
           className="combo-toggle"
           aria-label={`展開${label}選單`}
-          aria-expanded={open}
+          aria-expanded={open && !pending}
           aria-controls={`${id}-options`}
-          disabled={disabled}
+          disabled={disabled || pending}
           onClick={() => {
             setSearch(null);
             setActive(0);
@@ -135,7 +154,7 @@ export function SearchCombo({
             <ChevronDown className="icon" size={19} strokeWidth={1.6} aria-hidden="true" />
           </span>
         </button>
-        {open ? (
+        {open && !pending ? (
           <div id={`${id}-options`} className="options" role="listbox" aria-label={`${label}選項`}>
             {filtered.length ? (
               filtered.map((option, index) => (

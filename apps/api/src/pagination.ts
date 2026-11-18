@@ -1,9 +1,17 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { invalid } from './http.js';
 
+export function tripPageLimit(value: string | undefined): number {
+  const limit = value === undefined ? 50 : Number(value);
+
+  if (!Number.isSafeInteger(limit) || limit > 100) throw invalid('每頁筆數須為 1 到 100 的整數。');
+
+  return limit;
+}
+
 interface TripCursor {
   owner: string;
-  scope: 'trips';
+  scope: 'trips' | 'trips-trash';
   time: string;
   id: string;
 }
@@ -14,7 +22,12 @@ export function encodeTripCursor(value: TripCursor, secret: string) {
   return `${payload}.${createHmac('sha256', secret).update(payload).digest('base64url')}`;
 }
 
-export function decodeTripCursor(value: string, owner: string, secret: string): TripCursor {
+export function decodeTripCursor(
+  value: string,
+  owner: string,
+  secret: string,
+  scope: TripCursor['scope'] = 'trips',
+): TripCursor {
   try {
     const parts = value.split('.');
 
@@ -30,7 +43,7 @@ export function decodeTripCursor(value: string, owner: string, secret: string): 
 
     if (
       parsed.owner !== owner ||
-      parsed.scope !== 'trips' ||
+      parsed.scope !== scope ||
       typeof parsed.time !== 'string' ||
       !Number.isFinite(Date.parse(parsed.time)) ||
       !/^[0-9a-f-]{36}$/i.test(parsed.id)

@@ -291,7 +291,7 @@ export async function tripEnd(page: Page, date: string) {
   const dialog = page.getByRole('dialog');
 
   await dialog.getByLabel('結束日', { exact: true }).fill(date.replaceAll('-', '/'));
-  await dialog.getByRole('button', { name: /^(儲存日期|保存日期)$/ }).click();
+  await dialog.getByRole('button', { name: '儲存變更', exact: true }).click();
 }
 
 export async function assertTrip(

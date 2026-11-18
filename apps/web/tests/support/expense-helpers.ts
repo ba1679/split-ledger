@@ -350,21 +350,21 @@ export async function assertUnknown(page: Page, world: LedgerWorld, confirmed: b
 
 export async function arrangePagination(page: Page, world: LedgerWorld) {
   await arrangeTrip(world);
-  for (let index = 1; index <= 51; index++) {
+  for (let index = 1; index <= 21; index++) {
     await seedExpense(world, {
       tripName: '日本旅行',
       item: `跨頁支出${index.toString().padStart(2, '0')}`,
-      amount: index === 1 ? '9000' : '100',
+      amount: index === 1 ? '9000' : '250',
       currencyCode: index === 1 ? 'TWD' : 'JPY',
       spentOn: index === 1 ? '2027-01-01' : '2027-03-11',
     });
   }
   const { list } = await readLedger(world);
 
-  expect(list.totalCount).toBe(51);
+  expect(list.totalCount).toBe(21);
   await login(page, world);
   await openTrip(page, world);
-  await expect(page.getByRole('link').filter({ hasText: /跨頁支出\d+/ })).toHaveCount(50);
+  await expect(page.getByRole('link').filter({ hasText: /跨頁支出\d+/ })).toHaveCount(20);
   await expect(expenseLink(page, '跨頁支出01')).toHaveCount(0);
   await assertTotal(page, world, 'TWD', '9000');
   await assertTotal(page, world, 'JPY', '5000');

@@ -1,0 +1,231 @@
+.form-dialog.thumbnail-editor {
+  width: min(668px, calc(100% - 32px));
+  max-width: calc(100% - 32px);
+  height: min(715px, calc(100dvh - 32px));
+  padding: 32px;
+  border: 0;
+}
+.form-dialog.thumbnail-editor::backdrop {
+  background: rgb(25 46 41 / 50%);
+}
+.form-dialog.thumbnail-editor.has-feedback {
+  height: fit-content;
+  min-height: min(715px, calc(100dvh - 32px));
+}
+.mobile-thumbnail-description {
+  display: none;
+}
+.form-dialog.thumbnail-editor h2 {
+  font-family: inherit;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 8px;
+  padding-right: 30px;
+}
+.landscape .trip-thumbnail {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.trip-thumbnail-status {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--soft);
+  color: var(--green);
+}
+.trash-card-image {
+  position: relative;
+}
+.trip-thumbnail-fallback {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  min-height: 32px;
+  padding: 6px 12px;
+  z-index: 2;
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 20px;
+}
+.thumbnail-editor .dialog-description {
+  margin-bottom: 24px;
+  font-size: 15px;
+}
+.thumbnail-preview-area {
+  position: relative;
+  height: 264px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--soft);
+}
+.thumbnail-preview-area .thumbnail-preview {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
+}
+.thumbnail-default {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  height: 100%;
+  padding: 32px;
+  color: white;
+  background: linear-gradient(155deg, #9ca982, #d5be8f);
+}
+.thumbnail-confirmed-placeholder {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--muted);
+  font-size: 14px;
+}
+.thumbnail-draft-badge {
+  position: absolute;
+  top: 16px;
+  left: 14px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  background: rgb(25 46 41 / 55%);
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+}
+.thumbnail-selection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+.thumbnail-filename {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.thumbnail-tools {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--muted);
+}
+.thumbnail-tools .ds-button {
+  padding: 0 10px;
+  min-height: 48px;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--muted);
+}
+.thumbnail-tools .ds-button:first-child {
+  color: var(--green);
+}
+.thumbnail-limits {
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.thumbnail-limits p {
+  margin-bottom: 6px;
+}
+.thumbnail-editor .thumbnail-actions {
+  margin-top: 24px;
+  padding-top: 22px;
+}
+.thumbnail-actions .ds-button:first-child {
+  min-width: 148px;
+}
+.thumbnail-actions .ds-button {
+  min-height: 48px;
+}
+.thumbnail-outcome,
+.operation-outcome {
+  margin-top: 12px;
+  padding: 12px;
+  border-left: 3px solid #b69c65;
+  background: var(--warning-surface);
+  font-size: 14px;
+}
+.thumbnail-outcome p,
+.operation-outcome p {
+  margin-bottom: 8px;
+}
+.trip-operation-check {
+  position: relative;
+}
+.trip-operation-check .action-spinner {
+  position: absolute;
+  left: calc(50% - 10px);
+  top: calc(50% - 10px);
+}
+.thumbnail-actions .ds-button:last-child {
+  min-width: 166px;
+}
+@media (max-width: 700px) {
+  .form-dialog.thumbnail-editor {
+    height: min(720px, calc(100dvh - 32px));
+    padding: 24px 20px;
+  }
+  .form-dialog.thumbnail-editor.has-feedback {
+    min-height: min(720px, calc(100dvh - 32px));
+  }
+  .desktop-thumbnail-description {
+    display: none;
+  }
+  .mobile-thumbnail-description {
+    display: initial;
+  }
+  .form-dialog.thumbnail-editor h2 {
+    font-size: 23px;
+    line-height: 31px;
+  }
+  .thumbnail-editor .dialog-description {
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+  .thumbnail-preview-area {
+    height: 190px;
+  }
+  .thumbnail-selection {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .thumbnail-tools {
+    align-self: flex-start;
+  }
+  .thumbnail-limits {
+    margin-top: 24px;
+    max-width: 285px;
+  }
+  .thumbnail-limits p {
+    margin-bottom: 0;
+  }
+  .thumbnail-limits p:last-child {
+    margin-top: 30px;
+  }
+  .thumbnail-editor .thumbnail-actions {
+    margin-top: 14px;
+    padding-top: 0;
+    border-top: 0;
+  }
+  .thumbnail-actions .ds-button {
+    flex: 1;
+    min-width: 0 !important;
+  }
+}

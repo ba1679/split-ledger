@@ -9,6 +9,9 @@ export interface Account {
 }
 
 export interface Trip {
+  lifecycleRevision: string;
+  thumbnailRevision: string;
+  hasThumbnail: boolean;
   ownerMemberId: string;
   simplifyDebts: boolean;
   accountingRevision: string;

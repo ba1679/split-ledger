@@ -88,8 +88,26 @@ for (const width of [375, 1280])
       const during = await panel.boundingBox();
 
       expect(during!.height).toBe(before!.height);
-      await expect(panel.getByRole('status')).toHaveClass('sr-only');
-      const track = await toggle.locator('span').boundingBox();
+      const busy = panel.getByRole('status', { name: '正在更新簡化付款', exact: true });
+
+      await expect(busy).toBeVisible();
+      await expect(busy).toHaveText('');
+      await expect(toggle).toHaveAccessibleName('簡化付款');
+      const spinner = busy.locator('svg');
+
+      await expect(spinner).toBeVisible();
+      const spinnerBox = await spinner.boundingBox();
+      const toggleBox = await toggle.boundingBox();
+
+      expect(spinnerBox!.width).toBeGreaterThanOrEqual(16);
+      expect(spinnerBox!.height).toBeGreaterThanOrEqual(16);
+      expect(
+        Math.abs(spinnerBox!.x + spinnerBox!.width / 2 - toggleBox!.x - toggleBox!.width / 2),
+      ).toBeLessThanOrEqual(1);
+      expect(
+        Math.abs(spinnerBox!.y + spinnerBox!.height / 2 - toggleBox!.y - toggleBox!.height / 2),
+      ).toBeLessThanOrEqual(1);
+      const track = await toggle.locator('.switch-track').boundingBox();
 
       expect(track!.height).toBe(24);
       expect((await toggle.boundingBox())!.height).toBeGreaterThanOrEqual(44);

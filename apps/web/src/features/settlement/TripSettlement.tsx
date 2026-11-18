@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import {
@@ -15,6 +15,7 @@ import { formatShareAmount } from '../expenses/ExpenseShares.js';
 import { displayAmount } from '../expenses/money.js';
 import { Button } from '../../components/ui/button.js';
 import { QueryState } from '../../components/QueryState.js';
+import { BusyIndicator } from '../../components/waiting/BusyIndicator.js';
 import { Icon } from '../../components/Icon.js';
 import './settlement.css';
 
@@ -45,10 +46,12 @@ export function TripSettlement() {
   const queryKey = ['account', account!.id, 'settlement', tripId, 'screen'];
   const query = useQuery({ queryKey, queryFn: ({ signal }) => readSettlement(base, signal) });
   const [saving, setSaving] = useState(false);
+  const writing = useRef(false);
   const [failure, setFailure] = useState<{ target: boolean; unknown: boolean } | null>(null);
 
   async function changeMode(target: boolean) {
-    if (saving) return;
+    if (writing.current) return;
+    writing.current = true;
     setSaving(true);
     setFailure(null);
     let saved = false;
@@ -69,11 +72,14 @@ export function TripSettlement() {
         unknown: saved || !(error instanceof ApiError && error.status >= 400 && error.status < 500),
       });
     } finally {
+      writing.current = false;
       setSaving(false);
     }
   }
 
   async function confirmMode() {
+    if (writing.current) return;
+    writing.current = true;
     setSaving(true);
     try {
       const confirmed = await readSettlement(base);
@@ -83,10 +89,19 @@ export function TripSettlement() {
     } catch {
       // Keep the last confirmed graph while the result cannot be verified.
     } finally {
+      writing.current = false;
       setSaving(false);
     }
   }
 
+  const pageHead = (
+    <header className="page-head">
+      <div>
+        <h1>誰該付給誰</h1>
+        <p className="muted">查看每個人的應收、應付與付款安排。</p>
+      </div>
+    </header>
+  );
   const back = (
     <Link className="back" to={`/trips/${tripId}`}>
       <Icon name="back" />
@@ -97,7 +112,11 @@ export function TripSettlement() {
     return (
       <>
         {back}
+        {pageHead}
         <QueryState
+          label="付款安排"
+          layout="list"
+          fetchStatus={query.fetchStatus}
           pending={query.isPending}
           error={query.error}
           retry={() => {
@@ -124,12 +143,7 @@ export function TripSettlement() {
           {location.state.message}
         </p>
       ) : null}
-      <header className="page-head">
-        <div>
-          <h1>誰該付給誰</h1>
-          <p className="muted">查看每個人的應收、應付與付款安排。</p>
-        </div>
-      </header>
+      {pageHead}
       <section
         className="settlement-panel simplification-panel"
         aria-labelledby="simplification-title"
@@ -146,12 +160,16 @@ export function TripSettlement() {
             aria-label="簡化付款"
             aria-checked={settlement.simplifyDebts}
             aria-busy={saving}
-            disabled={saving || failure?.unknown}
+            aria-disabled={saving || failure?.unknown || undefined}
+            disabled={failure?.unknown}
             onClick={() => {
               void changeMode(!settlement.simplifyDebts);
             }}
           >
-            <span />
+            <span className="switch-track" />
+            {saving ? (
+              <BusyIndicator className="switch-spinner" accessibleLabel="正在更新簡化付款" />
+            ) : null}
           </button>
         </div>
         <p>{settlement.explanation}</p>
@@ -159,9 +177,6 @@ export function TripSettlement() {
           直接安排 {settlement.directArrangementCount} 筆 · 目前安排{' '}
           {settlement.suggestedArrangementCount} 筆
         </p>
-        <span role="status" className="sr-only">
-          {saving ? '正在確認付款安排…' : ''}
-        </span>
         {failure ? (
           <div className="error" role="alert">
             <p>

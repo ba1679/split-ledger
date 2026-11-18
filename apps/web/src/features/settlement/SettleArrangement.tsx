@@ -1,4 +1,4 @@
-import React, { useId, useRef, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import {
   parseMoney,
   classifyArrangementPayment,
@@ -16,6 +16,7 @@ import {
   type CurrencyList,
 } from '../../api/index.js';
 import { Button } from '../../components/ui/button.js';
+import { ActionButton } from '../../components/waiting/ActionButton.js';
 import { Input } from '../../components/ui/input.js';
 import { DateField } from '../../components/DateField.js';
 import { dateOnly, localToday, parseDate } from '../../components/date.js';
@@ -156,6 +157,9 @@ export function SettleArrangement() {
   if (!query.data)
     return (
       <QueryState
+        label="結清表單"
+        layout="form"
+        fetchStatus={query.fetchStatus}
         pending={query.isPending}
         error={query.error}
         retry={() => {
@@ -194,7 +198,7 @@ function LoadedSettlement({
   );
   if (!arrangement)
     return (
-      <div className="settle-page">
+      <div className="settle-page" role="region" aria-label="結清表單">
         <p role="alert">付款安排已更新，請重新載入。</p>
         <Link to={`/trips/${snapshot.trip.id}/settlement`}>返回安排</Link>
       </div>
@@ -243,12 +247,29 @@ function SettleEditor({
   const [unknown, setUnknown] = useState<SettleArrangementRequest | null>(null);
   const [saved, setSaved] = useState<ArrangementPaymentResult | null>(null);
   const [busy, setBusy] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const checkingNow = useRef(false);
+  const recheck = useRef<HTMLButtonElement>(null);
+  const alive = useRef(true);
   const writing = useRef(false);
+  useEffect(() => {
+    alive.current = true;
+
+    return () => {
+      alive.current = false;
+    };
+  }, []);
+  useEffect(() => {
+    if (unknown && recheck.current) {
+      recheck.current.scrollIntoView({ block: 'center', inline: 'nearest' });
+      recheck.current.focus({ preventScroll: true });
+    }
+  }, [unknown]);
   const amountId = useId();
   const names = new Map(members.map((member) => [member.id, member.name]));
   const payer = names.get(arrangement.debtorMemberId);
   const payee = names.get(arrangement.creditorMemberId);
-  const locked = busy || Boolean(unknown) || Boolean(saved) || stale;
+  const locked = busy || checking || Boolean(unknown) || Boolean(saved) || stale;
 
   let partialDraft = false;
   try {
@@ -262,6 +283,7 @@ function SettleEditor({
   }
 
   async function confirmed(record: ArrangementPaymentResult) {
+    if (!alive.current) return;
     setSaved(record);
     setUnknown(null);
     await Promise.all(
@@ -275,28 +297,44 @@ function SettleEditor({
   }
 
   async function verify(command: SettleArrangementRequest) {
-    try {
-      const record = await apiRequest<SettlementRecord>(`${base}/settlements/${command.id}`);
-      if (matchesRecord(record, command, trip.id)) {
-        await confirmed(record);
-
-        return;
-      }
-    } catch {
-      // A temporary 404 or transport failure cannot prove that the POST did not commit.
-    }
-    try {
-      const payment = await apiRequest<Repayment>(`${base}/repayments/${command.repaymentId}`);
-      const partial = partialResult(payment, command, trip.id);
-      if (partial) {
-        await confirmed(partial);
-
-        return;
-      }
-    } catch {
-      // Keep the same original command when neither result can be confirmed.
-    }
+    if (checkingNow.current || !alive.current) return;
+    checkingNow.current = true;
+    setBusy(false);
+    setChecking(true);
     setUnknown(command);
+    try {
+      try {
+        const record = await apiRequest<SettlementRecord>(`${base}/settlements/${command.id}`, {
+          signal: AbortSignal.timeout(5000),
+        });
+        if (!alive.current) return;
+        if (matchesRecord(record, command, trip.id)) {
+          await confirmed(record);
+
+          return;
+        }
+      } catch {
+        // A temporary 404 or transport failure cannot prove the POST did not commit.
+      }
+      if (!alive.current) return;
+      try {
+        const payment = await apiRequest<Repayment>(`${base}/repayments/${command.repaymentId}`, {
+          signal: AbortSignal.timeout(5000),
+        });
+        if (!alive.current) return;
+        const partial = partialResult(payment, command, trip.id);
+        if (partial) {
+          await confirmed(partial);
+
+          return;
+        }
+      } catch {
+        // Retain the original command and draft when neither result is confirmed.
+      }
+    } finally {
+      checkingNow.current = false;
+      if (alive.current) setChecking(false);
+    }
   }
 
   async function save(event: React.FormEvent) {
@@ -330,12 +368,15 @@ function SettleEditor({
     try {
       const record = await apiRequest<ArrangementPaymentResult>(`${base}/settlements`, {
         method: 'POST',
+        signal: AbortSignal.timeout(15000),
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(command),
       });
+      if (!alive.current) return;
       if (matchesResult(record, command, trip.id)) await confirmed(record);
       else await verify(command);
     } catch (error) {
+      if (!alive.current) return;
       if (error instanceof ApiError && error.status >= 400 && error.status < 500) {
         if (['ACCOUNTING_REVISION_CONFLICT', 'ARRANGEMENT_NOT_FOUND'].includes(error.code))
           setStale(true);
@@ -343,12 +384,12 @@ function SettleEditor({
       } else await verify(command);
     } finally {
       writing.current = false;
-      setBusy(false);
+      if (alive.current) setBusy(false);
     }
   }
 
   return (
-    <div className="settle-page">
+    <div className="settle-page" role="region" aria-label="結清表單">
       <Link className="back" to={`/trips/${trip.id}/settlement`}>
         <Icon name="back" />
         <span>返回安排</span>
@@ -423,16 +464,17 @@ function SettleEditor({
               {partialDraft ? '部分還款結果尚未確認' : '結清結果尚未確認'}
               ，請查證原本這次操作的結果。
             </p>
-            <Button
+            <ActionButton
+              ref={recheck}
               type="button"
               variant="outline"
-              disabled={busy}
+              busy={checking}
+              label="查證結果"
+              busyLabel="正在查證原次實付結果"
               onClick={() => {
                 void verify(unknown);
               }}
-            >
-              查證結果
-            </Button>
+            />
           </div>
         ) : null}
         {saved && 'kind' in saved ? (
@@ -448,9 +490,12 @@ function SettleEditor({
           </p>
         ) : null}
         <div className="settle-actions">
-          <Button type="submit" disabled={locked}>
-            {partialDraft ? '記錄部分還款' : '結清這筆安排'}
-          </Button>
+          <ActionButton
+            busy={busy}
+            label={partialDraft ? '記錄部分還款' : '結清這筆安排'}
+            type="submit"
+            disabled={locked}
+          />
           <Button asChild type="button" variant="outline">
             <Link to={`/trips/${trip.id}/settlement`}>返回安排</Link>
           </Button>
