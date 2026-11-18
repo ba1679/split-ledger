@@ -27,7 +27,8 @@ disable-model-invocation: true
 
 1. READ 需要判斷先後與平行分組時，讀取 `rules/Wave依賴排序與平行分組判準.md`。
 2. THINK 依已載入契約判定各範圍 UI 分流、呈現／行為依據與基準缺口；依決策依賴、truth 風險及可平行程度安排 Wave，確認各介面的 owner 或既有依據。
-3. WRITE 將系統介面盤點、UI 分流與理由、受影響畫面／行為、固定基準或替代依據、Wave 決策依賴及委派理由寫入 `specs/plans/NNN-<slug>/plan.md`。
+3. THINK 收斂交付依賴與首條可驗證路徑，辨識所需資料、API、fixture、執行環境與適用瀏覽器／裝置；將待 owner 收斂事項標為待決，不提前定義契約或 schema。
+4. WRITE 將系統介面盤點、UI 分流與理由、受影響畫面／行為、固定基準或替代依據、分析 Wave、交付依賴與首條驗證路徑寫入 `specs/plans/NNN-<slug>/plan.md`，供 `/tasks` 在 owner 產物就緒後排定實作波次。
 
 ## Phase 4 -- 委派 planner 並交付
 

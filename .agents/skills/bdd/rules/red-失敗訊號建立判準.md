@@ -35,6 +35,7 @@ Focused test：
 - 新 slice 的實作必須先讓對應測試以合理方式失敗，確認它真的在驅動本輪需求，再進入 `green`。
 - 若 skeleton 已存在，也必須至少重跑 focused test，確認目前 failure 與這個 slice 有關，不可憑感覺直接補實作。
 - 不可在沒有觀察過 failure 的情況下，直接寫完整功能後宣稱自己完成了 `red`。
+- 依入口載入的共用測試證據判準區分產品失敗、測試工具錯誤與前置受阻；目標未到達就維持待驗，不為相同阻塞展開重複矩陣。
 
 ## Good Example
 
@@ -43,7 +44,7 @@ Focused test：
 ```md
 1. 新增對應 step skeleton 或 assertion
 2. 跑 focused test
-3. 看到 undefined step、missing assertion 或行為不符的 failure
+3. 排除 undefined step、fixture／工具錯誤，觀察到可歸因至目標斷言或產品行為的 failure
 4. 停在紅燈，準備交給 `green`
 ```
 

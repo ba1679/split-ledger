@@ -8,6 +8,15 @@
 
 **輸入**: 使用者描述：「{{USER_INPUT}}」
 
+## 範圍與交付邊界
+
+- 本輪成果與納入範圍：{{PLAN_OUTCOME_AND_INCLUDED_SCOPE}}
+- 排除範圍、後續候選與依賴：{{EXCLUDED_SCOPE_AND_FOLLOWUPS}}
+- 拆分判斷與決定：{{PLAN_SPLIT_DECISION_AND_REASON}}
+- 必要品質與驗證／交付依賴：{{MINIMUM_QUALITY_AND_DELIVERY_DEPENDENCIES}}
+
+<!-- 單一小功能簡記不需拆分；多個獨立成果記錄開發者選擇。保留同一 plan 時交代共同交付理由與逐步驗證方式。後續候選不等於已建立或已授權的 plan；此處不預先決定技術方案。 -->
+
 ## 使用者情境與測試 *(必填)*
 
 <!--

@@ -37,6 +37,7 @@
 - 當前範疇內若已出現重複 step wording、可抽的 parameter / data table type、硬編碼測試資料、命名失焦或薄 glue 被破壞，應優先在 `refactor` 階段整理。
 - 重構的目標是讓後續同範疇 slices 更容易繼續前進，而不是追求與本輪行為無關的大型架構整理。
 - 若整理只會改善局部可讀性、卻會放大風險與變動面，應保守處理。
+- 實際重構與 NOOP 的驗證範圍依入口載入的共用測試證據判準，記錄影響消費者及版本。沒有必要整理時可回報 NOOP 並引用有效 Green 證據，不為了完成 refactor task 製造變更。
 
 ## Good Example
 

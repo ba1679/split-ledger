@@ -9,7 +9,7 @@
 - Phase 1 `Setup` 只做本輪新增技術的基礎建設、技術環境與最後的 smoke-test；不寫 DSL 語意、不寫產品行為。
 - Phase 2 `Foundational` 只建立後續實作程式、測試共用元件、入口、fixture、helper 與落點骨架。
 - 無需對齊 DSL 時省略 Phase 3，記錄原因與既有回歸範圍。
-- Phase 3 `Test Alignment & Implementation` 的目的：在寫產品碼之前，先把本輪所有受影響 DSL 的自動化測試對齊最新版 truth。
+- Phase 3 `Test Alignment & Implementation` 按實作波次對齊受影響 DSL；各波對應產品碼開始前，該波測試須對齊最新版 truth 並完成獨立 review。
 - Truth 參照必須使用 `specs/truth/**` 路徑；plan 參照才使用當前 plan package 內相對路徑。
 - Feature `Shared Must Read` 除 feature、同模組 DSL、對應 `truth-delta` 列外，還必須列入按分流回追到的適用產物或既有呈現／行為依據。
 
@@ -24,7 +24,7 @@
 
 | Checkpoint      | 完成條件／驗證                  | 下一範圍與交接位置     |
 | --------------- | ------------------------------- | ---------------------- |
-| 測試層完成 T015 | 全部 DSL 就緒且獨立 review 通過 | T016 green；handoff.md |
+| 首波測試層 T030 | 拒絕流程 DSL 就緒且獨立 review 通過 | T016 green；handoff.md |
 
 <!-- 依範圍列出測試 review、後端 feature 組、代表畫面桌機／手機比對、其餘前端及最終整合等適用交接點。待確認只產出阻礙與前置關卡，只阻擋依賴未決事項的任務；A／B 缺 ui/ 或不製作 prototype 不算未完成。 -->
 
@@ -32,8 +32,20 @@
 - 第一個代表畫面：T022 完成桌機／手機與相關狀態比對，T023 完成後交接；後續共用版型的畫面必須依賴此比對，若無後續畫面則註明不適用。
 - 最終整合：T024 獨立 UI gate；適用完整回歸及其他產品驗收完成後才解鎖 T028，T029 核對回填後交付，不宣稱未跑矩陣已完成。
 
-- 分波與補驗：預設全批測試對齊後 review；UI 受阻時可明列本波僅獨立 backend 的 feature／DSL／Test Scope 與 review 依賴。前端後補時增量加入其對齊與 review，不宣告全 plan 已就緒。
+- 分波與補驗：先讓空白拒絕的正式流程取得回饋，再展開對話與清空及前端；不等待全站 DSL。每波保留精確 Test Scope 與獨立 review，不宣告未執行範圍已完成。
 - 舊 tasks 更新：保留既有 ID／歷史證據及不受影響的 `[X]`；缺適用批准／比對者才重開或新增補驗，阻擋相應最終 gate；新增 ID 不得重複。
+
+## 實作波次與依賴
+
+| 實作波次／成果 | 前置 task／共同依賴 | Feature／DSL 範圍與測試層 tasks | Test Scope 與獨立 review | 解鎖的產品 tasks |
+| --- | --- | --- | --- | --- |
+| 首波：空白拒絕 | T001–T007 | 單人等待與空白訊息拒絕；T011–T013 | 該 feature 全部 Examples；T030 | T016；其 Green 完成才解鎖 T017 |
+| 次波：對話與清空 | T017 | 雙方在場寫入、離開清空；T008–T010、T014 | 兩份 feature 全部 Examples；T015 | T018–T021 |
+| 前端波：操作與回饋 | T021、有效 design-v1 確認 | 登入與送訊畫面；本例假設全數 DSL 已有同語意 stepdef，引用既有落點 | 前端 feature 全部 Examples；T031 | T022、T023 |
+
+- 首條正式驗證路徑：以「單人等待與空白訊息拒絕」正式測試先驗證資料建態、連線、送出與拒絕斷言；先 focused RED，再完成首波對齊／review／Green，不另加 smoke。既有持久化前置在本例已成立；若未成立，需先排可獨立驗證的產品前置波，不能塞入 T001–T007。
+- 共用測試消費者與重驗邊界：chat_helpers.py 為三波共用；後波修改時核對前波消費者並重驗受影響案例。前端若缺少或需調整 DSL 綁定，須逐句新增對齊 tasks 後才能進 T031，不能照抄本例的沿用假設。
+- 最終完整回歸與工程／人工驗收依賴：完成所有指定 feature、瀏覽器與專案檢查後才能宣告交付；設計與基準回填仍依下方關卡。
 
 ## Phase 1: Setup
 
@@ -91,7 +103,7 @@
 
 ## Phase 3: Test Alignment & Implementation
 
-**Goal**: 把本輪 Feature 用到的 DSL 自動化測試對齊最新版 truth；含 truth-delta 有改的句，以及本輪 Feature 用到、尚無 stepdef 的句。不寫產品行為。
+**Goal**: 按上述波次把本輪 Feature 用到的 DSL 自動化測試對齊最新版 truth；含 truth-delta 有改的句，以及本輪 Feature 用到、尚無 stepdef 的句。不寫產品行為。
 
 **DSL 參照**:
 
@@ -127,32 +139,59 @@
 - 不寫產品碼。
 - review 交給未參與實作的既有審查者，依共同資源預算安排；本波明列的 Test Scope（未明確分波時為本輪所有 Test Scope）不得再有 undefined step，失敗只能是 assertion 或產品行為。有 issues 就修正再 review；通過只解鎖明列依賴此 review 的 Feature phases。
 
+- 目標被環境／產品前置遮蔽時保持待驗，依共用測試證據判準引用首次阻塞，不把相同 exit=1 當作有效產品 RED。
+
+### 首波：空白拒絕
+
+**Dependencies**: T001–T007
+**Test Scope**: `specs/truth/features/backend/房間聊天/單人等待與空白訊息拒絕.feature`
+
 **Parallel Hint**:
 
-- T008–T014 是可平行範圍；low-memory-16gb 逐筆驗證回寫，standard 依有限預算分波；T015 等全批完成後由既有獨立審查者 review。
+- T011–T013 為本波範圍；low-memory-16gb 逐筆驗證回寫；T030 等本波完成才 review，不等待次波。
+
+- [ ] T011 [P] [BDD-RED] `Given: "{玩家}" 在房間內單人等待`
+- [ ] T012 [P] [BDD-RED] `When: "{玩家}" 嘗試送出空白訊息`
+- [ ] T013 [P] [BDD-RED] `Then: 這次聊天送出被拒絕`
+- [ ] T030 subagent review (首波測試層 quality gate)
+  - Dependencies: T011–T013
+  - 核對首波正式測試可執行、訊號可歸因、無 undefined step 與未決 issues；通過只解鎖 T016。
+
+### 次波：對話與清空
+
+**Dependencies**: T017；不以章節順序要求本波在首波 Green 前完成
+**Test Scope**: `specs/truth/features/backend/房間聊天/雙方在場寫入房間對話.feature`、`specs/truth/features/backend/房間聊天/離開後清空與他房隔離.feature`
+
+**Parallel Hint**:
+
+- T008–T010、T014 為本波範圍；low-memory-16gb 逐筆驗證回寫；T015 等本波全部完成後 review。
 
 - [ ] T008 [P] [BDD-ALIGN] `When: "{玩家}" 送出訊息 "{內容}"`
   - Read: `backend/features/steps/modules/房間聊天/操作與斷言.py`
-
 - [ ] T009 [P] [BDD-ALIGN] `Then: "{玩家}" 與 "{玩家}" 都看得到以下聊天內容：`
   - Read: `backend/features/steps/modules/房間聊天/操作與斷言.py`
-
 - [ ] T010 [P] [BDD-REMOVE] `Then: 對手仍看得到離房前訊息`
   - Read: `backend/features/steps/modules/房間聊天/操作與斷言.py`
-
-- [ ] T011 [P] [BDD-RED] `Given: "{玩家}" 在房間內單人等待`
-
-- [ ] T012 [P] [BDD-RED] `When: "{玩家}" 嘗試送出空白訊息`
-
-- [ ] T013 [P] [BDD-RED] `Then: 這次聊天送出被拒絕`
-
 - [ ] T014 [P] [BDD-RED] `Then: "{玩家}" 看不到先前的聊天訊息`
+- [ ] T015 subagent review (次波測試層 quality gate)
+  - Dependencies: T008–T010、T014
+  - 核對本波完整 Test Scope 及共用 helper 的首波消費者；通過解鎖 T018、T020。
 
-- [ ] T015 subagent review (phase quality gate)
+### 前端波：操作與回饋
+
+**Dependencies**: T021、有效 design-v1 確認
+**Test Scope**: `specs/truth/features/frontend/房間對戰/登入與送訊畫面.feature`
+
+- 沿用 `frontend/features/steps/modules/房間對戰/操作與斷言.ts` 的既有同語意 DSL 綁定；正式產出先查證全部 Given／When／Then，缺少則逐句新增對齊 task。這裡示範無新 DSL，仍核對就緒範圍，不虛構對齊項。
+- [ ] T031 subagent review (前端測試就緒 quality gate)
+  - Dependencies: T021、有效 design-v1 確認
+  - 核對上述既有綁定與實際執行證據；前端 Test Scope 無 undefined step，RED 可歸因至新版產品行為，無未決 issues 才解鎖 T022。缺證據或需改測試時回交對齊，不由 reviewer 修自己的受審測試。
 
 ## Phase 4A: ADD Feature File - backend/房間聊天/單人等待與空白訊息拒絕.feature
 
 **Goal**: 以最小送訊拒絕邏輯讓此 feature file 全綠。
+
+**Dependencies**: T030；不依賴次波 T015
 
 **Shared Must Read**:
 
@@ -171,10 +210,13 @@
 
 - [ ] T016 [BDD-GREEN] 讓 Test Scope 全綠
 - [ ] T017 [BDD-REFACTOR] 在綠燈下整理拒絕訊息與測試 helper
+  - Dependencies: T016
 
 ## Phase 4B: MODIFY Feature File - backend/房間聊天/雙方在場寫入房間對話.feature
 
 **Goal**: 調整送訊實作與快照投影，讓更新後測試全綠。
+
+**Dependencies**: T015
 
 **Shared Must Read**:
 
@@ -192,10 +234,13 @@
 
 - [ ] T018 [BDD-GREEN] 讓 Test Scope 全綠
 - [ ] T019 [BDD-REFACTOR] 在綠燈下整理聊天寫入與再讀確認共用邏輯
+  - Dependencies: T018
 
 ## Phase 4C: DELETE Feature / DSL Truth - 離房後仍可看到舊訊息
 
 **Goal**: 移除產品碼中保留離房訊息的過期分支，並確認新版 truth 仍成立。
+
+**Dependencies**: T015、T019
 
 **Shared Must Read**:
 
@@ -214,10 +259,13 @@
 
 - [ ] T020 [CODE-REMOVE] 移除產品碼中保留離房訊息的過期分支
 - [ ] T021 [REGRESSION] 跑 Test Scope，確認新版 truth 成立
+  - Dependencies: T020
 
 ## Phase 4D: ADD Feature File - frontend/房間對戰/登入與送訊畫面.feature
 
 **Goal**: 以最小產品行為讓此 feature file 全綠。
+
+**Dependencies**: T031
 
 **Shared Must Read**:
 
@@ -241,10 +289,12 @@
 
 - room/main、room/error、navigation；正式 /rooms/:id 與共享 AppShell。
 - 同假資料在 1280px／375px 比對固定設計／產品，validation.md 留版本、截圖與「預期／實際／差異／處理」。
+- 先在 T022 focused 開發迴圈核對適用的 busy、error、unknown、恢復入口、焦點及固定導航遮擋，再展開完整矩陣；無該狀態時記不適用，不新增需求。
 - T022 為代表畫面比對 checkpoint；任何後續套用同版型的畫面任務須依賴其通過，重大變更回交開發者確認。
 
 - [ ] T022 [BDD-GREEN] 讓 Test Scope 全綠並完成代表畫面比對
 - [ ] T023 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
+  - Dependencies: T022
 
 ## Phase 4E: ui quality gate
 

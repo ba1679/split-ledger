@@ -27,7 +27,7 @@ action: MODIFY
 # Rule 2 - 改產品碼前，Phase 3 必須已對齊測試
 
 - Level: `MUST`
-- Feature Green / `CODE-REMOVE` 開始改產品碼前，Phase 3 review 必須已通過。
+- Feature Green / `CODE-REMOVE` 開始改產品碼前，其明列依賴的 Phase 3 波次 review 必須已通過；未分波的舊 tasks 仍遵守原全批關卡，不自行改成部分通過。
 - 若既有測試仍表達舊 truth，必須先在 Phase 3 用 `[BDD-ALIGN]` 或 `[BDD-REMOVE]` 處理，不得在 Green 裡順便改測試來就綠。
 - 若找不到既有測試落點，必須記錄查找範圍，並在 Phase 3 建立能覆蓋新版 truth 的 stepdef。
 

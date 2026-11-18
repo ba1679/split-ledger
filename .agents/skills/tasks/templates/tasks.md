@@ -9,7 +9,7 @@
 - Phase 1 `Setup` 只做本輪新增技術的基礎建設、技術環境與最後的 smoke-test；不寫 DSL 語意、不寫產品行為。
 - Phase 2 `Foundational` 只建立後續實作程式、測試共用元件、入口、fixture、helper 與落點骨架。
 - 無需對齊 DSL 時省略 Phase 3，記錄原因與既有回歸範圍。
-- Phase 3 `Test Alignment & Implementation` 的目的：在寫產品碼之前，先把本輪所有受影響 DSL 的自動化測試對齊最新版 truth。
+- Phase 3 `Test Alignment & Implementation` 按實作波次對齊受影響 DSL；各波對應產品碼開始前，該波測試須對齊最新版 truth 並完成獨立 review。
 - Truth 參照必須使用 `specs/truth/**` 路徑；plan 參照才使用當前 plan package 內相對路徑。
 - Feature `Shared Must Read` 除 feature、同模組 DSL、對應 `truth-delta` 列外，還必須列入按分流回追到的適用產物或既有呈現／行為依據。
 
@@ -28,8 +28,20 @@
 
 <!-- 依範圍列出測試 review、後端 feature 組、代表畫面桌機／手機比對、其餘前端及最終整合等適用交接點。待確認只產出阻礙與前置關卡，只阻擋依賴未決事項的任務；A／B 缺 ui/ 或不製作 prototype 不算未完成。 -->
 
-- 分波與補驗：預設全批測試對齊後 review；UI 受阻時可明列本波僅獨立 backend 的 feature／DSL／Test Scope 與 review 依賴。前端後補時增量加入其對齊與 review，不宣告全 plan 已就緒。
+- 分波與補驗：依可獨立驗證的範圍明列下表，不限於 UI 受阻；單一小功能可只一波。未分波的舊 tasks 仍遵守原全批 review，不由 implement 自行縮小。
 - 舊 tasks 更新：保留既有 ID／歷史證據及不受影響的 `[X]`；缺適用批准／比對者才重開或新增補驗，阻擋相應最終 gate；新增 ID 不得重複。
+
+## 實作波次與依賴
+
+| 實作波次／成果 | 前置 task／共同依賴 | Feature／DSL 範圍與測試層 tasks | Test Scope 與獨立 review | 解鎖的產品 tasks |
+| --- | --- | --- | --- | --- |
+| {{DELIVERY_WAVE_ID_AND_OUTCOME}} | {{DELIVERY_WAVE_PREREQUISITES}} | {{DELIVERY_WAVE_FEATURE_DSL_AND_TASKS}} | {{DELIVERY_WAVE_TEST_SCOPE_AND_REVIEW}} | {{DELIVERY_WAVE_UNLOCKED_PRODUCT_TASKS}} |
+
+- 首條正式驗證路徑：{{FIRST_FORMAL_TEST_PATH_AND_PREREQUISITES}}
+- 共用測試消費者與重驗邊界：{{SHARED_TEST_CONSUMERS_AND_REVALIDATION}}
+- 最終完整回歸與工程／人工驗收依賴：{{FINAL_VALIDATION_AND_DELIVERY_DEPENDENCIES}}
+
+<!-- 分波不是分析 Wave 或額外審批。Phase 3 保留所有測試層任務，但依本表與 Feature phases 交錯執行。產品 schema/API 前置必須有自己的有效 RED／review／Green，不放 Setup／Foundational，也不等待被它阻塞的後波。已有正式測試能提供證據時不新增 smoke；首波 focused RED 先確認訊號，再完成本波矩陣。 -->
 
 ## Phase 1: Setup
 
@@ -87,7 +99,7 @@
 
 ## Phase 3: Test Alignment & Implementation
 
-**Goal**: 把本輪 Feature 用到的 DSL 自動化測試對齊最新版 truth；含 truth-delta 有改的句，以及本輪 Feature 用到、尚無 stepdef 的句。不寫產品行為。
+**Goal**: 按上表波次把本輪 Feature 用到的 DSL 自動化測試對齊最新版 truth；含 truth-delta 有改的句，以及本輪 Feature 用到、尚無 stepdef 的句。不寫產品行為。
 
 **DSL 參照**:
 
@@ -117,10 +129,16 @@
 - 只改該句的 stepdef / assertion / 直接依賴的 helper。
 - 不寫產品碼。
 - review 交給未參與實作的既有審查者，依共同資源預算安排；本波明列的 Test Scope（未明確分波時為本輪所有 Test Scope）不得再有 undefined step，失敗只能是 assertion 或產品行為。有 issues 就修正再 review；通過只解鎖明列依賴此 review 的 Feature phases。
+- 目標被環境／產品前置遮蔽時保持待驗，依共用測試證據判準引用首次阻塞，不把相同 exit=1 當成多個有效 RED。
+
+### 波次 {{PHASE3_WAVE_ID}}：{{PHASE3_WAVE_OUTCOME}}
+
+**Dependencies**: {{PHASE3_WAVE_DEPENDENCIES}}
+**Test Scope**: {{PHASE3_WAVE_TEST_SCOPE}}
 
 **Parallel Hint**:
 
-- T{{PHASE3_FIRST_DSL_TASK}}–T{{PHASE3_LAST_DSL_TASK}} 是可平行範圍；low-memory-16gb 逐筆驗證回寫，standard 在有限預算內分波；T{{PHASE3_REVIEW_TASK}} 等全批完成後由既有獨立審查者 review。
+- T{{PHASE3_FIRST_DSL_TASK}}–T{{PHASE3_LAST_DSL_TASK}} 是本波可平行範圍；low-memory-16gb 逐筆驗證回寫，standard 在有限預算內排程；T{{PHASE3_REVIEW_TASK}} 等本波全部完成後由既有獨立審查者 review，不等待無關後波。
 
 - [ ] T{{ALIGN_TASK_ID}} [P] [BDD-ALIGN] `{{ALIGN_DSL_SENTENCE}}`
   - Read: `{{ALIGN_EXISTING_STEPDEF_PATH}}`
@@ -131,10 +149,16 @@
 - [ ] T{{RED_TASK_ID}} [P] [BDD-RED] `{{RED_DSL_SENTENCE}}`
 
 - [ ] T{{PHASE3_REVIEW_TASK}} subagent review (phase quality gate)
+  - Dependencies: {{PHASE3_WAVE_REVIEW_DEPENDENCIES}}
+  - 通過只解鎖：{{PHASE3_WAVE_UNLOCKED_FEATURE_TASKS}}
+
+<!-- 依實際波次重複以上小節；共用 DSL 只排一次，後波明列依賴。無新 DSL 但需承接既有測試的波次，列出沿用來源及適用獨立審查，不虛構對齊 task。 -->
 
 ## Phase 4A: ADD Feature File - {{INTERFACE_KIND}}/{{MODULE}}/{{ADDED_FEATURE_FILE_NAME}}.feature
 
 **Goal**: {{ADD_FEATURE_PHASE_GOAL}}
+
+**Dependencies**: {{ADD_FEATURE_WAVE_AND_REVIEW_DEPENDENCIES}}
 
 **Shared Must Read**:
 
@@ -165,6 +189,8 @@
 
 **Goal**: {{MODIFY_FEATURE_PHASE_GOAL}}
 
+**Dependencies**: {{MODIFY_FEATURE_WAVE_AND_REVIEW_DEPENDENCIES}}
+
 **Shared Must Read**:
 
 - `specs/truth/features/{{INTERFACE_KIND}}/{{MODULE}}/{{MODIFIED_FEATURE_FILE_NAME}}.feature` -> `Feature: {{MODIFIED_FEATURE_TITLE}}`
@@ -193,6 +219,8 @@
 ## Phase 4C: DELETE Feature / DSL Truth - {{DELETED_TRUTH_UNIT}}
 
 **Goal**: {{DELETE_PHASE_GOAL}}
+
+**Dependencies**: {{DELETE_FEATURE_WAVE_AND_REVIEW_DEPENDENCIES}}
 
 **Shared Must Read**:
 

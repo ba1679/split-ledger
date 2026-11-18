@@ -10,24 +10,27 @@ disable-model-invocation: true
 
 # SOP
 
-## Phase 1 -- 建立新的 plan package
+## Phase 1 -- 確認交付邊界並建立新的 plan package
 
 1. READ 讀取使用者需求、呼叫者要求、目前 `specs/plans/` 下既有編號與 `specs/truth/**` 的高層現況，確認本次功能主題、範圍、語言要求與明示限制。
 2. READ 讀取 `templates/spec.template.md`、`templates/spec.example.md`、`templates/requirements-checklist.md` 與 `templates/requirements-checklist.example.md`，確認 spec 與 checklist 的固定結構。
 3. READ 讀取 `rules/Feature目錄命名與輸出定位判準.md`，確認下一個 `NNN-<slug>` plan package 命名方式與輸出定位。
 4. READ 讀取 `.agents/constitution/CONSTITUTION.md`、`.agents/constitution/shared.md`、`.agents/constitution/skills/specify/spec.md` 與 `.agents/constitution/skills/specify/requirements-checklist.md`，並將其中規則視為高於本地 artifact 規範的約束。
-5. WRITE 建立 `specs/plans/NNN-<slug>/` 與 `checklists/`，並初始化 `truth-delta.md` 骨架；本 phase 不建立或修改 `specs/truth/**`。
+5. READ 讀取 `rules/Plan邊界與獨立成果拆分判準.md`，判斷輸入是否包含多個可獨立交付的成果。
+6. THINK 依已載入規則收斂本輪 plan 邊界；需要拆分決策時，在建目錄前提出候選成果、依賴、建議順序及最低品質邊界，取得開發者選擇；已明確指定的選擇不重問。
+7. WRITE 只為本輪選定範圍建立 `specs/plans/NNN-<slug>/` 與 `checklists/`，並初始化 `truth-delta.md` 骨架；未選成果只記為後續候選，不預建其他 plan 或修改 `specs/truth/**`。
 
 ## Phase 2 -- 收斂需求缺口與 clarify 策略
 
 1. THINK 從需求與現有 truth 整理主要使用者目標、核心流程、顯性限制、品質期望、可能的 ADD / MODIFY / DELETE 意圖與可辨識範圍邊界。
 2. READ 若需要判斷哪些缺口必須升級為 clarify，讀取 `rules/Clarify升級門檻與提問預算判準.md`。
 3. DELEGATE 若缺口會改變使用者故事切分、需求歸戶、主要流程、正式驗收標準，或會高影響修改/刪除既有 truth 行為，呼叫 `/clarify` 先訪談使用者；未收斂前停止，不自行假設答案。
+4. THINK 澄清後重新核對本輪交付邊界；若新揭露獨立成果，先依已載入判準取得範圍選擇，再進入 spec 撰寫，不因目錄已建立就自動合併；保留本輪已配置的編號，不改寫歷史 plan。
 
 ## Phase 3 -- 重建 spec 語意骨架
 
 1. READ 需要切分故事或需求歸戶時，讀取 `rules/使用者故事切分與優先級判準.md` 與 `rules/FR與NFR歸戶到UserStory與全域需求判準.md`。
-2. THINK 依已載入規則收斂可獨立驗證的 User Stories、Priority、驗收情境、故事專屬 FR / NFR、全域需求、邊界情況、關鍵實體、成功標準與假設。
+2. THINK 在已選 plan 邊界內，依已載入規則收斂可獨立驗證的 User Stories、Priority、驗收情境、故事專屬 FR / NFR、全域需求、邊界情況、關鍵實體、成功標準與假設。
 3. THINK 把輸入裡的舉例說明、證明點、狀態與公式寫入對應項目：舉例不得壓成一句摘要，同一則舉例只掛在它真正說明的項目，每個故事要證明的事必須能從故事、舉例與驗收對上；輸入若有狀態或數量公式，必須讓審查找得到且與對應需求一致。輸入沒有的就省略，不要求特定區塊名稱。
 4. THINK 對涉及既有 truth 的需求，明確標示它預期是新增、修改或刪除現有系統行為，但不在本 skill 寫入 truth。
 
@@ -38,4 +41,4 @@ disable-model-invocation: true
 
 ## Phase 5 -- 交付後續 handoff
 
-1. WRITE 向使用者回報 plan package、spec、checklist、truth-delta 路徑、本次是否進入 `/clarify`、仍保留的 `NEEDS CLARIFICATION` 或假設，以及此 plan 是否可進入 `/spec-by-example` 或 `/technical-research`。
+1. WRITE 向使用者回報 plan package、spec、checklist、truth-delta 路徑、範圍與拆分決定及後續候選、本次是否進入 `/clarify`、仍保留的 `NEEDS CLARIFICATION` 或假設，以及此 plan 是否可進入 `/spec-by-example` 或 `/technical-research`。

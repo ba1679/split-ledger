@@ -21,7 +21,7 @@ disable-model-invocation: true
 ## Phase 1 -- 對齊上游交付、測試入口與本輪範疇
 
 1. READ 讀取使用者需求、指定的介面 `feature file` 或其明確區塊、同模組 `dsl.md`、該 feature 實際使用的介面根共用 `dsl.md` rows、相關測試程式與產品碼，確認本輪入口是 `red`、`green` 或 `refactor`，以及使用者圈定的範疇；若由 `/implement` 委派，額外確認當前 task 只授權單一 `slice` 與單一 `requested step`。
-2. READ 讀取 `../shared/low-memory-execution.md`，承接上游資源契約；單獨使用時選定模式並記錄基線、可用回收能力與資源檢查點。
+2. READ 讀取 `../shared/low-memory-execution.md` 與 `../shared/test-evidence.md`，承接資源契約、失敗分類與版本有效性判準；單獨使用時選定模式並記錄基線、可用回收能力與資源檢查點。
 3. READ 讀取 `../shared/session-handoff.md` 與 `../shared/ui-delivery.md`，核對實際範圍的分流與呈現／行為依據；單獨呼叫時也承接或補記最小 plan-side 分流紀錄，按已載入契約處理相關確認與缺口，只停止受影響 slice。
 4. READ 若需要確認模組化 truth 的承接方式或專案既有 symlink 策略，讀取 `rules/模組化Truth按需承接與Symlink判準.md`。
 5. READ 若需要確認本 skill 可承接的上游交付物、何時必須停止，或何種缺口應回交上游，讀取 `rules/上游交付承接與回交判準.md`。
@@ -44,7 +44,7 @@ disable-model-invocation: true
 2. THINK 若實際修改超出原畫面綁定，先補齊受影響畫面參照並回報；若 B 類實際需設計變更則升 C 回交 `/ui-plan`；若 feature／DSL 與相應呈現依據的導航、資訊位置或行為衝突，停止受影響 slice 回交 owner，不自行增加區塊、改設計或弱化測試。
 3. THINK 啟動測試前核對資源檢查點，依資源契約選定測試 worker、瀏覽器順序與既有 runner 命令。
 4. DELEGATE 直接透過工具執行對應的 focused tests 或最小代表性測試集合，觀察訊號並修正當前 slice 至達成該入口完成條件；低記憶體模式不為測試另建 agent。
-5. WRITE 完成測試程序回收，記錄案例範圍、結果與資源檢查點；本輪完成前補跑指定的完整 `Test Scope`，保留全部要求的瀏覽器與回歸範圍。
+5. WRITE 完成測試程序回收，在既有驗證紀錄保存 scope、來源版本、分類結果與資源檢查點；Green 完成前覆蓋完整 `Test Scope`，Refactor 依已載入證據判準核對影響與重用，RED／前置受阻明列待驗，保留最終完整回歸。
 6. WRITE 按分流完成本輪可呈現 UI 的適用行為／畫面驗證，C 類保留桌機／手機及相關狀態比對，在 plan 驗證紀錄留下版本、截圖與逐項差異；RED／部分 slice 明列未完成範圍，重大差異依已載入規則回交。
 7. THINK 當前 slice 完成且資源檢查通過後，若仍有下一個同入口 slice，回到本 phase 的 step 1；若範疇、上游規格、測試回饋或資源受阻，保存未完成位置並回報。
 

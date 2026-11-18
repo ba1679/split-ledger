@@ -41,6 +41,15 @@ specs/plans/{{PLAN_PACKAGE_NAME}}/
 
 **結構決策**: {{STRUCTURE_DECISION}}
 
+## 交付依賴與首條驗證路徑
+
+- 本輪交付邊界與後續候選依賴：{{DELIVERY_SCOPE_AND_FOLLOWUP_DEPENDENCIES}}
+- 首個可獨立驗證成果與正式測試路徑：{{FIRST_VERIFIABLE_OUTCOME_AND_TEST_PATH}}
+- 資料／API／fixture 前置及 owner 待決事項：{{DATA_API_FIXTURE_PREREQUISITES}}
+- 執行環境、瀏覽器／裝置及人工驗收需求：{{RUNTIME_AND_MANUAL_VALIDATION_DEPENDENCIES}}
+
+<!-- 下方 Wave 是分析順序。本區提供交付依賴，由 /tasks 在 owner 產物就緒後排實作波次；不提前寫 schema／契約、不宣稱環境已驗證。小功能可簡記單一路徑，無關前置註明不適用。 -->
+
 ## 分析流程規劃
 
 ### 系統介面的盤點

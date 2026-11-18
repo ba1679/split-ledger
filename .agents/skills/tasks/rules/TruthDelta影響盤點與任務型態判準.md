@@ -30,7 +30,7 @@
 - [ ] T001 盤點聊天 MODIFY / DELETE 對既有自動化測試與產品碼的影響
 ```
 
-# Rule 2 - 測試層集中在 Phase 3，Feature phase 只留產品碼任務
+# Rule 2 - 測試層按波列於 Phase 3，Feature phase 只留產品碼任務
 
 - Level: `MUST`
 - `ADD` 的句，或本輪 Feature 用到、尚無 stepdef 的句：Phase 3 用 `[BDD-RED]`；對應 Feature phase 只留 `[BDD-GREEN] -> [BDD-REFACTOR]`。
@@ -74,6 +74,7 @@
 - `[BDD-ALIGN]` 只改既有測試，讓它表達最新版 `StepDef 實作語意`，不寫產品碼。
 - `[BDD-REMOVE]` 只移除或改寫仍保護舊 truth 的測試，不寫產品碼。
 - `[BDD-RED]` 依 `dsl.md` 該列寫出 stepdef；完成時這句可被跑到，失敗只能是 assertion 或產品行為。
+- Phase 3 列全本輪 DSL 不代表必須先執行全批；實際先後依明列波次、review 與 Feature 依賴判斷。
 
 ## Good Example
 
@@ -116,4 +117,31 @@ Phase 4C: [REGRESSION] 跑 Test Scope
 
 ```md
 - [ ] T020 [CODE-REMOVE] 移除舊功能
+```
+
+# Rule 5 - 依可驗證範圍分波，先取得一條真實流程的回饋
+
+- Level: `MUST`
+- 新 tasks 先判斷可獨立驗證的交付範圍；多個範圍依真實依賴分波，單一小功能可只用一波，不為形式新增 phase 或確認關卡。分析 Wave 不自動等於實作波次。
+- 各波列 feature／明確 Rule 或 Example 範圍、所有使用的 DSL、共用前置、測試層 task IDs、獨立 review ID、解鎖的 Green／Refactor IDs 及 Test Scope。首波 review 與 Green 不等待無關後波測試；後波依賴已明列的前波成果，不依 task 編號推定全部前序完成。
+- 第一波選一條正式驗收測試，讓所需資料／schema、API、fixture、行為斷言與適用 runner／瀏覽器能實際接起來；先 focused RED、該波測試對齊與 review、Green，再擴到相依波次。以既有正式測試取得證據，不新增一套額外 smoke 或人工審批。RED 不要求預先全綠，Green 才完成該波 Test Scope。
+- 若目標卡在產品前置，將前置規劃成能獨立取得有效 RED 的早期產品波次；其產品 migration／API 實作不能放 Setup／Foundational，也不能依賴尚被它阻塞的後續 review。前置語意無法由現有 truth 承接時回交 owner。
+- 一句 DSL 仍只有一個對齊 task；共用句由最早需要的波次建立，後續明列依賴與消費者。修改共用語意、helper 或 fixture 後重開受影響已完成的測試／review，不把同一路徑換個 wave 名稱就視為獨立。
+- UI 首次可呈現時先核對代表性桌機／手機的適用 busy、error、unknown 與恢復入口、焦點及遮擋，再展開共用畫面。此比對併入正式 feature 驗證，不取代最終 UI gate 或完整回歸。
+- 舊 plan 未分波時仍服從原關卡；只有 `/tasks` 增量明列新依賴後才能分波，保留既有 ID、歷史證據與有效狀態，不由 `/implement` 臨時縮小 scope。
+
+## Good Example
+
+```md
+首波：schema/API 正式驗收的 DSL 對齊 → 獨立 review → 前置產品 Green。
+次波：依賴首波，讓結果未知的一條正式流程取得有效 RED → review → Green。
+共用 Given 只建立一次；後波引用其 task 與已成立的前置，不重複建置。
+前端首個未知畫面先查手機恢復按鈕是否被底部導航擋住，再擴到同類操作。
+```
+
+## Bad Example
+
+```md
+先完成全站數百句 DSL 與全批 review，才首次嘗試真實 API／fixture。
+或 schema 前置 Green 必須等待依賴該 schema 的後波 review，形成循環。
 ```
