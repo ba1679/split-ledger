@@ -3035,3 +3035,21 @@ Pen MCP無open document，官方CLI headless另回報2.22格式與已達當期pl
 原T288完整工程證據仍有效：產品/測試1493來源be3e154698a3975b07977b1d3a2ebaa277fa7836e37c66fef1e145baf0cc01be無改動；2375 Playwright基本執行+23unit均PASS，另300精準影響重驗，雙平台品質/build0。這輪僅增加plan紀錄與ignored視覺工具/證據。未commit、push、部署。保留HTTPS manual server供使用者自行檢視，URL見既有聊天與ignoredmetadata，無須Google登入；憑證有效至11/20 22:19台北。同Wi-Fi，第一次自簽提示詳細資訊後繼續。
 
 T292最終核對：1493檔來源逐檔SHA全部相符（0 mismatch），tasks292筆/288完成/4暫緩；git diff --check exit0；manualPID44536/starttime一致仍運行。沒有新增產品修改，無須重跑不受影響scope。
+
+
+## 2026-11-18 人工 UI 接受、局部修正與 main 合併授權
+
+使用者先指出垃圾桶「永久刪除」hover 應為淡紅底、滑鼠開啟管理選單不應將第一項畫成選中；修正後明確回覆：「目前人眼驗證 ok，現階段可以先 merge main 了」。依此記錄人工 UI 接受及 commit／push／merge 授權，不將未提供的真機、VoiceOver／TalkBack或逐 frame 獨立審查結果視為通過。T287、T289、T290、T291 保留未完成與既有例外；本次不補跑或修改設計基準。
+
+產品修正 commit `566268d`，僅 `apps/web/src/features/trips/management.css`：選單底色從 `:focus` 改為 `:focus-visible`，保留 menu 的第一項焦點及鍵盤提示；垃圾桶永久刪除 hover 使用 danger 10% 與 panel 的 color-mix。CSS SHA256 `55669b93649b163bbbe5c1be0b828d4db5e8dca9ef7ec920171995f87c081dab`。API、資料、React 行為與其他共用按鈕規則未修改。
+
+驗證證據：
+
+- `.cache/toolchain/node/bin/node .cache/trip-action-feedback/check.mjs` exit0；以真實 TripManagementMenu／Button 元件及產品 CSS，在本機 Vite fixture 的 Chromium 核對七項：滑鼠開啟第一項白底且仍有焦點、實際 hover 軟綠底、鍵盤 focus-visible 底色與 outline、方向鍵切換、Escape 回 trigger、永久刪除淡紅底／紅字、其他 ghost 按鈕 hover 維持軟綠。永久刪除最終背景 `color(srgb 0.965882 0.919608 0.919608)`，文字 `rgb(168, 50, 50)`；兩張局部圖片位於 ignored `.cache/trip-action-feedback/`，已人工檢視。
+- 先前 fixture 路由未掛入與動畫中間色斷言兩次檢查失敗屬驗證工具問題，修正 fixture 掛載與等待最終色後通過；不算產品回歸，也不充作額外成功案例。
+- `./scripts/pnpm.sh exec prettier --check apps/web/src/features/trips/management.css` exit0；`git diff --check` exit0。
+- `./scripts/pnpm.sh --filter @split-ledger/web build` exit0，Vite 2213 modules；產生正式 bundle，無產品編譯錯誤。
+
+T288 的全量歷史證據仍按原紀錄保留，本機沒有前一主機 ignored audit／PNG／server metadata，未聲稱重新檢查 raw 或重跑 2375 次矩陣。本次 CSS 的兩個直接消費範圍已有局部證據及使用者人眼接受；不因文件或 Git hash 變動重跑未受影響 API／帳務測試。局部 Vite server／Chromium 正常關閉，未啟動歷史 manual server，也未依舊 PID 停止本機程序。
+
+本輪依授權推送 feat/006-trip-management 並合併至 main，最終結果以 Git 遠端分支為準；未執行正式部署命令。獨立 skill 調整 `chore/skill-delivery-scope`／`7013dd7` 不包含在此次功能合併。

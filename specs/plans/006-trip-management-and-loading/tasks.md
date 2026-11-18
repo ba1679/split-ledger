@@ -2,7 +2,7 @@
 
 **Plan package**: `specs/plans/006-trip-management-and-loading`  
 **建立日期**: 2026-11-14  
-**狀態**: 288/292已完成；T001–T286、T288、T292 `[X]`。T287真機/讀屏與T289 UI審查依2026-11-17使用者指示略過；T290/T291 UI基準回填/核對暫緩。本輪工程範圍已收尾，未宣稱全部UI驗證通過。
+**狀態**: 288/292已完成；T001–T286、T288、T292 `[X]`。T287真機/讀屏與T289 UI審查依2026-11-17使用者指示略過；T290/T291 UI基準回填/核對暫緩。2026-11-18使用者已回覆人眼驗證ok並授權merge main；原四項框保留，不宣稱真機／讀屏或原完整獨立UI審查已通過。
 
 **核心輸入**: `spec.md`、`plan.md`、`research.md`、`truth-delta.md`、`dsl-refine-review.md`、`ui/ui-plan.md`，以及 `specs/truth/techstack.md`、`specs/truth/contracts/**`、`specs/truth/data/data-model.dbml`、受影響 `specs/truth/features/**`。
 
@@ -22,7 +22,7 @@
 - 實作時每個C範圍記錄設計／產品固定版本、同尺寸同可比資料、預期與產品畫面、差異與處理到 `validation.md`；首個代表性桌機／手機checkpoint通過，才套用其共用樣式到後續畫面。沒有變更意圖時不另設USER-CONFIRM；若有重大設計偏差，停止依賴範圍並回交使用者確認，其他成果保留。
 - 基準回填適用：完成產品驗收與UI gate後，將已驗收旅行管理／縮圖／等待共享元件及受影響頁面更新到 `specs/ui-baseline/**`，保留最新基準的其他成果；另有獨立回填核對，不能把提案直接升為現況。
 - `profile=low-memory-16gb`；已觀測RAM16GiB。主代理逐筆處理，最多保留一位輔助代理做獨立審查（本輪root直接實作，依T240增量補驗啟動唯一定審查者 `/root/review_006`；舊規劃代理不視為本輪存活代理），不spawn子代理；同時重型工作1、worker=1，Chromium後WebKit依序執行。不因[P]增加代理；代理到PID回收未知須明記。每次重型工作前核對壓力、程序與受管PID，服務/fixtures用finally teardown，勿終止使用者程序。
-- 規劃與目前實作快照已保存於Git；目前分支 `feat/006-trip-management`，最新進度與續跑點以 `handoff.md` 為準。T001–T286與T288已完成各筆適用驗證；Phase3增量補驗及獨立審查、完整工程/產品回歸見validation。T287/T289人工UI驗證及T290/T291基準工作依使用者指示暫緩；T292已保存工程交付例外，原完整plan未全部驗證；歷史scope提交保留，本輪未commit/push/deploy。
+- 規劃與目前實作快照已保存於Git；目前分支 `feat/006-trip-management`，最新進度與續跑點以 `handoff.md` 為準。T001–T286與T288已完成各筆適用驗證；Phase3增量補驗及獨立審查、完整工程/產品回歸見validation。T287/T289人工UI驗證及T290/T291基準工作依使用者指示暫緩；T292已保存工程交付例外，原完整plan未全部驗證；歷史scope提交保留；2026-11-18已取得人工UI接受並授權提交／推送及合併main，未執行正式部署命令。
 
 ## 執行入口與完整矩陣
 
@@ -1976,6 +1976,7 @@
 **Boundary**: 不改truth、不加feature、不重跑GREEN當作review；原型不製作，沒有原型證據前置。未參與受審產品實作的既有審查者執行；重大差異未有開發者決策不得自行接受。
 
 - [ ] T289 subagent review (ui quality gate)
+  - 2026-11-18更新：使用者回覆「目前人眼驗證 ok，現階段可以先 merge main 了」，已取得目前UI的人工接受及合併授權；原完整獨立審查未補執行，保持本框與例外，不再阻擋此次合併。
   - 本輪處置：使用者2026-11-17明確回覆「如果只是 UI 的話可以先跳過，我來人眼驗證就好」，依指示停止自動補拍/審查，交由使用者人眼驗證，不標PASS。首輪review核對來源/設計及12張最終主畫面未發現confirmed product defect；其餘視覺責任未完成。
   - Dependencies: T288；T287於2026-11-17由使用者明確回覆「這項先 skip」豁免本輪前置，非驗證通過。
   - Evidence: 核對38frame責任、桌機/手機完整主旅程與關鍵狀態、跨頁共享導航/按鈕/骨架一致性，名稱/日期/筆數/分攤/淨額各在已確認位置。差異全修正或有可追溯的使用者接受；不能只寫PASS、無溢出或功能綠燈。
@@ -1998,6 +1999,7 @@
   - Evidence: 未參與回填的審查者核對產品/設計/基準/索引同版一致、只回填已驗收範圍、保留其他成果，實際版本與findings落validation.md；這是回填核對，不再加第二個產品UI家族gate。
 
 - [X] T292 保存最終交付與續跑/完成狀態
+  - 2026-11-18更新：記錄人工UI接受、兩處CSS修正與局部驗證、更新目前handoff及人工驗證狀態；使用者授權提交／推送並合併main。四項歷史驗證／基準缺口仍保留，Git實際提交與合併結果以歷史為準。
   - 本輪交付例外：2026-11-17使用者明確將UI交其人眼驗證；本筆改為保存工程交付及T287/T289/T290/T291暫緩狀態，不宣稱原完整plan全部通過。已更新tasks/validation/handoff/manual-validation；核對產品1493來源未變、diff hygiene與程序退出，manual入口保留供使用者人工檢視，未commit/push/deploy。
   - Dependencies: 原T291本輪依上述使用者指示豁免；工程T288已通過。
   - Dependencies之外亦核對所有任務與工程/人工證據完整；更新本plan/handoff/validation的版本、未提交變更、資源/受管程序、完整矩陣、基準回填與審查結果。所有要求通過才標plan完成；受阻/未跑保持未完成，需發布或正式部署另依使用者指示，不因本清單自動執行。

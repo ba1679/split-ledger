@@ -1,17 +1,12 @@
 # 006 目前交接
 
-- 更新：2026-11-17；branch `feat/006-trip-management`、HEAD `6ededa4`；未commit/push/deploy。
-- **本輪工程範圍已收尾，288/292完成**：T001–T286、T288、T292 `[X]`。T287真機/讀屏與T289完整UI家族審查依使用者指示略過；T290/T291 UI基準回填/獨立核對暫緩，四項維持 `[ ]`，不宣稱全部UI驗證通過。
-- **使用者決策**：先對T287回覆「這項先 skip」，再回覆「如果只是 UI 的話可以先跳過，我來人眼驗證就好」。不再自動補拍或要求裝置報告；後續僅在使用者要求時續接人工結果及基準工作。這是本輪明確例外，不改truth或設計意圖。
-- **工程證據**：T288基本2375 Playwright＋23unit均PASS，0skip/flaky/unexpected/globalerror；另精準影響重驗300（管理88、初讀/舊連結212）。API348/API-support356/Web357×2+手機193×2/web-support275×2/UI5×2/smoke2×2/deployment7。品質/typecheck/lint/format/build雙平台exit0。歷史中止/失敗不計PASS，細節與來源沿用鏈在validation及ignored `t288-final-audit.json`。
-- **固定來源**：1493檔manifest SHA `be3e154698a3975b07977b1d3a2ebaa277fa7836e37c66fef1e145baf0cc01be`；本輪UI補證/文件未改產品測試來源。後續產品變更按實際依賴重驗，不因整體hash改變重跑無關scope。
-- **交付修正**：compiled startup升級測試；實際0.5GB隔離資源/連續圖片與timeout/abort恢復；17表含圖片/垃圾桶/收據/tombstone備份還原；768px帳本header自然換行修溢出；unknown-trip錯誤恢復我的旅行返回、不誤判purged；兩支support等待斷言對齊且保留帳務/DB/恢復保護。T190/T240增量均獨立審查zero blocking。
-- **UI局部證據**：T289首輪核38frame/32設計預覽/最終1493來源與12張新compiled D/M畫面，無confirmed product defect；後期歷史PNG部分在另一主機cache、此處不可讀，完整視覺證據仍缺。`.cache/implement-006-resume/t289-ui-family-review.md`及`t289-ui/manifest.json`保留，不冒稱正式gate通過。
-- **補拍停止/回收**：依使用者新指示，已核對ownedPID56691/starttime/command後SIGINT；session7830 exit130，82passed/1interrupted/15未跑，不計fullscope通過。worker57286/browser57325退出、補拍子DB回收；單一manualDB刻意保留。Pen inspection session65750正常exit0，官方工具本期usage limit，另舊CLI不支援2.22；未繞過限制或修改baseline。
-- **人工入口保留**：HTTPS `https://192.168.0.125:44287`，完整URL在聊天與ignored `.cache/implement-006-resume/t287-local-server.json`；PID44536、session57169，唯一fakeDB `ledger_test_44536_287`。同Wi-Fi，首次本機自簽提示詳細資訊後繼續，無系統root安裝/公開隧道；憑證至2026-11-20 22:19台北。隔離Alice/Carol與日本完整帳務，無需真Google登入；操作參考`manual-validation.md`僅為可選，不要求回報。要停server時先核PID/starttime/command再SIGTERM，腳本正常關閉並DROP精確fakeDB；不要殺無關程序/動devDB。
-- **資源**：low-memory16gb、root+固定idle reviewer `/root/review_006` only，heavy0/worker1；warning2依先前使用者授權可續，critical/OOM必停；agent→OS PID未知。Linux兩測試容器停止，devDB未動、testDB健康。
-- **Git dirty**：TripAccessState.tsx、management.css、owner-overview-feedback.spec.ts、ui-quality.spec.ts、tests/deployment/runtime.spec.ts，本plan tasks/validation/handoff與新manual-validation.md；無truth/skill/lockfile/env變更，cache原證據保留。
-- **UI權威**：混合A/C；原design-v7批准仍有效，38frames/32PNG，SHA `6c33bce25da872057d253a44bd0e59dec1f0e41f974873fb6db0dfe10b6c1abc`；固定baseline `8fc9f94134c66ffd29918014b950894b1007aa86`，本輪未回填。使用者日後需要恢復時：人工UI確認→補足同一T289未完成責任→T290工具恢復後整合最新基準→T291獨立核對，保留原其他成果。
+- 更新：2026-11-18；使用者明確回覆「目前人眼驗證 ok，現階段可以先 merge main 了」，本輪記錄 UI 接受並依授權提交／推送及合併 main。合併結果以 Git 歷史為準，未執行正式部署命令。
+- **工程交付與人工 UI 接受**：288/292 tasks 已完成。T287 真機／讀屏、T289 原完整獨立 UI 家族審查、T290/T291 基準回填／核對仍保留未完成框；使用者已接受目前人眼驗證結果並授權合併，不將此回覆延伸為所有裝置、讀屏或原獨立 gate 通過。
+- **來源與提交**：`31feb2c` 已包含 T284–T288 工程收尾及相關產品修正；本輪另修 `apps/web/src/features/trips/management.css` 的選單焦點底色與永久刪除 hover，CSS SHA256 `55669b93649b163bbbe5c1be0b828d4db5e8dca9ef7ec920171995f87c081dab`。CSS 修正已提交為 `566268d`；本輪文件與合併結果以 Git commit 追溯。
+- **驗證**：先前 T288 已提交紀錄為 2375 Playwright 基本執行、23 unit 與 300 次影響重驗；這些不是本機重新執行的結果。本輪 CSS 的實際 React 元件 Chromium 檢查涵蓋滑鼠開啟中性底色、hover、鍵盤焦點、方向鍵、Escape 回焦、淡紅 hover 及其他 ghost 按鈕不變，7 項通過；格式與 diff 檢查通過。詳細結果見 validation.md 本日紀錄。
+- **後續範圍**：T287 不強迫補跑；T289 原自動補證／獨立審查依使用者例外保留，已有人工 UI 接受；T290/T291 繼續暫緩，未將尚未回填的設計基準宣稱為最新產品。
+- **本機與歷史證據**：本機沒有前一主機的 T288 audit、T289 圖片或 T287 server metadata；舊 IP、PID、session、測試 DB 與憑證資訊僅是歷史，不代表本機服務仍在運行。不得憑舊 PID 停止本機程序。新局部驗證工具／圖片在 ignored `.cache/trip-action-feedback/`，測試瀏覽器與 Vite server 已正常關閉。
+- **獨立 skill 分支**：`chore/skill-delivery-scope` 的 `7013dd7` 未併入本功能分支；此次 main 合併只涵蓋旅行功能與已授權修正。
 
 以下為歷史交接，舊branch/HEAD、進度、資源數與working tree不得覆蓋上方當前狀態。
 
