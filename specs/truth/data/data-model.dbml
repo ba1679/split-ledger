@@ -10,6 +10,12 @@ Project "travel_ledger_trip_lifecycle" {
   count 與清單以同一 SQL 或一致性 snapshot 讀取；聚合值不得轉成浮點金額。
   公平份額由支出金額與分攤成員數重建；淨額與付款安排由目前支出、實際還款及
   歷史結清差額重建，不持久化衍生總額。所有分帳寫入由旅行列鎖及帳務 revision 序列化。
+  分類花費分析也是衍生讀取：在 owner 範圍內先確認旅行 active，再由同一唯讀一致快照
+  讀取當前旅行全部 expenses、expense_shares、固定 owner trip_members 及 categories；
+  不受支出清單分頁或旅行日期限制。個人依穩定 member_id 的精確份額，團體僅納入
+  兩人以上分攤的支出原金額一次；分類用 category_id 關聯目前名稱，NULL 歸未分類。
+  停用成員仍計入歷史分攤；同幣別依每筆保存的 minor_unit 對齊後計算，幣別互不相加。
+  還款與結清不是分類消費來源；不保存分析總額、占比或圖表快取。
   垃圾桶保留原旅行列與全部子資料；僅 owner 明確確認的整趟永久刪除可使用受控
   immutable trigger DELETE 例外。縮圖只存目前的正規化 WebP，不保存原始照片；
   最小操作收據與 UUID reservation 不保存可復原的旅行、帳務或圖片內容。

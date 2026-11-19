@@ -1,6 +1,6 @@
 # 技術堆疊總覽：旅行記帳與分帳工具
 
-截至 2026-11-13 的採用技術。既有前後端、共用套件、Phase 1B 分帳模組與測試已在工作區實作，版本由 package.json 與 pnpm lockfile 固定；下列「旅行生命週期、圖片與等待回饋」為已選定、尚未在產品實作的新技術方向，不代表已部署或驗收。
+截至 2026-11-19 的採用技術。既有前後端、共用套件、Phase 1B 分帳模組及旅行生命週期／圖片／等待回饋相關程式與依賴已在工作區存在，版本由 package.json 與 pnpm lockfile 管理；本次只查核相關程式與 manifest，未重新執行其完整驗收或部署。下列「分類花費分析」為已選定、尚未實作的新技術方向，不代表已部署或驗收。
 
 ## 技術堆疊總覽
 
@@ -72,7 +72,7 @@
 | 成員名稱 | 旅行成員統一命名空間、trim、ASCII 不分大小寫名稱鍵與唯一鍵 | owner 及啟用/停用同行者不重名；穩定 ID 關聯 |
 | 資料演進 | 新增 SQL migration、既有 checksum/advisory lock | 回填 owner 成員與既有單人分攤，不改歷史金額 |
 
-### 旅行生命週期、圖片與等待回饋（已選定，尚未實作）
+### 旅行生命週期、圖片與等待回饋（工作區已有相關程式）
 
 | 類別 | 採用技術 | 用途 |
 | --- | --- | --- |
@@ -88,7 +88,18 @@
 | 等待與確認 UI | 既有 Button／QueryState／FormDialog／lucide-react、共用 skeleton／busy 呈現與 CSS reduced-motion | 初次讀取、背景更新、分頁、mutation、查證／未知與 paused 分開；dialog 描述、取消優先焦點與焦點恢復 |
 | 快取與恢復 | TanStack Query account/trip scope、取消 in-flight 查詢、失效／清除及明確查證 | 移入／purge 不留可操作舊帳本；背景更新保留資料，mutation 不盲目 retry；視覺 busy 不代替業務結果 |
 
-新增套件版本於 2026-11-13 查核，並在 macOS arm64／Node24 做過獨立 parser／轉碼小型實驗；尚未加入專案 manifest 或 lockfile，也未通過 Linux/Railpack、真機選圖、容量、備份或產品 E2E 驗證。正式實作須固定直接依賴及跨平台 optional binary，按必要性調整 pnpm allowBuilds。永久刪除完成指 live application 資料與存取移除，不承諾清除既有備份、已下載副本或磁碟安全覆寫。
+套件版本於 2026-11-13 研究時查核，並在 macOS arm64／Node24 做過獨立 parser／轉碼小型實驗；2026-11-19 讀取工作區已確認 API manifest 包含 `@fastify/multipart 10.1.8` 與 `sharp 0.35.5`，亦有 management、圖片與等待回饋相關程式。本輪未重新驗證 lockfile 安裝、Linux/Railpack、真機選圖、容量、備份或產品 E2E，不以程式存在宣稱交付驗收通過。跨平台 optional binary 與 pnpm allowBuilds 仍須由交付檢查確認。永久刪除完成指 live application 資料與存取移除，不承諾清除既有備份、已下載副本或磁碟安全覆寫。
+
+### 分類花費分析（已選定，尚未實作）
+
+| 類別 | 採用技術 | 用途 |
+| --- | --- | --- |
+| 統計來源與快照 | Fastify／Drizzle、PostgreSQL REPEATABLE READ read-only 交易 | 同一旅行同快照取得完整支出、分攤集合與分類；一次提供全部已有支出幣別及兩圖結果，不受清單分頁或旅行日期限制；具體 HTTP schema 由 API owner 定義 |
+| 精確分類聚合 | 既有 TypeScript BigInt 約分有理數與 ExactAmount 字串 | 同幣別先對齊保存的 minorUnit；個人按指定成員份額，團體只計至少兩人分攤的原始金額一次；不納入還款或結算調整 |
+| 資料與身分邊界 | 既有支出／分攤／分類、穩定 categoryId／memberId、owner 與 active gate | 分類統計即時計算，未分類用 null 分組；本輪解析 owner 對應成員後計算，不新增任意成員代看或多帳號協作資料模型；既有 totals 預設語意保持 |
+| 圖表與可及明細 | shadcn/ui 本地 Chart＋Recharts 3 系列、React、語意化 HTML 與 CSS tokens | 兩圖統一品牌樣式、響應式容器及 hover tooltip；分類名稱／金額／占比另有常駐明細與手機點按／鍵盤選取；同分類一致色彩，零值空狀態；實作固定穩定 patch 與匹配 React 的 react-is，尚未安裝驗證 |
+| 格式化與繪圖邊界 | BigInt 金額 formatter、精確占比與有界累積定點比例 | 先精確聚合再格式化；累積比例在 BigInt 中縮放至 10^12，再以相鄰差產生 Recharts 有界 Number 權重，末端為完整尺度；tooltip 金額取精確資料，近似不回寫帳務，極小分類保留文字 |
+| 快取與更新 | TanStack Query account／trip scope、fetch AbortSignal、既有等待元件 | 全幣別一次查詢，幣別切換為本地投影；支出修改／刪除與分類變更失效分析，背景更新保留同範圍資料，生命週期／登出取消及清除；不新增推送同步 |
 
 ### 測試與驗證
 
@@ -105,6 +116,7 @@
 | 空行與整合 | ESLint Stylistic padding、eslint-config-prettier | 保留基本 lint 規則，固定 imports/函式/回傳的空行；關閉與 Prettier 衝突規則；其他邏輯分段依上下文判斷 |
 | 耗時管理 | 按功能選取案例、隔離後平行、失敗 trace、冷/熱啟動量測 | 各輪實際測試結果與耗時保存於開發驗證紀錄，效能主張需獨立量測 |
 | 旅行／圖片／等待驗證（已選定，待執行） | 沿用兩端 Gherkin E2E、真 PostgreSQL、故障／併發控制、Chromium/WebKit 與真機選圖 | 驗垃圾桶全部子資源、purge trigger 例外與回滾、操作去重、格式／大小／動畫／abort、跨帳號圖片存取及全站等待覆蓋；另驗 Linux binary、RSS 與含 bytea 備份還原 |
+| 分類花費分析驗證（已選定，待執行） | 既有兩端 Playwright Test＋playwright-bdd E2E、APIRequestContext、測試 PostgreSQL；Vitest 補純函式 | 驗個人份額、共同支出一次計入、跨頁／幣別／分類與權限隔離、同快照、更新失效及手機／桌面可及狀態；補循環份額、歷史尺度、巨大字串及圖表全圓／零值／極小權重、hover tooltip、手機／鍵盤互動與 reduced-motion；尚未通過新增產品驗收 |
 
 ### 本地環境
 
@@ -136,6 +148,7 @@
 - Phase 1B 不引入浮點分攤、有限小數作權威份額、全域最少轉帳求解器或生成式 AI 結算說明服務。
 - 旅行縮圖不引入外部媒體服務、S3 bucket/CDN、app 本機永久圖片目錄、原圖保存、HEIC codec 自建或圖片裁切編輯器；目前採有界 bytea 縮圖。
 - 等待呈現不引入動畫套件、全站 Suspense 遷移、固定假等待或假的上傳百分比；不新增垃圾桶自動清除排程。
+- 分類花費圖不自建 SVG 圖表／tooltip 引擎，不引入 Canvas 圖表引擎、新金額套件、分析彙總表或 materialized view；採 shadcn/ui Chart＋Recharts，保留既有精確有理數。無匯率、跨旅行報表、即時推送、任意成員代看或共編 ACL／邀請模型。
 
 
 Railway 為已驗證的試用平台，正式營運供應商與長期維運方案尚未確定；正式使用前仍需規劃長期備份、費用與容量、到期處置及正式 OAuth／migration 發布管理。

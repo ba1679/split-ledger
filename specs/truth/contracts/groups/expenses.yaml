@@ -287,3 +287,50 @@ totals:
           application/json:
             schema:
               $ref: ../components/schemas/shared.yaml#/ApiError
+expenseAnalysis:
+  parameters:
+    - $ref: ../components/parameters.yaml#/TripId
+  get:
+    tags: [expenses]
+    operationId: getTripExpenseAnalysis
+    x-session-required: true
+    security:
+      - BetterAuthSession: []
+    summary: 查看當前旅行各幣別的個人與團體分類花費
+    description: |-
+      唯讀、無 query 參數及分頁；只在目前 session 為旅行 owner 且旅行為 active 時讀取。
+      於同一 REPEATABLE READ 唯讀快照確認旅行、解析固定 owner 成員，並讀取當前旅行
+      全部已保存支出、分攤集合及分類目前名稱，包含旅行日期外、清單未載入頁與停用成員的歷史分攤。
+      回應一次列出旅行所有仍有支出的幣別，即使該幣別只有他人單人支出、兩張圖都為零。
+      同幣別以所有來源支出保存的最大 minorUnit 為共同尺度，先精確加總再呈現；不跨幣別換算。
+      個人圖只加總固定 owner 成員的平均份額，付款人不決定歸屬；團體圖只包含兩人以上
+      分攤的支出，各以原始金額計一次，owner 不必參與。團體總額不是旅行全部支出總額。
+      分類依穩定 ID 關聯目前名稱；沒有分類的支出歸入 null 分組。還款、結算、淨額及
+      實付差額均不影響花費。兩圖由同一來源快照產生；分類占比由精確分類金額除以該圖
+      精確總額導出，不在 API 回傳已取整的百分比或任何圖表角度。
+      本端點不提供 memberId selector，回應的 ownerMemberId 僅識別本次個人統計對象。
+    responses:
+      '200':
+        description: 單一來源快照的全旅行分類分析；無任何支出時 currencies 為空陣列。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/expenses.yaml#/ExpenseCategoryAnalysisResponse
+      '401':
+        description: 尚未登入；code=UNAUTHENTICATED。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '404':
+        description: 旅行不存在或不屬於目前帳號；code=NOT_FOUND，不揭露他人帳務。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError
+      '409':
+        description: 本人旅行在垃圾桶；code=TRIP_TRASHED，普通帳務分析不可讀。
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas/shared.yaml#/ApiError

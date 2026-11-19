@@ -1,0 +1,28 @@
+{
+  "checkedAt": "2026-11-19T08:38:26.231389+00:00",
+  "tasksSha256": "51dfd6864c6dd0df275ca4629fb1af162dedb523342a517a18552ffd6877484b",
+  "taskCount": 135,
+  "uncheckedTasks": 135,
+  "dslTasks": {
+    "backend": 29,
+    "frontend": 74,
+    "total": 103,
+    "markers": {
+      "BDD-RED": 103,
+      "BDD-ALIGN": 0,
+      "BDD-REMOVE": 0
+    },
+    "uniqueRowsMatched": true,
+    "unusedBackendAddedFixtureRows": 1
+  },
+  "featurePhases": 8,
+  "greenRefactorPairs": 8,
+  "phase3ReviewTask": "T111",
+  "representativeUiCheckpoint": "T120",
+  "uiFamilyGate": "T133",
+  "baselineWrite": "T134",
+  "baselineIndependentReview": "T135",
+  "dependenciesPointBackward": true,
+  "truthFeatureDslSourceHashesUnchanged": true,
+  "productTestsRun": false
+}

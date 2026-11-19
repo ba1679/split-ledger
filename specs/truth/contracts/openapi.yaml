@@ -3,7 +3,7 @@
 openapi: 3.0.3
 info:
   title: 旅帳 API 契約
-  version: 0.3.0
+  version: 0.4.0
   description: |-
     Owner 管理的旅行記帳與分帳 API；此文件與 groups/components 是唯一可維護來源。
 
@@ -33,6 +33,7 @@ info:
     - 結清需比對安排識別及 revision，保存正數實付與成對差額；獨立還款的超額需先取得警告並明確確認。兩者均不收或存取整方式。
 
     金額與日期的格式見各 schema；既有帳務 API 有程式實作，006 新增契約仍待實作與驗收。
+    007 分類花費分析為新增唯讀契約，尚未實作與驗收；它不改既有 totals 回應語意。
 servers:
   - url: /
     description: 同 origin 提供網頁與 /api，開發與正式環境共用相對路徑。
@@ -42,7 +43,7 @@ tags:
   - name: trips
     description: Owner 的旅行帳本及分帳設定
   - name: expenses
-    description: 個人與共同支出及分幣別統計
+    description: 個人與共同支出、分幣別總額及分類花費分析
   - name: members
     description: 旅行內 owner 與同行者帳務身分
   - name: settlement
@@ -88,6 +89,8 @@ paths:
     $ref: ./groups/expenses.yaml#/expense
   /api/trips/{tripId}/totals:
     $ref: ./groups/expenses.yaml#/totals
+  /api/trips/{tripId}/expense-analysis:
+    $ref: ./groups/expenses.yaml#/expenseAnalysis
   /api/trips/{tripId}/members:
     $ref: ./groups/members.yaml#/members
   /api/trips/{tripId}/members/{memberId}:
@@ -160,6 +163,8 @@ components:
       $ref: ./components/schemas/trips.yaml#/TripOperationOutcome
     Expense:
       $ref: ./components/schemas/expenses.yaml#/Expense
+    ExpenseCategoryAnalysisResponse:
+      $ref: ./components/schemas/expenses.yaml#/ExpenseCategoryAnalysisResponse
     TripMember:
       $ref: ./components/schemas/members.yaml#/TripMember
     SettlementView:

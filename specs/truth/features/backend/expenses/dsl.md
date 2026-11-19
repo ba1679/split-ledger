@@ -84,3 +84,46 @@
 | --- | --- | --- | --- | --- |
 | `owner 將原支出金額改為 JPY 300` | 無 | 不支援 | 只送 amount=300。 | When：以owner session/可信Origin對Given expenseId做一次PATCH，保留付款人及分攤集合；保存before/reply，成功後權威金額先落地再供結算斷言，失敗來源不變；不必重演原始還款。 |
 | `owner 將原支出改為 JPY 200` | 無 | 不支援 | currencyCode=JPY、amount=200；其餘欄位省略。 | When：一次PATCH Given expenseId，同owner session/可信Origin；金額與歷史minorUnit依實際新幣別更新，完整替換舊貢獻但保留已發生TWD還款，不進行匯率換算。保存before/reply與新expenseId快照，成功才落地；失敗來源不變。 |
+
+## 007 分類花費分析：模組專屬契約
+
+本節只承接 expenses 模組的新句型；不修改既有 DSL 或上提到介面根。前端與後端 row 分別在各介面權威檔，不共用 StepDef。
+
+- 前端Arrange位置：初次建立旅行/支出資料的Given以真API或隔離DB fixture落地後，開同旅行帳本並等待ledger ready，尚不讀分析；追加/修改保存後停在原旅行帳本並保留已確認分析快取。已明寫分析頁/已確認內容的Given依各row覆寫導航起點。生命週期Given透過既有管理完成操作：復原後回同旅行帳本，trash/purge保留原分析連結，未授權Given不手工清舊快取。後端沒有瀏覽器導航。
+- 資料語意：Alice 是目前帳本 owner 對應的穩定成員，不是任意付款者或登入 user ID；所有列是已保存支出，份額以不同 share member 集合等分。未分類=null，不新建分類。名稱變更沿用 ID，停用成員保留歷史 shares。
+- 精確 oracle：從 DB 的完整旅行 expense、expense_shares、categories、owner member 獨立計算；個人只加 owner 在 shares 的 A/N，團體只加 N>=2 的 A 一次，日期不過濾、分頁不截斷、還款與實付排除。按幣別全部歷史支出的最大 minor_unit 對齊，BigInt 分數求和後約分；不得浮點或逐筆格式化後相加，不調整任何人的份額。
+- ExactAmount 真實大單位=numerator/denominator/10^minorUnit；分子/分母為整數字串、分母正且最簡、零為0/1，各圖及分類尺度等於外層。API categories 只有正額，null先列再按 category.id 升序。所有成功回應核對 tripId 與固定 ownerMemberId。
+- 每例隔離，不借前例結果；Given 落地後回寫 IDs、credential 與權威快照。讀取前後 DB 來源不變是所有讀取 Then 的最低 oracle；不呼叫產品同一聚合函式產生期望。前端對真 API/DB 的驗證不以 mock response 或只看文字取代。
+- 文字百分比按各圖精確分類額/總額計算，最多2位、四捨五入去尾零，正值<0.01% 顯示「小於0.01%」；零總額無占比。不從顯示百分比重算扇形。金額依既有最多兩位、半入去尾零規則；尾差只影響顯示。
+
+| DSL 句型 | Gherkin 參數 | Data Table 參數 | 預設參數 | 後端實作語意 |
+| --- | --- | --- | --- | --- |
+| `分類分析旅行已有以下支出：` | 無 | 必填多列表：項目 string（旅行內唯一）、分類 string（未分類表示 null）、幣別 string、金額正十進位 string（大單位）、付款人 string、分攤者以頓號分隔的非空不重複成員集合 | 表格是該旅行完整支出；不是追加；預設值見本節 | 建立隔離帳號 Alice、有效 session、正常台南旅行（2027-04-03～05）及 owner 成員 Alice、同行者 Amy／Bob；同名分類在旅行內共用穩定 ID；預設消費日期2027-04-03，歷史精度依保存幣別。將表格支出、付款及分攤關聯寫入 DB，確認所有列落地；回寫帳號、session、trip/member/category/expense ID 及來源快照，不必先讀分析。不得用分析 response 當種子。 |
+| `分類分析旅行已新增以下支出：` | 無 | 必填多列表：項目 string（旅行內唯一）、分類 string（未分類表示 null）、幣別 string、金額正十進位 string（大單位）、付款人 string、分攤者以頓號分隔的非空不重複成員集合 | 沿用目前旅行及分類/成員映射 | 在已存在旅行透過正式保存流程追加表格支出，確認 DB 支出與份額保存；回寫新 ID 與當前來源快照，不覆寫舊支出、不替換既有分析快取，不必先讀分析。 |
+| `分類分析旅行尚無支出` | 無 | 不支援 | 台南旅行、Alice owner、正常狀態 | 建立隔離帳號 Alice、有效 session、正常台南旅行（2027-04-03～05）及 owner 成員 Alice、同行者 Amy／Bob；同名分類在旅行內共用穩定 ID；預設消費日期2027-04-03，歷史精度依保存幣別。確認 DB 此旅行支出為空，回寫目前旅行與來源快照，不必先讀分析。 |
+| `分類分析旅行有 {筆數} 筆各 "{幣別}" {餐費} 的單人餐飲及旅行前 "{機票幣別}" {票價} 的機票` | 筆數 integer >0；幣別/機票幣別 currency code；餐費/票價正十進位大單位金額 | 不支援 | 日本旅行2027-03-10～15；餐飲2027-03-11；機票2027-01-15 | 建立 Alice 的日本旅行，按筆數寫不同項目餐飲及交通分類機票，全部 Alice 付款且僅 Alice 分攤；DB 確認含旅行外日期、完整筆數與保存金額。回寫本旅行 ID、分類 ID 及來源快照，不必讀分析或載入清單。 |
+| `另一分類分析旅行有 "{幣別}" {金額} 的單人餐飲` | 幣別 currency code；金額正十進位大單位金額 | 不支援 | 同一 Alice 的另一台南旅行 | 在另一 trip 寫入 Alice 付款且單人分攤的餐飲，核對 DB 隔離；回寫另一旅行 ID，維持目前分析旅行不變，不必先讀分析。 |
+| `分類分析旅行已有 Amy 還款 "{還款幣別}" {還款} 及 Bob 實付結清 "{實付幣別}" {實付}` | 還款幣別/實付幣別 currency code；還款/實付正十進位大單位金額 | 不支援 | Amy→Alice 獨立還款、Bob→Alice settlement payment，日期2027-04-03 | 沿用既有獨立還款與結清正式保存流程，在目前旅行保存指定兩筆付款並完成結清狀態；DB 確認 repayment/payment 及來源 expense_shares 均存在，回寫 ID、來源快照，不改 expense 金額與分攤，不必先讀分析。 |
+| `分類分析支出 "{項目}" 已保存金額為 "{幣別}" {金額}` | 項目目前旅行唯一既有項目；幣別 currency code；金額正十進位大單位金額 | 不支援 | 同幣別為改金額；不同幣別為改幣別及金額 | 透過既有支出編輯保存流程更新該筆金額/幣別，保留其他欄位；確認 DB amount_minor、currency_code、minor_unit 及 shares 已保存，回寫最新來源快照，不能預先讀新分析或清除前端舊快取。 |
+| `分類分析支出 "{項目}" 已保存分攤者為 "{分攤者}"` | 項目 string；分攤者頓號分隔非空不同成員名稱 | 不支援 | 其他支出欄位不變 | 透過既有支出更新保存完整分攤集合，DB 核對 expense_shares 精確成員 ID 集合、原付款者與金額；回寫最新來源快照，不必讀分析，不預先清除前端舊快取。 |
+| `分類分析支出 "{項目}" 已刪除` | 項目 string，先前存在於目前旅行 | 不支援 | 沿用既有刪除流程 | 完成該支出的正式刪除，確認 DB 與子 shares 已刪除並保留其他支出；回寫刪除前 ID 及最新來源快照，不必讀分析、不清除前端已確認內容。 |
+| `分類分析的分類 "{舊名}" 已改名為 "{新名}"` | 舊名/新名 string；舊名映射既有穩定 ID | 不支援 | 只改目前旅行引用的既有分類名稱 | 完成分類改名保存；確認 DB 同一 ID 的 current name 已更新且 expense.category_id 不變，回寫名稱映射及來源快照，不必讀分析、不先改畫面期望。 |
+| `分類分析支出 "{項目}" 已清除分類` | 項目 string | 不支援 | 沒有建立名為未分類的分類 row | 完成支出編輯清除 categoryId，確認 DB category_id=null 且金額及分攤未變；回寫最新來源快照，不必讀分析。 |
+| `分類分析成員 "{舊名}" 已改名為 "{新名}" 並停用` | 舊名/新名 string；映射同一 stable member ID | 不支援 | 歷史支出保留該成員 | 完成既有成員改名及停用安排，DB 確認同一 ID、新顯示名稱、inactive 與歷史 shares 不變；回寫名稱映射及快照，不必讀分析。 |
+| `分類分析旅行狀態為 "{狀態}"` | 狀態 enum：正常、垃圾桶、永久刪除、已復原 | 不支援 | 沿用目前旅行，維持原 trip ID | 使用既有旅行管理流程安排指定狀態；正常不改、垃圾桶先軟刪、永久刪除必須先 trash 再確認 purge、已復原先 trash 再 restore。DB 確認 trips 狀態及 purge 級聯；回寫原 ID 與狀態快照，保留可重開的舊 URL，不必讀分析。 |
+| `分類分析查看者為 "{身分}"` | 身分 enum：擁有者、未登入、同名其他帳號 | 不支援 | 其他帳號顯示名稱 Amy、沒有目前旅行權限 | 擁有者沿用 Alice session；未登入完成登出/失效 session；其他帳號建立獨立 user ID 並登入，顯示名 Amy 不連結 owner member。確認 auth/DB 權威身分後回寫目前 credential；前端保留先前已載入狀態直到被測路由/guard 處理，不手工清 DOM，不必讀分析。 |
+| `擁有者讀取分類分析` | 無 | 不支援 | 目前旅行、Alice session | 唯一 Act：以 Alice session 呼叫一次 GET /api/trips/{tripId}/expense-analysis，無幣別/member/page query；保存 response 及請求前後 DB 快照。唯讀，不寫入來源資料；不再呼叫第二次受測查詢，Then 以原回應及獨立 DB oracle 驗證。 |
+| `目前查看者讀取分類分析` | 無 | 不支援 | 目前安排的 credential 與原 trip ID | 唯一 Act：以目前 credential 呼叫一次同上分析 GET；保存 status/body 及請求前後 DB 快照，失敗也不得改任何權威帳務，不必查第二次分析。 |
+| `分類分析回傳 "{圖別}" 在 "{幣別}" 的完整分類金額：` | 圖別 enum：個人、團體；幣別 currency code | 必填多列表：分類 string（未分類=null）、金額非負精確大單位十進位或分數 string | 分類列比對集合；API 順序另按契約驗 | 驗200及指定圖 categories 的完整 ID/name/amount 集合，無多餘舊名/分類；ExactAmount 符合本節換算與約分、順序規約。以請求前 DB 的 expense/share/category/member 關聯獨立算個人固定 owner 份額或 group >=2 原額一次，核對表格及回應；請求後來源快照不變。不用同一產品聚合函式產生期望。 |
+| `分類分析回傳的完整總額如下：` | 無 | 必填多列表：幣別 currency code、個人/團體精確非負大單位十進位或分數 string | 幣別集合必須完全一致 | 驗200、currencies 完整集合、各圖 total 的精確值與 categories 精確和；獨立 DB oracle 按幣別全來源核對，零值亦驗尺度/約分，來源不變。不得使用畫面格式化值作期望。 |
+| `分類分析回傳的幣別依序為 "{幣別清單}"` | 幣別清單以頓號分隔 code，順序有意義 | 不支援 | 所有存在支出的幣別，包括兩圖皆零者 | 驗200及 currencies 的完整順序恰為清單；DB 全旅行 distinct currency_code 升序核對，來源不變，不能依合資格 categories 反推幣別。 |
+| `分類分析的 "{圖別}" 在 "{幣別}" 沒有分類且總額為零` | 圖別 enum：個人、團體；幣別 currency code | 不支援 | zero numerator="0"、denominator="1" | 驗200、指定圖 categories=[]、total 0/1 且 minorUnit=外層尺度；由 DB 證明該幣別有支出但此圖沒有合資格金額，來源不變。 |
+| `分類分析回傳共同消費狀態為 "{狀態}"` | 狀態 enum：有、無 | 不支援 | 跨整個旅行所有幣別 | 驗200及 hasSharedExpenses 對應 true/false；DB 對所有支出以 distinct share member 數>=2 計算，無 owner 參與條件，核對無來源變更。 |
+| `分類分析成功且沒有任何支出幣別` | 無 | 不支援 | 空旅行不是查詢失敗 | 驗200、正確 tripId/ownerMemberId、hasSharedExpenses=false、currencies=[]；DB 確認 owner、active、expense_count=0，前後來源不變。 |
+| `分類分析旅行有歷史精度 {舊精度} 的 "{幣別}" {舊金額} 及精度 {新精度} 的 "{新幣別}" {新金額}，皆由 Alice 與 Amy 分攤` | 舊精度/新精度 integer 0..4；幣別/新幣別 currency code；舊金額/新金額正十進位大單位 string | 不支援 | 兩筆餐飲，Alice 付款；此例以 DB fixture 保留真實歷史尺度 | 在隔離旅行 DB 寫入合法歷史 expense rows，amount_minor=大單位×10^該列歷史尺度、兩人 shares；不經目前貨幣表覆寫舊 minor_unit。確認 DB 精度及成員關聯，回寫 IDs/快照，不必查分析。 |
+| `分類分析的 "{幣別}" 計算精度為 {精度}` | 幣別 currency code；精度 integer 0..4 | 不支援 | 該幣別所有來源支出的最大 minor_unit | 驗外層與所有圖/分類 ExactAmount 的 minorUnit 一致並等於指定精度；DB 全來源最大尺度核對，不能只取符合 owner 的 rows，來源不變。 |
+| `分類分析查詢前後的來源帳務完全相同` | 無 | 不支援 | 包含旅行、成員、分類、支出、shares、還款及實付 | 驗200；以穩定欄位全快照比較查詢前後 DB，不新增衍生紀錄、不改來源金額、分攤或結清狀態；回應與 DB oracle 的當前旅行範圍一致。 |
+| `分類分析另有與同行者 "{成員}" 同名的獨立帳號` | 成員 string，已存在同行者 | 不支援 | 不切換目前 Alice session | 建立不同 user ID 的帳號，其顯示名與指定 member 一致；DB 確認沒有該 trip ownership 或認領關聯，回寫帳號 ID，不必讀分析。 |
+| `分類分析的個人對象為 Alice 的擁有者成員` | 無 | 不支援 | member ID 與 user ID 分離 | 驗200及 ownerMemberId 恰為 DB 此 trip owner-role 成員 ID，非 user ID、付款人或同名帳號；personal categories 以該 member 歷史份額獨立核對，來源不變。 |
+| `分類分析支出 "{項目}" 仍保留原本三個成員的歷史分攤` | 項目 string | 不支援 | Alice、原 Amy 的穩定 ID、Bob | 驗 response 中受影響 personal/group 金額與停用前獨立期望相同；DB expense_shares 仍是三個原 ID，原 Amy 名稱/active 改動未刪除歷史關聯；查詢未修改來源。 |
+| `分類分析讀取被拒絕為 "{原因}"` | 原因 enum：未登入、不存在、垃圾桶 | 不支援 | 未登入=401 UNAUTHENTICATED；不存在=404 NOT_FOUND；本人垃圾桶=409 TRIP_TRASHED | 驗 status 及 ApiError code；body 不含 analysis/expense/member/category/amount payload，404 不區分他人/未知/purged。DB 證明 credential/ownership/lifecycle 與預期相符，前後帳務及 auth 狀態不因失敗查詢改變；purged 維持不存在、不可重建或洩漏。 |

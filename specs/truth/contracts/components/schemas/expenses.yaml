@@ -187,3 +187,74 @@ PersonalTotalsResponse:
             $ref: ./shared.yaml#/CurrencyCode
           amount:
             $ref: ./shared.yaml#/ExactAmount
+ExpenseCategoryAnalysisResponse:
+  type: object
+  additionalProperties: false
+  required: [tripId, ownerMemberId, hasSharedExpenses, currencies]
+  description: 同一唯讀來源快照的當前旅行完整分類分析；不是已分頁支出清單的彙總。
+  properties:
+    tripId:
+      type: string
+      format: uuid
+      description: 本次統計的旅行 ID，用於識別讀取範圍。
+    ownerMemberId:
+      type: string
+      format: uuid
+      description: 目前登入 owner 對應的固定旅行成員 ID；個人圖以此成員的份額計算，不是登入帳號 ID，也不能由請求指定其他成員。
+    hasSharedExpenses:
+      type: boolean
+      description: 整趟旅行任一幣別有至少一筆由兩名以上不同成員分攤的支出時為 true；不由目前所選幣別或 owner 是否參與推斷。
+    currencies:
+      type: array
+      description: 依 currencyCode 升序，每個仍有已保存支出的幣別恰一筆；空旅行為空陣列。即使兩圖皆零也保留該幣別。
+      items:
+        $ref: '#/ExpenseCategoryCurrency'
+ExpenseCategoryCurrency:
+  type: object
+  additionalProperties: false
+  required: [currencyCode, minorUnit, personal, group]
+  properties:
+    currencyCode:
+      $ref: ./shared.yaml#/CurrencyCode
+    minorUnit:
+      type: integer
+      minimum: 0
+      maximum: 4
+      description: 此旅行此幣別所有已保存支出的最大歷史 minorUnit；兩圖所有 ExactAmount 使用此共同尺度，空圖的 0 亦同。
+    personal:
+      $ref: '#/ExpenseCategoryChart'
+    group:
+      $ref: '#/ExpenseCategoryChart'
+ExpenseCategoryChart:
+  type: object
+  additionalProperties: false
+  required: [total, categories]
+  description: total 等於 categories 所有精確 amount 之和；若 total 為 0/1，categories 必須為空。分類占比是該分類精確 amount / total，零總額時不適用。
+  properties:
+    total:
+      $ref: ./shared.yaml#/ExactAmount
+    categories:
+      type: array
+      description: 只列正金額分類，每個穩定 category ID 至多一筆；未分類獨立一筆。先列未分類，再按 category.id 升序；空圖為空陣列。
+      items:
+        $ref: '#/ExpenseCategoryAmount'
+ExpenseCategoryAmount:
+  type: object
+  additionalProperties: false
+  required: [category, amount]
+  description: amount 為此分類精確且大於零的金額，分子／分母為已約分十進位整數字串；minorUnit 等於外層幣別共同尺度，不以顯示取整或還款更動。
+  properties:
+    category:
+      type: object
+      nullable: true
+      additionalProperties: false
+      required: [id, name]
+      description: 分類目前名稱及穩定 ID；支出 category_id 為 null 時此值為 null。改名保留 ID，移除支出分類關聯後歸入 null。
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+    amount:
+      $ref: ./shared.yaml#/ExactAmount
