@@ -45,8 +45,8 @@ C 類沒有已確認設計，把 Goal 改為「畫面可空白」後仍輸出 BD
 - Level: `MUST`
 - truth 產物以該 Feature 的 Test Scope 全綠為 gate，不另加產物家族 review；回追到的 plan-side 設計或其他需獨立驗收的產物，在最後一個消費它的 Feature 後剛好加一題 `subagent review (<產物名> quality gate)`，同家族只一題。
 - B 類僅引用既有依據不因此新增設計產物家族 gate，仍完成適用行為與畫面回歸；A 不排 UI gate。C 的 UI gate 包含固定基準＋本次設計對照，不能因基準位於 plan 外而省略。
-- UI gate 讀本輪相關設計／預覽、有效確認、產品與差異證據，選用互動才讀其證據；通過條件依已載入共用契約。Test Scope 全綠不能替代設計比對；gate 不改 truth、不加 feature、不以重跑 GREEN 代替。
-- 逐畫面比對與代表畫面 checkpoint 放在對應 task 完成條件，後續同版型任務明列依賴，不按每個 feature 加家族 gate。
+- UI gate 依已載入測試交付契約核對自動／集中人工的責任與實際結果，讀本輪相關設計／預覽、有效確認、產品與差異證據，選用互動才讀其證據；通過條件依已載入共用契約。Test Scope 全綠不能替代設計比對；gate 不改 truth、不加 feature、不以重跑 GREEN 代替。
+- 代表畫面自查 checkpoint 放在對應實作 task 完成條件；使用者桌機／無障礙集中驗收獨立列 task，只有依賴人工結論的 gate 等待；後續同版型任務明列依賴，不按每個 feature 加家族 gate。
 - 需回填基準時，在適用產品驗收、最終 UI gate 與要求的回歸完成後另排回填及獨立核對任務，列寫入範圍與版本整合依據；回填的審查屬該任務完成證據，不再新增第二個產品 UI 家族 gate。
 
 ## Good Example

@@ -31,8 +31,10 @@
 
 | 類別 | 採用技術 | 用途 |
 | --- | --- | --- |
-| 前端 BDD techstack | `Playwright` | webapp E2E，跑前端 Gherkin |
+| 前端 BDD techstack | `Playwright` | 主要手機上傳／查閱 Gherkin；桌機拖放與第二瀏覽器已知風險 smoke |
 | 後端 BDD techstack | `behave` | 後端 E2E，跑後端 Gherkin，驗 API 與權威狀態 |
+
+桌機完整布局、鍵盤／焦點與螢幕閱讀器由使用者集中驗收，另列版本與確認證據，不算在自動化通過結果。
 
 ## 本次開發不引入的技術
 

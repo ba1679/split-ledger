@@ -15,7 +15,7 @@
 
 ## UI 分流、資源模式與 session checkpoints
 
-- 資源契約：low-memory-16gb：主代理實作、一個固定 reviewer；workers=1，瀏覽器逐一執行；呼叫 skill 不代表新增 agent；完整測試矩陣維持，依序排程。
+- 資源契約：low-memory-16gb：主代理實作、一個固定 reviewer；workers=1，瀏覽器逐一執行；呼叫 skill 不代表新增 agent；按風險選定的自動化範圍依序排程；集中人工驗收另列責任與依賴。
 - 分流與理由、受影響畫面／行為：C，新增 room/main、room/error 與 navigation；下方完整任務以 C 為主。A／B 分支見後述對照。
 - 既有呈現／固定基準＋本次設計與行為依據：ui/ui-plan.md 記錄必要現況與 design-v1；業務行為依 feature／DSL。
 - 適用設計確認與未決依賴：示例假設 design-v1 已確認並記錄實際雜湊／原回覆；正式產出必須查證，不能複製本例作批准。
@@ -26,14 +26,29 @@
 | --------------- | ------------------------------- | ---------------------- |
 | 測試層完成 T015 | 全部 DSL 就緒且獨立 review 通過 | T016 green；handoff.md |
 
-<!-- 依範圍列出測試 review、後端 feature 組、代表畫面桌機／手機比對、其餘前端及最終整合等適用交接點。待確認只產出阻礙與前置關卡，只阻擋依賴未決事項的任務；A／B 缺 ui/ 或不製作 prototype 不算未完成。 -->
+<!-- 依範圍列出測試 review、後端 feature 組、代表畫面自查及集中人工驗收、其餘前端及最終整合等適用交接點。待確認只產出阻礙與前置關卡，只阻擋依賴未決事項的任務；A／B 缺 ui/ 或不製作 prototype 不算未完成。 -->
 
 - 後端交接：T021 回歸完成後，下一範圍 T022。
-- 第一個代表畫面：T022 完成桌機／手機與相關狀態比對，T023 完成後交接；後續共用版型的畫面必須依賴此比對，若無後續畫面則註明不適用。
-- 最終整合：T024 獨立 UI gate；適用完整回歸及其他產品驗收完成後才解鎖 T028，T029 核對回填後交付，不宣稱未跑矩陣已完成。
+- 第一個代表畫面：T022 完成手機代表畫面與相關狀態自查，桌機完整與無障礙集中交 T024，T023 完成後交接；後續共用版型的畫面必須依賴此比對，若無後續畫面則註明不適用。
+- 最終整合：T024 集中人工驗收後，T025 獨立 UI gate；適用完整回歸及其他產品驗收完成後才解鎖 T029，T030 核對回填後交付，不宣稱未跑矩陣已完成。
 
 - 分波與補驗：預設全批測試對齊後 review；UI 受阻時可明列本波僅獨立 backend 的 feature／DSL／Test Scope 與 review 依賴。前端後補時增量加入其對齊與 review，不宣告全 plan 已就緒。
 - 舊 tasks 更新：保留既有 ID／歷史證據及不受影響的 `[X]`；缺適用批准／比對者才重開或新增補驗，阻擋相應最終 gate；新增 ID 不得重複。
+
+## 驗證範圍與責任
+
+- 政策來源與既有契約衝突處理：本例示範已確認的手機為主政策；實際 plan 引用原回覆，既有衝突交 owner 增量對齊。
+
+| 範圍／案例 | 驗證層與環境／輸入 | 獨有風險或重用依據 | 入口／證據與完成責任 |
+| --- | --- | --- | --- |
+| 等待、拒絕、保存與房間隔離 | 後端 API BDD／真資料來源 | 權限、保存及跨房隔離 | 對應三份 backend feature 的 focused runner；實作者 |
+| 登入、送訊、錯誤後重試 | 主要手機 Chromium／375px | 真 UI 保存與更新 | frontend 登入與送訊畫面 feature；實作者 |
+| WebKit 回焦／桌機入口與送訊 | WebKit 已知焦點回歸／桌機 smoke | 對應事件與焦點差異，無已知風險者省略額外組合 | 同 runner 以指定案例／project 聚焦；實作者 |
+| 桌機完整、長內容、鍵盤／焦點與讀屏 | 同版人工驗收 | 完整呈現及輔助科技體驗 | T024 的驗收包與使用者確認 |
+
+- 新 support 測試只處理 barrier／清理或 assertion 錯誤拒絕；送訊成功 helper 重用既有 feature，無獨有斷言就不另寫 E2E。
+- 工程實驗：本例無新增成本實驗；若修改資料查詢則沿用既有工程入口，列觸發條件與交付影響。
+- 集中人工驗收：T024 提供固定版本／入口／步驟／預期／差異；自動通過與人工 pending 分開記錄，T025／T029 等實際確認。
 
 ## Phase 1: Setup
 
@@ -122,7 +137,7 @@
 
 **Boundary**:
 
-- 一條 DSL 一個 task。
+- 一條 DSL 一個 task；引用既有 feature focused run，不逐句新增 support spec；需要新測試時說明其獨有失敗模式。
 - 只改該句的 stepdef / assertion / 直接依賴的 helper。
 - 不寫產品碼。
 - review 交給未參與實作的既有審查者，依共同資源預算安排；本波明列的 Test Scope（未明確分波時為本輪所有 Test Scope）不得再有 undefined step，失敗只能是 assertion 或產品行為。有 issues 就修正再 review；通過只解鎖明列依賴此 review 的 Feature phases。
@@ -167,6 +182,7 @@
 
 **Test Scope**:
 
+- 案例／環境／入口引用「驗證範圍與責任」對應列，不自動展開其他瀏覽器／尺寸。
 - `specs/truth/features/backend/房間聊天/單人等待與空白訊息拒絕.feature`
 
 - [ ] T016 [BDD-GREEN] 讓 Test Scope 全綠
@@ -188,6 +204,7 @@
 
 **Test Scope**:
 
+- 案例／環境／入口引用「驗證範圍與責任」對應列，不自動展開其他瀏覽器／尺寸。
 - `specs/truth/features/backend/房間聊天/雙方在場寫入房間對話.feature`
 
 - [ ] T018 [BDD-GREEN] 讓 Test Scope 全綠
@@ -210,6 +227,7 @@
 
 **Test Scope**:
 
+- 案例／環境／入口引用「驗證範圍與責任」對應列，不自動展開其他瀏覽器／尺寸。
 - `specs/truth/features/backend/房間聊天/離開後清空與他房隔離.feature`
 
 - [ ] T020 [CODE-REMOVE] 移除產品碼中保留離房訊息的過期分支
@@ -235,18 +253,27 @@
 
 **Test Scope**:
 
+- 案例／環境／入口引用「驗證範圍與責任」對應列，不自動展開其他瀏覽器／尺寸。
 - `specs/truth/features/frontend/房間對戰/登入與送訊畫面.feature`
 
 **受影響畫面與完成證據**：
 
 - room/main、room/error、navigation；正式 /rooms/:id 與共享 AppShell。
-- 同假資料在 1280px／375px 比對固定設計／產品，validation.md 留版本、截圖與「預期／實際／差異／處理」。
+- 同假資料在 375px 自查固定設計／產品，validation.md 留版本、截圖與「預期／實際／差異／處理」；1280px 完整與無障礙集中交 T024，必要桌機 smoke 仍保留。
 - T022 為代表畫面比對 checkpoint；任何後續套用同版型的畫面任務須依賴其通過，重大變更回交開發者確認。
 
 - [ ] T022 [BDD-GREEN] 讓 Test Scope 全綠並完成代表畫面比對
 - [ ] T023 [BDD-REFACTOR] 在綠燈下整理此 feature 的產品碼與測試 helper
 
-## Phase 4E: ui quality gate
+## Phase 4E: 集中人工驗收
+
+- [ ] T024 [USER-CONFIRM] 使用者驗收桌機完整布局、長內容與無障礙
+  - 前置：T022、T023；確認對象：使用者。
+  - 驗收包：validation.md 保存可取回產品版本、入口、1280px 桌機及長內容、鍵盤／焦點／讀屏步驟、預期與已知差異。
+  - 通過條件：使用者明確確認同版範圍，記錄原回覆；自動綠燈與設計批准不能替代。
+  - 真正受阻依賴：T025、T029；其他已解鎖後端／工程工作可繼續，不逐小 task 重驗。
+
+## Phase 4F: ui quality gate
 
 **Goal**: 產品對齊本輪回追到的 plan-side 產物。`Test Scope` 全綠不能代替本題。
 
@@ -261,33 +288,34 @@
 
 - 不改 truth、不加 feature、不重跑 GREEN 當通過條件。
 
-- [ ] T024 subagent review (ui quality gate)
-  - Evidence: 獨立核對桌機／手機、主旅程、關鍵狀態與固定基準／設計／產品版本；本例不製作原型，逐項差異已修正或有開發者接受依據；不能只寫 PASS。
+- [ ] T025 subagent review (ui quality gate)
+  - Dependencies: T024 及本輪相關產品任務。
+  - Evidence: 獨立核對手機自查、T024 實際人工確認、主旅程、關鍵狀態與固定基準／設計／產品版本；本例不製作原型，逐項差異已修正或有開發者接受依據；不能只寫 PASS。
 
 ## Phase 5: 示範遷移與確認（示意：依需求選用）
 
 **來源**: `spec.md` -> 先示範並取得確認，再完成其餘遷移
 **Dependencies**: 前置環境與相關測試對齊完成
 
-- [ ] T025 遷移示範表單
+- [ ] T026 遷移示範表單
   - 既有回歸範圍與入口：執行表單既有 feature。
   - 工程檢查及證據：對照遷移前後畫面，檢查共用設計值與圖示來源。
-- [ ] T026 [USER-CONFIRM] 展示示範表單與對照結果
-  - 前置：T025；確認對象：使用者；通過條件：使用者明確確認可繼續。
-- [ ] T027 遷移其餘介面並檢查無用舊樣式
-  - Dependencies: T026
+- [ ] T027 [USER-CONFIRM] 展示示範表單與對照結果
+  - 前置：T026；確認對象：使用者；通過條件：使用者明確確認可繼續。
+- [ ] T028 遷移其餘介面並檢查無用舊樣式
+  - Dependencies: T027
 
 ## Phase 6: 驗收後基準回填（有設計內容需回填時）
 
 **來源**: plan.md／ui/ui-plan.md -> 將已驗收 room/main、room/error 與 navigation 納入現況基準
-**Dependencies**: T022、T023、T024、相關產品任務及要求的完整回歸已通過；若 Phase 5 遷移也影響同一畫面，T027 與其驗收亦為前置
+**Dependencies**: T022、T023、T024、T025、相關產品任務及要求的完整回歸已通過；若 Phase 5 遷移也影響同一畫面，T028 與其驗收亦為前置
 
-- [ ] T028 回填本次已驗收的共用基準
+- [ ] T029 回填本次已驗收的共用基準
   - Read: ui/ui-plan.md 的固定起點、validation.md 的產品版本與驗收證據、最新基準及其與起點的差異。
   - 寫入範圍：specs/ui-baseline/split-ledger.pen 的 room 與 navigation、相關 previews/、README.md。
   - 更新相關 frame／元件、同版預覽、README 的產品 commit、涵蓋範圍、差異與更新紀錄；比較最新基準並保留其他 plan 成果，同範圍衝突回交。
-- [ ] T029 subagent review (baseline backfill)
-  - Dependencies: T028
+- [ ] T030 subagent review (baseline backfill)
+  - Dependencies: T029
   - Read: 本次基準 diff、產品驗收、預覽及 README。
   - 完成證據：未實作回填的 reviewer 核對上述內容一致，記錄實際版本與發現；通過才可完成 plan。
 

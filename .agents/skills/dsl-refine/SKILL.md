@@ -13,7 +13,7 @@ disable-model-invocation: true
 ## Phase 1 -- 對齊 acceptance、系統介面與 feature truth
 
 1. READ 讀取使用者要求、目標 plan package 的 `features/acceptance/**`、`plan.md`、`truth-delta.md`、`specs/truth/techstack.md`、按範圍適用的 UI 依據，以及受影響介面的既有功能模組、feature、模組 DSL 與介面根共用 DSL。
-2. READ 讀取 `../shared/ui-delivery.md` 與 `../shared/session-handoff.md`，按分流核對 plan 的呈現／行為依據或 C 類畫面索引、有效確認及選用互動決策；只停止依賴缺口的細化，不因 A／B 缺 ui/ 或不製作 prototype 而停止。
+2. READ 讀取 `../shared/testing-delivery.md`、`../shared/ui-delivery.md` 與 `../shared/session-handoff.md`，按分流核對 plan 的呈現／行為依據或 C 類畫面索引、有效確認及選用互動決策；只停止依賴缺口的細化，不因 A／B 缺 ui/ 或不製作 prototype 而停止。
 3. THINK 從 `plan.md`、truth-delta 與現有 feature truth 辨識本次涉及的前端、後端或其他系統介面，以及各介面既有 feature/dsl 是否需要 ADD / MODIFY / DELETE。
 4. WRITE 向使用者回報本輪辨識出的介面、預計新增/修改/刪除的 truth feature files 與 DSL 範圍。
 
@@ -21,7 +21,7 @@ disable-model-invocation: true
 
 1. READ 讀取 `rules/介面Gherkin原子化與單一Act判準.md`，確認介面 Gherkin 原子化與單一 Act 邊界。
 2. THINK 逐一盤點 acceptance 的 Rule、Example、關鍵 Given / When / Then 與 `# [need clarification]`，分派到相關介面，確認每條 acceptance 規則至少由一個 interface truth 承接。
-3. THINK 將前端旅程對應到畫面／狀態 ID、導覽與資訊位置；總覽、詳情及結算的斷言分別落在已確認位置，不為測試方便新增區塊。跨裝置驗證沿用同一旅程，不把必須取得資料推定為同頁顯示全部資料；B 類依據不足回交 `/system-analysis` 補記，實際需改設計則升 C 回交 `/ui-plan`；行為矛盾回交規格 owner。
+3. THINK 將前端旅程對應到畫面／狀態 ID、導覽與資訊位置；總覽、詳情及結算的斷言分別落在已確認位置，不為測試方便新增區塊。跨裝置驗證依已載入的測試交付契約沿用同一旅程；在 plan-side handoff 標示自動化範圍與集中人工驗收對應；人工檢查點引用相應 spec／UI 與既有行為 truth，不逐項擴寫新的自動旅程，也不為擴大矩陣複製 feature／DSL；不把必須取得資料推定為同頁顯示全部資料；B 類依據不足回交 `/system-analysis` 補記，實際需改設計則升 C 回交 `/ui-plan`；行為矛盾回交規格 owner。
 4. DELEGATE 若高影響 MODIFY / DELETE 會改寫既有 interface 行為、移除既有驗收或削弱 DSL 驗證契約，且尚未有明確使用者決策，呼叫 `/clarify`；未收斂前停止。
 
 ## Phase 3 -- 更新 interface feature truth
