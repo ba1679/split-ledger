@@ -21,6 +21,7 @@ import { ExactAmountSchema } from '../splitting/http-schema.js';
 import { decodeExpenseCursor, encodeExpenseCursor } from '../../pagination.js';
 import { requireUser, type Auth, type AuthConfig } from '../auth/index.js';
 import { personalTotals } from './personal-totals.js';
+import { registerAnalysisRoutes } from './analysis/index.js';
 
 const TripParams = Type.Object({ tripId: Uuid }, { additionalProperties: false });
 const Params = Type.Object({ tripId: Uuid, expenseId: Uuid }, { additionalProperties: false });
@@ -236,6 +237,7 @@ export function registerExpenseRoutes(
   auth: Auth,
   config: AuthConfig,
 ) {
+  registerAnalysisRoutes(app, db, auth);
   const api = app.withTypeProvider<TypeBoxTypeProvider>();
 
   api.get(

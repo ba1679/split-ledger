@@ -331,6 +331,7 @@ function ExpenseEditor({
         'trips',
         'expense',
         'expenses',
+        'expense-analysis',
         'totals',
         'categories',
         'settlement',

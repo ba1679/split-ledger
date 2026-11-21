@@ -1,6 +1,8 @@
+import './analysis-entry.css';
 import { TripManagementMenu } from './TripManagementMenu.js';
 import { Button } from '../../components/ui/button.js';
 import React, { useRef, useState } from 'react';
+import { ChartPie } from 'lucide-react';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import {
@@ -154,20 +156,28 @@ export function TripLedger() {
           />
         </div>
       </header>
-      <nav aria-label="旅行內導覽" className="trip-navigation">
-        <Button asChild variant="outline">
-          <Link to={`/trips/${tripId}/members`}>
-            <Icon name="members" />
-            同行者
+      <div className="ledger-analysis-navigation">
+        <nav aria-label="旅行內導覽" className="trip-navigation">
+          <Button asChild variant="outline">
+            <Link to={`/trips/${tripId}/members`}>
+              <Icon name="members" />
+              同行者
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link to={`/trips/${tripId}/settlement`}>
+              <Icon name="settlement" />
+              分帳結算
+            </Link>
+          </Button>
+        </nav>
+        <Button asChild variant="outline" className="analysis-entry">
+          <Link to={`/trips/${tripId}/analysis`}>
+            <ChartPie size={20} strokeWidth={1.6} aria-hidden="true" />
+            花費分析
           </Link>
         </Button>
-        <Button asChild variant="outline">
-          <Link to={`/trips/${tripId}/settlement`}>
-            <Icon name="settlement" />
-            分帳結算
-          </Link>
-        </Button>
-      </nav>
+      </div>
       {(location.state as { message?: string } | null)?.message ? (
         <p className="feedback" role="status">
           {(location.state as { message: string }).message}

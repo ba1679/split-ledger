@@ -59,18 +59,19 @@
 
 **Goal**: 加入本輪選定的shadcn/ui本地Chart＋Recharts3技術，確認Node/peer及既有build可用；不接分析路由、不寫DSL或帳務規則。
 
-- [ ] T001 固定新增圖表依賴與相容版本
+- [X] T001 固定新增圖表依賴與相容版本
   Read: `specs/truth/techstack.md` → 分類花費分析；`research.md` → 決策3；`apps/web/package.json`、`pnpm-lock.yaml`。
   Dependencies: 無（第一個可執行task）。
   以Node24.22.2/pnpm11.25.0記錄執行環境；核對Recharts3穩定patch及React19.3.1對應react-is的可用性/peer，固定直接依賴與lockfile。保留React版本與現有primitive；無相容版本證據則停止此依賴、回交technical-research，不擅自升級React或更換圖表引擎。
   記錄安裝前build/bundle基線；不寫圖表產品資料、計算或測試DSL。
+  驗證（2026-11-19）：Node24.22.2/pnpm11.25.0，固定recharts3.11.0/react-is19.3.1；peer涵蓋React19.3.1。安裝前後web build均exit0，JS497.25kB/gzip152.21kB；摘要見`checks/verification-summary.md`；原始T001輸出已本機封存，位置見`checks/README.md`。
 
-- [ ] T002 匯入本地Chart技術元件與最小配置
+- [X] T002 匯入本地Chart技術元件與最小配置
   Read: `research.md` → 決策3；`apps/web/src/components/ui/`、`apps/web/src/design-system.css`、`apps/web/src/lib/utils.ts`。
   Dependencies: T001。
   只匯入需要的shadcn ChartContainer/Tooltip/Content本地組件至`apps/web/src/components/ui/chart.tsx`，接既有CSS tokens/React型別與明確容器尺寸；記來源/版本/授權。可用隔離技術harness渲染靜態測試資料，不掛產品分析route，不實作分類選取/金額/百分比語意。
 
-- [ ] T003 smoke-test 驗證圖表依賴及技術環境
+- [X] T003 smoke-test 驗證圖表依賴及技術環境
   Read: `research.md` → 決策3與風險；`apps/web/vite.config.ts`、`apps/web/tsconfig.json`。
   Dependencies: T002。
   單worker依序跑web typecheck/build與隔離harness的Chromium/WebKit基本掛載/resize，確認有界靜態Pie/Tooltip可載入、無console例外/peer衝突；記版本與log後清理技術harness，不新增產品入口。這是技術smoke，不跑/聲稱本輪BDD全綠。
@@ -79,25 +80,25 @@
 
 **Goal**: 建立下游共用落點與資源管理骨架，每項只做結構，不實作DSL語意或產品行為。
 
-- [ ] T004 預留API來源讀取及純計算落點
+- [X] T004 預留API來源讀取及純計算落點
   Read: `apps/api/src/modules/expenses/{index.ts,personal-totals.ts}`、`packages/shared/src/rational.ts`；`truth-delta.md` → API/data及後端feature ADD。
   Dependencies: T003。
   只做：預留`apps/api/src/modules/expenses/analysis/`的schema/repository/service純型別與空模組入口、現有expenses註冊接縫；引用既有ExactAmount型別。
   不做：不註冊可成功的分析GET、不寫SQL/owner或份額聚合、不回假空資料、不改舊totals/DB schema。
 
-- [ ] T005 預留前端容器、圖卡及API client落點
+- [X] T005 預留前端容器、圖卡及API client落點
   Read: `apps/web/src/app/App.tsx`、`apps/web/src/api/index.ts`、`apps/web/src/features/trips/TripLedger.tsx`、`apps/web/src/components/QueryState.tsx`；`ui/ui-plan.md`。
   Dependencies: T004。
   只做：預留`apps/web/src/features/expenses/analysis/`與`apps/web/src/api/expense-analysis.ts`的型別/模組殼，圈定後續TripExpenseAnalysis/卡片/明細/資訊卡的責任；盤點結果已在本文件，不另輸出調查task。
   不做：不掛可操作route/帳本入口、不畫產品圖、不接fetch/query、不寫百分比/選幣規則、不改現有頁面。
 
-- [ ] T006 建立測試入口、world狀態及runner收錄骨架
+- [X] T006 建立測試入口、world狀態及runner收錄骨架
   Read: `apps/api/tests/support/{world.ts,fixtures.ts,database.ts,seed.ts}`、`apps/web/tests/support/fixtures.ts`、兩端playwright.config.ts、`vitest.config.ts`、`playwright.web-support.config.ts`。
   Dependencies: T005。
   只做：預留兩端`tests/steps/expenses/category-analysis/`與`tests/support/category-analysis/`空模組及具名context型別；沿用scenario/worker隔離及正式migrations。讓Vitest限定收錄`apps/{api,web}/tests/unit/**/*.test.ts`、web-support收錄`**/category-analysis/**/*.spec.ts`；接明確viewport/variant參數入口但不放斷言。
   不做：不實作Given/When/Then、不加假通過step/skip、不啟動第二套服務、不更動舊BDD預期。
 
-- [ ] T007 預留獨立oracle及受控response生命週期入口
+- [X] T007 預留獨立oracle及受控response生命週期入口
   Read: `apps/api/tests/support/splitting/expense-fixture.ts`、`apps/web/tests/support/loading/response-proxy.ts`、`apps/web/tests/support/trips/account-switch-fixture.ts`、`packages/shared/tests/money.test.ts`。
   Dependencies: T006。
   只做：預留seed/來源快照/獨立有理數oracle/page object/response barrier/context清理的函式簽名與檔案，標示world內ID映射；建立finally/teardown資源登記接縫。
@@ -140,426 +141,426 @@
 
 ### 後端 expenses DSL
 
-- [ ] T008 [P] [BDD-RED] backend `分類分析旅行已有以下支出：`
+- [X] T008 [P] [BDD-RED] backend `分類分析旅行已有以下支出：`
   Read: `specs/truth/features/backend/expenses/dsl.md:101` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T009 [P] [BDD-RED] backend `分類分析旅行已新增以下支出：`
+- [X] T009 [P] [BDD-RED] backend `分類分析旅行已新增以下支出：`
   Read: `specs/truth/features/backend/expenses/dsl.md:102` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
   此ADD Given目前未被BE feature使用：加直接DB fixture/step-support測試，不新增truth Scenario。
 
-- [ ] T010 [P] [BDD-RED] backend `分類分析旅行尚無支出`
+- [X] T010 [P] [BDD-RED] backend `分類分析旅行尚無支出`
   Read: `specs/truth/features/backend/expenses/dsl.md:103` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T011 [P] [BDD-RED] backend `分類分析旅行有 {筆數} 筆各 "{幣別}" {餐費} 的單人餐飲及旅行前 "{機票幣別}" {票價} 的機票`
+- [X] T011 [P] [BDD-RED] backend `分類分析旅行有 {筆數} 筆各 "{幣別}" {餐費} 的單人餐飲及旅行前 "{機票幣別}" {票價} 的機票`
   Read: `specs/truth/features/backend/expenses/dsl.md:104` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T012 [P] [BDD-RED] backend `另一分類分析旅行有 "{幣別}" {金額} 的單人餐飲`
+- [X] T012 [P] [BDD-RED] backend `另一分類分析旅行有 "{幣別}" {金額} 的單人餐飲`
   Read: `specs/truth/features/backend/expenses/dsl.md:105` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T013 [P] [BDD-RED] backend `分類分析旅行已有 Amy 還款 "{還款幣別}" {還款} 及 Bob 實付結清 "{實付幣別}" {實付}`
+- [X] T013 [P] [BDD-RED] backend `分類分析旅行已有 Amy 還款 "{還款幣別}" {還款} 及 Bob 實付結清 "{實付幣別}" {實付}`
   Read: `specs/truth/features/backend/expenses/dsl.md:106` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T014 [P] [BDD-RED] backend `分類分析支出 "{項目}" 已保存金額為 "{幣別}" {金額}`
+- [X] T014 [P] [BDD-RED] backend `分類分析支出 "{項目}" 已保存金額為 "{幣別}" {金額}`
   Read: `specs/truth/features/backend/expenses/dsl.md:107` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T015 [P] [BDD-RED] backend `分類分析支出 "{項目}" 已保存分攤者為 "{分攤者}"`
+- [X] T015 [P] [BDD-RED] backend `分類分析支出 "{項目}" 已保存分攤者為 "{分攤者}"`
   Read: `specs/truth/features/backend/expenses/dsl.md:108` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T016 [P] [BDD-RED] backend `分類分析支出 "{項目}" 已刪除`
+- [X] T016 [P] [BDD-RED] backend `分類分析支出 "{項目}" 已刪除`
   Read: `specs/truth/features/backend/expenses/dsl.md:109` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T017 [P] [BDD-RED] backend `分類分析的分類 "{舊名}" 已改名為 "{新名}"`
+- [X] T017 [P] [BDD-RED] backend `分類分析的分類 "{舊名}" 已改名為 "{新名}"`
   Read: `specs/truth/features/backend/expenses/dsl.md:110` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T018 [P] [BDD-RED] backend `分類分析支出 "{項目}" 已清除分類`
+- [X] T018 [P] [BDD-RED] backend `分類分析支出 "{項目}" 已清除分類`
   Read: `specs/truth/features/backend/expenses/dsl.md:111` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T019 [P] [BDD-RED] backend `分類分析成員 "{舊名}" 已改名為 "{新名}" 並停用`
+- [X] T019 [P] [BDD-RED] backend `分類分析成員 "{舊名}" 已改名為 "{新名}" 並停用`
   Read: `specs/truth/features/backend/expenses/dsl.md:112` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T020 [P] [BDD-RED] backend `分類分析旅行狀態為 "{狀態}"`
+- [X] T020 [P] [BDD-RED] backend `分類分析旅行狀態為 "{狀態}"`
   Read: `specs/truth/features/backend/expenses/dsl.md:113` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T021 [P] [BDD-RED] backend `分類分析查看者為 "{身分}"`
+- [X] T021 [P] [BDD-RED] backend `分類分析查看者為 "{身分}"`
   Read: `specs/truth/features/backend/expenses/dsl.md:114` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T022 [P] [BDD-RED] backend `擁有者讀取分類分析`
+- [X] T022 [P] [BDD-RED] backend `擁有者讀取分類分析`
   Read: `specs/truth/features/backend/expenses/dsl.md:115` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
   對應IF02同快照契約補受控讀寫交錯的support測試，與B03/B14共同核對單次查詢的完整精確回應及唯讀；測試層安排，不在此實作transaction。
 
-- [ ] T023 [P] [BDD-RED] backend `目前查看者讀取分類分析`
+- [X] T023 [P] [BDD-RED] backend `目前查看者讀取分類分析`
   Read: `specs/truth/features/backend/expenses/dsl.md:116` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T024 [P] [BDD-RED] backend `分類分析回傳 "{圖別}" 在 "{幣別}" 的完整分類金額：`
+- [X] T024 [P] [BDD-RED] backend `分類分析回傳 "{圖別}" 在 "{幣別}" 的完整分類金額：`
   Read: `specs/truth/features/backend/expenses/dsl.md:117` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
   補本節列明的精確計算/格式化或有界圖形focused測試，實作缺口維持RED。
 
-- [ ] T025 [P] [BDD-RED] backend `分類分析回傳的完整總額如下：`
+- [X] T025 [P] [BDD-RED] backend `分類分析回傳的完整總額如下：`
   Read: `specs/truth/features/backend/expenses/dsl.md:118` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T026 [P] [BDD-RED] backend `分類分析回傳的幣別依序為 "{幣別清單}"`
+- [X] T026 [P] [BDD-RED] backend `分類分析回傳的幣別依序為 "{幣別清單}"`
   Read: `specs/truth/features/backend/expenses/dsl.md:119` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T027 [P] [BDD-RED] backend `分類分析的 "{圖別}" 在 "{幣別}" 沒有分類且總額為零`
+- [X] T027 [P] [BDD-RED] backend `分類分析的 "{圖別}" 在 "{幣別}" 沒有分類且總額為零`
   Read: `specs/truth/features/backend/expenses/dsl.md:120` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T028 [P] [BDD-RED] backend `分類分析回傳共同消費狀態為 "{狀態}"`
+- [X] T028 [P] [BDD-RED] backend `分類分析回傳共同消費狀態為 "{狀態}"`
   Read: `specs/truth/features/backend/expenses/dsl.md:121` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T029 [P] [BDD-RED] backend `分類分析成功且沒有任何支出幣別`
+- [X] T029 [P] [BDD-RED] backend `分類分析成功且沒有任何支出幣別`
   Read: `specs/truth/features/backend/expenses/dsl.md:122` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T030 [P] [BDD-RED] backend `分類分析旅行有歷史精度 {舊精度} 的 "{幣別}" {舊金額} 及精度 {新精度} 的 "{新幣別}" {新金額}，皆由 Alice 與 Amy 分攤`
+- [X] T030 [P] [BDD-RED] backend `分類分析旅行有歷史精度 {舊精度} 的 "{幣別}" {舊金額} 及精度 {新精度} 的 "{新幣別}" {新金額}，皆由 Alice 與 Amy 分攤`
   Read: `specs/truth/features/backend/expenses/dsl.md:123` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T031 [P] [BDD-RED] backend `分類分析的 "{幣別}" 計算精度為 {精度}`
+- [X] T031 [P] [BDD-RED] backend `分類分析的 "{幣別}" 計算精度為 {精度}`
   Read: `specs/truth/features/backend/expenses/dsl.md:124` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T032 [P] [BDD-RED] backend `分類分析查詢前後的來源帳務完全相同`
+- [X] T032 [P] [BDD-RED] backend `分類分析查詢前後的來源帳務完全相同`
   Read: `specs/truth/features/backend/expenses/dsl.md:125` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T033 [P] [BDD-RED] backend `分類分析另有與同行者 "{成員}" 同名的獨立帳號`
+- [X] T033 [P] [BDD-RED] backend `分類分析另有與同行者 "{成員}" 同名的獨立帳號`
   Read: `specs/truth/features/backend/expenses/dsl.md:126` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T034 [P] [BDD-RED] backend `分類分析的個人對象為 Alice 的擁有者成員`
+- [X] T034 [P] [BDD-RED] backend `分類分析的個人對象為 Alice 的擁有者成員`
   Read: `specs/truth/features/backend/expenses/dsl.md:127` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T035 [P] [BDD-RED] backend `分類分析支出 "{項目}" 仍保留原本三個成員的歷史分攤`
+- [X] T035 [P] [BDD-RED] backend `分類分析支出 "{項目}" 仍保留原本三個成員的歷史分攤`
   Read: `specs/truth/features/backend/expenses/dsl.md:128` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T036 [P] [BDD-RED] backend `分類分析讀取被拒絕為 "{原因}"`
+- [X] T036 [P] [BDD-RED] backend `分類分析讀取被拒絕為 "{原因}"`
   Read: `specs/truth/features/backend/expenses/dsl.md:129` → 該完整row。
   Dependencies: T007；落點 `apps/api/tests/steps/expenses/category-analysis/` 及對應support。
 
 ### 前端 expenses DSL
 
-- [ ] T037 [P] [BDD-RED] frontend `分類分析旅行已有以下支出：`
+- [X] T037 [P] [BDD-RED] frontend `分類分析旅行已有以下支出：`
   Read: `specs/truth/features/frontend/expenses/dsl.md:145` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T038 [P] [BDD-RED] frontend `分類分析旅行已新增以下支出：`
+- [X] T038 [P] [BDD-RED] frontend `分類分析旅行已新增以下支出：`
   Read: `specs/truth/features/frontend/expenses/dsl.md:146` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T039 [P] [BDD-RED] frontend `分類分析旅行尚無支出`
+- [X] T039 [P] [BDD-RED] frontend `分類分析旅行尚無支出`
   Read: `specs/truth/features/frontend/expenses/dsl.md:147` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T040 [P] [BDD-RED] frontend `分類分析旅行有 {筆數} 筆各 "{幣別}" {餐費} 的單人餐飲及旅行前 "{機票幣別}" {票價} 的機票`
+- [X] T040 [P] [BDD-RED] frontend `分類分析旅行有 {筆數} 筆各 "{幣別}" {餐費} 的單人餐飲及旅行前 "{機票幣別}" {票價} 的機票`
   Read: `specs/truth/features/frontend/expenses/dsl.md:148` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T041 [P] [BDD-RED] frontend `另一分類分析旅行有 "{幣別}" {金額} 的單人餐飲`
+- [X] T041 [P] [BDD-RED] frontend `另一分類分析旅行有 "{幣別}" {金額} 的單人餐飲`
   Read: `specs/truth/features/frontend/expenses/dsl.md:149` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T042 [P] [BDD-RED] frontend `分類分析旅行已有 Amy 還款 "{還款幣別}" {還款} 及 Bob 實付結清 "{實付幣別}" {實付}`
+- [X] T042 [P] [BDD-RED] frontend `分類分析旅行已有 Amy 還款 "{還款幣別}" {還款} 及 Bob 實付結清 "{實付幣別}" {實付}`
   Read: `specs/truth/features/frontend/expenses/dsl.md:150` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T043 [P] [BDD-RED] frontend `分類分析支出 "{項目}" 已保存金額為 "{幣別}" {金額}`
+- [X] T043 [P] [BDD-RED] frontend `分類分析支出 "{項目}" 已保存金額為 "{幣別}" {金額}`
   Read: `specs/truth/features/frontend/expenses/dsl.md:151` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T044 [P] [BDD-RED] frontend `分類分析支出 "{項目}" 已保存分攤者為 "{分攤者}"`
+- [X] T044 [P] [BDD-RED] frontend `分類分析支出 "{項目}" 已保存分攤者為 "{分攤者}"`
   Read: `specs/truth/features/frontend/expenses/dsl.md:152` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T045 [P] [BDD-RED] frontend `分類分析支出 "{項目}" 已刪除`
+- [X] T045 [P] [BDD-RED] frontend `分類分析支出 "{項目}" 已刪除`
   Read: `specs/truth/features/frontend/expenses/dsl.md:153` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T046 [P] [BDD-RED] frontend `分類分析的分類 "{舊名}" 已改名為 "{新名}"`
+- [X] T046 [P] [BDD-RED] frontend `分類分析的分類 "{舊名}" 已改名為 "{新名}"`
   Read: `specs/truth/features/frontend/expenses/dsl.md:154` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T047 [P] [BDD-RED] frontend `分類分析支出 "{項目}" 已清除分類`
+- [X] T047 [P] [BDD-RED] frontend `分類分析支出 "{項目}" 已清除分類`
   Read: `specs/truth/features/frontend/expenses/dsl.md:155` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T048 [P] [BDD-RED] frontend `分類分析成員 "{舊名}" 已改名為 "{新名}" 並停用`
+- [X] T048 [P] [BDD-RED] frontend `分類分析成員 "{舊名}" 已改名為 "{新名}" 並停用`
   Read: `specs/truth/features/frontend/expenses/dsl.md:156` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T049 [P] [BDD-RED] frontend `分類分析旅行狀態為 "{狀態}"`
+- [X] T049 [P] [BDD-RED] frontend `分類分析旅行狀態為 "{狀態}"`
   Read: `specs/truth/features/frontend/expenses/dsl.md:157` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T050 [P] [BDD-RED] frontend `分類分析查看者為 "{身分}"`
+- [X] T050 [P] [BDD-RED] frontend `分類分析查看者為 "{身分}"`
   Read: `specs/truth/features/frontend/expenses/dsl.md:158` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T051 [P] [BDD-RED] frontend `分類分析使用裝置為 "{裝置}"`
+- [X] T051 [P] [BDD-RED] frontend `分類分析使用裝置為 "{裝置}"`
   Read: `specs/truth/features/frontend/expenses/dsl.md:159` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T052 [P] [BDD-RED] frontend `分類分析旅行的支出清單已載入 {筆數} 筆`
+- [X] T052 [P] [BDD-RED] frontend `分類分析旅行的支出清單已載入 {筆數} 筆`
   Read: `specs/truth/features/frontend/expenses/dsl.md:160` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T053 [P] [BDD-RED] frontend `分類分析先前內容已確認`
+- [X] T053 [P] [BDD-RED] frontend `分類分析先前內容已確認`
   Read: `specs/truth/features/frontend/expenses/dsl.md:161` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T054 [P] [BDD-RED] frontend `分類分析保留選擇為 "{幣別}"`
+- [X] T054 [P] [BDD-RED] frontend `分類分析保留選擇為 "{幣別}"`
   Read: `specs/truth/features/frontend/expenses/dsl.md:162` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T055 [P] [BDD-RED] frontend `分類分析頁已選擇 "{幣別}"`
+- [X] T055 [P] [BDD-RED] frontend `分類分析頁已選擇 "{幣別}"`
   Read: `specs/truth/features/frontend/expenses/dsl.md:163` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T056 [P] [BDD-RED] frontend `分類分析頁已先查看 "{先前幣別}" 再選擇 "{目前幣別}"`
+- [X] T056 [P] [BDD-RED] frontend `分類分析頁已先查看 "{先前幣別}" 再選擇 "{目前幣別}"`
   Read: `specs/truth/features/frontend/expenses/dsl.md:164` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T057 [P] [BDD-RED] frontend `分類分析的 "{圖別}" 分類 "{分類}" 資訊卡已開啟`
+- [X] T057 [P] [BDD-RED] frontend `分類分析的 "{圖別}" 分類 "{分類}" 資訊卡已開啟`
   Read: `specs/truth/features/frontend/expenses/dsl.md:165` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T058 [P] [BDD-RED] frontend `分類分析資訊卡已關閉且焦點在原分類控制`
+- [X] T058 [P] [BDD-RED] frontend `分類分析資訊卡已關閉且焦點在原分類控制`
   Read: `specs/truth/features/frontend/expenses/dsl.md:166` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T059 [P] [BDD-RED] frontend `分類分析旅行有多個分類及超長分類名稱的已保存支出`
+- [X] T059 [P] [BDD-RED] frontend `分類分析旅行有多個分類及超長分類名稱的已保存支出`
   Read: `specs/truth/features/frontend/expenses/dsl.md:167` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T060 [P] [BDD-RED] frontend `分類分析下一次讀取為 "{結果}"`
+- [X] T060 [P] [BDD-RED] frontend `分類分析下一次讀取為 "{結果}"`
   Read: `specs/truth/features/frontend/expenses/dsl.md:168` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T061 [P] [BDD-RED] frontend `分類分析已有餐飲個人 "{幣別}" {個人}、團體 "{團體幣別}" {團體} 的已確認內容`
+- [X] T061 [P] [BDD-RED] frontend `分類分析已有餐飲個人 "{幣別}" {個人}、團體 "{團體幣別}" {團體} 的已確認內容`
   Read: `specs/truth/features/frontend/expenses/dsl.md:169` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T062 [P] [BDD-RED] frontend `另一裝置已新增餐飲 "{幣別}" {金額} 且由 Alice 與 Amy 分攤`
+- [X] T062 [P] [BDD-RED] frontend `另一裝置已新增餐飲 "{幣別}" {金額} 且由 Alice 與 Amy 分攤`
   Read: `specs/truth/features/frontend/expenses/dsl.md:170` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T063 [P] [BDD-RED] frontend `分類分析頁已處於 "{狀態}"`
+- [X] T063 [P] [BDD-RED] frontend `分類分析頁已處於 "{狀態}"`
   Read: `specs/truth/features/frontend/expenses/dsl.md:171` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T064 [P] [BDD-RED] frontend `分類分析裝置已離線`
+- [X] T064 [P] [BDD-RED] frontend `分類分析裝置已離線`
   Read: `specs/truth/features/frontend/expenses/dsl.md:172` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T065 [P] [BDD-RED] frontend `分類分析有日本餐飲 "{日本幣別}" {日本金額} 及台南交通 "{台南幣別}" {台南金額} 的兩趟單人旅行`
+- [X] T065 [P] [BDD-RED] frontend `分類分析有日本餐飲 "{日本幣別}" {日本金額} 及台南交通 "{台南幣別}" {台南金額} 的兩趟單人旅行`
   Read: `specs/truth/features/frontend/expenses/dsl.md:173` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T066 [P] [BDD-RED] frontend `日本分類分析正在延遲讀取`
+- [X] T066 [P] [BDD-RED] frontend `日本分類分析正在延遲讀取`
   Read: `specs/truth/features/frontend/expenses/dsl.md:174` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T067 [P] [BDD-RED] frontend `台南分類分析下一次讀取尚未完成`
+- [X] T067 [P] [BDD-RED] frontend `台南分類分析下一次讀取尚未完成`
   Read: `specs/truth/features/frontend/expenses/dsl.md:175` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T068 [P] [BDD-RED] frontend `目前已顯示台南分類分析且日本舊讀取仍在等待`
+- [X] T068 [P] [BDD-RED] frontend `目前已顯示台南分類分析且日本舊讀取仍在等待`
   Read: `specs/truth/features/frontend/expenses/dsl.md:176` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T069 [P] [BDD-RED] frontend `從帳本開啟分類分析`
+- [X] T069 [P] [BDD-RED] frontend `從帳本開啟分類分析`
   Read: `specs/truth/features/frontend/expenses/dsl.md:177` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T070 [P] [BDD-RED] frontend `在分類分析選擇幣別 "{幣別}"`
+- [X] T070 [P] [BDD-RED] frontend `在分類分析選擇幣別 "{幣別}"`
   Read: `specs/truth/features/frontend/expenses/dsl.md:178` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T071 [P] [BDD-RED] frontend `以鍵盤在分類分析選擇幣別 "{幣別}"`
+- [X] T071 [P] [BDD-RED] frontend `以鍵盤在分類分析選擇幣別 "{幣別}"`
   Read: `specs/truth/features/frontend/expenses/dsl.md:179` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T072 [P] [BDD-RED] frontend `以 "{操作}" 查看分類分析的 "{圖別}" 分類 "{分類}"`
+- [X] T072 [P] [BDD-RED] frontend `以 "{操作}" 查看分類分析的 "{圖別}" 分類 "{分類}"`
   Read: `specs/truth/features/frontend/expenses/dsl.md:180` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T073 [P] [BDD-RED] frontend `以 "{操作}" 關閉分類分析資訊卡`
+- [X] T073 [P] [BDD-RED] frontend `以 "{操作}" 關閉分類分析資訊卡`
   Read: `specs/truth/features/frontend/expenses/dsl.md:181` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T074 [P] [BDD-RED] frontend `重試分類分析讀取`
+- [X] T074 [P] [BDD-RED] frontend `重試分類分析讀取`
   Read: `specs/truth/features/frontend/expenses/dsl.md:182` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T075 [P] [BDD-RED] frontend `回到目前旅行的分類分析`
+- [X] T075 [P] [BDD-RED] frontend `回到目前旅行的分類分析`
   Read: `specs/truth/features/frontend/expenses/dsl.md:183` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T076 [P] [BDD-RED] frontend `切換至台南旅行分類分析`
+- [X] T076 [P] [BDD-RED] frontend `切換至台南旅行分類分析`
   Read: `specs/truth/features/frontend/expenses/dsl.md:184` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T077 [P] [BDD-RED] frontend `日本旅行較晚的分類分析讀取完成`
+- [X] T077 [P] [BDD-RED] frontend `日本旅行較晚的分類分析讀取完成`
   Read: `specs/truth/features/frontend/expenses/dsl.md:185` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T078 [P] [BDD-RED] frontend `開啟原旅行的分類分析連結`
+- [X] T078 [P] [BDD-RED] frontend `開啟原旅行的分類分析連結`
   Read: `specs/truth/features/frontend/expenses/dsl.md:186` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T079 [P] [BDD-RED] frontend `從分類分析返回帳本`
+- [X] T079 [P] [BDD-RED] frontend `從分類分析返回帳本`
   Read: `specs/truth/features/frontend/expenses/dsl.md:187` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T080 [P] [BDD-RED] frontend `分類分析的 "{圖別}" 在 "{幣別}" 顯示總額 "{總額}"`
+- [X] T080 [P] [BDD-RED] frontend `分類分析的 "{圖別}" 在 "{幣別}" 顯示總額 "{總額}"`
   Read: `specs/truth/features/frontend/expenses/dsl.md:188` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T081 [P] [BDD-RED] frontend `分類分析頁屬於目前旅行且可返回原帳本`
+- [X] T081 [P] [BDD-RED] frontend `分類分析頁屬於目前旅行且可返回原帳本`
   Read: `specs/truth/features/frontend/expenses/dsl.md:189` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T082 [P] [BDD-RED] frontend `手機帳本的分析入口位於旅行導覽下一列且底部導覽維持五項`
+- [X] T082 [P] [BDD-RED] frontend `手機帳本的分析入口位於旅行導覽下一列且底部導覽維持五項`
   Read: `specs/truth/features/frontend/expenses/dsl.md:190` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T083 [P] [BDD-RED] frontend `分類分析兩圖在桌機並排、手機依個人再團體排列`
+- [X] T083 [P] [BDD-RED] frontend `分類分析兩圖在桌機並排、手機依個人再團體排列`
   Read: `specs/truth/features/frontend/expenses/dsl.md:191` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T084 [P] [BDD-RED] frontend `分類分析頁的 "{圖別}" 在 "{幣別}" 顯示完整分類明細：`
+- [X] T084 [P] [BDD-RED] frontend `分類分析頁的 "{圖別}" 在 "{幣別}" 顯示完整分類明細：`
   Read: `specs/truth/features/frontend/expenses/dsl.md:192` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
   補本節列明的精確計算/格式化或有界圖形focused測試，實作缺口維持RED。
 
-- [ ] T085 [P] [BDD-RED] frontend `分類分析頁在 "{幣別}" 的個人總額為 "{個人}"、團體總額為 "{團體}"`
+- [X] T085 [P] [BDD-RED] frontend `分類分析頁在 "{幣別}" 的個人總額為 "{個人}"、團體總額為 "{團體}"`
   Read: `specs/truth/features/frontend/expenses/dsl.md:193` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T086 [P] [BDD-RED] frontend `分類分析扇形與各圖精確分類比例一致`
+- [X] T086 [P] [BDD-RED] frontend `分類分析扇形與各圖精確分類比例一致`
   Read: `specs/truth/features/frontend/expenses/dsl.md:194` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
   補本節列明的精確計算/格式化或有界圖形focused測試，實作缺口維持RED。
 
-- [ ] T087 [P] [BDD-RED] frontend `分類分析團體區塊說明只計至少兩人分攤的共同消費`
+- [X] T087 [P] [BDD-RED] frontend `分類分析團體區塊說明只計至少兩人分攤的共同消費`
   Read: `specs/truth/features/frontend/expenses/dsl.md:195` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T088 [P] [BDD-RED] frontend `分類分析目前幣別為 "{幣別}" 且選項依序為 "{清單}"`
+- [X] T088 [P] [BDD-RED] frontend `分類分析目前幣別為 "{幣別}" 且選項依序為 "{清單}"`
   Read: `specs/truth/features/frontend/expenses/dsl.md:196` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T089 [P] [BDD-RED] frontend `分類分析的 "{圖別}" 顯示 "{幣別}" 零值且沒有消費扇形或占比`
+- [X] T089 [P] [BDD-RED] frontend `分類分析的 "{圖別}" 顯示 "{幣別}" 零值且沒有消費扇形或占比`
   Read: `specs/truth/features/frontend/expenses/dsl.md:197` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T090 [P] [BDD-RED] frontend `分類分析團體區塊顯示全旅行沒有共同消費的說明`
+- [X] T090 [P] [BDD-RED] frontend `分類分析團體區塊顯示全旅行沒有共同消費的說明`
   Read: `specs/truth/features/frontend/expenses/dsl.md:198` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T091 [P] [BDD-RED] frontend `分類分析資訊卡顯示 "{分類}"、"{幣別}"、"{金額}" 與 "{占比}"`
+- [X] T091 [P] [BDD-RED] frontend `分類分析資訊卡顯示 "{分類}"、"{幣別}"、"{金額}" 與 "{占比}"`
   Read: `specs/truth/features/frontend/expenses/dsl.md:199` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T092 [P] [BDD-RED] frontend `分類分析常駐明細不依賴顏色或動畫才能閱讀`
+- [X] T092 [P] [BDD-RED] frontend `分類分析常駐明細不依賴顏色或動畫才能閱讀`
   Read: `specs/truth/features/frontend/expenses/dsl.md:200` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T093 [P] [BDD-RED] frontend `分類分析兩圖的 "{分類}" 配色相同`
+- [X] T093 [P] [BDD-RED] frontend `分類分析兩圖的 "{分類}" 配色相同`
   Read: `specs/truth/features/frontend/expenses/dsl.md:201` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T094 [P] [BDD-RED] frontend `分類分析資訊卡關閉且焦點回到原分類控制`
+- [X] T094 [P] [BDD-RED] frontend `分類分析資訊卡關閉且焦點回到原分類控制`
   Read: `specs/truth/features/frontend/expenses/dsl.md:202` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T095 [P] [BDD-RED] frontend `分類分析的 "{圖別}" 為代表唯一分類的完整圓環`
+- [X] T095 [P] [BDD-RED] frontend `分類分析的 "{圖別}" 為代表唯一分類的完整圓環`
   Read: `specs/truth/features/frontend/expenses/dsl.md:203` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T096 [P] [BDD-RED] frontend `分類分析的 "{圖別}" 分類 "{分類}" 金額為 "{金額}" 且占比顯示 "{占比}"`
+- [X] T096 [P] [BDD-RED] frontend `分類分析的 "{圖別}" 分類 "{分類}" 金額為 "{金額}" 且占比顯示 "{占比}"`
   Read: `specs/truth/features/frontend/expenses/dsl.md:204` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T097 [P] [BDD-RED] frontend `分類分析所有分類名稱與金額完整可讀且不自動合併為其他`
+- [X] T097 [P] [BDD-RED] frontend `分類分析所有分類名稱與金額完整可讀且不自動合併為其他`
   Read: `specs/truth/features/frontend/expenses/dsl.md:205` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T098 [P] [BDD-RED] frontend `分類分析顯示初次讀取狀態且沒有已確認的零總額`
+- [X] T098 [P] [BDD-RED] frontend `分類分析顯示初次讀取狀態且沒有已確認的零總額`
   Read: `specs/truth/features/frontend/expenses/dsl.md:206` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T099 [P] [BDD-RED] frontend `分類分析顯示初讀失敗及重試，不冒充沒有支出`
+- [X] T099 [P] [BDD-RED] frontend `分類分析顯示初讀失敗及重試，不冒充沒有支出`
   Read: `specs/truth/features/frontend/expenses/dsl.md:207` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T100 [P] [BDD-RED] frontend `分類分析顯示旅行尚無支出且沒有幣別選擇或消費扇形`
+- [X] T100 [P] [BDD-RED] frontend `分類分析顯示旅行尚無支出且沒有幣別選擇或消費扇形`
   Read: `specs/truth/features/frontend/expenses/dsl.md:208` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T101 [P] [BDD-RED] frontend `分類分析保留個人 "{幣別}" {個人}、團體 "{團體幣別}" {團體} 的圖表明細並顯示更新中`
+- [X] T101 [P] [BDD-RED] frontend `分類分析保留個人 "{幣別}" {個人}、團體 "{團體幣別}" {團體} 的圖表明細並顯示更新中`
   Read: `specs/truth/features/frontend/expenses/dsl.md:209` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T102 [P] [BDD-RED] frontend `分類分析保留個人 "{幣別}" {個人}、團體 "{團體幣別}" {團體} 的圖表明細並顯示更新失敗可重試`
+- [X] T102 [P] [BDD-RED] frontend `分類分析保留個人 "{幣別}" {個人}、團體 "{團體幣別}" {團體} 的圖表明細並顯示更新失敗可重試`
   Read: `specs/truth/features/frontend/expenses/dsl.md:210` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T103 [P] [BDD-RED] frontend `分類分析保留舊內容、可辨識離線且更新動畫停止`
+- [X] T103 [P] [BDD-RED] frontend `分類分析保留舊內容、可辨識離線且更新動畫停止`
   Read: `specs/truth/features/frontend/expenses/dsl.md:211` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T104 [P] [BDD-RED] frontend `台南分類分析讀取中不顯示日本旅行的分類或金額`
+- [X] T104 [P] [BDD-RED] frontend `台南分類分析讀取中不顯示日本旅行的分類或金額`
   Read: `specs/truth/features/frontend/expenses/dsl.md:212` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T105 [P] [BDD-RED] frontend `分類分析顯示 "{狀態}" 且不洩漏原旅行圖表、分類或金額`
+- [X] T105 [P] [BDD-RED] frontend `分類分析顯示 "{狀態}" 且不洩漏原旅行圖表、分類或金額`
   Read: `specs/truth/features/frontend/expenses/dsl.md:213` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T106 [P] [BDD-RED] frontend `分類分析返回目前旅行帳本且原有總額與成員結餘位置保留`
+- [X] T106 [P] [BDD-RED] frontend `分類分析返回目前旅行帳本且原有總額與成員結餘位置保留`
   Read: `specs/truth/features/frontend/expenses/dsl.md:214` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T107 [P] [BDD-RED] frontend `分類分析個人餐飲的滑鼠提示已顯示`
+- [X] T107 [P] [BDD-RED] frontend `分類分析個人餐飲的滑鼠提示已顯示`
   Read: `specs/truth/features/frontend/expenses/dsl.md:215` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T108 [P] [BDD-RED] frontend `將滑鼠移離分類分析的餐飲區域`
+- [X] T108 [P] [BDD-RED] frontend `將滑鼠移離分類分析的餐飲區域`
   Read: `specs/truth/features/frontend/expenses/dsl.md:216` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T109 [P] [BDD-RED] frontend `分類分析的滑鼠提示已關閉`
+- [X] T109 [P] [BDD-RED] frontend `分類分析的滑鼠提示已關閉`
   Read: `specs/truth/features/frontend/expenses/dsl.md:217` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T110 [P] [BDD-RED] frontend `分類分析提供顯示取整說明且原始份額仍精確`
+- [X] T110 [P] [BDD-RED] frontend `分類分析提供顯示取整說明且原始份額仍精確`
   Read: `specs/truth/features/frontend/expenses/dsl.md:218` → 該完整row。
   Dependencies: T007；落點 `apps/web/tests/steps/expenses/category-analysis/` 及對應support。
 
-- [ ] T111 subagent review (phase quality gate)
+- [X] T111 subagent review (phase quality gate)
   Dependencies: T008–T110全部完成。
   Read: 本phase Shared Must Read、8檔89案例、103個DSL task diff及RED logs/矩陣、真DB種子與oracle、UI路由/資訊位置。
   由固定未實作審查者唯讀檢查：103唯一綁定/無undefined與模糊regex、資料合法/可獨立安排、89案例完整、失敗原因不是harness、無mock API自證/無產品碼；新unit與support測試有正確runner收錄。列明BE30及FE220基礎+變體矩陣、同一Rule不在Then重做Act；有issues先修再review。
@@ -591,11 +592,11 @@
 
 - `specs/truth/features/backend/expenses/分類花費精確統計.feature` → B01–B14、B29–B30，完整檔案全綠；API專案workers1，不只聚焦一條抽樣。
 
-- [ ] T112 [BDD-GREEN] 讓 Test Scope 全綠
+- [X] T112 [BDD-GREEN] 讓 Test Scope 全綠
   Dependencies: T111、T111。
   落點與完成條件依本phase；先保留Phase3有效RED證據，再最小產品實作與整份Test Scope綠燈；保存log/精確oracle，並跑本feature相關純函式與受控同快照support測試，記錄DB來源不變；這些測試已在Phase3建立。
 
-- [ ] T113 [BDD-REFACTOR] 在綠燈下整理本feature責任與共用接縫
+- [X] T113 [BDD-REFACTOR] 在綠燈下整理本feature責任與共用接縫
   Dependencies: T112。
   只整理本phase產品責任，重跑完整Test Scope及既有expenses/totals、來源修正/還款歷史與相關存取回歸，列出實際檔名/命令與結果；變更共享接縫時擴及全部消費者。不得宣稱未跑回歸通過。
 
@@ -625,11 +626,11 @@
 
 - `specs/truth/features/backend/expenses/分類分析資料修正.feature` → B15–B22，完整檔案全綠；API專案workers1，不只聚焦一條抽樣。
 
-- [ ] T114 [BDD-GREEN] 讓 Test Scope 全綠
+- [X] T114 [BDD-GREEN] 讓 Test Scope 全綠
   Dependencies: T113、T111。
   落點與完成條件依本phase；先保留Phase3有效RED證據，再最小產品實作與整份Test Scope綠燈；保存log/精確oracle。
 
-- [ ] T115 [BDD-REFACTOR] 在綠燈下整理本feature責任與共用接縫
+- [X] T115 [BDD-REFACTOR] 在綠燈下整理本feature責任與共用接縫
   Dependencies: T114。
   只整理本phase產品責任，重跑完整Test Scope及既有expenses/totals、來源修正/還款歷史與相關存取回歸，列出實際檔名/命令與結果；變更共享接縫時擴及全部消費者。不得宣稱未跑回歸通過。
 
@@ -659,11 +660,11 @@
 
 - `specs/truth/features/backend/expenses/分類分析存取邊界.feature` → B23–B28，完整檔案全綠；API專案workers1，不只聚焦一條抽樣。
 
-- [ ] T116 [BDD-GREEN] 讓 Test Scope 全綠
+- [X] T116 [BDD-GREEN] 讓 Test Scope 全綠
   Dependencies: T115、T111。
   落點與完成條件依本phase；先保留Phase3有效RED證據，再最小產品實作與整份Test Scope綠燈；保存log/精確oracle。
 
-- [ ] T117 [BDD-REFACTOR] 在綠燈下整理本feature責任與共用接縫
+- [X] T117 [BDD-REFACTOR] 在綠燈下整理本feature責任與共用接縫
   Dependencies: T116。
   只整理本phase產品責任，重跑完整Test Scope及既有expenses/totals、來源修正/還款歷史與相關存取回歸，列出實際檔名/命令與結果；變更共享接縫時擴及全部消費者。不得宣稱未跑回歸通過。
 
@@ -695,11 +696,11 @@
 
 - `specs/truth/features/frontend/expenses/分類分析入口與數值.feature` → F01–F21，完整檔案全綠；Chromium/WebKit依序，依本文件完整viewport/變體帳，不只聚焦一條抽樣。
 
-- [ ] T118 [BDD-GREEN] 讓 Test Scope 全綠
+- [X] T118 [BDD-GREEN] 讓 Test Scope 全綠
   Dependencies: T117、T111。
   落點與完成條件依本phase；先保留Phase3有效RED證據，再最小產品實作與整份Test Scope綠燈；保存log/精確oracle及本phase畫面差異證據。
 
-- [ ] T119 [BDD-REFACTOR] 在綠燈下整理本feature責任與共用接縫
+- [X] T119 [BDD-REFACTOR] 在綠燈下整理本feature責任與共用接縫
   Dependencies: T118。
   只整理本phase產品責任，重跑完整Test Scope及既有expenses、categories、旅行管理/設計系統中直接受影響案例，列出實際檔名/命令與結果；變更共享接縫時擴及全部消費者。不得宣稱未跑回歸通過。
 
@@ -707,7 +708,7 @@
 
 **Goal**: 在主頁GREEN/REFACTOR後保存首組設計比對證據；不是另一個Feature或UI家族gate。
 
-- [ ] T120 完成第一組代表桌機／手機設計比對 checkpoint
+- [X] T120 完成第一組代表桌機／手機設計比對 checkpoint
   Dependencies: T118–T119。
   來源: `ui/ui-plan.md` → 代表畫面及共用UI交付契約；`dsl-refine-review.md` → 畫面/資料映射。
   使用同一台南旅行混合支出（個人600=餐飲300+購物300、團體1500=餐飲900+交通600），分析1440×900/390×844比對z7pOeL/vrPz0，手機捲動對vjeyS；帳本入口對O24TBs/zS1cF及完整ledger上下文。
@@ -741,11 +742,11 @@
 
 - `specs/truth/features/frontend/expenses/分類分析修正後重看.feature` → F22–F29，完整檔案全綠；Chromium/WebKit依序，依本文件完整viewport/變體帳，不只聚焦一條抽樣。
 
-- [ ] T121 [BDD-GREEN] 讓 Test Scope 全綠
+- [X] T121 [BDD-GREEN] 讓 Test Scope 全綠
   Dependencies: T120、T111。
   落點與完成條件依本phase；先保留Phase3有效RED證據，再最小產品實作與整份Test Scope綠燈；保存log/精確oracle及本phase畫面差異證據。
 
-- [ ] T122 [BDD-REFACTOR] 在綠燈下整理本feature責任與共用接縫
+- [X] T122 [BDD-REFACTOR] 在綠燈下整理本feature責任與共用接縫
   Dependencies: T121。
   只整理本phase產品責任，重跑完整Test Scope及既有expenses、categories、旅行管理/設計系統中直接受影響案例，列出實際檔名/命令與結果；變更共享接縫時擴及全部消費者。不得宣稱未跑回歸通過。
 
@@ -777,11 +778,11 @@
 
 - `specs/truth/features/frontend/expenses/分類圖表互動.feature` → F30–F41、F57–F59，完整檔案全綠；Chromium/WebKit依序，依本文件完整viewport/變體帳，不只聚焦一條抽樣。
 
-- [ ] T123 [BDD-GREEN] 讓 Test Scope 全綠
+- [X] T123 [BDD-GREEN] 讓 Test Scope 全綠
   Dependencies: T122、T111。
   落點與完成條件依本phase；先保留Phase3有效RED證據，再最小產品實作與整份Test Scope綠燈；保存log/精確oracle及本phase畫面差異證據。
 
-- [ ] T124 [BDD-REFACTOR] 在綠燈下整理本feature責任與共用接縫
+- [X] T124 [BDD-REFACTOR] 在綠燈下整理本feature責任與共用接縫
   Dependencies: T123。
   只整理本phase產品責任，重跑完整Test Scope及既有expenses、categories、旅行管理/設計系統中直接受影響案例，列出實際檔名/命令與結果；變更共享接縫時擴及全部消費者。不得宣稱未跑回歸通過。
 
@@ -813,11 +814,11 @@
 
 - `specs/truth/features/frontend/expenses/分類分析讀取與範圍狀態.feature` → F42–F50，完整檔案全綠；Chromium/WebKit依序，依本文件完整viewport/變體帳，不只聚焦一條抽樣。
 
-- [ ] T125 [BDD-GREEN] 讓 Test Scope 全綠
+- [X] T125 [BDD-GREEN] 讓 Test Scope 全綠
   Dependencies: T124、T111。
   落點與完成條件依本phase；先保留Phase3有效RED證據，再最小產品實作與整份Test Scope綠燈；保存log/精確oracle及本phase畫面差異證據。
 
-- [ ] T126 [BDD-REFACTOR] 在綠燈下整理本feature責任與共用接縫
+- [X] T126 [BDD-REFACTOR] 在綠燈下整理本feature責任與共用接縫
   Dependencies: T125。
   只整理本phase產品責任，重跑完整Test Scope及既有expenses、categories、旅行管理/設計系統中直接受影響案例，列出實際檔名/命令與結果；變更共享接縫時擴及全部消費者。不得宣稱未跑回歸通過。
 
@@ -849,11 +850,11 @@
 
 - `specs/truth/features/frontend/expenses/分類分析權限與生命週期.feature` → F51–F56，完整檔案全綠；Chromium/WebKit依序，依本文件完整viewport/變體帳，不只聚焦一條抽樣。
 
-- [ ] T127 [BDD-GREEN] 讓 Test Scope 全綠
+- [X] T127 [BDD-GREEN] 讓 Test Scope 全綠
   Dependencies: T126、T111。
   落點與完成條件依本phase；先保留Phase3有效RED證據，再最小產品實作與整份Test Scope綠燈；保存log/精確oracle及本phase畫面差異證據。
 
-- [ ] T128 [BDD-REFACTOR] 在綠燈下整理本feature責任與共用接縫
+- [X] T128 [BDD-REFACTOR] 在綠燈下整理本feature責任與共用接縫
   Dependencies: T127。
   只整理本phase產品責任，重跑完整Test Scope及既有expenses、categories、旅行管理/設計系統中直接受影響案例，列出實際檔名/命令與結果；變更共享接縫時擴及全部消費者。不得宣稱未跑回歸通過。
 
@@ -862,18 +863,18 @@
 **來源**: `research.md` → 決策2/4/7、殘餘風險；`spec.md` → NFR001/002、SC001–006；`truth-delta.md` → 既有totals/資料模型NOOP。
 **Dependencies**: T112–T128全部完成；這裡只補工程證據及執行已定義回歸，不新增未由truth承接的產品驗收。
 
-- [ ] T129 驗證精確計算、同快照實作與查詢成本證據
+- [X] T129 驗證精確計算、同快照實作與查詢成本證據
   Dependencies: T128。
   跑Phase3已建立的算術/幾何unit、API controlled-interleaving support測試：循環份額、混合歷史尺度、巨大字串、約分、finite 10^12累積權重與0/單分類/極小分類；核對數值近似只在繪圖邊界，無DB寫入。
   以真PostgreSQL及正式migrations建立多頁/較大資料集，記支出數/分攤數/分類數、EXPLAIN ANALYZE BUFFERS、查詢次數/延遲、payload及記憶體/分母成長；不要虛構毫秒SLO。發現實質瓶頸先做等價查詢優化並重跑受影響scope，需要新增索引/契約變更則回交owner，不能自行修改data truth或提前加彙總表。
   保存版本/資料量/SQL計畫/log至validation.md；既有資料庫與內容不被分析查詢改寫。
 
-- [ ] T130 執行完整後端與純函式回歸
+- [X] T130 執行完整後端與純函式回歸
   Dependencies: T129。
   依序執行`pnpm test:unit`、`pnpm exec bddgen -c apps/api/playwright.config.ts`與`pnpm exec playwright test -c apps/api/playwright.config.ts --workers=1`、`pnpm exec playwright test -c playwright.support.config.ts --workers=1`；涵蓋整個backend truth而非只30新例，舊totals/personal totals、expense修正、還款/結清、成員、分類及旅行生命週期均在完整帳。
   先gen後--list固定預期集合，0undefined/0失敗/0非預期skip；已GREEN但最終版本改動過的範圍必須重驗，輸出環境/命令/數量/exit/log與資源退出。
 
-- [ ] T131 完成工程品質與bundle檢查
+- [X] T131 完成工程品質與bundle檢查
   Dependencies: T130。
   依序跑`pnpm typecheck`、`pnpm lint`、`pnpm format:check`、`pnpm build`及`pnpm test:smoke`；若既有無關失敗須辨識固定版本證據並處理/記錄，不冒稱全通過。
   比較T001的前後build/bundle記錄，確認Chart只加入需要的組件、無重複React/不必要primitive、合理切分分析頁；記實際大小與變化及必要處理，不自行設未經研究的硬預算。檢查console/React及a11y診斷的適用項並收斂，不以lint代替UI/業務驗收。

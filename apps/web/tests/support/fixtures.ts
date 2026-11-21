@@ -1,4 +1,5 @@
 import { test as apiTest } from '../../../api/tests/support/fixtures.js';
+import type { AnalysisTestOptions } from './category-analysis/options.js';
 import { createBdd } from 'playwright-bdd';
 import { createServer, type ViteDevServer } from 'vite';
 import { registerResponseProxy, forwardProxyResponse } from './loading/response-proxy.js';
@@ -6,7 +7,15 @@ import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
-export const test = apiTest.extend<Record<never, never>, { webServer: string }>({
+export const test = apiTest.extend<AnalysisTestOptions, { webServer: string }>({
+  analysisViewport: ['desktop', { option: true }],
+  analysisVariant: ['default', { option: true }],
+  hasTouch: async ({ analysisViewport }, use, testInfo) => {
+    await use(
+      analysisViewport === 'mobile' ||
+        testInfo.tags.some((tag) => ['@F007-F02', '@F007-F32', '@F007-F58'].includes(tag)),
+    );
+  },
   webServer: [
     async ({ runtime }, use) => {
       const responseProxy = registerResponseProxy(runtime.webOrigin);
