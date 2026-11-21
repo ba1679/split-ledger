@@ -106,20 +106,20 @@ runner exit=0；本輪 API server 與 browser 子程序已結束。
 subagent 已回覆完成，所以假設工具記憶體已清除；繼續 spawn 下一個。
 ```
 
-# Rule 6 - 降低並行度並保留完整驗證矩陣
+# Rule 6 - 降低並行度並完成已約定驗證範圍
 
 - Level: `MUST`
 - 低記憶體模式直接使用既有 runner 執行測試，worker 上限為一；一次只跑一個瀏覽器 project／重型命令，上一個結束並完成回收檢查後才啟動下一個。測試執行不需要新增代理。
 - 開發迴圈沿用最窄有效 focused 測試；task 完成仍須跑完其指定 `Test Scope`。最終交付保留 plan／專案要求的完整回歸、瀏覽器與檢查，不用抽樣、縮減案例或 skip 換取低用量。
-- 建立完整矩陣的執行帳：範圍、瀏覽器／環境、預期案例數、命令、退出狀態、通過／失敗／跳過數與 log 路徑。可依 feature、瀏覽器或既有 shard 依序執行；合併結果須覆蓋全部要求且無遺漏或重複計數。
+- 案例／環境先依 `testing-delivery.md` 按風險規劃；資源契約只決定排程，不自行新增瀏覽器／尺寸組合。建立已約定範圍的執行帳：範圍、瀏覽器／環境、預期案例數、命令、退出狀態、通過／失敗／跳過數與 log 路徑。可依 feature、瀏覽器或既有 shard 依序執行；合併結果須覆蓋全部要求且無遺漏或重複計數。
 - 資源不足而未跑的項目標記待執行；測試中止或逾時不能算通過。不以累加數次不同程式版本的部分成功結果代替完整回歸；程式或環境改變後重跑受影響項目，無法判定影響時重跑完整矩陣。
 
 ## Good Example
 
 ```md
-完整 scope：12 Examples × Chromium/WebKit = 24 executions。
-先以既有 runner 的 workers=1 跑 Chromium 12，再跑 WebKit 12。
-兩邊完成、案例集合一致、沒有 skip，才回報 scope 全綠。
+已約定 scope：手機 Chromium 12 例、WebKit 已知觸控回歸 2 例。
+以既有 runner 的 workers=1 序列跑完 14 次並核對集合，不增加無風險依據的組合。
+桌機完整人工驗收另列 pending，不以自動 scope 全綠宣稱整個 plan 交付。
 ```
 
 ## Bad Example

@@ -96,19 +96,19 @@
 
 - Level: `MUST`
 - `測試與驗證` 不可只列一個通用測試框架。每個已確認存在的端，都要寫出該端的 BDD techstack 與用途。
-- 測試策略沒被使用者改判時，各端應寫成 E2E，不得把「完整瀏覽器 E2E」或後端 E2E 列進 `本次開發不引入的技術`。
+- 各端測試用途須反映已確認的風險分層、主要環境與人工分工，依主 SOP 已載入的測試交付契約；runner 選型不等於全面 E2E 或全面環境矩陣。保留必要核心 E2E，不把它整端排除，也不將人工驗收宣稱為自動覆蓋。
 - 前端 webapp 的 runner 與後端 API 的 runner 分列。用途要寫它跑的是哪一端的 Gherkin，以及打的是畫面還是 API／權威狀態。
 
 ## Good Example
 
-- 這個例子是好的，因為各端 BDD techstack 都看得到，而且預設是 E2E。
+- 這個例子是好的，因為各端 BDD techstack 都看得到，而且能看出自動化層與環境責任。
 
 ````md
 ### 測試與驗證
 
 | 類別 | 採用技術 | 用途 |
 | --- | --- | --- |
-| 前端 BDD techstack | `Playwright` | webapp E2E，跑前端 Gherkin |
+| 前端 BDD techstack | `Playwright` | 主要手機核心 Gherkin；桌機／第二瀏覽器已知風險 smoke |
 | 後端 BDD techstack | `behave` | 後端 E2E，跑後端 Gherkin，驗 API 與權威狀態 |
 ````
 

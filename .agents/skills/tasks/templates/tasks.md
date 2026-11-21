@@ -15,7 +15,7 @@
 
 ## UI 分流、資源模式與 session checkpoints
 
-- 資源契約：{{RESOURCE_CONTRACT}}；呼叫 skill 不代表新增 agent；完整測試矩陣維持，依序排程。
+- 資源契約：{{RESOURCE_CONTRACT}}；呼叫 skill 不代表新增 agent；按風險選定的自動化範圍依序排程；集中人工驗收另列責任與依賴。
 - 分流與理由、受影響畫面／行為：{{UI_CLASSIFICATION_AND_SCOPE}}。
 - 既有呈現／固定基準＋本次設計與行為依據：{{PRESENTATION_AND_BEHAVIOR_REFERENCES}}。
 - 適用設計確認與未決依賴：{{APPLICABLE_APPROVAL_AND_BLOCKERS}}。
@@ -26,10 +26,22 @@
 | ------------------------- | ------------------------------- | ---------------------------------- |
 | {{SESSION_CHECKPOINT_ID}} | {{SESSION_CHECKPOINT_CRITERIA}} | {{SESSION_NEXT_SCOPE}}；handoff.md |
 
-<!-- 依範圍列出測試 review、後端 feature 組、代表畫面桌機／手機比對、其餘前端及最終整合等適用交接點。待確認只產出阻礙與前置關卡，只阻擋依賴未決事項的任務；A／B 缺 ui/ 或不製作 prototype 不算未完成。 -->
+<!-- 依範圍列出測試 review、後端 feature 組、代表畫面自查及集中人工驗收、其餘前端及最終整合等適用交接點。待確認只產出阻礙與前置關卡，只阻擋依賴未決事項的任務；A／B 缺 ui/ 或不製作 prototype 不算未完成。 -->
 
 - 分波與補驗：預設全批測試對齊後 review；UI 受阻時可明列本波僅獨立 backend 的 feature／DSL／Test Scope 與 review 依賴。前端後補時增量加入其對齊與 review，不宣告全 plan 已就緒。
 - 舊 tasks 更新：保留既有 ID／歷史證據及不受影響的 `[X]`；缺適用批准／比對者才重開或新增補驗，阻擋相應最終 gate；新增 ID 不得重複。
+
+## 驗證範圍與責任
+
+- 政策來源與既有契約衝突處理：{{TEST_POLICY_SOURCE_AND_CONFLICTS}}。
+
+| 範圍／案例 | 驗證層與環境／輸入 | 獨有風險或重用依據 | 入口／證據與完成責任 |
+| --- | --- | --- | --- |
+| {{TEST_SCOPE_OR_CASES}} | {{TEST_LAYER_AND_ENVIRONMENT}} | {{RISK_OR_REUSED_COVERAGE}} | {{TEST_ENTRY_EVIDENCE_AND_OWNER}} |
+
+- 新 support 測試或合併候選只記獨有前置／斷言／替代覆蓋／理由；未新增獨立失敗模式時重用 feature，不逐 DSL 新寫 spec。
+- 工程實驗：{{ENGINEERING_COMMANDS_TRIGGERS_AND_GATES}}。
+- 集中人工驗收：{{MANUAL_SCOPE_VERSION_PACKAGE_AND_DEPENDENCIES}}；自動通過／待人工／使用者已確認分開記錄。
 
 ## Phase 1: Setup
 
@@ -113,7 +125,7 @@
 
 **Boundary**:
 
-- 一條 DSL 一個 task。
+- 一條 DSL 一個 task；每筆引用適當既有驗證或說明新增測試的獨立失敗模式，不等於逐句另寫 support spec。
 - 只改該句的 stepdef / assertion / 直接依賴的 helper。
 - 不寫產品碼。
 - review 交給未參與實作的既有審查者，依共同資源預算安排；本波明列的 Test Scope（未明確分波時為本輪所有 Test Scope）不得再有 undefined step，失敗只能是 assertion 或產品行為。有 issues 就修正再 review；通過只解鎖明列依賴此 review 的 Feature phases。
@@ -156,6 +168,7 @@
 
 **Test Scope**:
 
+- 本 feature 的案例／環境／入口及人工分工：{{FEATURE_VERIFICATION_BINDING}}（回指「驗證範圍與責任」，不自行展開矩陣）。
 - `specs/truth/features/{{INTERFACE_KIND}}/{{MODULE}}/{{ADDED_FEATURE_FILE_NAME}}.feature`
 
 - [ ] T{{ADD_GREEN_TASK_ID}} [BDD-GREEN] 讓 Test Scope 全綠
@@ -185,6 +198,7 @@
 
 **Test Scope**:
 
+- 本 feature 的案例／環境／入口及人工分工：{{FEATURE_VERIFICATION_BINDING}}（回指「驗證範圍與責任」，不自行展開矩陣）。
 - `specs/truth/features/{{INTERFACE_KIND}}/{{MODULE}}/{{MODIFIED_FEATURE_FILE_NAME}}.feature`
 
 - [ ] T{{MODIFY_GREEN_TASK_ID}} [BDD-GREEN] 讓 Test Scope 全綠
@@ -215,10 +229,19 @@
 
 **Test Scope**:
 
+- 本 feature 的案例／環境／入口及人工分工：{{FEATURE_VERIFICATION_BINDING}}（回指「驗證範圍與責任」，不自行展開矩陣）。
 - `specs/truth/features/{{INTERFACE_KIND}}/{{MODULE}}/{{DELETED_FEATURE_FILE_NAME}}.feature`
 
 - [ ] T{{CODE_REMOVE_TASK_ID}} [CODE-REMOVE] {{CODE_REMOVE_TASK_TITLE}}
 - [ ] T{{REGRESSION_TASK_ID}} [REGRESSION] 跑 Test Scope，確認新版 truth 成立
+
+## Phase {{MANUAL_ACCEPTANCE_PHASE}}: 集中人工驗收（適用時）
+
+- [ ] T{{MANUAL_ACCEPTANCE_TASK_ID}} [USER-CONFIRM] {{MANUAL_ACCEPTANCE_SCOPE}}
+  - 前置：{{MANUAL_READY_DEPENDENCIES}}；確認對象：使用者。
+  - 驗收包：{{RETRIEVABLE_PRODUCT_VERSION_ENVIRONMENT_STEPS_EXPECTATIONS_AND_DIFFERENCES}}。
+  - 通過條件：{{MANUAL_CONFIRMATION_CRITERIA_AND_EVIDENCE}}。
+  - 真正受阻依賴：{{MANUAL_BLOCKED_GATES}}；其他已解鎖獨立工作可續跑。
 
 ## Phase 4{{PLAN_SIDE_GATE_LETTER}}: {{PLAN_SIDE_ARTIFACT_FAMILY}} quality gate
 
@@ -234,7 +257,7 @@
 - 本輪沒有 plan-side 產物時省略整個 phase。
 
 - [ ] T{{PLAN_SIDE_GATE_TASK_ID}} subagent review ({{PLAN_SIDE_GATE_NAME}} quality gate)
-  - Evidence: {{PLAN_SIDE_GATE_EVIDENCE}}；C 類 UI 須核對固定基準／設計／產品版本、桌機／手機與逐項差異收斂；僅選用互動附其證據，不以功能綠燈或無溢出代替。
+  - Evidence: {{PLAN_SIDE_GATE_EVIDENCE}}；C 類 UI 須核對固定基準／設計／產品版本、代表畫面自查、集中人工驗收的實際確認與逐項差異收斂；僅選用互動附其證據，不以功能綠燈或無溢出代替。
 
 ## Phase {{DELIVERY_PHASE}}: 工程交付與確認（依需求選用）
 
@@ -252,7 +275,7 @@
 ## Phase {{BASELINE_PHASE}}: 驗收後基準回填（有設計內容需回填時）
 
 **來源**: plan.md／ui/ui-plan.md -> {{BASELINE_BACKFILL_REQUIREMENT}}
-**Dependencies**: {{PRODUCT_ACCEPTANCE_UI_GATE_AND_REGRESSION_TASKS}}
+**Dependencies**: {{PRODUCT_ACCEPTANCE_UI_GATE_AND_REGRESSION_TASKS}}；包含適用的集中人工確認，不以自動化全綠替代。
 
 - [ ] T{{BASELINE_UPDATE_TASK_ID}} 回填本次已驗收的共用基準
   - Read: {{BASELINE_START_AND_LATEST_REFERENCES}}；{{ACCEPTED_PRODUCT_AND_DESIGN_EVIDENCE}}

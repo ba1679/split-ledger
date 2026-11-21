@@ -1,12 +1,12 @@
-# Rule 1 - AIxBDD 有三題必問，沒問完不得寫 research / techstack
+# Rule 1 - 先確認 AIxBDD 三項決策，僅澄清未回答範圍
 
 - Level: `MUST`
-- 這是 AIxBDD workflow。`/technical-research` 在寫入 `research.md` 或更新 `specs/truth/techstack.md` 之前，必須先確認這三題都已拍板：
-  1. **BDD techstack**：各端用哪套跑 Gherkin。一定要 clarify。
-  2. **測試策略**：怎麼驗。一定要問。沒講就預設都是 E2E。
+- 這是 AIxBDD workflow。`/technical-research` 在寫入 `research.md` 或更新 `specs/truth/techstack.md` 之前，必須先確認三項適用決策的來源與狀態：
+  1. **BDD techstack**：各端用哪套跑 Gherkin；無有效決策時 clarify。
+  2. **測試策略**：各驗證層的風險、主要環境與人工分工；沿用已確認政策，尚未拍板的高影響選項才問，不預設全部行為都是 E2E。
   3. **系統有哪些端**：起始專案，且系統介面疑似有後端或其他端時，也要問。
-- 三題都走 `/clarify`。不可只在 `Rationale` 裡自行補完，也不可沿用相簿範例或 agent 推論充當答案。
-- 任一必問題尚未拍板，必須停止，不進入產出 `research.md` / `techstack.md` 的 phase。
+- 尚未回答的適用問題走 `/clarify`；已有使用者明確決策或有效交接就直接承接，不重複問。不可只在 `Rationale` 裡自行補完，也不可沿用相簿範例或 agent 推論充當答案。
+- 任一適用決策尚未拍板，只停止依賴該決策的研究與寫入，先完成必要澄清，不以推測答案產出 research／techstack。
 
 ## Good Example
 
@@ -40,7 +40,7 @@
 
 - Level: `MUST`
 - 下列才算該題已拍板，可以跳過重問：
-  - 使用者這輪原話已經指定，例如「後端則是 behave」「前端要上 webapp」「後端是 python fastapi」「要直接上 e2e test」
+  - 使用者已確認且可追溯的政策／交接，或這輪原話已經指定，例如「後端則是 behave」「前端要上 webapp」「後端是 python fastapi」「要直接上 e2e test」
   - 本輪 `/clarify` 已經得到該題答案
   - 既有 `specs/truth/techstack.md` 已寫明該端、該端 BDD techstack、以及測試策略，且本輪沒有改判
 - 下列不算已回答，仍必須 clarify：
@@ -102,33 +102,25 @@ BDD techstack：
 - 手動 demo
 ````
 
-# Rule 4 - 測試策略一定要問；沒講就預設都是 E2E
+# Rule 4 - 測試策略分配風險、主要環境與人工責任
 
 - Level: `MUST`
-- 測試策略是必問題，即使 agent 覺得單元測比較便宜，也必須先問。
-- 使用者沒講測試策略時，預設都是 E2E：有前端就上前端 E2E，有後端就上後端 E2E。後端 E2E 用該端的 BDD techstack 打 API 與權威狀態，不是只打領域函式。
-- 不可把「先 vitest / pytest、E2E 以後再補」「Quickstart 手動驗證」「完整瀏覽器 E2E 成本偏高所以不引入」寫成預設。
-- 只有使用者明確改判「這端先不要 E2E」時，才可在 `research.md` 與 `techstack.md` 排除該端 E2E。
+- 依主 SOP 已載入的測試交付契約承接使用者已確認政策，研究明列各端 runner、API／單元與主要手機 E2E 的分工、桌機／第二瀏覽器 smoke 的具體風險及集中人工驗收責任。不把採用 E2E runner 解讀為每條需求或 DSL 都要新增 E2E。
+- 已有決策不重問；沒有有效決策且高影響選項待定時，提出依風險分層的具體方案交 `/clarify`，只停止受影響研究範圍。不能一邊說策略未回答，一邊自行寫成全部 E2E。
+- 保留核心旅程的真 API／權威來源驗證，不以較便宜的單元測或人工 demo 冒充；額外矩陣與工程實驗依其獨有風險安排，不全面倍增。
 
 ## Good Example
 
-- 這個例子是好的，因為沒講時落成 E2E，有講才改。
-
-````md
-使用者沒提測試策略。
-
-落成：
-- 前端 webapp：E2E
-- 後端 API：E2E（behave）
-````
+```md
+已確認交接：主要手機 E2E、API 同快照與單元精度；WebKit 已知焦點 smoke。
+桌機完整及 VoiceOver 集中交使用者；直接沿用，不重問，也不展開所有組合。
+```
 
 ## Bad Example
 
-- 這個例子是壞的，因為自行把預設收成單元測。
-
-````md
-核心風險在狀態與數量，所以本版不引入瀏覽器 E2E，只用 vitest。
-````
+```md
+使用者已指定手機為主與桌機人工驗收，仍因 Playwright 已安裝而把全部案例乘兩瀏覽器與兩尺寸。
+```
 
 # Rule 5 - 起始專案且系統介面疑似有後端或其他端時，必須問有哪些端
 

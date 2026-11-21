@@ -66,7 +66,8 @@
 ## 實作與驗收交接
 
 - 頁面／元件切分與 API 依賴：{{IMPLEMENTATION_SEAMS_AND_API_DEPENDENCIES}}
-- 第一組代表性桌機／手機畫面及後續依賴：{{REPRESENTATIVE_SCREEN_CHECKPOINT}}
+- 代表畫面自查、集中人工驗收及後續依賴：{{REPRESENTATIVE_SCREEN_CHECKPOINT}}
+- 測試政策及使用者桌機／無障礙驗收包責任：{{TEST_POLICY_AND_MANUAL_ACCEPTANCE_HANDOFF}}
 - 同尺寸比對資料、截圖與差異清單位置：{{SCREEN_COMPARISON_PLAN}}
 - 基準回填範圍、產品驗收與獨立核對依賴：{{BASELINE_BACKFILL_HANDOFF}}
 - 舊版本處理與未完成限制：{{STALE_ARTIFACT_DISPOSITION}}

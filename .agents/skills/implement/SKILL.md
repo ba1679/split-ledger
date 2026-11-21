@@ -25,7 +25,7 @@ disable-model-invocation: true
 
 1. READ 讀取使用者需求、目標 plan package、`tasks.md`、`truth-delta.md` 與目前 task 完成狀態，確認指定範圍（若有）與 One-Shot 起點。
 2. READ 讀取 `../shared/low-memory-execution.md`，選定資源模式、記錄基線與可用回收能力，建立傳給下游的資源契約。
-3. READ 讀取 `../shared/session-handoff.md` 與 `../shared/ui-delivery.md`，恢復時核對 handoff 與實際範圍的分流、呈現／行為依據及適用前置；單獨呼叫也承接或補記分流，舊 tasks 只對不符合適用條件的範圍回交 `/tasks` 或相應 owner，不因缺無關產物推翻有效進度。
+3. READ 讀取 `../shared/testing-delivery.md`、`../shared/session-handoff.md` 與 `../shared/ui-delivery.md`，恢復時核對 handoff 與實際範圍的分流、呈現／行為依據及適用前置；單獨呼叫也承接或補記分流，舊 tasks 只對不符合適用條件的範圍回交 `/tasks` 或相應 owner，不因缺無關產物推翻有效進度。
 4. READ 讀取 `rules/任務選取與連續續跑判準.md`，確認已解鎖 task 的選取、One-Shot 與停止條件。
 5. READ 讀取 `rules/TruthDelta測試對齊與BDD委派判準.md`，確認 ADD / MODIFY / DELETE 的執行策略，以及哪些 marker 才委派 `/bdd`。
 6. THINK 依已讀任務、資源契約與判準收斂 One-Shot 起點、是否命中 `Parallel Hint`、所屬 phase 與本次 session checkpoint；只選前置關卡已通過的工作。
@@ -52,13 +52,13 @@ disable-model-invocation: true
 3. READ 若本輪修改受憲法治理的 artifact 或與 truth specs 發生衝突，讀取 `.agents/constitution/CONSTITUTION.md`、`.agents/constitution/shared.md` 與對應憲法檔。
 4. READ 讀取 `rules/自主決策與阻塞處理判準.md`，確認規格缺口、局部矛盾或環境阻礙時的決策優先序。
 5. WRITE 若本輪是 Phase 3 測試層 task，依已選派工方式直接實作或交給既有工作者；每筆驗證、回寫後才處理下一筆，整批完成後執行獨立 review 迴圈。
-6. DELEGATE 若本輪是 `[BDD-GREEN]` 或 `[BDD-REFACTOR]`，在目前 agent 載入 `/bdd` 或交給預算內的既有工作者執行單一 requested step，傳入 `Test Scope`、action、truth rows、模組 DSL、實際使用的共用 DSL rows、資源契約，以及分流、呈現／行為依據、適用批准／比對版本、選用互動決策與 checkpoint；呼叫 skill 不代表建立新 agent。
+6. DELEGATE 若本輪是 `[BDD-GREEN]` 或 `[BDD-REFACTOR]`，在目前 agent 載入 `/bdd` 或交給預算內的既有工作者執行單一 requested step，傳入已規劃的案例／環境／入口與人工驗收分工、`Test Scope`、action、truth rows、模組 DSL、實際使用的共用 DSL rows、資源契約，以及分流、呈現／行為依據、適用批准／比對版本、選用互動決策與 checkpoint；呼叫 skill 不代表建立新 agent。
 7. WRITE 若 task 為 `[USER-CONFIRM]`，依關卡規則展示並等待明確確認；否則若 task 不帶上述 marker，依 task marker 完成本輪所需的程式、設定、文件、基準回填或測試變更；回填只寫 task 明列的基準範圍；不得越出本輪任務與 phase boundary。
 
 ## Phase 5 -- 驗證、回寫、繼續 One-Shot 直到交付
 
 1. READ 讀取 `rules/完成定義-驗證與回寫判準.md`，確認 task 完成條件與回寫條件。
-2. THINK 依 task 類型收斂最直接的驗證方式。
+2. THINK 依已載入的測試交付契約及 task 類型，選定可重用的最直接驗證，確認本輪自動檢查與人工待驗責任。
 3. READ 按分流核對 task 的行為／畫面證據、有效版本與相關 checkpoint；基準回填實作 task 核對產品驗收依賴、最新基準整合與自查，完成後才解鎖回填審查 task；審查 task 另核對獨立審查結果，各自按證據回寫。
 4. WRITE 在本輪任務集的實作與驗證都完成後，立即將對應 task 改寫為 `[X]`，並保留其他 task 狀態不變。
 5. WRITE 完成本輪程序回收與資源檢查點，更新驗證證據與 `handoff.md`；到指定 session checkpoint、開發者待確認或資源受阻時保存進度、回報續跑指示並結束本輪，未驗證項目維持 `[ ]`。

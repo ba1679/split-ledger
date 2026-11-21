@@ -19,13 +19,13 @@
 
 ## 技術架構
 
-| 範圍 | 技術與職責 |
-| --- | --- |
-| 前端 | React、TypeScript、Vite、React Router、TanStack Query；提供旅行、支出及結算介面 |
-| 後端 | Fastify、TypeBox、Better Auth；處理 API、Google 登入、資料驗證及帳本存取 |
-| 資料 | PostgreSQL、Drizzle ORM；儲存帳本資料，以 migration 管理資料結構 |
-| 共用邏輯 | pnpm workspace 中的 `packages/shared`；集中金額、有理數與分帳計算 |
-| 測試 | Vitest、Playwright、playwright-bdd；涵蓋計算不變量、API 及瀏覽器情境 |
+| 範圍     | 技術與職責                                                                      |
+| -------- | ------------------------------------------------------------------------------- |
+| 前端     | React、TypeScript、Vite、React Router、TanStack Query；提供旅行、支出及結算介面 |
+| 後端     | Fastify、TypeBox、Better Auth；處理 API、Google 登入、資料驗證及帳本存取        |
+| 資料     | PostgreSQL、Drizzle ORM；儲存帳本資料，以 migration 管理資料結構                |
+| 共用邏輯 | pnpm workspace 中的 `packages/shared`；集中金額、有理數與分帳計算               |
+| 測試     | Vitest、Playwright、playwright-bdd；涵蓋計算不變量、API 及瀏覽器情境            |
 
 開發環境中，Vite 將 `/api` 代理至 Fastify。正式建置後由 API 提供前端靜態檔案，讓網頁與 API 使用同一個 origin。
 
@@ -103,6 +103,8 @@ pnpm test:ui-quality
 pnpm test:deployment
 ```
 
+上述列出現有測試入口；每次變更依 plan 指定的案例、環境與風險選取執行範圍，不預設把全部情境乘上所有瀏覽器、尺寸與輸入方式。新的規劃以主要手機 E2E 驗證核心旅程，API／單元測試保護帳務、權限與資料一致性；桌機及第二瀏覽器選取必要 smoke 與已知缺陷回歸。桌機完整呈現與完整無障礙檢查由使用者集中人工驗收，與自動化結果分開記錄。既有 plan 的明訂範圍須經對應流程調整，不能直接略過。
+
 BDD 情境透過真實 API、session、正式 migrations 與隔離的測試資料庫執行；瀏覽器情境涵蓋 Chromium 與 WebKit。自動化登入測試替換外部 Google HTTP 回應，因此不等同真實 Google 登入驗證。測試資料庫位於 port 54330，與開發資料庫分開；測試會建立及移除獨立的 worker 資料庫。
 
 分帳功能的測試結果、資料遷移及驗證限制記錄於 [Phase 1B 驗證紀錄](specs/plans/005-owner-managed-trip-splitting/validation.md)。其中瀏覽器視窗尺寸測試不代表已在實體手機或輔助科技上完成驗證。
@@ -132,11 +134,13 @@ docs/                 產品路線圖與開發文件
 - **固定現況基準**：以產品 commit、畫面 ID 與同版預覽引用已核對的 baseline；新提案留在各 plan 的 `ui/`，產品驗收後才回填現況，保留舊版本的有效確認與引用。
 - **畫布三區管理**：同一份 `.pen` 分成「版本與索引」「共用元件庫」「既有產品畫面」三個具名區域。元件集中定義、畫面以實例引用；產品畫面依功能、裝置與狀態分組。新增 baseline 同步更新索引，整理時保留節點 ID、元件引用及已確認的畫面呈現。
 - **按需選用 prototype**：由尚待回答的互動問題決定是否製作點擊連線或局部程式原型；設計與註記足夠時可不製作。選用時才追蹤原型版本、操作證據與決策，不將完整 prototype 當成所有開發的前置條件。
-- **畫面驗收**：任務須引用所有實際影響畫面的設計，先比對代表畫面，再逐項記錄設計與產品的差異，避免僅以功能測試通過作為完成依據。
+- **風險導向測試**：research、DSL、tasks 與實作共用測試交付契約；以主要手機旅程、API／單元與少量已知風險 smoke 分配保障，額外尺寸、輸入方式與 reduced-motion 須有具體理由，避免全面矩陣。
+- **驗證重用**：一條 DSL 一個任務不代表額外新增一個 support E2E；優先重用既有 feature 的 focused run，只有獨立失敗模式才另寫測試。SQL 成本等工程實驗沿用獨立入口，按相關變更觸發。
+- **畫面與集中人工驗收**：任務引用實際受影響畫面的設計，先完成代表畫面自查並記錄差異；桌機完整布局、長內容及鍵盤／焦點／VoiceOver 交使用者集中驗收。分開追蹤自動通過、待人工與使用者已確認，僅阻擋真正依賴的交付關卡，保留獨立審查與驗收後基準回填。
 - **低記憶體執行**：加入 16GB 模式，重用代理、限制重型工作與測試並行度，保留獨立審查及完整驗證範圍。
 - **跨 session 交接**：在明確 checkpoint 保存進度、版本、待跑驗證與設計確認紀錄，支援分階段續跑、舊任務補驗及獨立後端先行。
 
-客製化規則與模板位於 `.agents/skills/`，調整背景及驗證紀錄保留於 `docs/skill-engineering/`。
+客製化規則與模板位於 `.agents/skills/`，調整背景及驗證紀錄保留於 `docs/skill-engineering/`。本次測試政策見[共用測試交付契約](.agents/skills/shared/testing-delivery.md)、[修正紀錄](docs/skill-engineering/risk-based-testing-plan.md)與[驗證結果](docs/skill-engineering/risk-based-testing-validation.md)。
 
 設計流程見 [/ui-plan](.agents/skills/ui-plan/SKILL.md)；現有畫面與共用元件的開發參考入口見 [UI baseline 索引](specs/ui-baseline/README.md)。
 
