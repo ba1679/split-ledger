@@ -21,6 +21,14 @@ playwright-report/
 test-results/
 *.log
 
+# Generated validation evidence for all plans (keep scripts and summaries tracked)
+/specs/plans/*/checks/T[0-9]*.json
+/specs/plans/*/checks/T[0-9]*.txt
+/specs/plans/*/checks/T[0-9]*.md
+/specs/plans/*/checks/T[0-9]*.tar.gz
+/specs/plans/*/checks/screens/
+/specs/plans/*/checks/source-versions/
+
 # Operating system files
 .DS_Store
 ._*

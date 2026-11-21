@@ -226,7 +226,16 @@ export function TripMembers() {
 
   async function refresh() {
     await Promise.all(
-      ['members', 'expenses', 'expense', 'repayments', 'settlement', 'trip', 'trips'].map((key) =>
+      [
+        'members',
+        'expenses',
+        'expense',
+        'expense-analysis',
+        'repayments',
+        'settlement',
+        'trip',
+        'trips',
+      ].map((key) =>
         client.invalidateQueries({
           queryKey: [...prefix, key, ...(key === 'trips' ? [] : [tripId])],
         }),

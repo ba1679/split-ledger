@@ -8,6 +8,7 @@ export default defineConfig({
     'save-outcomes.spec.ts',
     'categories.spec.ts',
     '**/splitting/**/*.spec.ts',
+    '**/category-analysis/**/*.spec.ts',
   ],
   workers: 2,
   timeout: 15000,

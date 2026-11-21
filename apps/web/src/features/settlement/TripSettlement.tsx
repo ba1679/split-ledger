@@ -162,7 +162,8 @@ export function TripSettlement() {
             aria-busy={saving}
             aria-disabled={saving || failure?.unknown || undefined}
             disabled={failure?.unknown}
-            onClick={() => {
+            onClick={(event) => {
+              event.currentTarget.focus({ preventScroll: true });
               void changeMode(!settlement.simplifyDebts);
             }}
           >

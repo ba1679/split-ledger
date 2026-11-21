@@ -21,7 +21,7 @@ export function Categories() {
 
   async function changed(message: string) {
     await Promise.all(
-      ['categories', 'expense', 'expenses'].map((resource) =>
+      ['categories', 'expense', 'expenses', 'expense-analysis'].map((resource) =>
         client.invalidateQueries({ queryKey: ['account', account!.id, resource] }),
       ),
     );

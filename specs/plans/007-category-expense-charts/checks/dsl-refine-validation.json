@@ -1,0 +1,38 @@
+{
+  "checkedAt": "2026-11-19T08:28:10.876Z",
+  "gitHead": "d00f8b066ccb37645eb5b12ba16731a012c5d928",
+  "node": "v22.20.0",
+  "gherkinParser": "@cucumber/gherkin@39.1.0",
+  "newFeatures": 8,
+  "rules": 89,
+  "examples": 89,
+  "steps": 418,
+  "uniqueRuleTags": 89,
+  "exactlyOneWhen": true,
+  "actionAndAfterWhen": 0,
+  "topology": {
+    "backend": {
+      "passed": true,
+      "report": "dsl-refine-backend-topology.log",
+      "existingDslPrefixUnchanged": true
+    },
+    "frontend": {
+      "passed": true,
+      "report": "dsl-refine-frontend-topology.log",
+      "existingDslPrefixUnchanged": true
+    }
+  },
+  "sourceSha256": {
+    "specs/truth/features/backend/expenses/分類花費精確統計.feature": "8a4b2e8250f3bb158a70f5f1baaaff574fe54d869ea6f5bbfc69da7fac9c4b09",
+    "specs/truth/features/backend/expenses/分類分析資料修正.feature": "89845e98d83c8be688eb9f40654b10f1f5592dcc97c78133d92db941c0018afb",
+    "specs/truth/features/backend/expenses/分類分析存取邊界.feature": "8b2d84b685f969b049cd1baa4dd7c06367e45a6b560364e5e7a7917b42e56040",
+    "specs/truth/features/frontend/expenses/分類分析入口與數值.feature": "54af530d0b039bc64c5a59ba369a5582ddb51779d15c63084d75fec5b6944e50",
+    "specs/truth/features/frontend/expenses/分類分析修正後重看.feature": "e57e8bd36f1cd588d06d9c6c25846b8af594ea8b50733ebd81a083f257d143e0",
+    "specs/truth/features/frontend/expenses/分類圖表互動.feature": "a42969cf9ef9b5cc8867bbbcaf3c4265363f6acb74e9898aad12f232af5985a8",
+    "specs/truth/features/frontend/expenses/分類分析讀取與範圍狀態.feature": "43a7a3a92a29627b3abd0c11b6c9eef6bd5af873cb08365480e38454384578c5",
+    "specs/truth/features/frontend/expenses/分類分析權限與生命週期.feature": "699abb9d0a3306d7157eea1e33826c4c3b4401c7546fbcdcb635576f35295be9",
+    "specs/truth/features/backend/expenses/dsl.md": "a5729f639efa57cd89a1baf31f652512898dfb2ba0d39c054b9fc862d3658152",
+    "specs/truth/features/frontend/expenses/dsl.md": "7174ea7880692880fff2fdaaaa8c0916fec015f86e9adc177fdf3ff33cbbacee"
+  },
+  "productTestsRun": false
+}

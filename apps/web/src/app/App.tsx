@@ -16,6 +16,12 @@ import { SettleArrangement } from '../features/settlement/SettleArrangement.js';
 import { TripMembers } from '../features/members/TripMembers.js';
 import { IndependentRepayment } from '../features/repayments/IndependentRepayment.js';
 
+const TripExpenseAnalysis = React.lazy(() =>
+  import('../features/expenses/analysis/TripExpenseAnalysis.js').then((module) => ({
+    default: module.TripExpenseAnalysis,
+  })),
+);
+
 function PrivatePage({ children }: { children: React.ReactNode }) {
   const session = useSession();
 
@@ -65,6 +71,18 @@ export function App() {
         element={
           <PrivatePage>
             <TripLedger key={location.pathname} />
+          </PrivatePage>
+        }
+      />
+      <Route
+        path="/trips/:tripId/analysis"
+        element={
+          <PrivatePage>
+            <React.Suspense
+              fallback={<QueryState pending fetchStatus="fetching" label="花費分析" />}
+            >
+              <TripExpenseAnalysis key={location.key} />
+            </React.Suspense>
           </PrivatePage>
         }
       />
