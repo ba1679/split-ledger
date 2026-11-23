@@ -14,8 +14,9 @@ disable-model-invocation: true
 
 1. READ 讀取使用者要求、呼叫者 handoff、plan package 的 `spec.md`、`research.md`、`plan.md`、`truth-delta.md`、既有 `ui/**` 及相關 truth；基準建立工作讀取指定產品 commit 與範圍，無 plan package 時使用基準 README 保存交接。
 2. READ 讀取 `../shared/ui-delivery.md`、`../shared/session-handoff.md` 與 `../shared/low-memory-execution.md`，承接或建立資源契約，恢復時核對模式、版本及有效確認。
-3. THINK 核對 UI 分流與寫入範圍，定位固定基準／預覽、現況及需求差異；A／B 回報既有依據與適用驗證，交回呼叫者，不製作無關設計。
-4. DELEGATE 缺口影響畫面責任、操作意圖或 truth 對齊時呼叫 `/clarify`，只停止受影響範圍。
+3. READ 依序讀取 `.agents/constitution/CONSTITUTION.md` 與 `.agents/constitution/shared.md`。產出或更新 `ui-plan.md` 時，再讀取 `.agents/constitution/skills/ui-plan/ui-plan.md`，作為交接文件的約束。
+4. THINK 核對 UI 分流與寫入範圍，定位固定基準／預覽、現況及需求差異；A／B 回報既有依據與適用驗證，交回呼叫者，不製作無關設計。
+5. DELEGATE 缺口影響畫面責任、操作意圖或 truth 對齊時呼叫 `/clarify`，只停止受影響範圍。
 
 ## Phase 2 -- 交付必要設計並取得確認
 
@@ -31,7 +32,9 @@ disable-model-invocation: true
 1. THINK 記錄 prototype 選用方式與問題；設計及註記足夠時選不製作，直接準備交接。
 2. READ 選用互動時讀取 `rules/局部互動原型選用與交付判準.md`，確認該問題的最小交付範圍。
 3. WRITE 若選用，完成指定連線或局部程式原型、實際操作與同版設計核對，保存問題決策及限制；改設計意圖時回到上一 phase，業務矛盾回交 owner。
-4. WRITE 更新索引、有效確認、版本與各受阻依賴，交付已就緒範圍給 `/dsl-refine`／`/tasks`；基準模式回報現況核對與涵蓋範圍，不宣稱未執行的產品驗收已完成。
+4. WRITE 依已載入憲法更新交接文件的索引、有效確認、互動決策、版本與各受阻依賴。
+5. READ 交付前核對產物是否符合已載入的適用憲法，有缺漏即修正。
+6. WRITE 交付已就緒範圍給 `/dsl-refine`／`/tasks`；基準模式回報現況核對與涵蓋範圍，不宣稱未執行的產品驗收已完成。
 
 ## 基準畫布區隔
 

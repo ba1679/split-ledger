@@ -1,8 +1,9 @@
 # 前端設計基礎
 
 ## 選用元件
-遵循 .agents/constitution/shared.md：共用且容易客製化時用 shadcn/ui；
-商業邏輯元件、需要大量樣式或核心互動客製時自行撰寫，記錄實際原因。
+
+依[專案共用原則](../../.agents/constitution/shared.md)評估元件用途與客製成本。目前共用且容易客製化的元件採用 shadcn/ui，品牌樣式與設計值集中維護。業務元件由產品自行組合，需要大量樣式或核心互動客製時可自行撰寫，並記錄選型理由。
+
 FormDialog/DateField 的巢狀 modal、日期解析/月年/鍵盤/手機布局，及 SearchCombo 的
 受控搜尋/選取/清空/焦點契約採自製；其內部 Input 與圖示仍共用。
 

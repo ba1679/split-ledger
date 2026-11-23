@@ -14,8 +14,9 @@ disable-model-invocation: true
 
 1. READ 讀取使用者要求、目標 plan package 的 `features/acceptance/**`、`plan.md`、`truth-delta.md`、`specs/truth/techstack.md`、按範圍適用的 UI 依據，以及受影響介面的既有功能模組、feature、模組 DSL 與介面根共用 DSL。
 2. READ 讀取 `../shared/testing-delivery.md`、`../shared/ui-delivery.md` 與 `../shared/session-handoff.md`，按分流核對 plan 的呈現／行為依據或 C 類畫面索引、有效確認及選用互動決策；只停止依賴缺口的細化，不因 A／B 缺 ui/ 或不製作 prototype 而停止。
-3. THINK 從 `plan.md`、truth-delta 與現有 feature truth 辨識本次涉及的前端、後端或其他系統介面，以及各介面既有 feature/dsl 是否需要 ADD / MODIFY / DELETE。
-4. WRITE 向使用者回報本輪辨識出的介面、預計新增/修改/刪除的 truth feature files 與 DSL 範圍。
+3. READ 依序讀取 `.agents/constitution/CONSTITUTION.md`、`.agents/constitution/shared.md` 與 `.agents/constitution/skills/dsl-refine/feature.md`，作為介面 feature 的約束。
+4. THINK 從 `plan.md`、truth-delta 與現有 feature truth 辨識本次涉及的前端、後端或其他系統介面，以及各介面既有 feature/dsl 是否需要 ADD / MODIFY / DELETE。
+5. WRITE 向使用者回報本輪辨識出的介面、預計新增/修改/刪除的 truth feature files 與 DSL 範圍。
 
 ## Phase 2 -- 分派 acceptance 規則並處理高影響變更
 
@@ -29,7 +30,8 @@ disable-model-invocation: true
 1. READ 讀取 `../gherkin-and-dsl/SKILL.md` 與 `../gherkin-and-dsl/STANDARDS.md`，承接其已掛載的 Gherkin、DSL 與唯一歸屬判準。
 2. WRITE 依已載入規則在唯一權威位置建立、修改、移動或刪除受影響的 interface feature 與 DSL rows。
 3. DELEGATE 呼叫 `/gherkin-and-dsl` 檢查受影響介面，取得拓樸機械稽核、DSL 唯一歸屬、acceptance 覆蓋與 Gherkin 結構結果；另核對 DSL 的導航／資訊位置與分流對應的呈現依據一致，UI 路徑參照留在 plan-side handoff，不把像素值或 `.pen` 版本寫入業務 Gherkin；若不符合，修正或回交 owner。
-4. THINK 將 feature/dsl truth 改動整理為語意單元層級的 ADD / MODIFY / DELETE / NOOP 列。
+4. READ 對照原始 acceptance 與稽核結果，核對受影響的介面 feature 是否符合已載入的適用憲法，有缺漏即修正或回交 owner。
+5. THINK 將 feature/dsl truth 改動整理為語意單元層級的 ADD / MODIFY / DELETE / NOOP 列。
 
 ## Phase 4 -- 更新 truth-delta 並交付
 

@@ -13,7 +13,7 @@ disable-model-invocation: true
 ## Phase 1 -- 收斂 plan package、truth-delta 與本輪 DSL 清單
 
 1. READ 讀取使用者需求、目標 plan package 的 `spec.md`、`plan.md`、`research.md`、適用的 `ui/**`、`truth-delta.md`，以及受影響模組的 truth feature、模組 DSL、truth-delta 實際引用的介面根共用 DSL rows、相關 contracts/data 與 `specs/truth/techstack.md`。
-2. READ 讀取 `.agents/constitution/CONSTITUTION.md` 與 `.agents/constitution/shared.md`，並將其中規則視為高於本地 artifact 規範的約束。
+2. READ 依序讀取 `.agents/constitution/CONSTITUTION.md`、`.agents/constitution/shared.md` 與 `.agents/constitution/skills/tasks/tasks.md`，並將適用規則視為高於本地 artifact 規範的約束。
 3. READ 讀取 `rules/TruthDelta影響盤點與任務型態判準.md`，確認 ADD / MODIFY / DELETE / NOOP 如何拆到 Phase 3 測試層與 Feature 產品層，以及 Setup、Foundational 與 Test Alignment 的邊界。
 4. READ 讀取 `rules/acceptance-classification-and-delivery-gates.md`，分類每項驗收及其證據、依賴與來源；混合要求分別承接，不得以非 BDD 任務掩蓋產品行為缺口。
 5. READ 讀取 `../shared/testing-delivery.md`，收斂本輪風險、測試重用及集中人工驗收分工；再讀取 `../shared/low-memory-execution.md`、`../shared/session-handoff.md` 與 `../shared/ui-delivery.md`，核對分流、相應呈現／行為依據及適用確認；只列實際受阻依賴與前置，不輸出其可執行任務。
@@ -50,4 +50,4 @@ disable-model-invocation: true
 
 1. WRITE 先讀取 `templates/tasks.md` 與 `templates/tasks.example.md`，再依骨架複製結構、參考範例改寫填位符號與具體內容，輸出 `specs/plans/NNN-<slug>/tasks.md`；增量／舊 plan 補驗依已載入規則保留 ID 與歷史證據，只重開受影響項目或新增補驗依賴。
 2. READ 回頭檢查：新增任務皆為 `- [ ] T###`、既有狀態與補驗有依據、truth-delta 已納入核心輸入、沒有 Impact Audit phase、有新增技術時 Setup 寫清套件名與 smoke-test、Foundational 每則有「只做／不做」、有待處理 DSL 時 Phase 3 已集中 ALIGN / REMOVE / RED，否則記錄省略原因；每項驗收均有來源與證據、確認關卡依賴明確、Feature phase 不含 `[BDD-RED]` / `[BDD-ALIGN]` / `[BDD-REMOVE]`、每個 Feature phase 有具體案例／環境／入口的 `Test Scope`、自動與人工驗收責任分開、Feature `Shared Must Read` 含回追產物、每個適用產物家族在最後一個消費者之後有 quality gate、truth 參照指向 `specs/truth/**`、plan-side 參照用於回追產物及交付任務需求來源；若不符合，立即修正。
-3. READ 核對模板與輸出未要求無上限派工；UI 分流與條件前置、跨模組參照、代表畫面依賴、適用差異證據、驗收後回填及 session checkpoints 均可執行；若有缺漏，修正後才交付。
+3. READ 核對 `tasks.md` 符合已載入的適用憲法，且模板與輸出未要求無上限派工；UI 分流與條件前置、跨模組參照、代表畫面依賴、適用差異證據、驗收後回填及 session checkpoints 均可執行；若有缺漏，修正後才交付。
