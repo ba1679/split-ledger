@@ -1,60 +1,54 @@
-# 產品方向與階段地圖
+# 產品 Roadmap
 
-## 產品方向
+朋友出遊的旅行記帳與分帳工具，從 owner 單人管理，逐步走向英文支援與多人共編。
 
-建立一個適合朋友出遊時使用的旅行記帳與分帳工具。第一階段由帳本 owner 統一記錄旅行花費、同行者、共同支出與結算；第二階段再讓旅伴登入並共同編輯帳本。
+更新：2026-11-23 · 已同步 `origin/main`（`99e029b`）。下圖日期為合併 main 的日期；未來階段尚未排定日期。
 
-本專案同時是後端與資料庫的學習專案：每次迭代先釐清需求和驗收方式，再進行設計、實作與驗證。階段安排是目前的方向，後續可以依實際使用經驗調整。
+```mermaid
+flowchart TB
+    A["2026-11-06 ｜ Phase 1A · 已完成<br/>個人旅行記帳<br/>Google 登入・支出管理・共用分類"]
+    B["2026-11-11 ｜ Phase 1B · 已完成<br/>Owner 管理分帳與結算<br/>同行者・平均分攤・還款與結清"]
+    C["2026-11-18 ｜ 已實作並合併<br/>旅行管理與等待回饋<br/>垃圾桶與復原・自訂縮圖・Loading 優化"]
+    D["2026-11-21 ｜ 已實作並合併 · 目前進度<br/>分類花費分析<br/>個人／團體圓餅圖・幣別切換"]
+    E["下一步 ｜ Phase 2 · 尚未實作<br/>多語系：先支援英文<br/>保留繁體中文，加入英文介面"]
+    F["之後 ｜ Phase 3 · 尚未實作<br/>多人登入與共同編輯<br/>邀請加入・帳號配對・協作權限"]
 
-## Phase 1：Owner 主導的旅行記帳與分帳
+    A --> B --> C --> D
+    D -.-> E -.-> F
 
-Phase 1 由帳本 owner 單獨登入及維護資料。同行者是帳本內的分帳對象，不是可登入或共同編輯的帳號。Phase 1 分為個人記帳與 owner 管理分帳兩個子階段。
+    classDef done fill:#ecfdf5,stroke:#047857,color:#064e3b;
+    classDef current fill:#d1fae5,stroke:#047857,stroke-width:3px,color:#064e3b;
+    classDef next fill:#eff6ff,stroke:#2563eb,stroke-width:3px,color:#1e3a8a;
+    classDef later fill:#f8fafc,stroke:#64748b,stroke-dasharray:5 5,color:#334155;
+    class A,B,C done;
+    class D current;
+    class E next;
+    class F later;
+```
 
-### Phase 1A：個人旅行記帳
+**接續順序：英文多語系 → 多人共編。** 目前仍由 owner 單獨操作；不同幣別獨立計算，不換匯。
 
-**目標：** 讓使用者建立旅行帳本，記錄並查看自己的旅行支出。
+<details>
+<summary>驗收保留事項與規格連結</summary>
 
-### 已確認的方向
+| 項目 | 紀錄與待辦 |
+| --- | --- |
+| 個人記帳 | [001 規格](../specs/plans/001-personal-travel-expenses/spec.md) |
+| 分帳與結算 | [005 規格](../specs/plans/005-owner-managed-trip-splitting/spec.md)／[驗證紀錄](../specs/plans/005-owner-managed-trip-splitting/validation.md) |
+| 旅行管理與等待回饋 | 已取得人眼驗收接受；真機／讀屏與原完整獨立 UI 審查依指示略過，baseline 回填與核對暫緩。[006 任務](../specs/plans/006-trip-management-and-loading/tasks.md)／[驗證紀錄](../specs/plans/006-trip-management-and-loading/validation.md) |
+| 分類花費分析 | T132–T135 尚未完成：最新版本完整前端回歸／人工驗收、獨立 UI gate、baseline 回填與核對。[007 任務](../specs/plans/007-category-expense-charts/tasks.md)／[驗證摘要](../specs/plans/007-category-expense-charts/checks/verification-summary.md) |
 
-- 由使用者本人操作，使用 Google 帳號登入，在手機與電腦存取同一份帳本。
-- 建立旅行帳本，記錄個人支出。
-- 每筆支出保留原始金額與幣別；同一趟旅行的不同幣別分開統計，不直接加總或換算。
-- 支出可以修改與刪除，統計隨之反映最新紀錄。
-- 使用者可以自行建立支出分類，分類供自己的各趟旅行共用。
+「已實作並合併」不代表整個 plan 已完整驗收，也不代表線上已部署。
 
-#### 完成狀態（2026-11-10）
+</details>
 
-- 需求、系統分析、API 契約、資料模型、介面設計、BDD/DSL、任務拆分及正式程式均已完成；細節以 [Phase 1A 規格](../specs/plans/001-personal-travel-expenses/spec.md) 為準。
-- 手機與桌機介面、設計系統遷移及 Railway 試用部署已完成驗證。
-- Phase 1A 已完成，下一步進入 Phase 1B 的需求規劃。
+<details>
+<summary>後續規劃邊界</summary>
 
-同行者、共同支出、分帳及結算不屬於 Phase 1A 的範圍。
+- **英文多語系**：正式規劃時確認翻譯範圍、語言切換、預設語言、偏好保存及日期／數字／幣別格式；使用者輸入內容的翻譯另行確認。
+- **多人共編**：英文支援之後，再確認邀請與加入、帳號與同行者配對、成員權限、操作追蹤及資料衝突規則。
+- **未排程的擴展**：更多分攤方式、匯出、匯率換算及收據記錄，依使用回饋評估。
 
-### Phase 1B：Owner 管理的旅行分帳與結算
+Roadmap 記錄方向與順序；詳細需求與驗收標準以各次 plan package 為準。
 
-**目標：** 由 owner 一人維護旅行帳本，記錄同行者與共同支出，並查看分攤、應收應付及還款情況。
-
-#### 已確認的階段邊界
-
-- owner 可以新增及管理同行者；同行者須有穩定識別，不只以姓名關聯資料。
-- owner 可以記錄共同支出的付款人及參與分攤者。
-- 第一版以平均分攤為主，並顯示各同行者的應收、應付。
-- owner 可以記錄還款；不同幣別分開結算，不進行匯率換算。
-- 支出修改或刪除後，分攤與未結清餘額須反映最新資料。
-- 只有 owner 登入及操作帳本；同行者不需要帳號，也不能自行查看或編輯。
-
-實際分攤細節、還款抵扣規則及邊界案例將在 Phase 1B 的 plan package 中確認。
-
-## Phase 2：多人登入與共同編輯
-
-**方向：** 讓旅伴使用自己的 Google 帳號登入，加入並共同使用旅行帳本。
-
-Phase 2 才處理邀請與加入流程、同行者和登入帳號的配對、成員權限、共同編輯、操作追蹤及資料衝突。這些能力不納入 Phase 1B，詳細規則將依 Phase 1 的實際使用經驗另行規劃。
-
-## 未來擴展
-
-依實際使用與回饋評估後續功能，例如更多分攤方式、匯出、匯率換算或收據記錄；目前沒有承諾納入任何特定階段。
-
-## 規劃與規格的關係
-
-這份文件記錄產品方向、已確認的階段邊界與待決事項，不取代各階段的正式需求和驗收標準。每次開始新一輪工作時，再以對應的 plan package 詳細描述本輪範圍；未來階段的內容可隨學習與回饋調整。
+</details>
