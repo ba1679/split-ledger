@@ -1,5 +1,5 @@
 {
-  "version": "2.22",
+  "version": "2.25",
   "children": [
     {
       "type": "frame",
@@ -8,7 +8,7 @@
       "y": 0,
       "name": "00 / 版本與索引",
       "width": 3740,
-      "height": 1470,
+      "height": 1850,
       "fill": "#eef1e9",
       "cornerRadius": 16,
       "layout": "none",
@@ -798,6 +798,65 @@
               "fontWeight": "normal"
             }
           ]
+        },
+        {
+          "type": "frame",
+          "id": "t3WCVr",
+          "x": 40,
+          "y": 1450,
+          "name": "baseline-v0.4 / 語言切換 / 版本與索引 / approved",
+          "context": "008 | baseline-v0.4 approved | product 2281092 + source manifest a1ab54e6 | 2026-11-24",
+          "width": 2960,
+          "height": 330,
+          "fill": "$panel",
+          "cornerRadius": 12,
+          "stroke": "$line",
+          "strokeWidth": 1,
+          "strokeAlignment": "inner",
+          "layout": "none",
+          "children": [
+            {
+              "type": "text",
+              "id": "A79CQ",
+              "x": 24,
+              "y": 18,
+              "name": "Baseline version",
+              "fill": "$ink",
+              "content": "baseline-v0.4 · 語言切換 · approved",
+              "lineHeight": 1.5,
+              "fontFamily": "$font-ui",
+              "fontSize": 25,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "d0aYLh",
+              "x": 24,
+              "y": 67,
+              "name": "Source and verification",
+              "fill": "$muted",
+              "content": "2026-11-24 · 2281092 + a1ab54e6 · 使用者確認最新三張產品畫面",
+              "lineHeight": 1.5,
+              "fontFamily": "$font-ui",
+              "fontSize": 16,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "OjNWI",
+              "x": 24,
+              "y": 114,
+              "name": "Screen and component locator",
+              "fill": "$ink",
+              "textGrowth": "fixed-width",
+              "width": 2640,
+              "content": "手機登入選單  pqjS7     桌機帳本選單  p3HrQ     手機還款待確認  IdwIn\n畫面分組  qkUqv     語言選單元件庫  lHqw6\n來源、實作畫面與確認原文見 language-selector-baseline.md；前版畫面依原索引。",
+              "lineHeight": 1.9,
+              "fontFamily": "$font-ui",
+              "fontSize": 15,
+              "fontWeight": "normal"
+            }
+          ]
         }
       ]
     },
@@ -805,10 +864,10 @@
       "type": "frame",
       "id": "OKWYQ",
       "x": 0,
-      "y": 1590,
+      "y": 1970,
       "name": "01 / 共用元件庫",
       "width": 3740,
-      "height": 1450,
+      "height": 1830,
       "fill": "#e8eee8",
       "cornerRadius": 16,
       "layout": "none",
@@ -2214,7 +2273,8 @@
                               "content": "選填",
                               "lineHeight": 1.6,
                               "fontFamily": "$font-ui",
-                              "fontSize": 12
+                              "fontSize": 12,
+                              "fontWeight": "normal"
                             }
                           ]
                         },
@@ -2391,7 +2451,8 @@
                               "content": "選填",
                               "lineHeight": 1.6,
                               "fontFamily": "$font-ui",
-                              "fontSize": 12
+                              "fontSize": 12,
+                              "fontWeight": "normal"
                             }
                           ]
                         },
@@ -2808,7 +2869,8 @@
                               "content": "選填",
                               "lineHeight": 1.6,
                               "fontFamily": "$font-ui",
-                              "fontSize": 12
+                              "fontSize": 12,
+                              "fontWeight": "normal"
                             }
                           ]
                         },
@@ -2985,7 +3047,8 @@
                               "content": "選填",
                               "lineHeight": 1.6,
                               "fontFamily": "$font-ui",
-                              "fontSize": 12
+                              "fontSize": 12,
+                              "fontWeight": "normal"
                             }
                           ]
                         },
@@ -3348,7 +3411,8 @@
                               "content": "選填",
                               "lineHeight": 1.6,
                               "fontFamily": "$font-ui",
-                              "fontSize": 12
+                              "fontSize": 12,
+                              "fontWeight": "normal"
                             }
                           ]
                         },
@@ -3525,7 +3589,8 @@
                               "content": "選填",
                               "lineHeight": 1.6,
                               "fontFamily": "$font-ui",
-                              "fontSize": 12
+                              "fontSize": 12,
+                              "fontWeight": "normal"
                             }
                           ]
                         },
@@ -3784,7 +3849,8 @@
                   "content": "選填",
                   "lineHeight": 1.6,
                   "fontFamily": "$font-ui",
-                  "fontSize": 12
+                  "fontSize": 12,
+                  "fontWeight": "normal"
                 }
               ]
             },
@@ -3974,7 +4040,8 @@
                   "content": "選填",
                   "lineHeight": 1.6,
                   "fontFamily": "$font-ui",
-                  "fontSize": 12
+                  "fontSize": 12,
+                  "fontWeight": "normal"
                 }
               ]
             },
@@ -5407,6 +5474,515 @@
           "fontFamily": "$font-ui",
           "fontSize": 12,
           "fontWeight": "normal"
+        },
+        {
+          "type": "frame",
+          "id": "lHqw6",
+          "x": 40,
+          "y": 1450,
+          "name": "語言選單 / baseline-v0.4 approved",
+          "context": "008 | baseline-v0.4 approved | product 2281092 + source manifest a1ab54e6 | 2026-11-24",
+          "width": 936,
+          "height": 336,
+          "fill": "$bg",
+          "cornerRadius": 12,
+          "stroke": "$line",
+          "strokeWidth": 1,
+          "strokeAlignment": "inner",
+          "layout": "none",
+          "children": [
+            {
+              "type": "text",
+              "id": "MSFBf",
+              "x": 28,
+              "y": 15,
+              "name": "語言元件索引 / 標題",
+              "fill": "$ink",
+              "content": "語言選單 · Language selector",
+              "lineHeight": 1.5,
+              "fontFamily": "$font-ui",
+              "fontSize": 22,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "EgGH0",
+              "x": 28,
+              "y": 66,
+              "name": "Language trigger / 繁體中文 / closed",
+              "reusable": true,
+              "width": 142,
+              "height": 44,
+              "fill": "$panel",
+              "cornerRadius": 7,
+              "stroke": "#bccac0",
+              "strokeWidth": 1,
+              "strokeAlignment": "inner",
+              "padding": [
+                0,
+                11
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "d2x2bv",
+                  "name": "Language icon",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "languages",
+                  "library": "lucide",
+                  "fill": "$green"
+                },
+                {
+                  "type": "text",
+                  "id": "bspAD",
+                  "name": "Active language",
+                  "fill": "$ink",
+                  "content": "繁體中文",
+                  "fontFamily": "$font-ui",
+                  "fontSize": 14,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "icon",
+                  "id": "fTu1o",
+                  "name": "Disclosure chevron",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "chevron-down",
+                  "library": "lucide",
+                  "fill": "$green"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "ax5Ty",
+              "x": 28,
+              "y": 116,
+              "name": "元件索引 / EgGH0",
+              "fill": "$muted",
+              "content": "EgGH0",
+              "lineHeight": 1.5,
+              "fontFamily": "$font-ui",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "nF4ry",
+              "x": 184,
+              "y": 66,
+              "name": "Language trigger / 繁體中文 / open",
+              "reusable": true,
+              "width": 142,
+              "height": 44,
+              "fill": "#e9f0e8",
+              "cornerRadius": 7,
+              "stroke": "$green",
+              "strokeWidth": 1,
+              "strokeAlignment": "inner",
+              "padding": [
+                0,
+                11
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "bKEec",
+                  "name": "Language icon",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "languages",
+                  "library": "lucide",
+                  "fill": "$green"
+                },
+                {
+                  "type": "text",
+                  "id": "pg8LS",
+                  "name": "Active language",
+                  "fill": "$ink",
+                  "content": "繁體中文",
+                  "fontFamily": "$font-ui",
+                  "fontSize": 14,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "icon",
+                  "id": "s0afa",
+                  "name": "Disclosure chevron",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "chevron-up",
+                  "library": "lucide",
+                  "fill": "$green"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "Qip1r",
+              "x": 184,
+              "y": 116,
+              "name": "元件索引 / nF4ry",
+              "fill": "$muted",
+              "content": "nF4ry",
+              "lineHeight": 1.5,
+              "fontFamily": "$font-ui",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "u0fOX",
+              "x": 652,
+              "y": 66,
+              "name": "Language options / 繁體中文 selected",
+              "reusable": true,
+              "width": 174,
+              "height": 116,
+              "fill": "$panel",
+              "cornerRadius": 10,
+              "stroke": "$line",
+              "strokeWidth": 1,
+              "strokeAlignment": "inner",
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#192e291c",
+                "offset": {
+                  "x": 0,
+                  "y": 8
+                },
+                "blur": 22
+              },
+              "layout": "vertical",
+              "gap": 4,
+              "padding": 7,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "q2GAzt",
+                  "name": "Option / 繁體中文",
+                  "width": "fill_container",
+                  "height": 48,
+                  "fill": "#e9f0e8",
+                  "cornerRadius": 7,
+                  "padding": [
+                    0,
+                    12
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "llpAb",
+                      "name": "Language name",
+                      "fill": "$ink",
+                      "content": "繁體中文",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "I7LJI",
+                      "name": "Selected checkmark",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "check",
+                      "library": "lucide",
+                      "fill": "$green"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "qIgt6",
+                  "name": "Option / English",
+                  "width": "fill_container",
+                  "height": 48,
+                  "fill": "$panel",
+                  "cornerRadius": 7,
+                  "padding": [
+                    0,
+                    12
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "PPG68",
+                      "name": "Language name",
+                      "fill": "$ink",
+                      "content": "English",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "Zcp3N",
+              "x": 652,
+              "y": 184,
+              "name": "元件索引 / u0fOX",
+              "fill": "$muted",
+              "content": "u0fOX",
+              "lineHeight": 1.5,
+              "fontFamily": "$font-ui",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "efbBF",
+              "x": 340,
+              "y": 66,
+              "name": "Language trigger / English / closed",
+              "reusable": true,
+              "width": 142,
+              "height": 44,
+              "fill": "$panel",
+              "cornerRadius": 7,
+              "stroke": "#bccac0",
+              "strokeWidth": 1,
+              "strokeAlignment": "inner",
+              "padding": [
+                0,
+                11
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "ublzs",
+                  "name": "Language icon",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "languages",
+                  "library": "lucide",
+                  "fill": "$green"
+                },
+                {
+                  "type": "text",
+                  "id": "xNIYU",
+                  "name": "Active language",
+                  "fill": "$ink",
+                  "content": "English",
+                  "fontFamily": "$font-ui",
+                  "fontSize": 14,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "icon",
+                  "id": "v58DA",
+                  "name": "Disclosure chevron",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "chevron-down",
+                  "library": "lucide",
+                  "fill": "$green"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "aUgCf",
+              "x": 340,
+              "y": 116,
+              "name": "元件索引 / efbBF",
+              "fill": "$muted",
+              "content": "efbBF",
+              "lineHeight": 1.5,
+              "fontFamily": "$font-ui",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "p8Ma8J",
+              "x": 496,
+              "y": 66,
+              "name": "Language trigger / English / open",
+              "reusable": true,
+              "width": 142,
+              "height": 44,
+              "fill": "#e9f0e8",
+              "cornerRadius": 7,
+              "stroke": "$green",
+              "strokeWidth": 1,
+              "strokeAlignment": "inner",
+              "padding": [
+                0,
+                11
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "SvtYC",
+                  "name": "Language icon",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "languages",
+                  "library": "lucide",
+                  "fill": "$green"
+                },
+                {
+                  "type": "text",
+                  "id": "i9poe1",
+                  "name": "Active language",
+                  "fill": "$ink",
+                  "content": "English",
+                  "fontFamily": "$font-ui",
+                  "fontSize": 14,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "icon",
+                  "id": "HvhDM",
+                  "name": "Disclosure chevron",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "chevron-up",
+                  "library": "lucide",
+                  "fill": "$green"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "L1H27",
+              "x": 496,
+              "y": 116,
+              "name": "元件索引 / p8Ma8J",
+              "fill": "$muted",
+              "content": "p8Ma8J",
+              "lineHeight": 1.5,
+              "fontFamily": "$font-ui",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "KT3Z1",
+              "x": 652,
+              "y": 192,
+              "name": "Language options / English selected",
+              "reusable": true,
+              "width": 174,
+              "height": 116,
+              "fill": "$panel",
+              "cornerRadius": 10,
+              "stroke": "$line",
+              "strokeWidth": 1,
+              "strokeAlignment": "inner",
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#192e291c",
+                "offset": {
+                  "x": 0,
+                  "y": 8
+                },
+                "blur": 22
+              },
+              "layout": "vertical",
+              "gap": 4,
+              "padding": 7,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "GCDxC",
+                  "name": "Option / 繁體中文",
+                  "width": "fill_container",
+                  "height": 48,
+                  "fill": "$panel",
+                  "cornerRadius": 7,
+                  "padding": [
+                    0,
+                    12
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "gEacO",
+                      "name": "Language name",
+                      "fill": "$ink",
+                      "content": "繁體中文",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 14,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "wEHj5",
+                  "name": "Option / English",
+                  "width": "fill_container",
+                  "height": 48,
+                  "fill": "#e9f0e8",
+                  "cornerRadius": 7,
+                  "padding": [
+                    0,
+                    12
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "oSdqu",
+                      "name": "Language name",
+                      "fill": "$ink",
+                      "content": "English",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "Oamn9",
+                      "name": "Selected checkmark",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "check",
+                      "library": "lucide",
+                      "fill": "$green"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "xCk27",
+              "x": 652,
+              "y": 310,
+              "name": "元件索引 / KT3Z1",
+              "fill": "$muted",
+              "content": "KT3Z1",
+              "lineHeight": 1.5,
+              "fontFamily": "$font-ui",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            }
+          ]
         }
       ]
     },
@@ -5414,10 +5990,10 @@
       "type": "frame",
       "id": "nObqJ",
       "x": 0,
-      "y": 3160,
+      "y": 3920,
       "name": "02 / 既有產品畫面",
       "width": 3740,
-      "height": 7920,
+      "height": 9020,
       "fill": "#eef1e9",
       "cornerRadius": 16,
       "layout": "none",
@@ -6299,7 +6875,8 @@
                                       "content": "選填",
                                       "lineHeight": 1.6,
                                       "fontFamily": "$font-ui",
-                                      "fontSize": 12
+                                      "fontSize": 12,
+                                      "fontWeight": "normal"
                                     }
                                   ]
                                 },
@@ -6476,7 +7053,8 @@
                                       "content": "選填",
                                       "lineHeight": 1.6,
                                       "fontFamily": "$font-ui",
-                                      "fontSize": 12
+                                      "fontSize": 12,
+                                      "fontWeight": "normal"
                                     }
                                   ]
                                 },
@@ -8512,7 +9090,8 @@
                                       "content": "選填",
                                       "lineHeight": 1.6,
                                       "fontFamily": "$font-ui",
-                                      "fontSize": 12
+                                      "fontSize": 12,
+                                      "fontWeight": "normal"
                                     }
                                   ]
                                 },
@@ -8689,7 +9268,8 @@
                                       "content": "選填",
                                       "lineHeight": 1.6,
                                       "fontFamily": "$font-ui",
-                                      "fontSize": 12
+                                      "fontSize": 12,
+                                      "fontWeight": "normal"
                                     }
                                   ]
                                 },
@@ -22040,6 +22620,1636 @@
                       ]
                     }
                   }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "qkUqv",
+          "x": 40,
+          "y": 7940,
+          "name": "產品畫面 / 語言切換 / baseline-v0.4 approved",
+          "context": "008 | baseline-v0.4 approved | product 2281092 + source manifest a1ab54e6 | 2026-11-24",
+          "width": 2440,
+          "height": 1000,
+          "fill": "$panel",
+          "cornerRadius": 16,
+          "stroke": "$line",
+          "strokeWidth": 1,
+          "strokeAlignment": "inner",
+          "layout": "none",
+          "children": [
+            {
+              "type": "text",
+              "id": "OIIjL",
+              "x": 28,
+              "y": 15,
+              "name": "語言入口 / 組標題",
+              "fill": "$ink",
+              "content": "語言切換 · 已確認的產品畫面",
+              "lineHeight": 1.5,
+              "fontFamily": "$font-ui",
+              "fontSize": 24,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "pqjS7",
+              "x": 1500,
+              "y": 74,
+              "name": "login/language/mobile · 手機登入／繁中選單展開",
+              "context": "008 | baseline-v0.4 approved | product 2281092 + source manifest a1ab54e6 | 2026-11-24",
+              "clip": true,
+              "width": 390,
+              "height": 844,
+              "fill": "$bg",
+              "layout": "none",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "JnzVO",
+                  "x": 0,
+                  "y": 0,
+                  "name": "Login story",
+                  "width": 390,
+                  "height": 280,
+                  "fill": "#e8eddf",
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "WfIrQ",
+                      "x": 28,
+                      "y": 28,
+                      "name": "Product mark",
+                      "width": 36,
+                      "height": 36,
+                      "cornerRadius": 18,
+                      "stroke": "$ink",
+                      "strokeWidth": 1,
+                      "strokeAlignment": "inner",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "awQ6x",
+                          "name": "Brand initials",
+                          "fill": "$ink",
+                          "content": "t.",
+                          "fontFamily": "$font-serif-fallback",
+                          "fontSize": 21,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "ao4D5",
+                      "x": 76,
+                      "y": 36,
+                      "name": "Product name",
+                      "fill": "$ink",
+                      "content": "旅帳",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-ui",
+                      "fontSize": 16,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "B0YMIQ",
+                      "x": 28,
+                      "y": 129,
+                      "name": "Login story eyebrow",
+                      "fill": "$muted",
+                      "content": "少算一點，多玩一點。",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-ui",
+                      "fontSize": 12,
+                      "fontWeight": "700",
+                      "letterSpacing": 2.1
+                    },
+                    {
+                      "type": "text",
+                      "id": "Zxvqc",
+                      "x": 28,
+                      "y": 151,
+                      "name": "Login headline",
+                      "fill": "$ink",
+                      "textGrowth": "fixed-width",
+                      "width": 334,
+                      "content": "好好旅行，\n每一筆都記得。",
+                      "lineHeight": 1.3,
+                      "fontFamily": "$font-ui",
+                      "fontSize": 36,
+                      "fontWeight": "700",
+                      "letterSpacing": -2
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "aHqRx",
+                  "x": 26,
+                  "y": 378,
+                  "name": "Welcome eyebrow",
+                  "fill": "$muted",
+                  "content": "歡迎使用旅帳",
+                  "lineHeight": 1.5,
+                  "fontFamily": "$font-ui",
+                  "fontSize": 12,
+                  "fontWeight": "700",
+                  "letterSpacing": 2.1
+                },
+                {
+                  "type": "text",
+                  "id": "lBqLe",
+                  "x": 26,
+                  "y": 403,
+                  "name": "Login title",
+                  "fill": "$ink",
+                  "textGrowth": "fixed-width",
+                  "width": 338,
+                  "content": "下一趟旅行，\n從這裡開始。",
+                  "lineHeight": 1.4,
+                  "fontFamily": "$font-ui",
+                  "fontSize": 26,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "uXRMg",
+                  "x": 26,
+                  "y": 491,
+                  "name": "Login introduction",
+                  "fill": "$muted",
+                  "textGrowth": "fixed-width",
+                  "width": 338,
+                  "content": "登入你的個人旅行帳本，隨手記下沿途的花費。",
+                  "lineHeight": 1.5,
+                  "fontFamily": "$font-ui",
+                  "fontSize": 16,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "ANeIm",
+                  "x": 26,
+                  "y": 554,
+                  "name": "Sign in with Google",
+                  "width": 338,
+                  "height": 46,
+                  "fill": "$panel",
+                  "cornerRadius": 7,
+                  "stroke": "#bccac0",
+                  "strokeWidth": 1,
+                  "strokeAlignment": "inner",
+                  "gap": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "BBxOx",
+                      "name": "Button label",
+                      "fill": "$ink",
+                      "content": "使用 Google 帳號登入",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "O21Cq",
+                  "x": 26,
+                  "y": 627,
+                  "name": "Privacy and sync",
+                  "fill": "$muted",
+                  "textGrowth": "fixed-width",
+                  "width": 338,
+                  "content": "你的帳本只屬於你。\n登入後，可在手機與電腦查看同一份紀錄。",
+                  "lineHeight": 1.6,
+                  "fontFamily": "$font-ui",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "id": "I5en5",
+                  "type": "ref",
+                  "ref": "nF4ry",
+                  "name": "Language trigger / 繁體中文 / open",
+                  "x": 222,
+                  "y": 306
+                },
+                {
+                  "id": "P9mRxA",
+                  "type": "ref",
+                  "ref": "u0fOX",
+                  "name": "Language options / 繁體中文 selected",
+                  "x": 190,
+                  "y": 358
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "p3HrQ",
+              "x": 28,
+              "y": 74,
+              "name": "shell/language/desktop · 桌機帳本／英文選單展開",
+              "context": "008 | baseline-v0.4 approved | product 2281092 + source manifest a1ab54e6 | 2026-11-24",
+              "clip": true,
+              "width": 1440,
+              "height": 900,
+              "fill": "$bg",
+              "layout": "none",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "xujzp",
+                  "x": 0,
+                  "y": 0,
+                  "name": "Desktop sidebar — language context",
+                  "width": 228,
+                  "height": 900,
+                  "fill": "#eef0e8",
+                  "stroke": "$line",
+                  "strokeWidth": {
+                    "right": 1
+                  },
+                  "strokeAlignment": "inner",
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "y2tqE",
+                      "x": 28,
+                      "y": 40,
+                      "name": "Product mark",
+                      "width": 36,
+                      "height": 36,
+                      "cornerRadius": 18,
+                      "stroke": "$ink",
+                      "strokeWidth": 1,
+                      "strokeAlignment": "inner",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "rQbXc",
+                          "name": "Brand initials",
+                          "fill": "$ink",
+                          "content": "t.",
+                          "fontFamily": "$font-serif-fallback",
+                          "fontSize": 21,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "MLV7f",
+                      "x": 76,
+                      "y": 48,
+                      "name": "Product name",
+                      "fill": "$ink",
+                      "content": "Travel Ledger",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-ui",
+                      "fontSize": 16,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "B4yHK",
+                      "x": 28,
+                      "y": 145,
+                      "name": "Selected navigation item",
+                      "width": 171,
+                      "height": 48,
+                      "fill": "#dfe9dd",
+                      "cornerRadius": 8,
+                      "layout": "none"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "S4a5sT",
+                      "x": 41,
+                      "y": 160,
+                      "name": "briefcase-business",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "briefcase-business",
+                      "library": "lucide",
+                      "fill": "$green"
+                    },
+                    {
+                      "type": "text",
+                      "id": "P5IxQS",
+                      "x": 70,
+                      "y": 157,
+                      "name": "My trips",
+                      "fill": "$ink",
+                      "content": "My trips",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-ui",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "kQCTY",
+                      "x": 63,
+                      "y": 214,
+                      "name": "users",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "users",
+                      "library": "lucide",
+                      "fill": "$green"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ia2MZ",
+                      "x": 92,
+                      "y": 211,
+                      "name": "Companions",
+                      "fill": "$muted",
+                      "content": "Companions",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-ui",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "P59KAy",
+                      "x": 63,
+                      "y": 262,
+                      "name": "arrow-left-right",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "arrow-left-right",
+                      "library": "lucide",
+                      "fill": "$green"
+                    },
+                    {
+                      "type": "text",
+                      "id": "i7ftXW",
+                      "x": 92,
+                      "y": 259,
+                      "name": "Settle up",
+                      "fill": "$muted",
+                      "content": "Settle up",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-ui",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "yIzcU",
+                      "x": 63,
+                      "y": 310,
+                      "name": "trash-2",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "trash-2",
+                      "library": "lucide",
+                      "fill": "$green"
+                    },
+                    {
+                      "type": "text",
+                      "id": "N6n2A",
+                      "x": 92,
+                      "y": 307,
+                      "name": "Trash",
+                      "fill": "$muted",
+                      "content": "Trash",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-ui",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "vBrcN",
+                      "x": 41,
+                      "y": 365,
+                      "name": "list",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "list",
+                      "library": "lucide",
+                      "fill": "$green"
+                    },
+                    {
+                      "type": "text",
+                      "id": "biWzV",
+                      "x": 70,
+                      "y": 362,
+                      "name": "Categories",
+                      "fill": "$muted",
+                      "content": "Categories",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-ui",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "AxhDE",
+                      "x": 28,
+                      "y": 694,
+                      "name": "Sidebar account context",
+                      "fill": "$muted",
+                      "content": "A LITTLE RECORD\nOF EVERY JOURNEY.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-ui",
+                      "fontSize": 11,
+                      "fontWeight": "700",
+                      "letterSpacing": 2.1
+                    },
+                    {
+                      "type": "text",
+                      "id": "PjEQt",
+                      "x": 28,
+                      "y": 726,
+                      "name": "Account",
+                      "fill": "$muted",
+                      "content": "Alice’s travel ledger",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-ui",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "uAt30",
+                      "x": 32,
+                      "y": 836,
+                      "name": "chevron-left",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "chevron-left",
+                      "library": "lucide",
+                      "fill": "$green"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Hmr4a",
+                      "x": 52,
+                      "y": 832,
+                      "name": "Sign out",
+                      "fill": "$green",
+                      "content": "Sign out",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-ui",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "id": "u51od",
+                  "type": "ref",
+                  "ref": "p8Ma8J",
+                  "name": "Language trigger / English / open",
+                  "x": 28,
+                  "y": 760
+                },
+                {
+                  "id": "X18zX",
+                  "type": "ref",
+                  "ref": "KT3Z1",
+                  "name": "Language options / English selected",
+                  "x": 28,
+                  "y": 636
+                },
+                {
+                  "type": "icon",
+                  "id": "kYamP",
+                  "x": 284,
+                  "y": 64,
+                  "name": "chevron-left",
+                  "width": 17,
+                  "height": 17,
+                  "icon": "chevron-left",
+                  "library": "lucide",
+                  "fill": "$green"
+                },
+                {
+                  "type": "text",
+                  "id": "xtYIM",
+                  "x": 312,
+                  "y": 60,
+                  "name": "Back to trips",
+                  "fill": "$muted",
+                  "content": "My trips",
+                  "lineHeight": 1.5,
+                  "fontFamily": "$font-ui",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "vxcPc",
+                  "x": 284,
+                  "y": 119,
+                  "name": "Travel journal eyebrow",
+                  "fill": "$muted",
+                  "content": "TRAVEL JOURNAL",
+                  "lineHeight": 1.5,
+                  "fontFamily": "$font-ui",
+                  "fontSize": 12,
+                  "fontWeight": "700",
+                  "letterSpacing": 2.1
+                },
+                {
+                  "type": "text",
+                  "id": "A3wFSI",
+                  "x": 284,
+                  "y": 145,
+                  "name": "Trip title",
+                  "fill": "$ink",
+                  "content": "日本旅行",
+                  "lineHeight": 1.5,
+                  "fontFamily": "$font-ui",
+                  "fontSize": 38,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "Z52Im",
+                  "x": 284,
+                  "y": 213,
+                  "name": "Trip dates",
+                  "fill": "$muted",
+                  "content": "2027-01-20 — 2027-01-20",
+                  "lineHeight": 1.5,
+                  "fontFamily": "$font-ui",
+                  "fontSize": 15,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "YvV0p",
+                  "x": 494,
+                  "y": 217,
+                  "name": "Edit trip dates",
+                  "fill": "$green",
+                  "content": "Trip dates",
+                  "lineHeight": 1.5,
+                  "fontFamily": "$font-ui",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "o1WES",
+                  "x": 1023,
+                  "y": 159,
+                  "name": "Add expense",
+                  "width": 179,
+                  "height": 46,
+                  "fill": "$green",
+                  "cornerRadius": 7,
+                  "stroke": "$green",
+                  "strokeWidth": 1,
+                  "strokeAlignment": "inner",
+                  "gap": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "cMD3G",
+                      "name": "plus",
+                      "width": 17,
+                      "height": 17,
+                      "icon": "plus",
+                      "library": "lucide",
+                      "fill": "$panel"
+                    },
+                    {
+                      "type": "text",
+                      "id": "X1Brc",
+                      "name": "Button label",
+                      "fill": "$panel",
+                      "content": "Add an expense",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "HcuvF",
+                  "x": 1215,
+                  "y": 159,
+                  "name": "Manage trip",
+                  "width": 169,
+                  "height": 46,
+                  "fill": "$panel",
+                  "cornerRadius": 7,
+                  "stroke": "#bccac0",
+                  "strokeWidth": 1,
+                  "strokeAlignment": "inner",
+                  "gap": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Y9jhW",
+                      "name": "Button label",
+                      "fill": "$ink",
+                      "content": "Manage trip",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "J5q1R",
+                      "name": "chevron-down",
+                      "width": 17,
+                      "height": 17,
+                      "icon": "chevron-down",
+                      "library": "lucide",
+                      "fill": "$green"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "E6CT5",
+                  "x": 284,
+                  "y": 281,
+                  "name": "Companions",
+                  "width": 157,
+                  "height": 46,
+                  "fill": "$bg",
+                  "cornerRadius": 7,
+                  "stroke": "$line",
+                  "strokeWidth": 1,
+                  "strokeAlignment": "inner",
+                  "gap": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "yB7TX",
+                      "name": "users",
+                      "width": 17,
+                      "height": 17,
+                      "icon": "users",
+                      "library": "lucide",
+                      "fill": "$green"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Lyi6U",
+                      "name": "Button label",
+                      "fill": "$ink",
+                      "content": "Companions",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "TfohC",
+                  "x": 453,
+                  "y": 281,
+                  "name": "Settle up",
+                  "width": 132,
+                  "height": 46,
+                  "fill": "$bg",
+                  "cornerRadius": 7,
+                  "stroke": "$line",
+                  "strokeWidth": 1,
+                  "strokeAlignment": "inner",
+                  "gap": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "gAn5B",
+                      "name": "arrow-left-right",
+                      "width": 17,
+                      "height": 17,
+                      "icon": "arrow-left-right",
+                      "library": "lucide",
+                      "fill": "$green"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ySbVJ",
+                      "name": "Button label",
+                      "fill": "$ink",
+                      "content": "Settle up",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "BviM4",
+                  "x": 597,
+                  "y": 281,
+                  "name": "Analysis navigation",
+                  "width": 193,
+                  "height": 46,
+                  "fill": "$bg",
+                  "cornerRadius": 7,
+                  "stroke": "$line",
+                  "strokeWidth": 1,
+                  "strokeAlignment": "inner",
+                  "gap": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "dHa2U",
+                      "name": "chart-pie",
+                      "width": 17,
+                      "height": 17,
+                      "icon": "chart-pie",
+                      "library": "lucide",
+                      "fill": "$green"
+                    },
+                    {
+                      "type": "text",
+                      "id": "mqUM6",
+                      "name": "Button label",
+                      "fill": "$ink",
+                      "content": "Spending analysis",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "FRiLg",
+                  "x": 284,
+                  "y": 358,
+                  "name": "Ledger total label",
+                  "fill": "$muted",
+                  "content": "My share by currency",
+                  "lineHeight": 1.5,
+                  "fontFamily": "$font-ui",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "luUrh",
+                  "x": 284,
+                  "y": 400,
+                  "name": "Personal total / JPY",
+                  "width": 1100,
+                  "height": 152,
+                  "fill": "$green",
+                  "cornerRadius": 12,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "viYYW",
+                      "x": 24,
+                      "y": 23,
+                      "name": "Currency",
+                      "fill": "$panel",
+                      "content": "JPY",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-ui",
+                      "fontSize": 12,
+                      "fontWeight": "normal",
+                      "letterSpacing": 1
+                    },
+                    {
+                      "type": "text",
+                      "id": "sNPpK",
+                      "x": 24,
+                      "y": 52,
+                      "name": "Share",
+                      "fill": "$panel",
+                      "content": "60",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-ui",
+                      "fontSize": 34,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "AkEgN",
+                      "x": 24,
+                      "y": 105,
+                      "name": "Currency footnote",
+                      "fill": "$panel",
+                      "content": "JPY",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-ui",
+                      "fontSize": 13,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "c7RUb3",
+                  "x": 284,
+                  "y": 584,
+                  "name": "Balances by currency / JPY",
+                  "width": 540,
+                  "height": 298,
+                  "fill": "$panel",
+                  "cornerRadius": 12,
+                  "stroke": "$line",
+                  "strokeWidth": 1,
+                  "strokeAlignment": "inner",
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "aouG0",
+                      "x": 24,
+                      "y": 20,
+                      "name": "Balance currency",
+                      "fill": "$ink",
+                      "content": "JPY",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-serif-fallback",
+                      "fontSize": 25,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "CgROq",
+                      "x": 24,
+                      "y": 89,
+                      "name": "Balance status",
+                      "fill": "$ink",
+                      "content": "Alice owes",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-ui",
+                      "fontSize": 15,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "qxMlq",
+                      "x": 402,
+                      "y": 89,
+                      "name": "Balance amount",
+                      "fill": "$ink",
+                      "textGrowth": "fixed-width",
+                      "width": 112,
+                      "content": "JPY 60",
+                      "lineHeight": 1.5,
+                      "textAlign": "right",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 15,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "x3hbt",
+                      "x": 24,
+                      "y": 139,
+                      "name": "Balance status",
+                      "fill": "$ink",
+                      "content": "Amy Settled",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-ui",
+                      "fontSize": 15,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "bH9mP",
+                      "x": 402,
+                      "y": 139,
+                      "name": "Balance amount",
+                      "fill": "$ink",
+                      "textGrowth": "fixed-width",
+                      "width": 112,
+                      "content": "JPY 0",
+                      "lineHeight": 1.5,
+                      "textAlign": "right",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 15,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "vN08L",
+                      "x": 24,
+                      "y": 189,
+                      "name": "Balance status",
+                      "fill": "$ink",
+                      "content": "Bob is owed",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-ui",
+                      "fontSize": 15,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "lo8gd",
+                      "x": 402,
+                      "y": 189,
+                      "name": "Balance amount",
+                      "fill": "$green",
+                      "textGrowth": "fixed-width",
+                      "width": 112,
+                      "content": "JPY 60",
+                      "lineHeight": 1.5,
+                      "textAlign": "right",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 15,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "u0KeFb",
+                      "x": 24,
+                      "y": 239,
+                      "name": "Balance status",
+                      "fill": "$ink",
+                      "content": "Carol Settled",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-ui",
+                      "fontSize": 15,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "dq1p4",
+                      "x": 402,
+                      "y": 239,
+                      "name": "Balance amount",
+                      "fill": "$ink",
+                      "textGrowth": "fixed-width",
+                      "width": 112,
+                      "content": "JPY 0",
+                      "lineHeight": 1.5,
+                      "textAlign": "right",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 15,
+                      "fontWeight": "700"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "IdwIn",
+              "x": 1950,
+              "y": 74,
+              "name": "shell/language/mobile/pending · 手機還款待確認／切換英文後",
+              "context": "008 | baseline-v0.4 approved | product 2281092 + source manifest a1ab54e6 | 2026-11-24",
+              "clip": true,
+              "width": 390,
+              "height": 844,
+              "fill": "$bg",
+              "layout": "none",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "iIK0r",
+                  "x": 0,
+                  "y": 60,
+                  "name": "Scrollable form viewport",
+                  "clip": true,
+                  "width": 390,
+                  "height": 719,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "SR1Oo",
+                      "x": 20,
+                      "y": -8,
+                      "name": "Payer control",
+                      "clip": true,
+                      "width": 350,
+                      "height": 46,
+                      "fill": "#fafbf8",
+                      "cornerRadius": 7,
+                      "stroke": "#c4d2c8",
+                      "strokeWidth": 1,
+                      "strokeAlignment": "inner",
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "ETqyU",
+                          "x": 14,
+                          "y": 10,
+                          "name": "Payer value",
+                          "fill": "$muted",
+                          "content": "小宇",
+                          "lineHeight": 1.5,
+                          "fontFamily": "$font-ui",
+                          "fontSize": 16,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "RlhtR",
+                          "x": 316,
+                          "y": 14,
+                          "name": "chevron-down",
+                          "width": 17,
+                          "height": 17,
+                          "icon": "chevron-down",
+                          "library": "lucide",
+                          "fill": "$muted"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "W4s11c",
+                      "x": 20,
+                      "y": 67,
+                      "name": "Recipient",
+                      "fill": "$ink",
+                      "content": "Recipient",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-ui",
+                      "fontSize": 13,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "agDFp",
+                      "x": 20,
+                      "y": 93,
+                      "name": "Recipient control",
+                      "clip": true,
+                      "width": 350,
+                      "height": 46,
+                      "fill": "#fafbf8",
+                      "cornerRadius": 7,
+                      "stroke": "#c4d2c8",
+                      "strokeWidth": 1,
+                      "strokeAlignment": "inner",
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "QnHT4",
+                          "x": 14,
+                          "y": 10,
+                          "name": "Recipient value",
+                          "fill": "$muted",
+                          "content": "小安",
+                          "lineHeight": 1.5,
+                          "fontFamily": "$font-ui",
+                          "fontSize": 16,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "uTHKU",
+                          "x": 316,
+                          "y": 14,
+                          "name": "chevron-down",
+                          "width": 17,
+                          "height": 17,
+                          "icon": "chevron-down",
+                          "library": "lucide",
+                          "fill": "$muted"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "y7qpFd",
+                      "x": 20,
+                      "y": 173,
+                      "name": "Amount paid",
+                      "fill": "$ink",
+                      "content": "Amount paid",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-ui",
+                      "fontSize": 13,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "nLu7g",
+                      "x": 20,
+                      "y": 199,
+                      "name": "Amount paid control",
+                      "clip": true,
+                      "width": 165,
+                      "height": 46,
+                      "fill": "#fafbf8",
+                      "cornerRadius": 7,
+                      "stroke": "#c4d2c8",
+                      "strokeWidth": 1,
+                      "strokeAlignment": "inner",
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "G1ztj",
+                          "x": 14,
+                          "y": 10,
+                          "name": "Amount paid value",
+                          "fill": "$muted",
+                          "content": "100",
+                          "lineHeight": 1.5,
+                          "fontFamily": "$font-ui",
+                          "fontSize": 16,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "z5pVK",
+                      "x": 201,
+                      "y": 173,
+                      "name": "Currency",
+                      "fill": "$ink",
+                      "content": "Currency",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-ui",
+                      "fontSize": 13,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "jAFeb",
+                      "x": 201,
+                      "y": 199,
+                      "name": "Currency control",
+                      "clip": true,
+                      "width": 169,
+                      "height": 46,
+                      "fill": "#fafbf8",
+                      "cornerRadius": 7,
+                      "stroke": "#c4d2c8",
+                      "strokeWidth": 1,
+                      "strokeAlignment": "inner",
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "XMbGo",
+                          "x": 14,
+                          "y": 0,
+                          "name": "Currency input text viewport",
+                          "clip": true,
+                          "width": 110,
+                          "height": 46,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "jFzfr",
+                              "x": 0,
+                              "y": 10,
+                              "name": "Currency value",
+                              "fill": "$muted",
+                              "content": "TWD · New Taiwan Dollar",
+                              "lineHeight": 1.5,
+                              "fontFamily": "$font-ui",
+                              "fontSize": 16,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "icon",
+                          "id": "vsbPY",
+                          "x": 135,
+                          "y": 14,
+                          "name": "chevron-down",
+                          "width": 17,
+                          "height": 17,
+                          "icon": "chevron-down",
+                          "library": "lucide",
+                          "fill": "$muted"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "l9h8b",
+                      "x": 20,
+                      "y": 281,
+                      "name": "Payment date",
+                      "fill": "$ink",
+                      "content": "Payment date",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-ui",
+                      "fontSize": 13,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "fuzSF",
+                      "x": 20,
+                      "y": 307,
+                      "name": "Payment date control",
+                      "clip": true,
+                      "width": 350,
+                      "height": 46,
+                      "fill": "#fafbf8",
+                      "cornerRadius": 7,
+                      "stroke": "#c4d2c8",
+                      "strokeWidth": 1,
+                      "strokeAlignment": "inner",
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "takD4",
+                          "x": 14,
+                          "y": 10,
+                          "name": "Payment date value",
+                          "fill": "$muted",
+                          "content": "2027/03/12",
+                          "lineHeight": 1.5,
+                          "fontFamily": "$font-ui",
+                          "fontSize": 16,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "WbQdU",
+                          "x": 316,
+                          "y": 14,
+                          "name": "calendar-days",
+                          "width": 17,
+                          "height": 17,
+                          "icon": "calendar-days",
+                          "library": "lucide",
+                          "fill": "$muted"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "uXOH6",
+                      "x": 20,
+                      "y": 407,
+                      "name": "Payment status unconfirmed",
+                      "width": 350,
+                      "height": 276,
+                      "fill": "#fff5dc",
+                      "cornerRadius": 12,
+                      "stroke": "$line",
+                      "strokeWidth": 1,
+                      "strokeAlignment": "inner",
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "UoE0L",
+                          "x": 24,
+                          "y": 21,
+                          "name": "Status heading",
+                          "fill": "$ink",
+                          "content": "Payment status unconfirmed",
+                          "lineHeight": 1.5,
+                          "fontFamily": "$font-serif-fallback",
+                          "fontSize": 21,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "tI5LE",
+                          "x": 24,
+                          "y": 73,
+                          "name": "Status details",
+                          "fill": "$ink",
+                          "textGrowth": "fixed-width",
+                          "width": 302,
+                          "content": "Check whether this payment was recorded. Your draft is still here.",
+                          "lineHeight": 1.6,
+                          "fontFamily": "$font-ui",
+                          "fontSize": 15,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "T122E",
+                          "x": 24,
+                          "y": 145,
+                          "name": "Check status",
+                          "width": 130,
+                          "height": 46,
+                          "fill": "$green",
+                          "cornerRadius": 7,
+                          "stroke": "$green",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "gap": 8,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "sX8DV",
+                              "name": "Button label",
+                              "fill": "$panel",
+                              "content": "Check status",
+                              "fontFamily": "$font-ui",
+                              "fontSize": 14,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "nmOCI",
+                          "x": 24,
+                          "y": 202,
+                          "name": "Return to confirmed data",
+                          "width": 214,
+                          "height": 46,
+                          "fill": "$panel",
+                          "cornerRadius": 7,
+                          "stroke": "#bccac0",
+                          "strokeWidth": 1,
+                          "strokeAlignment": "inner",
+                          "gap": 8,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "MNccO",
+                              "name": "Button label",
+                              "fill": "$ink",
+                              "content": "Return to confirmed data",
+                              "fontFamily": "$font-ui",
+                              "fontSize": 14,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "BoNie",
+                      "x": 20,
+                      "y": 710,
+                      "name": "Save payment disabled",
+                      "opacity": 0.6,
+                      "width": 140,
+                      "height": 44,
+                      "fill": "$green",
+                      "cornerRadius": 7,
+                      "stroke": "$green",
+                      "strokeWidth": 1,
+                      "strokeAlignment": "inner",
+                      "gap": 8,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "naLRa",
+                          "name": "Button label",
+                          "fill": "$panel",
+                          "content": "Save payment",
+                          "fontFamily": "$font-ui",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Z9w2h",
+                  "x": 0,
+                  "y": 779,
+                  "name": "Mobile navigation — settlement context",
+                  "width": 390,
+                  "height": 65,
+                  "fill": "#ffffffed",
+                  "stroke": "$line",
+                  "strokeWidth": {
+                    "top": 1
+                  },
+                  "strokeAlignment": "inner",
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "O6UFd",
+                      "x": 39,
+                      "y": 13,
+                      "name": "briefcase-business",
+                      "width": 17,
+                      "height": 17,
+                      "icon": "briefcase-business",
+                      "library": "lucide",
+                      "fill": "$muted"
+                    },
+                    {
+                      "type": "text",
+                      "id": "y7MUVN",
+                      "x": 10,
+                      "y": 31,
+                      "name": "My trips",
+                      "fill": "$muted",
+                      "textGrowth": "fixed-width",
+                      "width": 75,
+                      "content": "My trips",
+                      "lineHeight": 1.5,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "OW9tQ",
+                      "x": 114,
+                      "y": 13,
+                      "name": "users",
+                      "width": 17,
+                      "height": 17,
+                      "icon": "users",
+                      "library": "lucide",
+                      "fill": "$muted"
+                    },
+                    {
+                      "type": "text",
+                      "id": "HLh0L",
+                      "x": 85,
+                      "y": 31,
+                      "name": "Companions",
+                      "fill": "$muted",
+                      "textGrowth": "fixed-width",
+                      "width": 75,
+                      "content": "Companions",
+                      "lineHeight": 1.5,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "q3DDF2",
+                      "x": 189,
+                      "y": 13,
+                      "name": "arrow-left-right",
+                      "width": 17,
+                      "height": 17,
+                      "icon": "arrow-left-right",
+                      "library": "lucide",
+                      "fill": "$green"
+                    },
+                    {
+                      "type": "text",
+                      "id": "NKkGV",
+                      "x": 160,
+                      "y": 31,
+                      "name": "Settle up",
+                      "fill": "$muted",
+                      "textGrowth": "fixed-width",
+                      "width": 75,
+                      "content": "Settle up",
+                      "lineHeight": 1.5,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 11,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "QmX7c",
+                      "x": 264,
+                      "y": 13,
+                      "name": "list",
+                      "width": 17,
+                      "height": 17,
+                      "icon": "list",
+                      "library": "lucide",
+                      "fill": "$muted"
+                    },
+                    {
+                      "type": "text",
+                      "id": "JOMES",
+                      "x": 235,
+                      "y": 31,
+                      "name": "Categories",
+                      "fill": "$muted",
+                      "textGrowth": "fixed-width",
+                      "width": 75,
+                      "content": "Categories",
+                      "lineHeight": 1.5,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "dI2gt",
+                      "x": 339,
+                      "y": 13,
+                      "name": "chevron-left",
+                      "width": 17,
+                      "height": 17,
+                      "icon": "chevron-left",
+                      "library": "lucide",
+                      "fill": "$muted"
+                    },
+                    {
+                      "type": "text",
+                      "id": "g1Oq4",
+                      "x": 310,
+                      "y": 31,
+                      "name": "Sign out",
+                      "fill": "$muted",
+                      "textGrowth": "fixed-width",
+                      "width": 75,
+                      "content": "Sign out",
+                      "lineHeight": 1.5,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "d6C5S",
+                  "x": 0,
+                  "y": 0,
+                  "name": "Sticky mobile back and language",
+                  "width": 390,
+                  "height": 60,
+                  "fill": "$bg",
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "T6ho6",
+                      "x": 20,
+                      "y": 23,
+                      "name": "chevron-left",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "chevron-left",
+                      "library": "lucide",
+                      "fill": "$green"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Emtkh",
+                      "x": 48,
+                      "y": 18,
+                      "name": "Current trip",
+                      "fill": "$muted",
+                      "content": "日本旅行",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$font-ui",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "id": "ZgCO8",
+                  "type": "ref",
+                  "ref": "efbBF",
+                  "name": "Language trigger / English / closed",
+                  "x": 228,
+                  "y": 8
                 }
               ]
             }
