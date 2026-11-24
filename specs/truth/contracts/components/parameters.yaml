@@ -70,6 +70,14 @@ SettlementId:
   schema:
     type: string
     format: uuid
+SettlementExplanationInclude:
+  name: include
+  in: query
+  required: false
+  description: 僅指定 explanationDetails 時，回傳可供前端組成各語言說明的同快照結構化資料；省略時維持原 SettlementView 回應形狀。
+  schema:
+    type: string
+    enum: [explanationDetails]
 RepaymentId:
   name: repaymentId
   in: path

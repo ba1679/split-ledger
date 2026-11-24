@@ -34,7 +34,7 @@ ApiError:
         - INTERNAL_ERROR
     message:
       type: string
-      description: 可直接顯示的繁體中文訊息，不包含他人的資源或私人資料。
+      description: 既有繁中訊息供舊客戶端與診斷使用，不包含他人的資源或私人資料。雙語 Web 依 code、field 與操作情境呈現所選語言的文案，避免直接顯示此欄位。
     field:
       type: string
       description: 可選，與表單欄位對應的識別。
