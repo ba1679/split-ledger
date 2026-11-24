@@ -95,7 +95,14 @@ export async function assertMemberBalancesScreen(
     await expect(group.getByText(row.成員, { exact: true })).toBeVisible();
     await expect(group.getByText(row.顯示, { exact: true })).toBeVisible();
     const sign = BigInt(tableBalance(row.淨額).numerator);
-    const direction = sign > 0n ? '應收' : sign < 0n ? '應付' : '已平衡';
+    const memberId = splittingMemberId(world, row.成員);
+    const hasPendingPayment = snapshot.settlement.arrangements.some(
+      (payment) =>
+        payment.currencyCode === row.幣別 &&
+        (payment.debtorMemberId === memberId || payment.creditorMemberId === memberId),
+    );
+    const direction =
+      sign > 0n ? '應收' : sign < 0n ? '應付' : hasPendingPayment ? '淨額為零' : '已結清';
     await expect(group.getByText(direction, { exact: true })).toBeVisible();
     await expect(group).not.toContainText(/\d+\s*\/\s*\d+|…|\.\.\.|\d+\.\d{3}/);
   }

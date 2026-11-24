@@ -1,0 +1,48 @@
+const en = {
+  'balance.receivable': 'is owed',
+  'balance.payable': 'owes',
+  'balance.zero': 'Zero balance',
+  'balance.settled': 'Settled',
+  'settlement.title': 'Settle up',
+  'settlement.simplify': 'Simplify payments',
+  'settlement.pending': 'Pending payments',
+  'settlement.emptyCurrency': 'No pending payments in {{currency}}',
+  'settlement.empty': 'There are no pending payments.',
+  'settlement.amountDue': 'Amount due',
+  'settlement.amountPaid': 'Amount paid',
+  'settlement.direct': 'Original payment setup applies ({{count}} payments).',
+  'settlement.direct_one': 'Original payment setup applies ({{count}} payment).',
+  'settlement.direct_other': 'Original payment setup applies ({{count}} payments).',
+  'settlement.unchanged_one': 'No adjustment is needed for the current {{count}} payment.',
+  'settlement.unchanged_other': 'No adjustment is needed for the current {{count}} payments.',
+  'settlement.changed':
+    'Originally, {{before}}; now, {{after}}, changing the number of payments from {{original}} to {{current}}.',
+  'settlement.pays': '{{payer}} pays {{payee}}',
+  'settlement.sameBalances': 'Each person’s net balance stays the same.',
+  'settlement.sameRecords': 'Original expenses and payments stay unchanged.',
+} as const;
+const zh: Record<keyof typeof en, string> = {
+  'balance.receivable': '應收',
+  'balance.payable': '應付',
+  'balance.zero': '淨額為零',
+  'balance.settled': '已結清',
+  'settlement.title': '誰該付給誰',
+  'settlement.simplify': '簡化付款',
+  'settlement.pending': '待付款',
+  'settlement.emptyCurrency': '{{currency}} 無待付款項',
+  'settlement.empty': '目前沒有待付款項。',
+  'settlement.amountDue': '應付金額',
+  'settlement.amountPaid': '已付金額',
+  'settlement.direct': '依原本的付款關係安排，共 {{count}} 筆付款。',
+  'settlement.direct_one': '依原本的付款關係安排，共 {{count}} 筆付款。',
+  'settlement.direct_other': '依原本的付款關係安排，共 {{count}} 筆付款。',
+  'settlement.unchanged_one': '目前的付款安排已無需調整，共 {{count}} 筆付款。',
+  'settlement.unchanged_other': '目前的付款安排已無需調整，共 {{count}} 筆付款。',
+  'settlement.changed':
+    '原本 {{before}}；現在 {{after}}，從 {{original}} 筆改為 {{current}} 筆付款。',
+  'settlement.pays': '{{payer}} 付款給 {{payee}}',
+  'settlement.sameBalances': '每位成員的應收應付淨額保持不變。',
+  'settlement.sameRecords': '原始支出與還款紀錄保持不變。',
+};
+
+export const settlementMessages = { en, 'zh-Hant': zh };

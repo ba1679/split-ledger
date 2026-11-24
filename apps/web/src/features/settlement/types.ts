@@ -23,6 +23,13 @@ export interface SettlementView {
   readonly suggestedArrangementCount: number;
 }
 
+export interface SettlementViewWithExplanationDetails extends SettlementView {
+  readonly explanationDetails: {
+    readonly kind: 'direct' | 'unchanged' | 'changed';
+    readonly directArrangements: readonly Omit<SettlementArrangement, 'key'>[];
+  };
+}
+
 export interface SettleArrangementRequest {
   readonly id: string;
   readonly repaymentId: string;

@@ -1,3 +1,4 @@
+import { tripText, useTripText } from './messages.js';
 import React, { useRef } from 'react';
 import { Mountain } from 'lucide-react';
 import { Button } from '../../components/ui/button.js';
@@ -14,26 +15,33 @@ export function TripImagePicker({
   disabled?: boolean;
   invalid?: boolean;
 }) {
+  useTripText();
   const input = useRef<HTMLInputElement>(null);
   const preview = usePreviewUrl(file, !invalid);
 
   return (
     <section className="create-trip-image">
-      <h3>旅行縮圖（選填）</h3>
+      <h3>{tripText('tripThumbnailOptional')}</h3>
       <div className="create-image-preview">
         {preview ? (
-          <img src={preview} alt="尚未保存的旅行縮圖預覽" />
+          <img src={preview} alt={tripText('previewOfUnsavedTripThumbnail')} />
         ) : (
-          <div className="thumbnail-default" role="img" aria-label="預設旅行縮圖">
+          <div
+            className="thumbnail-default"
+            role="img"
+            aria-label={tripText('defaultTripThumbnail')}
+          >
             <Mountain size={48} aria-hidden="true" />
           </div>
         )}
-        {file && !invalid ? <span className="thumbnail-draft-badge">尚未保存</span> : null}
+        {file && !invalid ? (
+          <span className="thumbnail-draft-badge">{tripText('notSavedYet')}</span>
+        ) : null}
       </div>
       {file ? (
         <strong className="create-image-name">{file.name}</strong>
       ) : (
-        <p className="create-image-default-label">目前使用預設風景</p>
+        <p className="create-image-default-label">{tripText('usingTheDefaultLandscape')}</p>
       )}
       <div className={`create-image-tools${file ? ' has-photo' : ''}`}>
         <Button
@@ -47,7 +55,7 @@ export function TripImagePicker({
             }
           }}
         >
-          {file ? '重新選圖' : '選擇照片'}
+          {file ? tripText('chooseAnotherImage') : tripText('chooseAPhoto')}
         </Button>
         {file ? (
           <>
@@ -61,7 +69,7 @@ export function TripImagePicker({
                 onChange(null);
               }}
             >
-              移除選圖
+              {tripText('removeSelectedPhoto')}
             </Button>
           </>
         ) : null}
@@ -78,13 +86,13 @@ export function TripImagePicker({
       />
       <p className="create-image-hint">
         {file
-          ? '照片先在本機預覽；建立旅行後才保存。'
-          : '不選照片也可以建立旅行，之後仍能自訂縮圖。'}
+          ? tripText('thePhotoIsPreviewedLocallyAndSavedAfter')
+          : tripText('youCanCreateATripWithoutAPhoto')}
       </p>
       <p className="create-image-limits">
-        靜態 JPG、PNG、WebP；單張最大 10 MiB，2,500 萬像素內。
+        {tripText('stillJPGPNGOrWebPOneImageUp')}
         <br />
-        最長邊 16,384 像素；HEIC 請先轉檔。
+        {tripText('longestSide16384PixelsConvertHEICFirst')}
       </p>
     </section>
   );

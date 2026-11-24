@@ -1,3 +1,4 @@
+import { tripText, useTripText } from './messages.js';
 import React, { useRef } from 'react';
 import { LoaderCircle } from 'lucide-react';
 import { Button } from '../../components/ui/button.js';
@@ -5,14 +6,15 @@ import { Button } from '../../components/ui/button.js';
 export function TripOperationCheck({
   busy,
   onCheck,
-  label = '再次查證',
-  busyLabel = '正在查證原次操作',
+  label = tripText('checkAgain'),
+  busyLabel = tripText('checkingOriginalOperation'),
 }: {
   busy: boolean;
   onCheck: () => Promise<void>;
   label?: string;
   busyLabel?: string;
 }) {
+  useTripText();
   const locked = useRef(false);
 
   async function check() {

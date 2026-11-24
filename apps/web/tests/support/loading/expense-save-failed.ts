@@ -26,7 +26,7 @@ export async function assertExpenseSaveFailed(world: LedgerWorld): Promise<void>
   await expect(error).toHaveText(rejection.message);
   await expect(error).not.toContainText(/23514|test_reject|isolated|constraint|postgres|SQLSTATE/i);
   await expect(state.data.control).toBeEnabled();
-  await expect(page.getByLabel('金額', { exact: true })).toBeEnabled();
+  await expect(page.getByLabel('支出金額', { exact: true })).toBeEnabled();
   await expect(page.getByRole('textbox', { name: '支出日期', exact: true })).toBeEnabled();
   await expect(page.locator('[aria-busy="true"]')).toHaveCount(0);
   await expect(page.getByRole('progressbar')).toHaveCount(0);

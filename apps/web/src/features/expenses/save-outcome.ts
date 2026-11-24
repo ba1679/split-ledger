@@ -1,6 +1,7 @@
 import { parseMoney } from '@split-ledger/shared';
 import { apiRequest, ApiError, type Expense } from '../../api/index.js';
 import type { TripState } from '../trips/management-api.js';
+import { expenseMessage } from './messages.js';
 
 export interface SaveIntent {
   kind: 'save';
@@ -24,8 +25,8 @@ export interface DeleteIntent {
 
 export type WriteIntent = SaveIntent | DeleteIntent;
 
-export function unconfirmedMessage(kind: WriteIntent['kind']) {
-  return `${kind === 'save' ? '保存' : '刪除'}結果尚未確認，請重新整理確認。`;
+export function unconfirmedMessageKey(kind: WriteIntent['kind']) {
+  return kind === 'save' ? 'unconfirmedSave' : 'unconfirmedDelete';
 }
 
 export class UnconfirmedWrite extends Error {
@@ -33,25 +34,19 @@ export class UnconfirmedWrite extends Error {
     readonly intent: WriteIntent,
     cause: unknown,
   ) {
-    super(unconfirmedMessage(intent.kind), { cause });
+    super(expenseMessage(unconfirmedMessageKey(intent.kind)), { cause });
   }
 }
 
 export class OfflineWrite extends Error {
-  constructor(kind: WriteIntent['kind']) {
-    super(
-      `目前無法連線，這筆支出尚未${kind === 'save' ? '保存' : '刪除'}。請保留畫面並在連線後再試。`,
-    );
+  constructor(readonly kind: WriteIntent['kind']) {
+    super(expenseMessage(kind === 'save' ? 'offlineSave' : 'offlineDelete'));
   }
 }
 
 export class UnavailableTrip extends Error {
   constructor(readonly state: TripState) {
-    super(
-      state.state === 'trash'
-        ? '旅行已在垃圾桶，請先復原旅行再繼續記帳。'
-        : '旅行已永久刪除，無法再使用原帳本。',
-    );
+    super(expenseMessage(state.state === 'trash' ? 'tripTrashed' : 'tripPurged'));
   }
 }
 

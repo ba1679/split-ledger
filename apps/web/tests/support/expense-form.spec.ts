@@ -17,7 +17,7 @@ test('historical TWD metadata edits omit the untouched decimal amount and preser
 
   await login(page, world);
   await page.goto(`/trips/${expense.trip_id}/expenses/${expense.id}`);
-  await expect(page.getByLabel('金額', { exact: true })).toHaveValue('100.50');
+  await expect(page.getByLabel('支出金額', { exact: true })).toHaveValue('100.50');
   await page.getByLabel('支出項目', { exact: true }).fill('歷史台幣已改名');
   const patch = page.waitForRequest(
     (request) =>
@@ -55,7 +55,7 @@ test('mobile currency selection rejects a whole invalid paste and permits exact 
   await openExpenseForm(page, world);
   await page.getByLabel('支出項目', { exact: true }).fill('巷口飲料');
   const currency = page.getByRole('combobox', { name: '幣別', exact: true }),
-    amount = page.getByLabel('金額', { exact: true });
+    amount = page.getByLabel('支出金額', { exact: true });
 
   await currency.fill('USD');
   await currency.press('ArrowDown');

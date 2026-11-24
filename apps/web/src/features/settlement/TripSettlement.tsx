@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React, { useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useLocation, useParams } from 'react-router-dom';
@@ -9,7 +10,12 @@ import {
   type ItemList,
 } from '../../api/index.js';
 import type { Repayment } from '../repayments/types.js';
-import type { SettlementView } from './types.js';
+import type {
+  SettlementArrangement,
+  SettlementView,
+  SettlementViewWithExplanationDetails,
+} from './types.js';
+import { balanceStatus, formatBalanceAmount } from './balance-status.js';
 import { useSession } from '../auth/session.js';
 import { formatShareAmount } from '../expenses/ExpenseShares.js';
 import { displayAmount } from '../expenses/money.js';
@@ -17,14 +23,60 @@ import { Button } from '../../components/ui/button.js';
 import { QueryState } from '../../components/QueryState.js';
 import { BusyIndicator } from '../../components/waiting/BusyIndicator.js';
 import { Icon } from '../../components/Icon.js';
+import { interfaceI18n, registerInterfaceMessages } from '../../i18n/runtime.js';
 import './settlement.css';
 
+registerInterfaceMessages('settlementPage', {
+  stale: [
+    '帳本已更新，請重新載入付款安排。',
+    'The ledger has changed. Reload payment arrangements.',
+  ],
+  intro: [
+    '查看每個人的應收、應付與付款安排。',
+    'See each person’s balance and payment arrangements.',
+  ],
+  ledger: ['旅行帳本', 'Trip ledger'],
+  arrangements: ['付款安排', 'Payment arrangements'],
+  simplifyHint: ['調整付款對象，減少轉帳筆數。', 'Adjust who pays whom to reduce transfers.'],
+  updating: ['正在更新簡化付款', 'Updating simplified payments'],
+  counts: [
+    '直接安排 {{direct}} 筆 · 目前安排 {{current}} 筆',
+    '{{direct}} original payments · {{current}} current payments',
+  ],
+  unknown: [
+    '簡化付款保存結果尚未確認，暫時保留上次已確認的安排。',
+    'Save status unconfirmed. Select Check status to verify. The last confirmed arrangements remain visible.',
+  ],
+  failed: [
+    '簡化付款保存失敗，已保留上次確認的安排。',
+    'Could not save simplified payments. The last confirmed arrangements remain visible.',
+  ],
+  check: ['查證結果', 'Check status'],
+  retry: ['重試', 'Try again'],
+  refreshError: [
+    '目前無法更新，仍顯示上次已確認的付款安排。',
+    'Could not update. The last confirmed payment arrangements remain visible.',
+  ],
+  reload: ['重新載入', 'Reload'],
+  balances: ['成員淨額', 'Member balances'],
+  paymentFor: ['{{payer}} 付款給 {{payee}} {{currency}}', '{{payer}} pays {{payee}} {{currency}}'],
+  settle: ['結清', 'Record payment'],
+  actualRepayments: ['實際還款', 'Payments made'],
+  recordRepayment: ['記錄還款', 'Record a separate payment'],
+  repaymentHistory: ['還款紀錄', 'Payments made'],
+  paidBy: ['{{payer}} 支付 {{payee}}', '{{payer}} paid {{payee}}'],
+  noRepayments: ['目前還沒有已記錄的實際還款。', 'No payments recorded yet.'],
+});
+
 /** Publish only a trip and calculation confirmed at the same accounting version. */
-async function readSettlement(base: string, signal?: AbortSignal) {
+async function readSettlement(base: string, localized: boolean, signal?: AbortSignal) {
   for (let attempt = 0; attempt < 3; attempt++) {
     const [trip, settlement, members, repayments] = await Promise.all([
       apiRequest<Trip>(base, { signal }),
-      apiRequest<SettlementView>(`${base}/settlement`, { signal }),
+      apiRequest<SettlementView | SettlementViewWithExplanationDetails>(
+        `${base}/settlement${localized ? '?include=explanationDetails' : ''}`,
+        { signal },
+      ),
       apiRequest<ItemList<TripMember>>(`${base}/members`, { signal }),
       apiRequest<ItemList<Repayment>>(`${base}/repayments`, { signal }),
     ]);
@@ -34,17 +86,22 @@ async function readSettlement(base: string, signal?: AbortSignal) {
     )
       return { trip, settlement, members: members.items, repayments: repayments.items };
   }
-  throw new Error('帳本已更新，請重新載入付款安排。');
+  throw new Error(interfaceI18n.t('settlementPage.stale'));
 }
 
 export function TripSettlement() {
+  const { t, i18n } = useTranslation();
+  const localized = i18n.resolvedLanguage === 'en';
   const location = useLocation();
   const { tripId } = useParams();
   const { account } = useSession();
   const client = useQueryClient();
   const base = `/api/trips/${tripId}`;
-  const queryKey = ['account', account!.id, 'settlement', tripId, 'screen'];
-  const query = useQuery({ queryKey, queryFn: ({ signal }) => readSettlement(base, signal) });
+  const queryKey = ['account', account!.id, 'settlement', tripId, 'screen', localized];
+  const query = useQuery({
+    queryKey,
+    queryFn: ({ signal }) => readSettlement(base, localized, signal),
+  });
   const [saving, setSaving] = useState(false);
   const writing = useRef(false);
   const [failure, setFailure] = useState<{ target: boolean; unknown: boolean } | null>(null);
@@ -63,7 +120,7 @@ export function TripSettlement() {
         body: JSON.stringify({ simplifyDebts: target }),
       });
       saved = true;
-      const confirmed = await readSettlement(base);
+      const confirmed = await readSettlement(base, localized);
       client.setQueryData(queryKey, confirmed);
       client.setQueryData(['account', account!.id, 'trip', tripId], confirmed.trip);
     } catch (error) {
@@ -82,7 +139,7 @@ export function TripSettlement() {
     writing.current = true;
     setSaving(true);
     try {
-      const confirmed = await readSettlement(base);
+      const confirmed = await readSettlement(base, localized);
       client.setQueryData(queryKey, confirmed);
       client.setQueryData(['account', account!.id, 'trip', tripId], confirmed.trip);
       setFailure(null);
@@ -97,15 +154,15 @@ export function TripSettlement() {
   const pageHead = (
     <header className="page-head">
       <div>
-        <h1>誰該付給誰</h1>
-        <p className="muted">查看每個人的應收、應付與付款安排。</p>
+        <h1>{t('settlement.title')}</h1>
+        <p className="muted">{t('settlementPage.intro')}</p>
       </div>
     </header>
   );
   const back = (
     <Link className="back" to={`/trips/${tripId}`}>
       <Icon name="back" />
-      <span>{query.data?.trip.name ?? '旅行帳本'}</span>
+      <span>{query.data?.trip.name ?? t('settlementPage.ledger')}</span>
     </Link>
   );
   if (!query.data)
@@ -114,7 +171,7 @@ export function TripSettlement() {
         {back}
         {pageHead}
         <QueryState
-          label="付款安排"
+          label={t('settlementPage.arrangements')}
           layout="list"
           fetchStatus={query.fetchStatus}
           pending={query.isPending}
@@ -127,6 +184,32 @@ export function TripSettlement() {
     );
   const { settlement, members, repayments } = query.data;
   const names = new Map(members.map((member) => [member.id, member.name]));
+  let explanation = settlement.explanation;
+  if ('explanationDetails' in settlement) {
+    const { kind, directArrangements } = settlement.explanationDetails;
+    const list = new Intl.ListFormat('en');
+    const describe = (arrangements: readonly Omit<SettlementArrangement, 'key'>[]) =>
+      list.format(
+        arrangements.map((entry) =>
+          t('settlement.pays', {
+            payer: names.get(entry.debtorMemberId),
+            payee: names.get(entry.creditorMemberId),
+          }),
+        ),
+      );
+    const arrangements =
+      kind === 'changed'
+        ? t('settlement.changed', {
+            before: describe(directArrangements),
+            after: describe(settlement.arrangements),
+            original: settlement.directArrangementCount,
+            current: settlement.suggestedArrangementCount,
+          })
+        : t(`settlement.${kind}`, { count: settlement.suggestedArrangementCount });
+    explanation = [arrangements, t('settlement.sameBalances'), t('settlement.sameRecords')].join(
+      ' ',
+    );
+  }
   const currencies = [
     ...new Set([
       ...settlement.balances.map((balance) => balance.currencyCode),
@@ -138,9 +221,9 @@ export function TripSettlement() {
   return (
     <div className="settlement-page">
       {back}
-      {location.state?.message ? (
+      {location.state?.messageKey || location.state?.message ? (
         <p role="status" className="notice">
-          {location.state.message}
+          {location.state.messageKey ? t(location.state.messageKey) : location.state.message}
         </p>
       ) : null}
       {pageHead}
@@ -150,14 +233,14 @@ export function TripSettlement() {
       >
         <div className="simplification-heading">
           <div>
-            <h2 id="simplification-title">簡化付款</h2>
-            <p className="muted">調整付款對象，減少轉帳筆數。</p>
+            <h2 id="simplification-title">{t('settlement.simplify')}</h2>
+            <p className="muted">{t('settlementPage.simplifyHint')}</p>
           </div>
           <button
             type="button"
             className="simplification-switch"
             role="switch"
-            aria-label="簡化付款"
+            aria-label={t('settlement.simplify')}
             aria-checked={settlement.simplifyDebts}
             aria-busy={saving}
             aria-disabled={saving || failure?.unknown || undefined}
@@ -169,22 +252,23 @@ export function TripSettlement() {
           >
             <span className="switch-track" />
             {saving ? (
-              <BusyIndicator className="switch-spinner" accessibleLabel="正在更新簡化付款" />
+              <BusyIndicator
+                className="switch-spinner"
+                accessibleLabel={t('settlementPage.updating')}
+              />
             ) : null}
           </button>
         </div>
-        <p>{settlement.explanation}</p>
+        <p>{explanation}</p>
         <p className="muted">
-          直接安排 {settlement.directArrangementCount} 筆 · 目前安排{' '}
-          {settlement.suggestedArrangementCount} 筆
+          {t('settlementPage.counts', {
+            direct: settlement.directArrangementCount,
+            current: settlement.suggestedArrangementCount,
+          })}
         </p>
         {failure ? (
           <div className="error" role="alert">
-            <p>
-              {failure.unknown
-                ? '簡化付款保存結果尚未確認，暫時保留上次已確認的安排。'
-                : '簡化付款保存失敗，已保留上次確認的安排。'}
-            </p>
+            <p>{failure.unknown ? t('settlementPage.unknown') : t('settlementPage.failed')}</p>
             <Button
               variant="outline"
               disabled={saving}
@@ -193,25 +277,25 @@ export function TripSettlement() {
                 else void changeMode(failure.target);
               }}
             >
-              {failure.unknown ? '查證結果' : '重試'}
+              {t(failure.unknown ? 'settlementPage.check' : 'settlementPage.retry')}
             </Button>
           </div>
         ) : null}
       </section>
       {query.error ? (
         <p role="alert" className="error">
-          目前無法更新，仍顯示上次已確認的付款安排。
+          {t('settlementPage.refreshError')}
           <Button
             variant="outline"
             onClick={() => {
               void query.refetch();
             }}
           >
-            重新載入
+            {t('settlementPage.reload')}
           </Button>
         </p>
       ) : null}
-      <section aria-label="成員淨額" className="balance-grid">
+      <section aria-label={t('settlementPage.balances')} className="balance-grid">
         {currencies.map((currency) => (
           <div key={currency} className="settlement-panel">
             <h2>{currency}</h2>
@@ -230,10 +314,12 @@ export function TripSettlement() {
                 >
                   <span className="balance-person">
                     <span>{member.name}</span>
-                    <span>{sign > 0n ? '應收' : sign < 0n ? '應付' : '已平衡'}</span>
+                    <span>
+                      {t(balanceStatus(sign, member.id, currency, settlement.arrangements))}
+                    </span>
                   </span>
                   <strong className={sign > 0n ? 'receivable' : undefined}>
-                    {currency} {formatShareAmount(amount)}
+                    {currency} {formatBalanceAmount(amount, i18n.resolvedLanguage)}
                   </strong>
                 </div>
               );
@@ -241,15 +327,15 @@ export function TripSettlement() {
           </div>
         ))}
       </section>
-      <section className="settlement-panel" aria-label="付款安排">
-        <h2>待付款安排</h2>
-        {currencies
-          .filter(
-            (currency) => !settlement.arrangements.some((entry) => entry.currencyCode === currency),
-          )
-          .map((currency) => (
-            <p key={currency}>{currency} 已結清，目前沒有待付款安排。</p>
-          ))}
+      <section className="settlement-panel" aria-label={t('settlementPage.arrangements')}>
+        <h2>{t('settlement.pending')}</h2>
+        {settlement.arrangements.length > 0 &&
+          currencies
+            .filter(
+              (currency) =>
+                !settlement.arrangements.some((entry) => entry.currencyCode === currency),
+            )
+            .map((currency) => <p key={currency}>{t('settlement.emptyCurrency', { currency })}</p>)}
         {settlement.arrangements.length ? (
           settlement.arrangements.map((arrangement) => {
             const payer = names.get(arrangement.debtorMemberId),
@@ -259,13 +345,18 @@ export function TripSettlement() {
               <div
                 className="arrangement-row"
                 role="group"
-                aria-label={`${payer} 付款給 ${payee} ${arrangement.currencyCode}`}
+                aria-label={t('settlementPage.paymentFor', {
+                  payer,
+                  payee,
+                  currency: arrangement.currencyCode,
+                })}
                 key={arrangement.key}
               >
                 <div>
                   <p>
                     {payer} → {payee}
                   </p>
+                  <span>{t('settlement.amountDue')}</span>{' '}
                   <strong className="arrangement-amount">
                     {arrangement.currencyCode} {formatShareAmount(arrangement.amount)}
                   </strong>
@@ -274,35 +365,41 @@ export function TripSettlement() {
                   <Link
                     to={`/trips/${tripId}/settlements/new?arrangementKey=${encodeURIComponent(arrangement.key)}`}
                   >
-                    結清
+                    {t('settlementPage.settle')}
                   </Link>
                 </Button>
               </div>
             );
           })
         ) : (
-          <p>這趟旅行的帳已平衡，目前沒有待付款安排。</p>
+          <p>{t('settlement.empty')}</p>
         )}
       </section>
       <section className="repayment-history">
-        <h2>實際還款</h2>
+        <h2>{t('settlementPage.actualRepayments')}</h2>
         <Button asChild variant="outline">
-          <Link to={`/trips/${tripId}/repayments/new`}>記錄還款</Link>
+          <Link to={`/trips/${tripId}/repayments/new`}>{t('settlementPage.recordRepayment')}</Link>
         </Button>
-        <ul aria-label="還款紀錄">
+        <ul aria-label={t('settlementPage.repaymentHistory')}>
           {repayments.map((repayment) => (
             <li key={repayment.id}>
               <span>
-                {names.get(repayment.payerMemberId)} 支付 {names.get(repayment.payeeMemberId)}
+                {t('settlementPage.paidBy', {
+                  payer: names.get(repayment.payerMemberId),
+                  payee: names.get(repayment.payeeMemberId),
+                })}
               </span>
               <span>{repayment.paidOn}</span>
               <strong>
-                {repayment.currencyCode} {displayAmount(repayment.amount)}
+                {t('settlement.amountPaid')} {repayment.currencyCode}{' '}
+                {displayAmount(repayment.amount)}
               </strong>
             </li>
           ))}
         </ul>
-        {repayments.length === 0 ? <p className="muted">目前還沒有已記錄的實際還款。</p> : null}
+        {repayments.length === 0 ? (
+          <p className="muted">{t('settlementPage.noRepayments')}</p>
+        ) : null}
       </section>
     </div>
   );

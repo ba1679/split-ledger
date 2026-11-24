@@ -5,6 +5,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { SessionProvider, useSession } from '../../../src/features/auth/session.js';
 import * as ExpenseModule from '../../../src/features/expenses/ExpenseForm.js';
 import { App } from '../../../src/app/App.js';
+import { initializeInterfaceLanguage } from '../../../src/i18n/runtime.js';
 import type { SharedExpenseDraft } from './expense-draft.js';
 import '../../../src/design-system.css';
 import '../../../src/styles/index.css';
@@ -29,6 +30,8 @@ function AuthenticatedForm() {
 
   return React.createElement(ExpenseForm, { initialDraft });
 }
+
+initializeInterfaceLanguage();
 
 createRoot(document.getElementById('root')!).render(
   React.createElement(

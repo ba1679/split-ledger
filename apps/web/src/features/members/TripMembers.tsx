@@ -17,7 +17,75 @@ import { Input } from '../../components/ui/input.js';
 import { QueryState } from '../../components/QueryState.js';
 import { FormDialog } from '../../components/FormDialog.js';
 import { Icon } from '../../components/Icon.js';
+import { useTranslation } from 'react-i18next';
+import { registerInterfaceMessages } from '../../i18n/runtime.js';
 import './members.css';
+
+registerInterfaceMessages('membersPage', {
+  required: ['請輸入同行者名稱。', 'Enter a companion name.'],
+  duplicate: [
+    '這個名稱已使用，請使用其他名稱。',
+    'This companion name is already in use. Choose a different name.',
+  ],
+  name: ['同行者名稱', 'Companion name'],
+  namePlaceholder: ['輸入名字', 'Enter a name'],
+  unknown: [
+    '保存結果尚未確認，你的輸入仍保留。請先查證這次操作是否已保存。',
+    'Save status unconfirmed. Your input is still here. Select Check status to verify.',
+  ],
+  verify: ['查證結果', 'Check status'],
+  saveName: ['儲存名稱', 'Save name'],
+  add: ['新增同行者', 'Add companion'],
+  saved: ['同行者資料已保存。', 'Companion saved.'],
+  deleted: ['同行者已刪除。', 'Companion deleted.'],
+  saveUnknown: [
+    '保存結果尚未確認，請重新載入名單確認。',
+    'Save status unconfirmed. Reload the list to check.',
+  ],
+  deleteUnknown: [
+    '刪除結果尚未確認，請重新載入名單確認。',
+    'Deletion status unconfirmed. Reload the list to check.',
+  ],
+  inUse: [
+    '{{name}} 已有支出或還款紀錄，不能刪除。請改為停用，歷史紀錄會保留。',
+    '{{name}} has expenses or payments and cannot be deleted. Deactivate this companion to keep the history.',
+  ],
+  title: ['同行者', 'Companions'],
+  intro: ['新增同行者，或管理這趟旅行的成員。', 'Add companions or manage members of this trip.'],
+  ledger: ['旅行帳本', 'Trip ledger'],
+  list: ['同行者清單', 'Companions list'],
+  together: ['一起旅行的人', 'People on this trip'],
+  travelMembers: ['旅行成員', 'Trip members'],
+  owner: ['帳本擁有者 · 永久啟用', 'Ledger owner · always active'],
+  active: ['啟用中', 'Active'],
+  inactive: ['已停用', 'Inactive'],
+  history: ['保留過去紀錄', 'History preserved'],
+  you: ['你', 'You'],
+  rename: ['改名', 'Rename'],
+  deactivate: ['停用', 'Deactivate'],
+  reactivate: ['重新啟用', 'Reactivate'],
+  delete: ['刪除', 'Delete'],
+  renameFor: ['改名 {{name}}', 'Rename {{name}}'],
+  deactivateFor: ['停用 {{name}}', 'Deactivate {{name}}'],
+  reactivateFor: ['重新啟用 {{name}}', 'Reactivate {{name}}'],
+  deleteFor: ['刪除 {{name}}', 'Delete {{name}}'],
+  manageTitle: ['管理 {{name}}', 'Manage {{name}}'],
+  deleteTitle: ['刪除 {{name}}', 'Delete {{name}}'],
+  deactivateTitle: ['停用 {{name}}', 'Deactivate {{name}}'],
+  renameHint: [
+    '改名後，過去的支出與還款仍屬於同一位同行者。',
+    'Past expenses and payments remain linked to this companion after renaming.',
+  ],
+  deactivateHint: [
+    '過去的支出與還款會保留。停用後，新支出與還款不能再選用這位同行者。',
+    'Past expenses and payments remain. New records cannot select this companion after deactivation.',
+  ],
+  deleteHint: [
+    '只有未被帳務引用的同行者才能刪除；刪除後會從同行者名單移除。有歷史紀錄請改為停用。',
+    'Only companions with no accounting records can be deleted. Deletion removes them from the list; deactivate companions with history instead.',
+  ],
+  cancel: ['取消', 'Cancel'],
+});
 
 function nameKey(value: string) {
   return value.trim().replace(/[A-Z]/g, (character) => character.toLowerCase());
@@ -38,6 +106,7 @@ function MemberNameForm({
   onBusyChange?: (busy: boolean) => void;
   onBegin?: () => void;
 }) {
+  const { t } = useTranslation();
   const [commandId, setCommandId] = useState(() => member?.id ?? crypto.randomUUID());
   const [name, setName] = useState(member?.name ?? '');
   const [error, setError] = useState('');
@@ -80,9 +149,9 @@ function MemberNameForm({
     onBegin?.();
     const trimmed = name.trim();
     const invalid = !trimmed
-      ? '請輸入同行者名稱。'
+      ? t('membersPage.required')
       : members.some((row) => row.id !== commandId && nameKey(row.name) === nameKey(trimmed))
-        ? '這個名稱已使用，請使用其他名稱。'
+        ? t('membersPage.duplicate')
         : '';
     setError(invalid);
     if (invalid) {
@@ -107,9 +176,7 @@ function MemberNameForm({
       } catch (failure) {
         if (failure instanceof ApiError && failure.status >= 400 && failure.status < 500) {
           setError(
-            failure.code === 'MEMBER_NAME_CONFLICT'
-              ? '這個名稱已使用，請使用其他名稱。'
-              : failure.message,
+            failure.code === 'MEMBER_NAME_CONFLICT' ? t('membersPage.duplicate') : failure.message,
           );
 
           return;
@@ -151,29 +218,26 @@ function MemberNameForm({
       }}
     >
       <div className="field">
-        <label htmlFor={fieldId}>同行者名稱</label>
+        <label htmlFor={fieldId}>{t('membersPage.name')}</label>
         <Input
           id={fieldId}
           ref={input}
           value={name}
           onChange={(event) => setName(event.target.value)}
           autoComplete="off"
-          placeholder="輸入名字"
+          placeholder={t('membersPage.namePlaceholder')}
           required
           disabled={pending || Boolean(unknown)}
           aria-invalid={Boolean(error)}
-          aria-describedby={`${fieldId}-hint ${fieldId}-error`}
+          aria-describedby={`${fieldId}-error`}
         />
-        <p id={`${fieldId}-hint`} className="field-hint">
-          前後空白會自動去除；同一趟旅行內名稱不可重複。
-        </p>
         <p id={`${fieldId}-error`} role="alert" className="error">
           {error}
         </p>
       </div>
       {unknown ? (
         <div role="alert" className="member-unknown">
-          <p>保存結果尚未確認，你的輸入仍保留。請先查證這次操作是否已保存。</p>
+          <p>{t('membersPage.unknown')}</p>
           <Button
             type="button"
             variant="outline"
@@ -182,13 +246,13 @@ function MemberNameForm({
               void checkResult();
             }}
           >
-            查證結果
+            {t('membersPage.verify')}
           </Button>
         </div>
       ) : null}
       <ActionButton
         busy={pending}
-        label={member ? '儲存名稱' : '新增同行者'}
+        label={t(member ? 'membersPage.saveName' : 'membersPage.add')}
         type="submit"
         disabled={pending || Boolean(unknown)}
       />
@@ -199,6 +263,7 @@ function MemberNameForm({
 type MemberAction = { member: TripMember; kind: 'rename' | 'deactivate' | 'delete' };
 
 export function TripMembers() {
+  const { t } = useTranslation();
   const { tripId } = useParams();
   const { account } = useSession();
   const client = useQueryClient();
@@ -250,7 +315,7 @@ export function TripMembers() {
         ? current.items.map((row) => (row.id === saved.id ? saved : row))
         : [...(current?.items ?? []), saved],
     }));
-    setMessage('同行者資料已保存。');
+    setMessage('membersPage.saved');
     setAction(null);
     await refresh();
   }
@@ -272,7 +337,7 @@ export function TripMembers() {
       setFailure(
         error instanceof ApiError && error.status < 500
           ? error.message
-          : '保存結果尚未確認，請重新載入名單確認。',
+          : t('membersPage.saveUnknown'),
       );
     } finally {
       writing.current = false;
@@ -292,16 +357,16 @@ export function TripMembers() {
         items: (current?.items ?? []).filter((row) => row.id !== member.id),
       }));
       setAction(null);
-      setMessage('同行者已刪除。');
+      setMessage('membersPage.deleted');
       await refresh();
     } catch (error) {
       setAction(null);
       setFailure(
         error instanceof ApiError && error.code === 'MEMBER_IN_USE'
-          ? `${member.name} 已有支出或還款紀錄，不能刪除。請改為停用，歷史紀錄會保留。`
+          ? t('membersPage.inUse', { name: member.name })
           : error instanceof ApiError && error.status < 500
             ? error.message
-            : '刪除結果尚未確認，請重新載入名單確認。',
+            : t('membersPage.deleteUnknown'),
       );
     } finally {
       writing.current = false;
@@ -312,15 +377,15 @@ export function TripMembers() {
   const pageHead = (
     <header className="page-head">
       <div>
-        <h1>同行者</h1>
-        <p className="muted">新增同行者，或管理這趟旅行的成員。</p>
+        <h1>{t('membersPage.title')}</h1>
+        <p className="muted">{t('membersPage.intro')}</p>
       </div>
     </header>
   );
   const back = (
     <Link className="back" to={`/trips/${tripId}`}>
       <Icon name="back" />
-      <span>{trip.data?.name ?? '旅行帳本'}</span>
+      <span>{trip.data?.name ?? t('membersPage.ledger')}</span>
     </Link>
   );
   if (!members.data || !trip.data)
@@ -329,7 +394,7 @@ export function TripMembers() {
         {back}
         {pageHead}
         <QueryState
-          label="同行者清單"
+          label={t('membersPage.list')}
           layout="list"
           fetchStatus={
             members.fetchStatus === 'paused' || trip.fetchStatus === 'paused'
@@ -351,7 +416,7 @@ export function TripMembers() {
       {back}
       {pageHead}
       <section className="member-add-panel" aria-labelledby="member-add-title">
-        <h2 id="member-add-title">一起旅行的人</h2>
+        <h2 id="member-add-title">{t('membersPage.together')}</h2>
         <MemberNameForm
           members={members.data.items}
           base={base}
@@ -365,7 +430,7 @@ export function TripMembers() {
       </section>
       {message ? (
         <p role="status" className="feedback">
-          {message}
+          {t(message)}
         </p>
       ) : null}
       {failure ? (
@@ -381,8 +446,8 @@ export function TripMembers() {
           }}
         />
       ) : null}
-      <section aria-label="同行者清單">
-        <ul className="member-list" aria-label="旅行成員">
+      <section aria-label={t('membersPage.list')}>
+        <ul className="member-list" aria-label={t('membersPage.travelMembers')}>
           {members.data.items.map((member) => (
             <li key={member.id}>
               <div className="member-person">
@@ -393,12 +458,12 @@ export function TripMembers() {
                   <strong>{member.name}</strong>
                   <p className="muted">
                     {member.role === 'owner' ? (
-                      '帳本擁有者 · 永久啟用'
+                      t('membersPage.owner')
                     ) : member.isActive ? (
-                      '啟用中'
+                      t('membersPage.active')
                     ) : (
                       <>
-                        <span>已停用</span> · 保留過去紀錄
+                        <span>{t('membersPage.inactive')}</span> · {t('membersPage.history')}
                       </>
                     )}
                   </p>
@@ -412,55 +477,55 @@ export function TripMembers() {
                 </div>
               </div>
               {member.role === 'owner' ? (
-                <span className="muted">你</span>
+                <span className="muted">{t('membersPage.you')}</span>
               ) : (
                 <div className="member-actions">
                   <Button
                     variant="ghost"
-                    aria-label={`改名 ${member.name}`}
+                    aria-label={t('membersPage.renameFor', { name: member.name })}
                     disabled={busy}
                     onClick={() => {
                       setFailure('');
                       setAction({ member, kind: 'rename' });
                     }}
                   >
-                    改名
+                    {t('membersPage.rename')}
                   </Button>
                   {member.isActive ? (
                     <Button
                       variant="ghost"
-                      aria-label={`停用 ${member.name}`}
+                      aria-label={t('membersPage.deactivateFor', { name: member.name })}
                       disabled={busy}
                       onClick={() => {
                         setFailure('');
                         setAction({ member, kind: 'deactivate' });
                       }}
                     >
-                      停用
+                      {t('membersPage.deactivate')}
                     </Button>
                   ) : (
                     <ActionButton
                       busy={busy && activationId === member.id}
-                      label={`重新啟用 ${member.name}`}
+                      label={t('membersPage.reactivateFor', { name: member.name })}
                       variant="ghost"
                       disabled={busy}
                       onClick={() => {
                         void changeStatus(member, true);
                       }}
                     >
-                      重新啟用
+                      {t('membersPage.reactivate')}
                     </ActionButton>
                   )}
                   <Button
                     variant="ghost"
-                    aria-label={`刪除 ${member.name}`}
+                    aria-label={t('membersPage.deleteFor', { name: member.name })}
                     disabled={busy}
                     onClick={() => {
                       setFailure('');
                       setAction({ member, kind: 'delete' });
                     }}
                   >
-                    刪除
+                    {t('membersPage.delete')}
                   </Button>
                 </div>
               )}
@@ -468,16 +533,22 @@ export function TripMembers() {
           ))}
         </ul>
       </section>
-      <p className="muted">同行者不用登入，由你統一管理這趟旅行的帳務。</p>
       {action ? (
         <FormDialog
-          title={`${action.kind === 'rename' ? '管理' : action.kind === 'delete' ? '刪除' : '停用'} ${action.member.name}`}
+          title={t(
+            action.kind === 'rename'
+              ? 'membersPage.manageTitle'
+              : action.kind === 'delete'
+                ? 'membersPage.deleteTitle'
+                : 'membersPage.deactivateTitle',
+            { name: action.member.name },
+          )}
           busy={busy}
           onClose={() => setAction(null)}
         >
           {action.kind === 'rename' ? (
             <div className="member-rename-panel">
-              <p className="muted">改名後，過去的支出與還款仍屬於同一位同行者。</p>
+              <p className="muted">{t('membersPage.renameHint')}</p>
               <MemberNameForm
                 member={action.member}
                 members={members.data.items}
@@ -490,23 +561,25 @@ export function TripMembers() {
                 }}
               />
               <Button variant="outline" disabled={busy} onClick={() => setAction(null)}>
-                取消
+                {t('membersPage.cancel')}
               </Button>
             </div>
           ) : (
             <>
               <p>
                 {action.kind === 'deactivate'
-                  ? '過去的支出與還款會保留。停用後，新支出與還款不能再選用這位同行者。'
-                  : '只有未被帳務引用的同行者才能刪除；刪除後會從同行者名單移除。有歷史紀錄請改為停用。'}
+                  ? t('membersPage.deactivateHint')
+                  : t('membersPage.deleteHint')}
               </p>
               <div className="form-actions">
                 <Button variant="outline" disabled={busy} onClick={() => setAction(null)}>
-                  取消
+                  {t('membersPage.cancel')}
                 </Button>
                 <ActionButton
                   busy={busy}
-                  label={action.kind === 'delete' ? '刪除' : '停用'}
+                  label={t(
+                    action.kind === 'delete' ? 'membersPage.delete' : 'membersPage.deactivate',
+                  )}
                   disabled={busy}
                   onClick={() => {
                     if (action.kind === 'delete') void remove(action.member);

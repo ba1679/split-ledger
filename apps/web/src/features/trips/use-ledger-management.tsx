@@ -2,7 +2,7 @@ import React, { useState, type RefObject } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '../auth/session.js';
 import { TripCommandDialog, ThumbnailEntryDialog } from './TripCommandDialog.js';
-import { lifecycleOutcomeMessage, type ManagedTrip, type TripState } from './management-api.js';
+import { lifecycleOutcomeMessageKey, type ManagedTrip, type TripState } from './management-api.js';
 
 export function useLedgerManagement(
   currentTrip: ManagedTrip | undefined,
@@ -35,9 +35,9 @@ export function useLedgerManagement(
         setManagementDialog(null);
         navigate('/trips', {
           state: {
-            message: verified
-              ? lifecycleOutcomeMessage(result)
-              : '旅行已移至垃圾桶，可從垃圾桶復原。',
+            messageKey: verified
+              ? 'trips.' + lifecycleOutcomeMessageKey(result)
+              : 'trips.tripMovedToTrashYouCanRestoreIt',
           },
         });
       }}

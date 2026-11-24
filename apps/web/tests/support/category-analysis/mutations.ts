@@ -49,7 +49,7 @@ export async function appendBrowserAnalysis(
       .click();
     await page.getByLabel('支出項目', { exact: true }).fill(row.項目!);
     await chooseCurrency(page, row.幣別!);
-    await page.getByLabel('金額', { exact: true }).fill(row.金額!);
+    await page.getByLabel('支出金額', { exact: true }).fill(row.金額!);
     await dateInput(page).fill('2027/04/03');
     await dateInput(page).press('Tab');
     await page
@@ -110,7 +110,7 @@ export async function saveBrowserAnalysisAmount(
     before = await analysisSnapshot(world);
   await openBrowserAnalysisExpense(page, world, item);
   await chooseCurrency(page, currency);
-  await page.getByLabel('金額', { exact: true }).fill(amount);
+  await page.getByLabel('支出金額', { exact: true }).fill(amount);
   await finishBrowserAnalysisSave(page, world);
   const row = (await world.db.query('SELECT * FROM expenses WHERE id=$1', [c.expenses.get(item)]))
     .rows[0];

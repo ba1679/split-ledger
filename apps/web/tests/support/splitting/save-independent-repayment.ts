@@ -70,7 +70,7 @@ export async function observeIndependentRepaymentSave(page: Page, tripId: string
           if (responses.length) outcome = repaymentSubmissionOutcome(responses[0]!.status());
           else if (
             await page
-              .getByText(/尚無法確認|尚未確認|結果未明|無法確認.*(?:保存|儲存)/)
+              .getByText(/尚無法確認|尚未確認|結果待確認|結果未明|無法確認.*(?:保存|儲存)/)
               .first()
               .isVisible()
           )

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pie, PieChart, Sector, type PieSectorShapeProps } from 'recharts';
 import type { AnalysisCategory, AnalysisChart } from '../../../api/expense-analysis.js';
 import { ChartContainer, ChartTooltip } from '../../../components/ui/chart.js';
@@ -7,6 +8,7 @@ import { displayAmount } from '../money.js';
 import { chartWeights, formatAnalysisPercent } from './math.js';
 import type { AnalysisTrigger } from './CategoryInfo.js';
 import { AnalysisTooltip } from './AnalysisTooltip.js';
+import '../messages.js';
 
 export const categoryKey = (row: AnalysisCategory) => row.category?.id ?? 'unclassified';
 
@@ -42,6 +44,10 @@ export function CategorySpendingCard({
   informationOpen: boolean;
   onInspect: (row: AnalysisCategory, trigger: AnalysisTrigger) => void;
 }) {
+  const { t } = useTranslation();
+  const personal = kind === '個人';
+  const title = t(personal ? 'expenses.personalTitle' : 'expenses.groupTitle');
+  const totalLabel = t(personal ? 'expenses.personalTotal' : 'expenses.groupTotal');
   const [tooltipPosition, setTooltipPosition] = React.useState<{ x: number; y: number }>();
   const totalText = displayAmount(formatShareAmount(chart.total));
   const rows = orderedCategories(chart.categories);
@@ -54,16 +60,14 @@ export function CategorySpendingCard({
   }));
 
   return (
-    <section className="analysis-card" role="region" aria-label={`${kind}花費`}>
-      <h2>{kind}花費</h2>
+    <section className="analysis-card" role="region" aria-label={title}>
+      <h2>{title}</h2>
       <p className="analysis-card-description">
-        {kind === '個人'
-          ? '自己的消費，加上共同支出中你負擔的份額'
-          : '僅包含至少兩人分攤的共同消費'}
+        {t(personal ? 'expenses.personalDescription' : 'expenses.groupDescription')}
       </p>
       {rows.length ? (
         <div className="analysis-ring">
-          <ChartContainer config={{}} className="analysis-chart" aria-label={`${kind}分類比例圖`}>
+          <ChartContainer config={{}} className="analysis-chart" aria-label={t(personal ? 'expenses.personalChart' : 'expenses.groupChart')}>
             <PieChart accessibilityLayer={false}>
               <Pie
                 data={data}
@@ -84,7 +88,7 @@ export function CategorySpendingCard({
                     {...props}
                     tabIndex={-1}
                     role="button"
-                    aria-label={rows[props.index]?.category?.name ?? '未分類'}
+                    aria-label={rows[props.index]?.category?.name ?? t('expenses.uncategorized')}
                     onKeyDown={(event) => {
                       if (event.key === 'Enter' || event.key === ' ') {
                         event.preventDefault();
@@ -129,24 +133,24 @@ export function CategorySpendingCard({
           <div
             className={`analysis-total${totalText.length > 16 ? ' analysis-total-longer' : totalText.length > 12 ? ' analysis-total-long' : ''}`}
           >
-            <output aria-label={`${kind}總額`}>{totalText}</output>
+            <output aria-label={totalLabel}>{totalText}</output>
             <span className="analysis-total-currency">{currency}</span>
           </div>
         </div>
       ) : (
         <div className="analysis-total analysis-zero-total">
           <span className="analysis-total-currency">{currency}</span>
-          <output aria-label={`${kind}總額`}>{totalText}</output>
+          <output aria-label={totalLabel}>{totalText}</output>
         </div>
       )}
       {rows.length ? (
         <div className="analysis-details">
           <div className="analysis-details-heading">
-            <span>分類</span>
-            <span>金額・占比</span>
+            <span>{t('expenses.category')}</span>
+            <span>{t('expenses.analysisAmountShare')}</span>
           </div>
           {rows.map((row) => {
-            const name = row.category?.name ?? '未分類',
+            const name = row.category?.name ?? t('expenses.uncategorized'),
               amount = displayAmount(formatShareAmount(row.amount)),
               percent = formatAnalysisPercent(row.amount, chart.total);
 
@@ -172,9 +176,9 @@ export function CategorySpendingCard({
       ) : (
         <>
           <p className="analysis-zero-description">
-            {kind === '個人' ? '這個幣別沒有你負擔的支出。' : '這個幣別沒有符合的共同消費。'}
+            {t(personal ? 'expenses.personalNoSpending' : 'expenses.groupNoSpending')}
           </p>
-          <p className="analysis-zero-hint">可切換幣別查看其他花費。</p>
+          <p className="analysis-zero-hint">{t('expenses.analysisSwitchCurrency')}</p>
         </>
       )}
     </section>

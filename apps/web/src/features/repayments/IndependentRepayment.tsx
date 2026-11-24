@@ -1,9 +1,13 @@
-import React, { useId, useRef, useState } from 'react';
+import { MobileLanguageBar } from '../../components/LanguageMenu.js';
+import { useTranslation } from 'react-i18next';
+import { currencyOption } from '../../i18n/currency-options.js';
+import React, { useId, useRef, useState, useSyncExternalStore } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { parseMoney, type ExactAmount } from '@split-ledger/shared';
 import {
   apiRequest,
+  apiErrorMessage,
   ApiError,
   type Trip,
   type TripMember,
@@ -23,9 +27,81 @@ import { dateOnly, localToday, parseDate } from '../../components/date.js';
 import { QueryState } from '../../components/QueryState.js';
 import { SearchCombo } from '../../components/SearchCombo.js';
 import { Icon } from '../../components/Icon.js';
+import { registerInterfaceMessages } from '../../i18n/runtime.js';
 import './repayment.css';
 
+registerInterfaceMessages('repaymentForm', {
+  label: ['還款表單', 'Separate payment form'],
+  saved: ['還款已儲存', 'Payment recorded'],
+  partiesRequired: [
+    '請選擇本旅行啟用中的付款人與收款人。',
+    'Select an active payer and recipient on this trip.',
+  ],
+  sameParty: ['付款人與收款人不可相同。', 'Payer and recipient must be different.'],
+  currencyRequired: ['請選擇有效幣別。', 'Select a valid currency.'],
+  amountInvalid: [
+    '請輸入符合幣別位數的正數金額。',
+    'Enter a positive amount paid with valid currency precision.',
+  ],
+  dateInvalid: ['請輸入有效日期（YYYY/MM/DD）。', 'Enter a valid date (YYYY/MM/DD).'],
+  title: ['記錄一筆實際還款', 'Record a separate payment'],
+  intro: [
+    '可先付一部分，也可以分次記錄。',
+    'Record a payment without selecting a payment arrangement.',
+  ],
+  due: ['目前應付', 'Amount due'],
+  lastConfirmed: ['目前應付（上次已確認）', 'Amount due (last confirmed)'],
+  selectParties: [
+    '選擇付款人與收款人，查看目前安排。',
+    'Select a payer and recipient to see the current arrangement.',
+  ],
+  contents: ['還款內容', 'Payment details'],
+  payer: ['付款人', 'Payer'],
+  payee: ['收款人', 'Recipient'],
+  choosePayer: ['選擇付款人', 'Select payer'],
+  choosePayee: ['選擇收款人', 'Select recipient'],
+  amount: ['金額', 'Amount paid'],
+  currency: ['幣別', 'Currency'],
+  date: ['還款日期', 'Payment date'],
+  remaining: [
+    '這次記錄後，將剩餘 {{currency}} {{amount}}。',
+    'After this payment, {{currency}} {{amount}} will remain due.',
+  ],
+  overHint: [
+    '還款超過目前應付時，會先告知結果，確認後才保存。',
+    'If the payment exceeds the amount due, review the result before saving.',
+  ],
+  onlyCurrency: [
+    '只更新 {{currency}} 的付款安排，其他幣別不變。',
+    'Only {{currency}} payment arrangements will change; other currencies stay the same.',
+  ],
+  overConfirm: ['超額確認', 'Overpayment confirmation'],
+  overTitle: ['這筆還款超過應付額', 'This payment exceeds the amount due'],
+  changedTitle: ['付款安排已更新', 'Payment arrangements have changed'],
+  excess: [
+    '超額 {{currency}} {{amount}}，尚未保存。',
+    'Excess {{currency}} {{amount}} has not been saved.',
+  ],
+  reverseDue: [
+    '{{payer}} 應付 {{payee}} {{currency}} {{amount}}',
+    '{{payer}} owes {{payee}} {{currency}} {{amount}}',
+  ],
+  reviewDue: [
+    '尚未保存，請確認更新後的應付金額。',
+    'Not saved yet. Review the updated amount due.',
+  ],
+  changedHint: [
+    '帳本已有變更，請再次確認；如仍超額，會重新取得警告並請你確認。',
+    'The ledger has changed. Review again; if the amount still exceeds what is due, confirm the new warning.',
+  ],
+  confirm: ['確認儲存還款', 'Confirm payment'],
+  cancel: ['取消', 'Cancel'],
+  returnConfirmed: ['返回已確認資料', 'Return to confirmed data'],
+  save: ['儲存還款', 'Save payment'],
+});
+
 type PaymentDraft = Omit<CreateRepaymentRequest, 'overpaymentConfirmation'>;
+type Verification = { draft: PaymentDraft; status: 'unconfirmed' | 'unknown' };
 type Errors = Partial<Record<'parties' | 'amount' | 'currency' | 'date', string>>;
 
 function remainingAfter(
@@ -67,6 +143,7 @@ function matchesPayment(saved: Repayment, draft: PaymentDraft, tripId: string) {
 }
 
 export function IndependentRepayment() {
+  const { t } = useTranslation();
   const { tripId } = useParams();
   const { account } = useSession();
   const base = `/api/trips/${tripId}`;
@@ -87,7 +164,7 @@ export function IndependentRepayment() {
   if (!query.data)
     return (
       <QueryState
-        label="還款表單"
+        label={t('repaymentForm.label')}
         layout="form"
         fetchStatus={query.fetchStatus}
         pending={query.isPending}
@@ -99,6 +176,16 @@ export function IndependentRepayment() {
     );
 
   return <RepaymentEditor key={`${account!.id}:${tripId}`} {...query.data} />;
+}
+
+function subscribeOnline(notify: () => void) {
+  window.addEventListener('online', notify);
+  window.addEventListener('offline', notify);
+
+  return () => {
+    window.removeEventListener('online', notify);
+    window.removeEventListener('offline', notify);
+  };
 }
 
 function RepaymentEditor({
@@ -113,6 +200,8 @@ function RepaymentEditor({
   settlement: SettlementView;
 }) {
   const { account } = useSession();
+  const { t, i18n } = useTranslation();
+  const online = useSyncExternalStore(subscribeOnline, () => navigator.onLine);
   const navigate = useNavigate();
   const client = useQueryClient();
   const base = `/api/trips/${trip.id}`;
@@ -124,7 +213,7 @@ function RepaymentEditor({
   const [date, setDate] = useState(() => dateOnly(localToday()).replaceAll('-', '/'));
   const [settlement, setSettlement] = useState(initialSettlement);
   const [errors, setErrors] = useState<Errors>({});
-  const [failure, setFailure] = useState('');
+  const [failure, setFailure] = useState<ApiError | 'revisionConflict' | null>(null);
   const [warning, setWarning] = useState<{
     draft: PaymentDraft;
     confirmation?: OverpaymentConfirmation;
@@ -132,7 +221,7 @@ function RepaymentEditor({
     reverseDebtorMemberId: string;
     reverseCreditorMemberId: string;
   } | null>(null);
-  const [unknown, setUnknown] = useState<PaymentDraft | null>(null);
+  const [unknown, setUnknown] = useState<Verification | null>(null);
   const [saving, setSaving] = useState(false);
   const writing = useRef(false);
   const payerId = useId(),
@@ -162,10 +251,11 @@ function RepaymentEditor({
         client.invalidateQueries({ queryKey: ['account', account!.id, resource] }),
       ),
     );
-    navigate(`/trips/${trip.id}/settlement`, { state: { message: '還款已儲存' } });
+    navigate(`/trips/${trip.id}/settlement`, { state: { messageKey: 'repaymentForm.saved' } });
   }
 
   async function verify(draft: PaymentDraft) {
+    let status: Verification['status'] = 'unknown';
     try {
       const result = await apiRequest<Repayment>(`${base}/repayments/${draft.id}`);
       if (matchesPayment(result, draft, trip.id)) {
@@ -173,10 +263,11 @@ function RepaymentEditor({
 
         return;
       }
-    } catch {
-      /* Even 404 cannot establish whether the original POST committed. */
+    } catch (error) {
+      // A reachable server without a matching record cannot prove the original save failed.
+      if (error instanceof ApiError && error.status === 404) status = 'unconfirmed';
     }
-    setUnknown(draft);
+    setUnknown({ draft, status });
   }
 
   async function submit(draft: PaymentDraft, confirmation?: OverpaymentConfirmation) {
@@ -190,7 +281,7 @@ function RepaymentEditor({
       });
       if (!matchesPayment(result, draft, trip.id)) {
         setWarning(null);
-        setUnknown(draft);
+        setUnknown({ draft, status: 'unknown' });
         await verify(draft);
 
         return;
@@ -229,12 +320,14 @@ function RepaymentEditor({
               reverseCreditorMemberId: draft.payerMemberId,
             });
           } catch {
-            setFailure('付款安排已更新，請重新載入後再確認。');
+            setFailure('revisionConflict');
           }
-        } else setFailure(error.message);
+        } else {
+          setFailure(error.code === 'ACCOUNTING_REVISION_CONFLICT' ? 'revisionConflict' : error);
+        }
       } else {
         setWarning(null);
-        setUnknown(draft);
+        setUnknown({ draft, status: 'unknown' });
         await verify(draft);
       }
     }
@@ -247,17 +340,17 @@ function RepaymentEditor({
       !active.some((member) => member.id === payer) ||
       !active.some((member) => member.id === payee)
     )
-      next.parties = '請選擇本旅行啟用中的付款人與收款人。';
-    else if (payer === payee) next.parties = '付款人與收款人不可相同。';
-    if (precision === undefined) next.currency = '請選擇有效幣別。';
+      next.parties = 'repaymentForm.partiesRequired';
+    else if (payer === payee) next.parties = 'repaymentForm.sameParty';
+    if (precision === undefined) next.currency = 'repaymentForm.currencyRequired';
     else
       try {
         parseMoney(amount, precision, currency);
       } catch {
-        next.amount = '請輸入符合幣別位數的正數金額。';
+        next.amount = 'repaymentForm.amountInvalid';
       }
     const parsedDate = parseDate(date);
-    if (!parsedDate) next.date = '請輸入有效日期（YYYY/MM/DD）。';
+    if (!parsedDate) next.date = 'repaymentForm.dateInvalid';
     setErrors(next);
     if (Object.keys(next).length) return;
     const draft = warning?.draft ?? {
@@ -270,7 +363,7 @@ function RepaymentEditor({
     };
     writing.current = true;
     setSaving(true);
-    setFailure('');
+    setFailure(null);
     try {
       await submit(draft, confirm ? warning?.confirmation : undefined);
     } finally {
@@ -281,26 +374,28 @@ function RepaymentEditor({
 
   return (
     <div className="repayment-page">
-      <Link className="back" to={`/trips/${trip.id}/settlement`}>
-        <Icon name="back" />
-        <span>{trip.name}</span>
-      </Link>
+      <MobileLanguageBar>
+        <Link className="back" to={`/trips/${trip.id}/settlement`}>
+          <Icon name="back" />
+          <span>{trip.name}</span>
+        </Link>
+      </MobileLanguageBar>
       <header className="page-head">
         <div>
-          <h1>記錄一筆實際還款</h1>
-          <p className="muted">可先付一部分，也可以分次記錄。</p>
+          <h1>{t('repaymentForm.title')}</h1>
+          <p className="muted">{t('repaymentForm.intro')}</p>
         </div>
       </header>
-      <section className="repayment-due" aria-label="目前應付">
-        <p>目前應付{unknown ? '（上次已確認）' : ''}</p>
+      <section className="repayment-due" aria-label={t('repaymentForm.due')}>
+        <p>{t(unknown ? 'repaymentForm.lastConfirmed' : 'repaymentForm.due')}</p>
         <strong>
           {payer && payee
             ? `${names.get(payer)} → ${names.get(payee)} / ${currency} ${due ? formatShareAmount(due) : '0'}`
-            : '選擇付款人與收款人，查看目前安排。'}
+            : t('repaymentForm.selectParties')}
         </strong>
       </section>
       <form
-        aria-label="還款表單"
+        aria-label={t('repaymentForm.label')}
         noValidate
         data-command-id={id}
         onSubmit={(event) => {
@@ -309,10 +404,10 @@ function RepaymentEditor({
         }}
       >
         <fieldset disabled={saving || Boolean(unknown) || Boolean(warning)}>
-          <legend className="sr-only">還款內容</legend>
+          <legend className="sr-only">{t('repaymentForm.contents')}</legend>
           <div className="repayment-parties">
             <div className="field">
-              <label htmlFor={payerId}>付款人</label>
+              <label htmlFor={payerId}>{t('repaymentForm.payer')}</label>
               <Select
                 className="ds-input"
                 id={payerId}
@@ -321,7 +416,7 @@ function RepaymentEditor({
                 aria-invalid={Boolean(errors.parties)}
                 aria-describedby={`${payerId}-error`}
               >
-                <option value="">選擇付款人</option>
+                <option value="">{t('repaymentForm.choosePayer')}</option>
                 {active.map((member) => (
                   <option key={member.id} value={member.id}>
                     {member.name}
@@ -330,7 +425,7 @@ function RepaymentEditor({
               </Select>
             </div>
             <div className="field">
-              <label htmlFor={payeeId}>收款人</label>
+              <label htmlFor={payeeId}>{t('repaymentForm.payee')}</label>
               <Select
                 className="ds-input"
                 id={payeeId}
@@ -339,7 +434,7 @@ function RepaymentEditor({
                 aria-invalid={Boolean(errors.parties)}
                 aria-describedby={`${payerId}-error`}
               >
-                <option value="">選擇收款人</option>
+                <option value="">{t('repaymentForm.choosePayee')}</option>
                 {active.map((member) => (
                   <option key={member.id} value={member.id}>
                     {member.name}
@@ -350,12 +445,12 @@ function RepaymentEditor({
           </div>
           {errors.parties ? (
             <p className="error" role="alert" id={`${payerId}-error`}>
-              {errors.parties}
+              {errors.parties && t(errors.parties)}
             </p>
           ) : null}
           <div className="repayment-money">
             <div className="field">
-              <label htmlFor={amountId}>金額</label>
+              <label htmlFor={amountId}>{t('repaymentForm.amount')}</label>
               <Input
                 id={amountId}
                 value={amount}
@@ -365,58 +460,73 @@ function RepaymentEditor({
                 aria-describedby={`${amountId}-error`}
               />
               <p className="error" role="alert" id={`${amountId}-error`}>
-                {errors.amount}
+                {errors.amount && t(errors.amount)}
               </p>
             </div>
             <SearchCombo
-              label="幣別"
+              label={t('repaymentForm.currency')}
               value={currency}
-              options={currencies.items.map((entry) => ({
-                value: entry.code,
-                label: `${entry.code} · ${entry.name}`,
-              }))}
+              options={currencies.items.map((entry) =>
+                currencyOption(entry, i18n.resolvedLanguage),
+              )}
               onChange={setCurrency}
-              error={errors.currency}
+              error={errors.currency && t(errors.currency)}
             />
           </div>
-          <DateField label="還款日期" value={date} onChange={setDate} error={errors.date} />
+          <DateField
+            label={t('repaymentForm.date')}
+            value={date}
+            onChange={setDate}
+            error={errors.date && t(errors.date)}
+          />
         </fieldset>
         {remaining && !unknown ? (
           <section className="repayment-preview">
             <p>
               {BigInt(remaining.numerator) >= 0n
-                ? `這次記錄後，將剩餘 ${currency} ${formatShareAmount(remaining)}。`
-                : '還款超過目前應付時，會先告知結果，確認後才保存。'}
+                ? t('repaymentForm.remaining', { currency, amount: formatShareAmount(remaining) })
+                : t('repaymentForm.overHint')}
             </p>
-            <p className="muted">只更新 {currency} 的付款安排，其他幣別不變。</p>
+            <p className="muted">{t('repaymentForm.onlyCurrency', { currency })}</p>
           </section>
         ) : null}
         {failure ? (
           <p role="alert" className="error">
-            {failure}
+            {failure === 'revisionConflict'
+              ? t('repayment.revisionConflict')
+              : apiErrorMessage(failure)}
           </p>
         ) : null}
         {warning ? (
-          <section className="repayment-warning" aria-label="超額確認" role="alert">
-            <h2>{warning.excessAmount ? '這筆還款超過應付額' : '付款安排已更新'}</h2>
+          <section
+            className="repayment-warning"
+            aria-label={t('repaymentForm.overConfirm')}
+            role="alert"
+          >
+            <h2>
+              {t(warning.excessAmount ? 'repaymentForm.overTitle' : 'repaymentForm.changedTitle')}
+            </h2>
             {warning.excessAmount ? (
               <>
                 <p>
-                  超額 {warning.draft.currencyCode} {formatShareAmount(warning.excessAmount)}
-                  ，尚未保存。
+                  {t('repaymentForm.excess', {
+                    currency: warning.draft.currencyCode,
+                    amount: formatShareAmount(warning.excessAmount),
+                  })}
                 </p>
                 <p>
-                  {names.get(warning.reverseDebtorMemberId)} 應付{' '}
-                  {names.get(warning.reverseCreditorMemberId)} {warning.draft.currencyCode}{' '}
-                  {formatShareAmount(warning.excessAmount)}
+                  {t('repaymentForm.reverseDue', {
+                    payer: names.get(warning.reverseDebtorMemberId),
+                    payee: names.get(warning.reverseCreditorMemberId),
+                    currency: warning.draft.currencyCode,
+                    amount: formatShareAmount(warning.excessAmount),
+                  })}
                 </p>
               </>
             ) : (
-              <p>尚未保存，請確認更新後的應付金額。</p>
+              <p>{t('repaymentForm.reviewDue')}</p>
             )}
-            {!warning.confirmation ? (
-              <p>帳本已有變更，請再次確認；如仍超額，會重新取得警告並請你確認。</p>
-            ) : null}
+            {!warning.confirmation ? <p>{t('repaymentForm.changedHint')}</p> : null}
             <div className="repayment-actions">
               <Button
                 type="button"
@@ -425,7 +535,7 @@ function RepaymentEditor({
                   void save(true);
                 }}
               >
-                確認儲存還款
+                {t('repaymentForm.confirm')}
               </Button>
               <Button
                 type="button"
@@ -433,15 +543,22 @@ function RepaymentEditor({
                 disabled={saving}
                 onClick={() => setWarning(null)}
               >
-                取消
+                {t('repaymentForm.cancel')}
               </Button>
             </div>
           </section>
         ) : null}
         {unknown ? (
           <section className="repayment-warning" role="status">
-            <h2>還款保存結果尚未確認</h2>
-            <p>請先查證這次操作是否已保存。你的輸入仍會保留。</p>
+            <h2>
+              {t(
+                online && unknown.status === 'unconfirmed'
+                  ? 'repayment.unconfirmedResult'
+                  : 'repayment.unknownResult',
+              )}
+            </h2>
+            <p>{t('repayment.pendingHelp')}</p>
+            {!online ? <p>{t('repayment.offlineHelp')}</p> : null}
             <div className="repayment-actions">
               <Button
                 type="button"
@@ -450,16 +567,18 @@ function RepaymentEditor({
                   if (writing.current) return;
                   writing.current = true;
                   setSaving(true);
-                  void verify(unknown).finally(() => {
+                  void verify(unknown.draft).finally(() => {
                     writing.current = false;
                     setSaving(false);
                   });
                 }}
               >
-                查證結果
+                {t('repayment.checkResult')}
               </Button>
               <Button asChild variant="outline">
-                <Link to={`/trips/${trip.id}/settlement`}>返回已確認資料</Link>
+                <Link to={`/trips/${trip.id}/settlement`}>
+                  {t('repaymentForm.returnConfirmed')}
+                </Link>
               </Button>
             </div>
           </section>
@@ -467,13 +586,13 @@ function RepaymentEditor({
         <div className="repayment-actions">
           <ActionButton
             busy={saving}
-            label="儲存還款"
+            label={t('repaymentForm.save')}
             type="submit"
             disabled={saving || Boolean(unknown) || Boolean(warning)}
           />
         </div>
       </form>
-      <p className="muted">若還款超過目前應付，會先告知結果，確認後才保存。</p>
+      <p className="muted">{t('repaymentForm.overHint')}</p>
     </div>
   );
 }

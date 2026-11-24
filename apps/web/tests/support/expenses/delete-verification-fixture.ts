@@ -59,7 +59,7 @@ export async function arrangeExpenseDeleteVerification(
   await waitForManagementReads(managementUI(world));
   const draft: ExpenseVerificationDraft = {
     item: await page.getByLabel('支出項目', { exact: true }).inputValue(),
-    amount: await page.getByLabel('金額', { exact: true }).inputValue(),
+    amount: await page.getByLabel('支出金額', { exact: true }).inputValue(),
     date: await page.getByRole('textbox', { name: '支出日期', exact: true }).inputValue(),
     currency: await page.getByRole('combobox', { name: '幣別', exact: true }).inputValue(),
     category: await page.getByRole('combobox', { name: /^分類(?:選填)?$/ }).inputValue(),
@@ -213,7 +213,7 @@ export async function arrangeExpenseDeleteVerification(
   await expect(page.getByText(/刪除結果(?:尚未確認|無法確認)/).first()).toBeVisible();
   await expect(page.getByRole('button', { name: /^(重新查證|再次查證)$/ })).toBeEnabled();
   await expect(page.getByLabel('支出項目', { exact: true })).toHaveValue(draft.item);
-  await expect(page.getByLabel('金額', { exact: true })).toHaveValue(draft.amount);
+  await expect(page.getByLabel('支出金額', { exact: true })).toHaveValue(draft.amount);
   await expect(
     page.getByRole('textbox', { name: '支出日期', exact: true, includeHidden: true }),
   ).toHaveValue(draft.date);

@@ -1,4 +1,6 @@
 import { Input } from '../../components/ui/input.js';
+import { useTranslation } from 'react-i18next';
+import { currencyOption } from '../../i18n/currency-options.js';
 import { Button } from '../../components/ui/button.js';
 import React, { useEffect, useId, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -7,6 +9,7 @@ import { parseMoney } from '@split-ledger/shared';
 import { expenseDraftKey, type RetainedExpenseDraft } from './expense-draft.js';
 import {
   apiRequest,
+  apiErrorMessage,
   ApiError,
   type Trip,
   type CurrencyList,
@@ -31,7 +34,7 @@ import {
   UnavailableTrip,
   OfflineWrite,
   UnconfirmedWrite,
-  unconfirmedMessage,
+  unconfirmedMessageKey,
   verifiedDelete,
   verifiedSave,
   type SaveIntent,
@@ -42,9 +45,13 @@ import type { TripState } from '../trips/management-api.js';
 import { readCategoryPreference, saveCategoryPreference } from '../categories/preference.js';
 import { Icon } from '../../components/Icon.js';
 import { readCurrencyPreference, saveCurrencyPreference } from './currency-preference.js';
+import './messages.js';
 
 type FieldErrors = Partial<
-  Record<'item' | 'currency' | 'amount' | 'date' | 'payerMemberId' | 'shareMemberIds', string>
+  Record<
+    'item' | 'currency' | 'amount' | 'date' | 'payerMemberId' | 'shareMemberIds',
+    string | ApiError
+  >
 >;
 
 export interface ExpenseDraft {
@@ -58,6 +65,7 @@ export interface ExpenseDraft {
 }
 
 export function ExpenseForm({ initialDraft }: { initialDraft?: ExpenseDraft } = {}) {
+  const { t } = useTranslation();
   const { tripId, expenseId } = useParams(),
     { account } = useSession();
   const trip = useQuery({
@@ -77,10 +85,10 @@ export function ExpenseForm({ initialDraft }: { initialDraft?: ExpenseDraft } = 
       <>
         <Link className="back" to={tripId ? `/trips/${tripId}` : '/trips'}>
           <Icon name="back" />
-          <span>返回旅行帳本</span>
+          <span>{t('expenses.backLedger')}</span>
         </Link>
         <QueryState
-          label="支出詳情與支出表單"
+          label={t('expenses.formRegion')}
           layout="form"
           fetchStatus={
             trip.fetchStatus === 'paused' || expense.fetchStatus === 'paused'
@@ -119,6 +127,7 @@ function ExpenseEditor({
   expense?: Expense;
   readError: Error | null;
 }) {
+  const { t, i18n } = useTranslation();
   const { account } = useSession(),
     navigate = useNavigate(),
     client = useQueryClient();
@@ -164,7 +173,7 @@ function ExpenseEditor({
       apiRequest<ItemList<TripMember>>(`/api/trips/${tripId}/members`, { signal }),
   });
   const [errors, setErrors] = useState<FieldErrors>({}),
-    [saveError, setSaveError] = useState('');
+    [saveError, setSaveError] = useState<string | Error>('');
   const [deleting, setDeleting] = useState(false);
   const [unconfirmed, setUnconfirmed] = useState<WriteIntent | null>(null);
   const [stateReadRequired, setStateReadRequired] = useState(false);
@@ -207,7 +216,7 @@ function ExpenseEditor({
 
   function showWriteError(error: Error) {
     if (!sameOwner()) return;
-    setSaveError(error instanceof UnavailableTrip ? '' : error.message);
+    setSaveError(error instanceof UnavailableTrip ? '' : error);
     if (error instanceof UnavailableTrip) {
       setDeleting(false);
       void client.cancelQueries({
@@ -311,18 +320,26 @@ function ExpenseEditor({
   }
 
   const currencyOptions =
-    currencies.data?.items.map((option) => ({
-      value: option.code,
-      label: `${option.code} · ${option.name}`,
-    })) ?? [];
+    currencies.data?.items.map((option) => currencyOption(option, i18n.resolvedLanguage)) ?? [];
 
   if (expense && !currencyOptions.some((option) => option.value === expense.currencyCode))
     currencyOptions.push({
       value: expense.currencyCode,
-      label: `${expense.currencyCode} · 已保存幣別`,
+      label: `${expense.currencyCode} · ${t('expenses.savedCurrency')}`,
     });
 
-  async function saved(message: string) {
+  function displayError(error: string | Error | undefined) {
+    if (error instanceof ApiError) return apiErrorMessage(error);
+    if (error instanceof UnconfirmedWrite)
+      return t('expenses.' + unconfirmedMessageKey(error.intent.kind));
+    if (error instanceof OfflineWrite)
+      return t(error.kind === 'save' ? 'expenses.offlineSave' : 'expenses.offlineDelete');
+    if (error instanceof Error) return error.message;
+
+    return error ? t(error) : '';
+  }
+
+  async function saved(messageKey: string) {
     if (!sameOwner()) return;
     client.removeQueries({ queryKey: expenseDraftKey(account!.id, tripId), exact: true });
     await Promise.all(
@@ -340,7 +357,7 @@ function ExpenseEditor({
         client.invalidateQueries({ queryKey: ['account', account!.id, resource] }),
       ),
     );
-    if (sameOwner()) navigate(`/trips/${tripId}`, { state: { message } });
+    if (sameOwner()) navigate(`/trips/${tripId}`, { state: { messageKey } });
   }
 
   const mutation = useMutation({
@@ -397,7 +414,7 @@ function ExpenseEditor({
             try {
               current = await readTripState();
             } catch {
-              throw new Error('這次支出未保存，目前無法確認旅行狀態，請重新讀取後再試。', {
+              throw new Error(t('expenses.saveStateUnknown'), {
                 cause: error,
               });
             }
@@ -413,7 +430,7 @@ function ExpenseEditor({
         throw new UnconfirmedWrite(intent, error);
       }
     },
-    onSuccess: () => saved('支出已保存'),
+    onSuccess: () => saved('expenses.saveSuccess'),
     onError: (error) => {
       showWriteError(error);
       if (error instanceof UnconfirmedWrite) setUnconfirmed(error.intent);
@@ -428,7 +445,7 @@ function ExpenseEditor({
         if (
           ['item', 'currency', 'amount', 'date', 'payerMemberId', 'shareMemberIds'].includes(field)
         )
-          setErrors((previous) => ({ ...previous, [field]: error.message }));
+          setErrors((previous) => ({ ...previous, [field]: error }));
       }
     },
     onSettled: () => {
@@ -452,7 +469,7 @@ function ExpenseEditor({
         throw new UnconfirmedWrite(intent, error);
       }
     },
-    onSuccess: () => saved('支出已刪除'),
+    onSuccess: () => saved('expenses.deleteSuccess'),
     onError: (error) => {
       showWriteError(error);
       if (error instanceof UnconfirmedWrite) setUnconfirmed(error.intent);
@@ -471,8 +488,8 @@ function ExpenseEditor({
         : verifiedDelete(intent, readTripState),
     onSuccess: async (confirmed, intent) => {
       if (confirmed) {
-        await saved(intent.kind === 'save' ? '支出已保存' : '支出已刪除');
-      } else setSaveError(unconfirmedMessage(intent.kind));
+        await saved(intent.kind === 'save' ? 'expenses.saveSuccess' : 'expenses.deleteSuccess');
+      } else setSaveError('expenses.' + unconfirmedMessageKey(intent.kind));
     },
     onError: showWriteError,
     onSettled: () => {
@@ -482,7 +499,7 @@ function ExpenseEditor({
 
   const busy = mutation.isPending || deletion.isPending || verification.isPending || checkingTrip;
   const categoryOptions = [
-    { value: '', label: '未分類' },
+    { value: '', label: t('expenses.uncategorized') },
     ...(categories.data?.items.map((option) => ({ value: option.id, label: option.name })) ?? []),
   ];
 
@@ -511,11 +528,11 @@ function ExpenseEditor({
     try {
       const current = await readTripState();
       if (!sameOwner()) return;
-      setSaveError(current.state === 'active' ? '旅行目前可用，請確認保留的草稿後再保存。' : '');
+      setSaveError(current.state === 'active' ? 'expenses.tripReady' : '');
       if (current.state === 'active')
         requestAnimationFrame(() => itemInput.current?.focus({ preventScroll: true }));
     } catch {
-      if (sameOwner()) setSaveError('目前無法確認旅行狀態，請稍後再查證。');
+      if (sameOwner()) setSaveError('expenses.tripStateUnknown');
     } finally {
       writing.current = false;
       if (alive.current) setCheckingTrip(false);
@@ -540,21 +557,22 @@ function ExpenseEditor({
 
     const validation: FieldErrors = {};
 
-    if (!item.trim()) validation.item = '請填寫支出項目。';
-    if (precision === undefined || currencies.error) validation.currency = '請從可用目錄選擇幣別。';
+    if (!item.trim()) validation.item = 'expenses.itemRequired';
+    if (precision === undefined || currencies.error)
+      validation.currency = 'expenses.currencyRequired';
 
     try {
       if (precision === undefined) throw new RangeError();
       if (!expense || amount !== expense.amount || currency !== expense.currencyCode)
         parseMoney(amount, precision, currency);
     } catch {
-      validation.amount = '請輸入符合幣別位數且大於零的正數金額。';
+      validation.amount = 'expenses.amountRequired';
     }
-    if (!payerMemberId) validation.payerMemberId = '請選擇付款人。';
-    if (!shareMemberIds.length) validation.shareMemberIds = '請至少選擇一位分攤者。';
+    if (!payerMemberId) validation.payerMemberId = 'expenses.payerRequired';
+    if (!shareMemberIds.length) validation.shareMemberIds = 'expenses.sharesRequired';
     const parsed = parseDate(date);
 
-    if (!parsed) validation.date = '請輸入有效的支出日期，例如 2027/03/11。';
+    if (!parsed) validation.date = 'expenses.dateInvalid';
 
     setErrors(validation);
     setSaveError('');
@@ -565,7 +583,7 @@ function ExpenseEditor({
       return;
     }
     if (!navigator.onLine) {
-      setSaveError('目前無法連線，這筆支出尚未保存。請保留畫面並在連線後再試。');
+      setSaveError('expenses.offlineSave');
 
       return;
     }
@@ -584,36 +602,30 @@ function ExpenseEditor({
       </Link>
       <header className="page-head">
         <div>
-          <h1>{expense ? '編輯這筆花費' : '記下這筆花費'}</h1>
+          <h1>{t(expense ? 'expenses.editTitle' : 'expenses.newTitle')}</h1>
           <p className="muted">
-            {expense ? '修正紀錄，讓帳本更準確。' : '先記錄誰付了錢，再選這筆要由誰平均分攤。'}
+            {t(expense ? 'expenses.editDescription' : 'expenses.newDescription')}
           </p>
         </div>
       </header>
       {stateLocked ? (
         <section ref={stateNotice} tabIndex={-1} className="operation-outcome" role="status">
           <p>
-            {unavailable
-              ? new UnavailableTrip(unavailable).message
-              : '目前無法確認旅行狀態，草稿保留，請先查證。'}
+            {unavailable ? new UnavailableTrip(unavailable).message : t('expenses.stateCheckFirst')}
           </p>
-          <p>
-            {unconfirmed
-              ? '原次操作結果仍未確認，這裡不會重送原次操作。'
-              : '這筆支出尚未保存，草稿已保留。'}
-          </p>
+          <p>{unconfirmed ? t('expenses.operationUnknown') : t('expenses.draftKept')}</p>
           <div className="expense-state-actions">
             {unavailable ? (
               <Link to={unavailable.state === 'trash' ? '/trips/trash' : '/trips'}>
-                {unavailable.state === 'trash' ? '前往垃圾桶復原' : '返回旅行清單'}
+                {t(unavailable.state === 'trash' ? 'expenses.restoreTrip' : 'expenses.backTrips')}
               </Link>
             ) : null}
             {!unconfirmed ? (
               <TripOperationCheck
                 busy={busy}
                 onCheck={checkTripState}
-                label="重新讀取旅行狀態"
-                busyLabel="正在查證旅行狀態"
+                label={t('expenses.recheckTrip')}
+                busyLabel={t('expenses.checkingTrip')}
               />
             ) : null}
           </div>
@@ -621,11 +633,11 @@ function ExpenseEditor({
       ) : null}
       {readError ? (
         <p className="error" role="alert">
-          暫時無法更新已保存資料，請保留草稿後再試。
+          {t('expenses.readUpdateFailed')}
         </p>
       ) : null}
       <form
-        aria-label="支出詳情與支出表單"
+        aria-label={t('expenses.formRegion')}
         className="form-panel expense-form"
         data-command-id={id}
         noValidate
@@ -633,24 +645,24 @@ function ExpenseEditor({
       >
         <fieldset disabled={busy || Boolean(unconfirmed) || stateLocked}>
           <div className="field">
-            <label htmlFor={itemId}>支出項目</label>
+            <label htmlFor={itemId}>{t('expenses.item')}</label>
             <Input
               id={itemId}
               ref={itemInput}
               value={item}
               onChange={(event) => setItem(event.target.value)}
-              placeholder="例如：巷口的拉麵店"
+              placeholder={t('expenses.itemPlaceholder')}
               aria-invalid={Boolean(errors.item)}
               aria-describedby={errors.item ? `${itemId}-error` : undefined}
               required
             />
             <p id={`${itemId}-error`} className="error">
-              {errors.item}
+              {displayError(errors.item)}
             </p>
           </div>
           <div className="expense-money two-col">
             <div className="field">
-              <label htmlFor={amountId}>金額</label>
+              <label htmlFor={amountId}>{t('expenses.amount')}</label>
               <Input
                 id={amountId}
                 ref={amountInput}
@@ -669,14 +681,12 @@ function ExpenseEditor({
                     setAmount(next);
                     setErrors((previous) => ({
                       ...previous,
-                      amount: accepted(next)
-                        ? undefined
-                        : '目前金額不符合新幣別的小數位數，請手動修正。',
+                      amount: accepted(next) ? undefined : 'expenses.amountNewCurrency',
                     }));
                   } else
                     setErrors((previous) => ({
                       ...previous,
-                      amount: '請輸入符合幣別位數的正數金額。',
+                      amount: 'expenses.amountPositive',
                     }));
                 }}
                 onPaste={(event) => {
@@ -690,24 +700,24 @@ function ExpenseEditor({
                     event.preventDefault();
                     setErrors((previous) => ({
                       ...previous,
-                      amount: '貼上的金額不符合幣別位數，已保留原值。',
+                      amount: 'expenses.pastedAmountInvalid',
                     }));
                   }
                 }}
               />
               <p id={`${amountId}-hint`} className="field-hint">
                 {digits === undefined
-                  ? '請先選擇幣別。'
+                  ? t('expenses.chooseCurrencyFirst')
                   : digits
-                    ? `${currency} 最多 ${digits} 位小數`
-                    : `${currency} 使用整數金額`}
+                    ? t('expenses.maxDecimals', { currency, digits })
+                    : t('expenses.wholeAmount', { currency })}
               </p>
               <p id={`${amountId}-error`} className="error" role="status">
-                {errors.amount}
+                {displayError(errors.amount)}
               </p>
             </div>
             <SearchCombo
-              label="幣別"
+              label={t('expenses.currency')}
               value={currency}
               options={currencyOptions}
               onSelect={(value) => saveCurrencyPreference(account!.id, tripId, value)}
@@ -731,16 +741,16 @@ function ExpenseEditor({
                 setErrors((previous) => ({
                   ...previous,
                   currency: undefined,
-                  amount: incompatible ? '目前金額不符合新幣別的小數位數，請手動修正。' : undefined,
+                  amount: incompatible ? 'expenses.amountNewCurrency' : undefined,
                 }));
               }}
-              error={errors.currency}
+              error={displayError(errors.currency)}
               pending={currencies.isPending}
               disabled={Boolean(currencies.error)}
             />
             {currencies.error ? (
               <p className="error" role="alert">
-                無法取得幣別目錄，請保留草稿。
+                {t('expenses.currencyLoadFailed')}
                 <Button
                   variant="ghost"
                   className="text-btn"
@@ -749,16 +759,21 @@ function ExpenseEditor({
                     void currencies.refetch();
                   }}
                 >
-                  重新取得幣別
+                  {t('expenses.retryCurrencies')}
                 </Button>
               </p>
             ) : null}
           </div>
           <div className="two-col">
-            <DateField label="支出日期" value={date} onChange={setDate} error={errors.date} />
+            <DateField
+              label={t('expenses.expenseDate')}
+              value={date}
+              onChange={setDate}
+              error={displayError(errors.date)}
+            />
             <div>
               <SearchCombo
-                label="分類"
+                label={t('expenses.category')}
                 value={category}
                 options={categoryOptions}
                 onChange={setCategory}
@@ -769,7 +784,7 @@ function ExpenseEditor({
               />
               {categories.error ? (
                 <p className="error" role="alert">
-                  暫時無法取得分類。
+                  {t('expenses.categoryLoadFailed')}
                   <Button
                     variant="ghost"
                     type="button"
@@ -778,14 +793,14 @@ function ExpenseEditor({
                       void categories.refetch();
                     }}
                   >
-                    重新取得分類
+                    {t('expenses.retryCategories')}
                   </Button>
                 </p>
               ) : null}
             </div>
           </div>
           <section
-            aria-label="分攤成員"
+            aria-label={t('expenses.sharingMembers')}
             aria-busy={members.isPending || undefined}
             tabIndex={members.isPending ? 0 : -1}
           >
@@ -795,7 +810,7 @@ function ExpenseEditor({
                   className="member-picker"
                   aria-describedby={errors.payerMemberId ? `${itemId}-payer-error` : undefined}
                 >
-                  <legend>誰付款？</legend>
+                  <legend>{t('expenses.whoPaid')}</legend>
                   <div className="member-choices">
                     {members.data.items
                       .filter((member) => member.isActive || member.id === expense?.payerMemberId)
@@ -815,14 +830,14 @@ function ExpenseEditor({
                       ))}
                   </div>
                   <p id={`${itemId}-payer-error`} className="error" role="alert">
-                    {errors.payerMemberId}
+                    {displayError(errors.payerMemberId)}
                   </p>
                 </fieldset>
                 <fieldset
                   className="member-picker"
                   aria-describedby={errors.shareMemberIds ? `${itemId}-shares-error` : undefined}
                 >
-                  <legend>誰一起平均分攤？</legend>
+                  <legend>{t('expenses.whoShares')}</legend>
                   <div className="member-choices">
                     {members.data.items
                       .filter(
@@ -851,10 +866,10 @@ function ExpenseEditor({
                       ))}
                   </div>
                   <p id={`${itemId}-shares-error`} className="error" role="alert">
-                    {errors.shareMemberIds}
+                    {displayError(errors.shareMemberIds)}
                   </p>
                 </fieldset>
-                <p className="field-hint">付款人可以不參與分攤。</p>
+                <p className="field-hint">{t('expenses.payerMayNotShare')}</p>
                 {shareMemberIds.length && precision !== undefined
                   ? (() => {
                       try {
@@ -863,12 +878,12 @@ function ExpenseEditor({
                         return (
                           <div className="share-preview">
                             <div>
-                              每人分攤
+                              {t('expenses.eachShare')}
                               <p className="field-hint">
                                 {members.data.items
                                   .filter((member) => shareMemberIds.includes(member.id))
                                   .map((member) => member.name)
-                                  .join('、')}
+                                  .join(t('expenses.nameSeparator'))}
                               </p>
                             </div>
                             <output aria-label={display}>{display}</output>
@@ -886,7 +901,7 @@ function ExpenseEditor({
             ) : (
               <>
                 {members.isPending ? (
-                  <BusyIndicator accessibleLabel="正在讀取分攤成員" />
+                  <BusyIndicator accessibleLabel={t('expenses.readingMembers')} />
                 ) : (
                   <QueryState
                     error={members.error}
@@ -900,14 +915,14 @@ function ExpenseEditor({
           </section>
         </fieldset>
         <p className="error" role="alert">
-          {saveError}
+          {displayError(saveError)}
         </p>
         {unconfirmed && !deleting ? (
           <TripOperationCheck
             busy={busy}
             onCheck={recheck}
-            label="重新查證"
-            busyLabel="正在查證原次支出操作"
+            label={t('expenses.checkAgain')}
+            busyLabel={t('expenses.checkingOperation')}
           />
         ) : null}
         <div className="form-actions">
@@ -922,7 +937,7 @@ function ExpenseEditor({
                 setDeleting(true);
               }}
             >
-              刪除支出
+              {t('expenses.deleteExpense')}
             </Button>
           ) : null}
           <Button asChild variant="outline">
@@ -938,12 +953,12 @@ function ExpenseEditor({
               }}
               to={`/trips/${tripId}`}
             >
-              取消
+              {t('expenses.cancel')}
             </Link>
           </Button>
           <ActionButton
             busy={busy}
-            label="儲存支出"
+            label={t('expenses.saveExpense')}
             variant="default"
             disabled={
               busy ||
@@ -961,20 +976,27 @@ function ExpenseEditor({
         </div>
       </form>
       {deleting && expense && !unavailable ? (
-        <FormDialog title="刪除這筆支出？" onClose={() => setDeleting(false)} busy={busy}>
+        <FormDialog
+          title={t('expenses.deleteTitle')}
+          onClose={() => setDeleting(false)}
+          busy={busy}
+        >
           <p>
-            確定刪除「{expense.item}」{expense.currencyCode} {displayAmount(expense.amount)}
-            ？此操作無法復原。
+            {t('expenses.deleteDescription', {
+              item: expense.item,
+              currency: expense.currencyCode,
+              amount: displayAmount(expense.amount),
+            })}
           </p>
           <p className="error" role="alert">
-            {saveError}
+            {displayError(saveError)}
           </p>
           {unconfirmed ? (
             <TripOperationCheck
               busy={busy}
               onCheck={recheck}
-              label="重新查證"
-              busyLabel="正在查證原次支出操作"
+              label={t('expenses.checkAgain')}
+              busyLabel={t('expenses.checkingOperation')}
             />
           ) : null}
           <div className="form-actions">
@@ -984,11 +1006,11 @@ function ExpenseEditor({
               disabled={busy}
               onClick={() => setDeleting(false)}
             >
-              取消
+              {t('expenses.cancel')}
             </Button>
             <ActionButton
               busy={busy}
-              label="確認刪除"
+              label={t('expenses.confirmDelete')}
               variant="destructive"
               type="button"
               disabled={busy || Boolean(unconfirmed) || stateLocked}

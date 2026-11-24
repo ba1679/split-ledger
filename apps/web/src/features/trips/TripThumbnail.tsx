@@ -1,7 +1,9 @@
+import { tripText, useTripText } from './messages.js';
 import React, { useState } from 'react';
 import { LoaderCircle } from 'lucide-react';
 
 export function TripThumbnail({ src, children }: { src: string; children?: React.ReactNode }) {
+  useTripText();
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
 
@@ -13,7 +15,9 @@ export function TripThumbnail({ src, children }: { src: string; children?: React
             JOURNEY
           </span>
         )}
-        <span className="trip-thumbnail-fallback">圖片載入失敗・已顯示預設圖</span>
+        <span className="trip-thumbnail-fallback">
+          {tripText('imageFailedToLoadShowingDefault')}
+        </span>
       </>
     );
 
@@ -27,7 +31,11 @@ export function TripThumbnail({ src, children }: { src: string; children?: React
         onError={() => setFailed(true)}
       />
       {!loaded ? (
-        <span className="trip-thumbnail-status" role="status" aria-label="正在讀取旅行縮圖">
+        <span
+          className="trip-thumbnail-status"
+          role="status"
+          aria-label={tripText('loadingTripThumbnail')}
+        >
           <LoaderCircle size={24} className="action-spinner" aria-hidden="true" />
         </span>
       ) : null}

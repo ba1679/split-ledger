@@ -1,3 +1,4 @@
+import { tripText, useTripText } from './messages.js';
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Mountain } from 'lucide-react';
@@ -23,6 +24,7 @@ export function CreatedTripResult({
   onRetry: () => void;
   onVerify: () => void;
 }) {
+  useTripText();
   const heading = useRef<HTMLHeadingElement>(null);
   const previousError = useRef(error);
 
@@ -38,28 +40,34 @@ export function CreatedTripResult({
 
   return (
     <div className="created-trip-result">
-      <div className="mobile-trip-brand">t. 旅帳</div>
+      <div className="mobile-trip-brand">t. {tripText('brand')}</div>
       <header>
         <div className="eyebrow">MY JOURNEYS</div>
         <h1 ref={heading} tabIndex={-1}>
-          旅行已建立
+          {tripText('tripCreated')}
         </h1>
-        <p>{trip.name}已可以開始記帳。</p>
+        <p>{tripText('youCanStartAddingExpensesToName', { name: trip.name })}</p>
       </header>
       <section className="created-image-feedback" role={unknown ? 'status' : 'alert'}>
         <div>
-          <h2>{unknown ? '旅行已建立，圖片結果尚未確認' : '旅行已建立，但圖片未保存'}</h2>
+          <h2>
+            {unknown
+              ? tripText('tripCreatedImageResultUnconfirmed')
+              : tripText('tripCreatedButTheImageWasNotSaved')}
+          </h2>
           <p>
             {unknown ? (
-              '請查證原次圖片操作；等候確認時不重新送出，也不重新建立旅行。'
+              tripText('checkTheOriginalImageOperationDoNotResend')
             ) : !currentImageAvailable ? (
-              '行程和帳務已保留，目前圖片暫時無法讀取。可重新上傳縮圖，不必再建立一次。'
+              tripText('yourTripAndLedgerAreSavedButThe')
             ) : trip.hasThumbnail ? (
-              '行程和帳務與目前圖片已保留，本次圖片未保存。可重新上傳縮圖，不必再建立一次。'
+              tripText('yourTripLedgerAndCurrentImageAreSaved')
             ) : (
               <>
-                行程與帳務保留，現在顯示預設風景。可重新上傳。
-                <span className="desktop-created-detail">不必再建立一次。</span>
+                {tripText('yourTripAndLedgerAreSavedTheDefault')}
+                <span className="desktop-created-detail">
+                  {tripText('noNeedToCreateTheTripAgain')}
+                </span>
               </>
             )}
           </p>
@@ -71,39 +79,47 @@ export function CreatedTripResult({
               {error ?? reservedError}
             </p>
           ) : null}
-          {unknown && draftName ? <p>照片草稿：{draftName}（待查證）</p> : null}
+          {unknown && draftName ? (
+            <p>{tripText('photoDraftNameAwaitingVerification', { name: draftName })}</p>
+          ) : null}
         </div>
         <ActionButton
           busy={busy}
-          label={unknown ? '再次查證' : '重新上傳'}
-          busyLabel={unknown ? '正在查證圖片保存' : '正在重新上傳圖片'}
+          label={unknown ? tripText('checkAgain') : tripText('uploadAgain')}
+          busyLabel={unknown ? tripText('checkingImageSave') : tripText('uploadingImageAgain')}
           onClick={() => {
             if (!busy) (unknown ? onVerify : onRetry)();
           }}
         />
       </section>
-      <h2 className="created-trip-section-title">已建立的旅行</h2>
+      <h2 className="created-trip-section-title">{tripText('createdTrip')}</h2>
       <Link className="trip-card create-result-card" to={`/trips/${trip.id}`}>
         {unknown || !currentImageAvailable ? (
           <div
             className="created-trip-image created-image-unknown"
             role="img"
-            aria-label={unknown ? '圖片保存結果尚未確認' : '目前圖片暫時無法讀取'}
+            aria-label={
+              unknown
+                ? tripText('imageSaveResultUnconfirmed')
+                : tripText('currentImageTemporarilyUnavailable')
+            }
           >
-            {unknown ? '圖片結果尚未確認' : '目前圖片暫時無法讀取'}
+            {unknown
+              ? tripText('imageResultUnconfirmed')
+              : tripText('currentImageTemporarilyUnavailable')}
           </div>
         ) : trip.hasThumbnail ? (
           <div className="created-trip-image">
             <img
               src={`/api/trips/${trip.id}/thumbnail/${trip.thumbnailRevision}`}
-              alt={`${trip.name}旅行縮圖`}
+              alt={tripText('thumbnailForName', { name: trip.name })}
             />
           </div>
         ) : (
           <div
             className="created-trip-image thumbnail-default"
             role="img"
-            aria-label="預設旅行縮圖"
+            aria-label={tripText('defaultTripThumbnail')}
           >
             <Mountain size={48} aria-hidden="true" />
           </div>
@@ -112,13 +128,13 @@ export function CreatedTripResult({
           <h2>{trip.name}</h2>
           <p className="card-date">
             {trip.startDate || trip.endDate
-              ? `${trip.startDate ?? '開始日未定'} — ${trip.endDate ?? '結束日未定'}`
-              : '旅行日期未定'}
+              ? `${trip.startDate ?? tripText('startDateNotSet')} — ${trip.endDate ?? tripText('endDateNotSet')}`
+              : tripText('tripDatesNotSet')}
           </p>
           <div className="card-bottom">
-            <span>{trip.expenseCount} 筆支出</span>
+            <span>{tripText('expenseCount', { count: trip.expenseCount })}</span>
             <span>
-              開啟旅行帳本 <ArrowRight size={14} aria-hidden="true" />
+              {tripText('openTripLedger')} <ArrowRight size={14} aria-hidden="true" />
             </span>
           </div>
         </div>

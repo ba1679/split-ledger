@@ -20,7 +20,7 @@ Then('局部選項等待且必要內容未齊不能保存', async ({ page, world
   await expect(page.getByRole('button', { name: '儲存支出', exact: true })).toBeDisabled();
   await assertOptionDraft(world);
   await expect(page.getByLabel('支出項目', { exact: true })).toBeEnabled();
-  await expect(page.getByLabel('金額', { exact: true })).toBeEnabled();
+  await expect(page.getByLabel('支出金額', { exact: true })).toBeEnabled();
   for (const read of ui.reads) {
     if (isCancelledRead(read)) continue;
     const path = new URL(read.url()).pathname;

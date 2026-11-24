@@ -88,9 +88,9 @@ async function assertRetainedRepaymentForm(
     '2027/03/12',
   );
   await expect(
-    page.getByText(/尚無法確認|尚未確認|結果未明|無法確認.*(?:保存|儲存)/).first(),
+    page.getByText(/尚無法確認|尚未確認|結果待確認|結果未明|無法確認.*(?:保存|儲存)/).first(),
   ).toBeVisible();
-  const verify = page.getByRole('button', { name: /查證|確認(?:保存|儲存)結果/ });
+  const verify = page.getByRole('button', { name: /查看結果|查證|確認(?:保存|儲存)結果/ });
   await expect(verify).toHaveCount(1);
   await expect(verify).toBeVisible();
   await expect(verify).toBeEnabled();

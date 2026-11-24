@@ -1,4 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiRequest, type Trip } from '../../../api/index.js';
@@ -16,6 +17,7 @@ import { BusyIndicator } from '../../../components/waiting/BusyIndicator.js';
 import { CategorySpendingCard, categoryKey, orderedCategories } from './CategorySpendingCard.js';
 import { CategoryInfo, type AnalysisTrigger } from './CategoryInfo.js';
 import './analysis.css';
+import '../messages.js';
 
 const palette = [
   '#2D6A57',
@@ -31,6 +33,7 @@ const palette = [
 type SelectedCategory = { kind: '個人' | '團體'; id: string; trigger: AnalysisTrigger };
 
 export function TripExpenseAnalysis() {
+  const { t } = useTranslation();
   const { tripId } = useParams(),
     { account } = useSession(),
     client = useQueryClient();
@@ -47,7 +50,8 @@ export function TripExpenseAnalysis() {
     returningTo.current = null;
     const restore = () => {
       const svg = target.trigger instanceof SVGElement;
-      const selector = `[role="region"][aria-label="${target.kind}花費"] ${svg ? '.recharts-sector' : '.analysis-details button'}[data-category-id="${CSS.escape(target.id)}"]`;
+      const region = t(target.kind === '個人' ? 'expenses.personalTitle' : 'expenses.groupTitle');
+      const selector = `[role="region"][aria-label="${region}"] ${svg ? '.recharts-sector' : '.analysis-details button'}[data-category-id="${CSS.escape(target.id)}"]`;
       const current =
         !svg && target.trigger.isConnected
           ? target.trigger
@@ -59,7 +63,7 @@ export function TripExpenseAnalysis() {
     const frame = requestAnimationFrame(restore);
 
     return () => cancelAnimationFrame(frame);
-  }, [selection]);
+  }, [selection, t]);
   const heading = useRef<HTMLHeadingElement>(null);
   const authority = useLedgerEntryState(tripId, heading);
   const selectionKey = ['account', account!.id, 'analysis-currency', tripId];
@@ -119,16 +123,16 @@ export function TripExpenseAnalysis() {
   return (
     <div className="analysis-page" ref={pageElement} data-fetch-status={analysis.fetchStatus}>
       <Link className="analysis-back" to={`/trips/${tripId}`}>
-        ‹ {trip.data?.name ?? '旅行'}帳本
+        {t('expenses.analysisBack', { trip: trip.data?.name ?? t('expenses.tripFallback') })}
       </Link>
       <header className="analysis-heading">
         <div className="eyebrow">SPENDING INSIGHTS</div>
-        <h1>花費分析</h1>
-        <p>每一筆消費，都有它的位置。</p>
+        <h1>{t('common.spendingAnalysis')}</h1>
+        <p>{t('expenses.analysisDescription')}</p>
       </header>
       {analysis.isPending || !data ? (
         <AnalysisReadState
-          label="花費分析"
+          label={t('common.spendingAnalysis')}
           layout="summary"
           pending={analysis.isPending}
           error={analysis.error}
@@ -142,7 +146,7 @@ export function TripExpenseAnalysis() {
           {currency ? (
             <>
               <div className="analysis-currency-control">
-                <label htmlFor="analysis-currency">統計幣別</label>
+                <label htmlFor="analysis-currency">{t('expenses.analysisCurrency')}</label>
                 <select
                   id="analysis-currency"
                   value={currency.currencyCode}
@@ -176,23 +180,23 @@ export function TripExpenseAnalysis() {
               </div>
               {analysis.isFetching ? (
                 <div className="analysis-update-indicator" aria-busy="true">
-                  <BusyIndicator accessibleLabel="正在更新花費分析" />
+                  <BusyIndicator accessibleLabel={t('expenses.analysisUpdating')} />
                 </div>
               ) : null}
               {analysis.fetchStatus === 'paused' ? (
                 <p className="analysis-update-note" role="status">
-                  已離線，恢復連線後再更新。
+                  {t('expenses.analysisOffline')}
                 </p>
               ) : analysis.error ? (
                 <div className="analysis-update-note error" role="alert">
-                  <p>更新失敗，暫時顯示上次資料。</p>
+                  <p>{t('expenses.analysisUpdateFailed')}</p>
                   <Button
                     variant="ghost"
                     onClick={() => {
                       void analysis.refetch();
                     }}
                   >
-                    重新更新
+                    {t('expenses.analysisRetryUpdate')}
                   </Button>
                 </div>
               ) : null}
@@ -219,18 +223,18 @@ export function TripExpenseAnalysis() {
                     colors={colors}
                   />
                 ) : (
-                  <div className="analysis-no-shared">這趟旅行目前沒有共同消費。</div>
+                  <div className="analysis-no-shared">{t('expenses.analysisNoShared')}</div>
                 )}
               </div>
-              <p className="analysis-hint">將滑鼠移至圖表，或選取分類查看金額與占比。</p>
+              <p className="analysis-hint">{t('expenses.analysisHint')}</p>
             </>
           ) : (
             <section className="analysis-empty analysis-message">
               <ChartPie size={32} aria-hidden="true" />
-              <h2>還沒有花費可以分析</h2>
-              <p>記下第一筆支出，分類分布就會出現在這裡。</p>
+              <h2>{t('expenses.analysisEmptyTitle')}</h2>
+              <p>{t('expenses.analysisEmptyDescription')}</p>
               <Button asChild variant="default">
-                <Link to={`/trips/${tripId}`}>記一筆</Link>
+                <Link to={`/trips/${tripId}/expenses/new`}>{t('expenses.recordOne')}</Link>
               </Button>
             </section>
           )}

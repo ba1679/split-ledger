@@ -118,7 +118,7 @@ test('unavailable localStorage still permits selecting and saving a real categor
   );
   await openExpenseForm(page, world);
   await page.getByLabel('支出項目', { exact: true }).fill('車票');
-  await page.getByLabel('金額', { exact: true }).fill('1200');
+  await page.getByLabel('支出金額', { exact: true }).fill('1200');
   await page.getByRole('combobox', { name: /分類/ }).click();
   await page.getByRole('option', { name: '交通', exact: true }).click();
   await page.getByRole('button', { name: '儲存支出', exact: true }).click();
@@ -157,7 +157,7 @@ test('a stored preference must finish authoritative category validation before s
   await openExpenseForm(page, world);
   await expect(page.getByRole('combobox', { name: '幣別', exact: true })).toBeEnabled();
   await page.getByLabel('支出項目', { exact: true }).fill('公車');
-  await page.getByLabel('金額', { exact: true }).fill('1200');
+  await page.getByLabel('支出金額', { exact: true }).fill('1200');
   const save = page.getByRole('button', { name: '儲存支出', exact: true });
 
   await expect(save).toBeDisabled();
@@ -198,7 +198,7 @@ test('an unresolved save keeps its original preferred category when the availabl
 
   await expect(combo).toHaveValue('交通');
   await page.getByLabel('支出項目', { exact: true }).fill('車票');
-  await page.getByLabel('金額', { exact: true }).fill('1200');
+  await page.getByLabel('支出金額', { exact: true }).fill('1200');
   await page.getByRole('button', { name: '儲存支出', exact: true }).click();
   await expect(page.getByRole('alert').filter({ hasText: '保存結果尚未確認' })).toBeVisible();
   expect((await callApi(world, 'DELETE', `/api/categories/${transport.id}`)).status()).toBe(204);

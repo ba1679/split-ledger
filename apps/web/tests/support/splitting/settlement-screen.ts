@@ -39,7 +39,10 @@ export function assertSettlementScreenRevision(
   expect(trip.simplifyDebts).toBe(enabled);
   expect(view.simplifyDebts).toBe(enabled);
   expect(trip.accountingRevision).toBe(snapshot.settlement.accountingRevision);
-  expect(view).toEqual(snapshot.settlement);
+  const { explanationDetails: _details, ...baseView } = view as CountSettlementView & {
+    explanationDetails?: unknown;
+  };
+  expect(baseView).toEqual(snapshot.settlement);
   assertSimplificationCountProjection(snapshot.sources, view);
 }
 
@@ -78,7 +81,12 @@ export async function openConfirmedSettlementScreen(
   const trip = (await tripResponse.json()) as ModeTripProjection;
   const view = (await settlementResponse.json()) as CountSettlementView;
   assertSettlementScreenRevision(tripId, enabled, trip, view, before);
-  const control = page.getByRole('switch', { name: '簡化付款', exact: true });
+  world.set('splitting:browserUISettlementView', view);
+  world.set('splitting:browserUISettlementURL', settlementResponse.url());
+  const english = world.state.get('splitting:expectedSettlementLanguage') === 'en';
+  const control = english
+    ? page.getByRole('switch')
+    : page.getByRole('switch', { name: '簡化付款', exact: true });
   await expect(control).toBeVisible();
   await expect(control).toBeChecked({ checked: enabled });
   const links = page.locator(`a[href*="/trips/${tripId}/settlements/new"]`);

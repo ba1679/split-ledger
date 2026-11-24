@@ -22,7 +22,7 @@ type Expense = {
 };
 const state = (key: string) => `expense:${key}`;
 
-export const amountInput = (page: Page) => page.getByLabel('金額', { exact: true });
+export const amountInput = (page: Page) => page.getByLabel('支出金額', { exact: true });
 
 export const dateInput = (page: Page) =>
   page.getByRole('textbox', { name: '支出日期', exact: true });
@@ -153,8 +153,8 @@ export async function seedLedger(
   await rememberRows(world);
 }
 
-export async function chooseCurrency(page: Page, code: string) {
-  const combo = page.getByRole('combobox', { name: '幣別', exact: true });
+export async function chooseCurrency(page: Page, code: string, label: string | RegExp = '幣別') {
+  const combo = page.getByRole('combobox', { name: label, exact: true });
 
   await combo.fill(code);
   await page

@@ -1,9 +1,12 @@
+import { useTranslation } from 'react-i18next';
 import { ActionButton } from '../../components/waiting/ActionButton.js';
 import React, { useRef, useState } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { authClient, useSession } from './session.js';
+import { LanguageMenu } from '../../components/LanguageMenu.js';
 
 export function Login() {
+  const { t } = useTranslation();
   const { account } = useSession();
   const [params] = useSearchParams();
   const [busy, setBusy] = useState(false);
@@ -26,12 +29,12 @@ export function Login() {
       });
 
       if (result.error) {
-        setError(result.error.message ?? '登入尚未完成，請重新嘗試。');
+        setError('login.retry');
         setBusy(false);
         starting.current = false;
       }
     } catch {
-      setError('目前無法連線，登入尚未完成。請重新嘗試。');
+      setError('login.connection');
       setBusy(false);
       starting.current = false;
     }
@@ -44,37 +47,38 @@ export function Login() {
           <span className="brand-mark" aria-hidden="true">
             t.
           </span>
-          旅帳
+          {t('app.title')}
         </Link>
         <div>
-          <div className="eyebrow">LESS CALCULATING. MORE EXPLORING.</div>
+          <div className="eyebrow">{t('login.eyebrow')}</div>
           <h1>
-            好好旅行，
+            {t('login.storyFirst')}
             <br />
-            每一筆都記得。
+            {t('login.storySecond')}
           </h1>
-          <p>從出發前的機票，到路邊的一杯咖啡。把花費放好，把時間留給風景。</p>
+          <p>{t('login.storyBody')}</p>
           <div className="travel-stamp" aria-hidden="true">
-            LET'S
+            {t('login.stampFirst')}
             <br />
-            GO PLACES
+            {t('login.stampSecond')}
           </div>
         </div>
-        <footer>YOUR JOURNEY, IN LITTLE DETAILS.</footer>
+        <footer>{t('login.storyFooter')}</footer>
       </section>
       <section className="login-panel">
+        <LanguageMenu className="login-language-menu" />
         <div className="login-box">
-          <div className="eyebrow">WELCOME TO TRAVEL LEDGER</div>
+          <div className="eyebrow">{t('login.welcome')}</div>
           <h2>
-            下一趟旅行，
+            {t('login.headingFirst')}
             <br />
-            從這裡開始。
+            {t('login.headingSecond')}
           </h2>
-          <p>登入你的個人旅行帳本，隨手記下沿途的花費。</p>
+          <p>{t('login.intro')}</p>
           <ActionButton
             busy={busy}
-            label="使用 Google 帳號登入"
-            busyLabel="正在進行 Google 登入"
+            label={t('login.google')}
+            busyLabel={t('login.googlePending')}
             variant="outline"
             className="google"
             disabled={busy}
@@ -83,12 +87,12 @@ export function Login() {
             }}
           />
           <p className="error" role="alert">
-            {error || (params.has('error') ? '登入尚未完成，請重新嘗試。' : '')}
+            {error ? t(error) : params.has('error') ? t('login.retry') : null}
           </p>
           <p className="privacy">
-            你的帳本只屬於你。
+            {t('login.private')}
             <br />
-            登入後，可在手機與電腦查看同一份紀錄。
+            {t('login.sync')}
           </p>
         </div>
       </section>

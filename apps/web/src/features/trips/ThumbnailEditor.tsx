@@ -1,3 +1,4 @@
+import { tripText, useTripText } from './messages.js';
 import React, { useEffect, useRef, useState } from 'react';
 import { Mountain } from 'lucide-react';
 import { ActionButton } from '../../components/waiting/ActionButton.js';
@@ -17,24 +18,24 @@ type ImageAttempt = ThumbnailCommandInput & { file?: File };
 
 function selectionError(files: FileList): string | null {
   const selected = files[0];
-  if (files.length !== 1) return '一次只能選擇一張圖片，請重新選圖。';
-  if (selected!.size === 0) return '圖片檔案沒有內容，請重新選擇有效的 JPG、PNG 或 WebP。';
-  if (selected!.size > 10 * 1024 * 1024) return '圖片容量超過 10 MiB，請縮小後重新選圖。';
+  if (files.length !== 1) return tripText('chooseOneImageAtATimeSelectAnother');
+  if (selected!.size === 0) return tripText('thisImageFileIsEmptyChooseAValid');
+  if (selected!.size > 10 * 1024 * 1024) return tripText('theImageExceeds10MiBReduceItsSize');
   if (selected!.type && !['image/jpeg', 'image/png', 'image/webp'].includes(selected!.type))
-    return '不支援這種圖片格式，請轉成單張靜態 JPG、PNG 或 WebP 後重新選圖。';
+    return tripText('thisFormatIsNotSupportedConvertItTo');
 
   return null;
 }
 
 function rejectionMessage(failure: ApiError): string {
-  if (failure.code === 'THUMBNAIL_UPDATED') return '其他裝置已更新圖片，請確認目前圖片後再保存。';
-  if (failure.code === 'TRIP_STATE_CHANGED') return '旅行狀態已更新，請確認目前狀態後再保存。';
+  if (failure.code === 'THUMBNAIL_UPDATED')
+    return tripText('theImageChangedOnAnotherDeviceCheckThe');
+  if (failure.code === 'TRIP_STATE_CHANGED')
+    return tripText('theTripStatusChangedCheckItsCurrentStatus');
   if (failure.code === 'UNSUPPORTED_IMAGE_TYPE')
-    return '格式或動畫內容不支援，請轉成單張靜態 JPG、PNG 或 WebP 後重新選圖。';
-  if (failure.code === 'INVALID_IMAGE')
-    return '圖片內容損壞或尺寸無效，請重新選擇有效的 JPG、PNG 或 WebP。';
-  if (failure.code === 'IMAGE_TOO_LARGE')
-    return '圖片超過上限（10 MiB、總像素 2,500 萬、最長邊 16,384 像素），請縮小後重新選圖。';
+    return tripText('thisFormatOrAnimationIsNotSupportedConvert');
+  if (failure.code === 'INVALID_IMAGE') return tripText('theImageIsDamagedOrItsDimensionsAre');
+  if (failure.code === 'IMAGE_TOO_LARGE') return tripText('theImageExceedsTheLimits10MiB25');
 
   return failure.message;
 }
@@ -50,6 +51,7 @@ export function ThumbnailEntryDialog({
   onClose: () => void;
   availability?: TripState['state'];
 }) {
+  useTripText();
   const unavailable = availability !== 'active';
   const cancel = useRef<HTMLButtonElement>(null);
   const input = useRef<HTMLInputElement>(null);
@@ -104,9 +106,17 @@ export function ThumbnailEntryDialog({
     setNotice(
       current
         ? current.state !== 'active'
-          ? `原次圖片保存已確認成功。目前旅行${current.state === 'trash' ? '已在垃圾桶，可前往復原' : '已永久刪除'}。`
-          : `原次圖片保存已確認成功。目前縮圖${current.hasThumbnail ? '已保存，以目前圖片為準' : '使用預設圖'}。`
-        : '圖片已保存，原次操作已確認。',
+          ? tripText(
+              current.state === 'trash'
+                ? 'thumbnailSaveVerifiedTripInTrash'
+                : 'thumbnailSaveVerifiedTripPurged',
+            )
+          : tripText(
+              current.hasThumbnail
+                ? 'thumbnailSaveVerifiedCurrentImage'
+                : 'thumbnailSaveVerifiedDefaultImage',
+            )
+        : tripText('imageSavedTheOriginalOperationIsConfirmed'),
     );
     if (!current) onClose();
   }
@@ -204,7 +214,7 @@ export function ThumbnailEntryDialog({
           failure.code === 'UPLOAD_BUSY')
       ) {
         setAttempt(null);
-        setError(`圖片未保存：${rejectionMessage(failure)}`);
+        setError(tripText('imageNotSavedReason', { reason: rejectionMessage(failure) }));
         if (
           [
             'THUMBNAIL_UPDATED',
@@ -267,11 +277,11 @@ export function ThumbnailEntryDialog({
 
   const outcome = attempt ? (
     <section className="thumbnail-outcome" role="status">
-      <p>圖片保存結果尚未確認，請查證原次操作。關閉不會撤回已送出的保存。</p>
+      <p>{tripText('imageSaveResultUnconfirmedCheckTheOriginalOperation')}</p>
       <TripOperationCheck
         busy={busy}
         onCheck={() => verify(attempt)}
-        busyLabel="正在查證圖片保存"
+        busyLabel={tripText('checkingImageSave')}
       />
     </section>
   ) : null;
@@ -290,21 +300,21 @@ export function ThumbnailEntryDialog({
 
   return (
     <FormDialog
-      title="自訂旅行縮圖"
+      title={tripText('customizeTripThumbnail')}
       description={
         unknown ? (
-          `「${trip.name}」圖片保存結果尚未確認，請查證原次保存。`
+          tripText('theImageSaveResultForNameIsUnconfirmed', { name: trip.name })
         ) : (
           <>
             <span className="desktop-thumbnail-description">
               {draft?.kind === 'default'
-                ? `為「${trip.name}」已在本機選用預設風景，按「保存圖片」才會套用。`
-                : `為「${trip.name}」選一張照片，讓旅程更容易辨識。`}
+                ? tripText('theDefaultLandscapeIsSelectedLocallyForName', { name: trip.name })
+                : tripText('chooseAPhotoForNameToMakeThe', { name: trip.name })}
             </span>
             <span className="mobile-thumbnail-description">
               {draft?.kind === 'default'
-                ? `「${trip.name}」已選預設風景；保存後才套用。`
-                : `為「${trip.name}」選一張照片。`}
+                ? tripText('defaultLandscapeSelectedForNameSaveToApply', { name: trip.name })
+                : tripText('chooseAPhotoForName', { name: trip.name })}
             </span>
           </>
         )
@@ -319,16 +329,16 @@ export function ThumbnailEntryDialog({
           <div
             className="thumbnail-confirmed-placeholder"
             role="img"
-            aria-label="旅行目前無法編輯縮圖"
+            aria-label={tripText('thisTripSThumbnailCannotBeEditedNow')}
           >
-            旅行目前無法編輯縮圖
+            {tripText('thisTripSThumbnailCannotBeEditedNow')}
           </div>
         ) : source && !failedDraftPreview ? (
           <img
             key={source}
             className="thumbnail-preview"
             src={source}
-            alt={`${trip.name}旅行縮圖預覽`}
+            alt={tripText('thumbnailPreviewForName', { name: trip.name })}
             onError={
               file && !busy && !unknown && source === preview
                 ? () => setFailedPreviewUrl(source)
@@ -339,32 +349,44 @@ export function ThumbnailEntryDialog({
           <div
             className="thumbnail-confirmed-placeholder"
             role="img"
-            aria-label="無法預覽這張照片，請重新選圖。"
+            aria-label={tripText('cannotPreviewThisPhotoChooseAnotherImage')}
           >
-            無法預覽這張照片，請重新選圖。
+            {tripText('cannotPreviewThisPhotoChooseAnotherImage')}
           </div>
         ) : (busy || unknown) && trip.hasThumbnail ? (
           <div
             className="thumbnail-confirmed-placeholder"
             role="img"
-            aria-label="最後確認的圖片預覽暫不可用"
+            aria-label={tripText('lastConfirmedImagePreviewUnavailable')}
           >
-            最後確認的圖片預覽暫不可用
+            {tripText('lastConfirmedImagePreviewUnavailable')}
           </div>
         ) : (
-          <div className="thumbnail-default" role="img" aria-label="預設旅行縮圖">
+          <div
+            className="thumbnail-default"
+            role="img"
+            aria-label={tripText('defaultTripThumbnail')}
+          >
             <Mountain size={48} aria-hidden="true" />
           </div>
         )}
         {draft ? (
           <span className="thumbnail-draft-badge">
-            {unknown ? '結果尚未確認' : busy ? '最後確認的縮圖' : '尚未保存'}
+            {unknown
+              ? tripText('resultUnconfirmed')
+              : busy
+                ? tripText('lastConfirmedThumbnail')
+                : tripText('notSavedYet')}
           </span>
         ) : null}
       </div>
       <div className="thumbnail-selection">
         <strong className="thumbnail-filename">
-          {file ? file.name : draft?.kind === 'default' ? '預設旅行縮圖' : '目前旅行縮圖'}
+          {file
+            ? file.name
+            : draft?.kind === 'default'
+              ? tripText('defaultTripThumbnail')
+              : tripText('currentTripThumbnail')}
         </strong>
         <div className="thumbnail-tools">
           <Button
@@ -377,7 +399,7 @@ export function ThumbnailEntryDialog({
               }
             }}
           >
-            重新選圖
+            {tripText('chooseAnotherImage')}
           </Button>
           <span aria-hidden="true">・</span>
           <Button
@@ -389,7 +411,7 @@ export function ThumbnailEntryDialog({
               setNotice(null);
             }}
           >
-            使用預設圖
+            {tripText('useDefaultImage')}
           </Button>
         </div>
       </div>
@@ -409,13 +431,15 @@ export function ThumbnailEntryDialog({
         }}
       />
       <div className="thumbnail-limits">
-        <p>支援單張靜態 JPG（.jpg、.jpeg）、PNG、WebP，最大 10 MiB。</p>
-        <p>最長邊 16,384 像素、總像素 2,500 萬以內。</p>
+        <p>{tripText('oneStillJPGJpgJpegPNGOrWebP')}</p>
+        <p>{tripText('longestSide16384PixelsTotalUpTo')}</p>
         <p>
           <span className="desktop-thumbnail-description">
-            手機 HEIC 照片請先轉成 JPG、PNG 或 WebP。
+            {tripText('convertHEICPhotosFromYourPhoneToJPG')}
           </span>
-          <span className="mobile-thumbnail-description">HEIC 請先轉成 JPG、PNG 或 WebP。</span>
+          <span className="mobile-thumbnail-description">
+            {tripText('convertHEICToJPGPNGOrWebPFirst')}
+          </span>
         </p>
       </div>
       {error ? (
@@ -428,17 +452,17 @@ export function ThumbnailEntryDialog({
         <TripOperationCheck
           busy={refreshing}
           onCheck={refreshCurrent}
-          label="重新讀取目前狀態"
-          busyLabel="正在重新讀取目前狀態"
+          label={tripText('reloadCurrentStatus')}
+          busyLabel={tripText('reloadingCurrentStatus')}
         />
       ) : null}
       {unavailable ? (
         <p className="error">
           {availability === 'trash'
-            ? '旅行已在垃圾桶。照片草稿保留，復原後可重新讀取狀態再保存。'
-            : '旅行已永久刪除，這張照片無法再保存到原旅行。'}
+            ? tripText('tripIsInTrashYourPhotoDraftIs')
+            : tripText('thisTripWasPermanentlyDeletedThePhotoCannot')}
           <Link to={availability === 'trash' ? '/trips/trash' : '/trips'}>
-            {availability === 'trash' ? '前往垃圾桶復原' : '返回旅行清單'}
+            {availability === 'trash' ? tripText('goToTrashToRestore') : tripText('backToTripList')}
           </Link>
         </p>
       ) : null}
@@ -449,12 +473,12 @@ export function ThumbnailEntryDialog({
       ) : null}
       <div className="form-actions thumbnail-actions">
         <Button ref={cancel} variant="outline" onClick={onClose}>
-          取消
+          {tripText('cancel')}
         </Button>
         <ActionButton
-          label="保存圖片"
+          label={tripText('saveImage')}
           busy={busy && !refreshing}
-          busyLabel="正在保存圖片"
+          busyLabel={tripText('savingImage')}
           disabled={!draft || busy || unknown || conflict || unavailable}
           onClick={() => {
             void save();

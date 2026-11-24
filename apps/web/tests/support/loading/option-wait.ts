@@ -20,7 +20,7 @@ export async function assertOptionDraft(world: LedgerWorld): Promise<void> {
   const draft = world.get<OptionDraft>('loading:optionDraft'),
     page = managementUI(world).page;
   await expect(page.getByLabel('支出項目', { exact: true })).toHaveValue(draft.item);
-  await expect(page.getByLabel('金額', { exact: true })).toHaveValue(draft.amount);
+  await expect(page.getByLabel('支出金額', { exact: true })).toHaveValue(draft.amount);
   await expect(page.getByRole('textbox', { name: '支出日期', exact: true })).toHaveValue(
     draft.date,
   );
@@ -48,7 +48,7 @@ export async function arrangeOptionWait(
     )
     .toBe(0);
   await page.getByLabel('支出項目', { exact: true }).fill('選項恢復後的點心');
-  await page.getByLabel('金額', { exact: true }).fill('500');
+  await page.getByLabel('支出金額', { exact: true }).fill('500');
   const draft: OptionDraft = {
     item: '選項恢復後的點心',
     amount: '500',

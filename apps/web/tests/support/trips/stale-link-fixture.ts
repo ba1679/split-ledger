@@ -31,10 +31,10 @@ export async function arrangeStaleLink(
   const confirmed = await active.json();
   await page.getByRole('link', { name: '記一筆', exact: true }).click();
   await page.getByLabel('支出項目', { exact: true }).fill('未保存的午餐');
-  await page.getByLabel('金額', { exact: true }).fill('777');
+  await page.getByLabel('支出金額', { exact: true }).fill('777');
   const draft = {
     item: await page.getByLabel('支出項目', { exact: true }).inputValue(),
-    amount: await page.getByLabel('金額', { exact: true }).inputValue(),
+    amount: await page.getByLabel('支出金額', { exact: true }).inputValue(),
     date: await page.getByRole('textbox', { name: '支出日期', exact: true }).inputValue(),
   };
   await waitForManagementReads(managementUI(world));

@@ -8,6 +8,7 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
 export const test = apiTest.extend<AnalysisTestOptions, { webServer: string }>({
+  locale: ['zh-TW', { option: true }],
   analysisViewport: ['desktop', { option: true }],
   analysisVariant: ['default', { option: true }],
   hasTouch: async ({ analysisViewport }, use, testInfo) => {

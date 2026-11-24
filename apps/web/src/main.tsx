@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
 import { SessionProvider } from './features/auth/session.js';
 import { App } from './app/App.js';
+import { initializeInterfaceLanguage } from './i18n/runtime.js';
 import './design-system.css';
 import './styles/index.css';
 
@@ -11,6 +12,8 @@ import './styles/index.css';
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 0, retry: false }, mutations: { retry: false } },
 });
+
+initializeInterfaceLanguage();
 
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

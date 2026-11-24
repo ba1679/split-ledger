@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+import '../i18n/shared-messages.js';
 import React, { useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
@@ -23,6 +25,7 @@ export function FormDialog({
   initialFocus?: React.RefObject<HTMLElement | null>;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const { t } = useTranslation();
   const titleId = useId();
   const descriptionId = useId();
   const outside = useRef(false);
@@ -107,7 +110,7 @@ export function FormDialog({
           variant="ghost"
           size="icon"
           className="dialog-close"
-          aria-label="關閉"
+          aria-label={t('common.close')}
           disabled={busy}
           onClick={onClose}
         >

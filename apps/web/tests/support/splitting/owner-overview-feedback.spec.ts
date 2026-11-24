@@ -32,7 +32,7 @@ for (const width of [375, 1280])
     });
     await lunch.click();
     await expect(page.getByRole('list', { name: '支出分攤' })).toBeVisible();
-    const amount = await page.getByLabel('金額', { exact: true }).boundingBox();
+    const amount = await page.getByLabel('支出金額', { exact: true }).boundingBox();
     const currency = await page.getByRole('combobox', { name: '幣別', exact: true }).boundingBox();
 
     expect(amount).not.toBeNull();

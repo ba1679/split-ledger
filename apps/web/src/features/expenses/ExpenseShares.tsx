@@ -1,6 +1,8 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ExactAmount } from '@split-ledger/shared';
 import type { Expense, TripMember } from '../../api/index.js';
+import './messages.js';
 
 /** Round only the presentation, using integer arithmetic even for very large fractions. */
 export function formatShareAmount(amount: ExactAmount, minimumFractionDigits = 0): string {
@@ -20,12 +22,14 @@ export function formatShareAmount(amount: ExactAmount, minimumFractionDigits = 0
 }
 
 export function ExpenseShares({ expense, members }: { expense: Expense; members: TripMember[] }) {
+  const { t, i18n } = useTranslation();
   const names = new Map(members.map((member) => [member.id, member.name]));
 
   return (
     <div className="saved-expense-sharing">
-      <p className="field-hint">{names.get(expense.payerMemberId)} 付款</p>
-      <ul className="expense-share-list" aria-label="支出分攤">
+      <p className="field-hint">{t('expenses.payerLine', { name: names.get(expense.payerMemberId) })}</p>
+      {i18n.language === 'en' ? <p className="field-hint">{t('expenses.shareHeader')}</p> : null}
+      <ul className="expense-share-list" aria-label={t('expenses.sharingList')}>
         {expense.shares.map((share) => {
           const display = `${expense.currencyCode} ${formatShareAmount(share.amount)}`;
 

@@ -1,5 +1,27 @@
 # 分帳結算與實付結清 DSL
 
+## 008 台灣繁中結算文案
+
+本節只驗既有帳本成員淨額列與結算「待付款」區。零淨額判斷依同次 settlement 的成員／幣別與安排，不以四捨五入後的零代替精確零。
+
+| DSL 句型 | Gherkin 參數 | Data Table 參數 | 預設參數 | Playwright BDD 實作語意 |
+| --- | --- | --- | --- | --- |
+| `繁中旅行的 TWD 成員淨額全為零且無 TWD 付款安排，JPY 仍有待付款` | 無 | 不支援 | owner Alice 與 Amy | Given：真實API建立兩幣別來源，GET settlement 核對TWD每位ExactAmount=0且TWD arrangements=[]、JPY非空；保存同revision與原始來源，開頁前設定繁中。 |
+| `繁中旅行關閉簡化付款且小宇應收小安 TWD 100、應付小美 TWD 100` | 無 | 不支援 | 三位成員 | Given：建立直接付款關係並確認simplifyDebts=false；同快照小宇TWD淨額精確零、兩筆涉及小宇的安排各100。保存來源與revision。 |
+| `繁中旅行的 TWD 沒有付款安排而 JPY 仍有待付款` | 無 | 不支援 | 無 | Given：建立同旅行TWD與JPY來源；GET settlement確認TWD安排空、JPY安排非空與幣別集合，記錄完整快照；不開頁。 |
+| `繁中旅行所有幣別都沒有付款安排` | 無 | 不支援 | TWD及JPY均在來源範圍 | Given：建立TWD/JPY來源與已平衡的淨額，GET settlement確認全旅行arrangements=[]；保存幣別集合及revision，避免以無任何資料的旅行代替。 |
+| `繁中旅行有小宇應付小安 TWD 300 且已記錄實付 TWD 100` | 無 | 不支援 | 無 | Given：來源代付300與一筆獨立還款100均由真API落地；GET repayment/settlement確認原實付100及目前待付200，保存兩種事實不混算。 |
+| `owner 查看旅行帳本淨額` | 無 | 不支援 | 無 | When：只開啟同旅行帳本一次並等權威結算來源完成；不進結算頁，保存成員/幣別的精確淨額及revision。 |
+| `帳本的 TWD 零淨額成員顯示「已結清」` | 無 | 不支援 | 無 | Then：按成員ID及TWD對照同快照精確零與無涉及安排；既有帳本淨額列顯示「已結清」，不能顯示舊「已平衡」；JPY安排仍原值。 |
+| `結算的 TWD 零淨額成員顯示「已結清」` | 無 | 不支援 | 無 | Then：按成員ID及TWD對照同快照精確零與無涉及安排；既有結算淨額列顯示「已結清」，不能顯示舊「已平衡」；JPY安排仍原值。 |
+| `帳本中小宇的 TWD 淨額顯示「淨額為零」` | 無 | 不支援 | 無 | Then：同快照確認小宇ExactAmount=0但兩筆涉及他的直接安排非空；帳本淨額列顯示「淨額為零」而不稱已結清，不要求帳本另列付款安排。 |
+| `結算中小宇的 TWD 淨額顯示「淨額為零」且兩筆原付款安排仍可見` | 無 | 不支援 | 無 | Then：同快照確認小宇ExactAmount=0但兩筆涉及他的直接安排非空；結算淨額列顯示「淨額為零」，待付款保留兩筆ID/方向/100，不誤稱已結清。 |
+| `「待付款」區顯示「TWD 無待付款項」和 JPY 待付款明細` | 無 | 不支援 | 無 | Then：在既有結算安排區核對標題「待付款」、TWD一則局部空提示與JPY完整安排；同快照安排集合精確相等，不顯示全旅行空提示或舊冗長說明。 |
+| `「待付款」區只顯示一次「目前沒有待付款項。」` | 無 | 不支援 | 無 | Then：在既有結算安排區核對標題「待付款」及全旅行一則空提示；各幣別不重複空提示、不顯示舊冗長說明；API全安排確為空。 |
+| `畫面以「應付金額」及「已付金額」區分 TWD 200 待付與 TWD 100 實付` | 無 | 不支援 | 無 | Then：在既有結算/還款資訊位置，兩標籤各對應同幣別的目前應付200與原repayment實付100；不能把已付寫成應付、不能改寫原支出/還款。 |
+| `英文旅行的付款模式及安排屬於 "{結果}"` | 結果:string；未開啟簡化、開啟後安排相同、開啟後安排改變 | 不支援 | 無 | Given：以真實支出及同旅行成員準備三個獨立情境；直接安排如Alice→Bob與Bob→Carol，changed可化成Alice→Carol；unchanged用Amy→Alice單一安排；direct關閉開關。GET settlement以include=explanationDetails核對kind=direct/unchanged/changed，直接與選定安排、筆數、revision同快照；英文偏好有效。 |
+| `英文結算說明符合 "{結果}" 且來源帳務不變` | 結果:string；同上 | 不支援 | 無 | Then：既有結算說明位置用英文傳達direct/unchanged/changed對應語意，changed須說明實際改付對象與筆數變化，unchanged明確說無需調整；以memberId對應同旅行原文姓名，不因兩邊筆數相同就判未改。說明最多三句，來源支出與實付、精確淨額、安排、revision對照同次擴充回應，GET舊explanation不可被Web當英文翻譯；不另查拼接不同快照。 |
+
 ## 005 新增契約
 
 以下每列以既有 Playwright BDD fixture、page object 與真實 API/隔離資料庫實作。固定場景常數即句內明示值；所有 Then 不執行新的受測操作，API 再讀屬只讀權威查核。MoneyAmount 以字串解析，ExactAmount 用 BigInt 有理數，不用浮點或畫面值重算。fixture 所有名稱映射到同旅行穩定 UUID；未標示的可選值為 null，不自行擴張業務。
