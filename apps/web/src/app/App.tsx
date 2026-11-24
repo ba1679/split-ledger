@@ -1,3 +1,5 @@
+import '../i18n/shared-messages.js';
+import { useTranslation } from 'react-i18next';
 import { TrashTrips } from '../features/trips/TrashTrips.js';
 import { Button } from '../components/ui/button.js';
 import React from 'react';
@@ -31,13 +33,16 @@ function PrivatePage({ children }: { children: React.ReactNode }) {
 }
 
 export function App() {
+  const { t } = useTranslation();
   const session = useSession();
   const location = useLocation();
 
   if (session.pending || session.closing)
     return (
       <main className="session-state">
-        <BusyIndicator accessibleLabel={session.closing ? '正在登出' : '正在確認身分'} />
+        <BusyIndicator
+          accessibleLabel={session.closing ? t('app.signingOut') : t('app.checkingSession')}
+        />
       </main>
     );
   if (session.error && !session.account)
@@ -79,7 +84,9 @@ export function App() {
         element={
           <PrivatePage>
             <React.Suspense
-              fallback={<QueryState pending fetchStatus="fetching" label="花費分析" />}
+              fallback={
+                <QueryState pending fetchStatus="fetching" label={t('common.spendingAnalysis')} />
+              }
             >
               <TripExpenseAnalysis key={location.key} />
             </React.Suspense>
@@ -147,9 +154,9 @@ export function App() {
         element={
           <PrivatePage>
             <div className="empty">
-              <h1>找不到這個頁面</h1>
+              <h1>{t('common.pageMissing')}</h1>
               <Button asChild variant="default">
-                <Link to="/trips">返回我的旅行</Link>
+                <Link to="/trips">{t('common.backToTrips')}</Link>
               </Button>
             </div>
           </PrivatePage>

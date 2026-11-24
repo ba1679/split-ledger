@@ -1,3 +1,4 @@
+import { tripText, useTripText } from './messages.js';
 import React, { useEffect, useId, useRef, useState } from 'react';
 import { ActionButton } from '../../components/waiting/ActionButton.js';
 import { TripOperationCheck } from './TripOperationCheck.js';
@@ -25,7 +26,7 @@ class UnconfirmedTripEdit extends Error {
     readonly intent: TripEditIntent,
     cause: unknown,
   ) {
-    super('保存結果尚未確認，請再次查證。', { cause });
+    super(tripText('saveResultUnconfirmedCheckAgain'), { cause });
   }
 }
 
@@ -38,6 +39,7 @@ export function TripForm({
   onClose: () => void;
   onCreationResult?: () => void;
 }) {
+  useTripText();
   const { account } = useSession(),
     client = useQueryClient(),
     navigate = useNavigate();
@@ -77,7 +79,7 @@ export function TripForm({
   const alive = useRef(true);
   const photoError =
     file && (/\.hei[cf]$/i.test(file.name) || /hei[cf]/i.test(file.type))
-      ? 'HEIC 照片目前不支援，請先轉成 JPG、PNG 或 WebP，或移除選圖。'
+      ? tripText('heicPhotosAreNotSupportedConvertToJPG')
       : '';
 
   useEffect(() => {
@@ -88,7 +90,7 @@ export function TripForm({
     };
   }, []);
 
-  async function finish(saved: Trip, message?: string) {
+  async function finish(saved: Trip, messageKey?: string) {
     if (!alive.current) return;
     if (trip) client.setQueryData(['account', account!.id, 'trip', saved.id], saved);
     await Promise.all([
@@ -99,7 +101,7 @@ export function TripForm({
     ]);
     if (!alive.current) return;
     onClose();
-    navigate(`/trips/${saved.id}`, message ? { state: { message } } : undefined);
+    navigate(`/trips/${saved.id}`, messageKey ? { state: { messageKey } } : undefined);
   }
 
   async function verifyPhoto(saved: Trip, original: PhotoAttempt) {
@@ -129,7 +131,9 @@ export function TripForm({
       });
       await finish(
         current,
-        `原次圖片保存已確認成功。目前縮圖${current.hasThumbnail ? '已保存，以目前圖片為準' : '使用預設圖'}。`,
+        current.hasThumbnail
+          ? 'trips.thumbnailSaveVerifiedCurrentImage'
+          : 'trips.thumbnailSaveVerifiedDefaultImage',
       );
     } catch {
       // Keep the original operation and File while its current projection is unavailable.
@@ -218,7 +222,7 @@ export function TripForm({
 
       return;
     }
-    await finish(saved, trip ? '旅行名稱與日期已更新。' : undefined);
+    await finish(saved, trip ? 'trips.tripNameAndDatesUpdated' : undefined);
   }
 
   const mutation = useMutation({
@@ -294,14 +298,12 @@ export function TripForm({
         saved.startDate === editAttempt.startDate &&
         saved.endDate === editAttempt.endDate
       ) {
-        await finish(saved, '已確認目前的旅行名稱與日期。');
+        await finish(saved, 'trips.currentTripNameAndDatesConfirmed');
       } else {
-        setEditMessage(
-          '目前資料尚未與本次變更一致，仍無法確認保存結果。請稍後再次查證，或關閉視窗查看目前旅行。',
-        );
+        setEditMessage(tripText('currentDataDoesNotYetMatchThisChange'));
       }
     } catch {
-      if (alive.current) setEditMessage('目前無法取得旅行資料，請稍後再查證。本次草稿仍保留。');
+      if (alive.current) setEditMessage(tripText('tripDataIsUnavailableCheckAgainLaterYour'));
     } finally {
       editCheckLocked.current = false;
       if (alive.current) setEditChecking(false);
@@ -320,7 +322,7 @@ export function TripForm({
     )
       return;
     if (!name.trim()) {
-      setValidation('請填寫旅行名稱。');
+      setValidation(tripText('enterATripName'));
       nameInput.current?.focus();
 
       return;
@@ -330,7 +332,7 @@ export function TripForm({
       parsedEnd = parseDate(end);
 
     if ((start.trim() && !parsedStart) || (end.trim() && !parsedEnd)) {
-      setValidation('請輸入有效日期，例如 2027/03/11。');
+      setValidation(tripText('enterAValidDateForExample202703'));
 
       return;
     }
@@ -339,7 +341,7 @@ export function TripForm({
       endDate = parsedEnd ? dateOnly(parsedEnd) : null;
 
     if (startDate && endDate && endDate < startDate) {
-      setValidation('結束日不能早於開始日。');
+      setValidation(tripText('endDateCannotBeBeforeStartDate'));
 
       return;
     }
@@ -376,8 +378,12 @@ export function TripForm({
 
   return (
     <FormDialog
-      title={trip ? '旅行名稱與日期' : '新增旅行'}
-      description={trip ? '旅行名稱與日期會一併保存。' : '旅行名稱為必填；日期和縮圖可稍後設定。'}
+      title={trip ? tripText('tripNameAndDates') : tripText('newTrip')}
+      description={
+        trip
+          ? tripText('theTripNameAndDatesWillBeSaved')
+          : tripText('tripNameIsRequiredYouCanSetDates')
+      }
       className={
         trip
           ? undefined
@@ -394,30 +400,30 @@ export function TripForm({
           disabled={busy || createUnknown || Boolean(editAttempt)}
         >
           <div className="field">
-            <label htmlFor={inputId}>旅行名稱</label>
+            <label htmlFor={inputId}>{tripText('tripName')}</label>
             <Input
               id={inputId}
               ref={nameInput}
               value={name}
               onChange={(event) => setName(event.target.value)}
-              placeholder="例如：京都賞楓"
+              placeholder={tripText('forExampleAutumnInKyoto')}
               required
             />
           </div>
           <div className="two-col">
             <DateField
-              label="開始日"
+              label={tripText('startDate')}
               value={start}
               onChange={setStart}
               optional
-              placeholder={trip ? undefined : '年 / 月 / 日'}
+              placeholder={trip ? undefined : tripText('yearMonthDay')}
             />
             <DateField
-              label="結束日"
+              label={tripText('endDate')}
               value={end}
               onChange={setEnd}
               optional
-              placeholder={trip ? undefined : '年 / 月 / 日'}
+              placeholder={trip ? undefined : tripText('yearMonthDay')}
             />
           </div>
           {!trip ? (
@@ -434,13 +440,13 @@ export function TripForm({
         </p>
         {createUnknown ? (
           <section className="create-trip-unknown" role="status">
-            <p>旅行建立結果尚未確認；請查證原次建立。照片尚未送出。</p>
+            <p>{tripText('tripCreationIsUnconfirmedCheckTheOriginalRequest')}</p>
             <Button
               type="button"
               variant="outline"
               disabled={busy}
               aria-busy={createVerifying}
-              aria-label={createVerifying ? '正在查證旅行建立' : undefined}
+              aria-label={createVerifying ? tripText('checkingTripCreation') : undefined}
               onClick={() => {
                 if (createLocked.current) return;
                 createLocked.current = true;
@@ -455,20 +461,24 @@ export function TripForm({
               {createVerifying ? (
                 <LoaderCircle size={20} className="action-spinner" aria-hidden="true" />
               ) : (
-                '再次查證'
+                tripText('checkAgain')
               )}
             </Button>
           </section>
         ) : null}
         {editAttempt ? (
-          <section ref={editOutcome} className="operation-outcome" aria-label="旅行變更查證">
-            <p>本次草稿已保留。再次查證只讀取這趟旅行，不會重送保存。</p>
-            <p>關閉只會收起視窗，不會撤回已送出的保存。</p>
+          <section
+            ref={editOutcome}
+            className="operation-outcome"
+            aria-label={tripText('checkTripChanges')}
+          >
+            <p>{tripText('yourDraftIsRetainedCheckingAgainOnlyReads')}</p>
+            <p>{tripText('closingDismissesThisDialogItDoesNotUndo')}</p>
             {editMessage ? <p role="status">{editMessage}</p> : null}
             <TripOperationCheck
               busy={editChecking}
-              label="再次查證"
-              busyLabel="正在查證旅行變更"
+              label={tripText('checkAgain')}
+              busyLabel={tripText('checkingTripChanges')}
               onCheck={recheckEdit}
             />
           </section>
@@ -477,24 +487,24 @@ export function TripForm({
           {trip ? (
             <>
               <Button type="button" variant="outline" disabled={busy} onClick={onClose}>
-                {editAttempt ? '關閉視窗' : '取消'}
+                {editAttempt ? tripText('closeDialog') : tripText('cancel')}
               </Button>
               <ActionButton
                 variant="default"
                 busy={mutation.isPending}
-                label="儲存變更"
+                label={tripText('saveChanges')}
                 disabled={Boolean(editAttempt)}
               />
             </>
           ) : (
             <>
               <Button type="button" variant="secondary" disabled={busy} onClick={onClose}>
-                取消
+                {tripText('cancel')}
               </Button>
               <ActionButton
                 busy={busy}
-                label="建立旅行"
-                busyLabel={photoPending ? '正在保存旅行圖片' : '正在建立旅行'}
+                label={tripText('createTrip')}
+                busyLabel={photoPending ? tripText('savingTripImage') : tripText('creatingTrip')}
                 disabled={busy || createUnknown || Boolean(photoError)}
               />
             </>

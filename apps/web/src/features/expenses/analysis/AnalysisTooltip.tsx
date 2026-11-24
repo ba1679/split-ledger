@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { AnalysisCategory, AnalysisChart } from '../../../api/expense-analysis.js';
 import { ChartTooltipContent } from '../../../components/ui/chart.js';
 import { formatShareAmount } from '../ExpenseShares.js';
 import { displayAmount } from '../money.js';
 import { formatAnalysisPercent } from './math.js';
+import '../messages.js';
 
 /** Recharts owns activation and chart positioning; keep its branded content in view. */
 export function AnalysisTooltip({
@@ -17,6 +19,7 @@ export function AnalysisTooltip({
   currency: string;
   kind: '個人' | '團體';
 }) {
+  const { t } = useTranslation();
   const element = useRef<HTMLDivElement>(null);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const reposition = useCallback(() => {
@@ -48,7 +51,7 @@ export function AnalysisTooltip({
     <div
       ref={element}
       role="tooltip"
-      aria-label="分類資訊"
+      aria-label={t('expenses.categoryInfo')}
       className="analysis-tooltip"
       style={{ transform: `translate(${offset.x}px, ${offset.y}px)` }}
     >
@@ -59,12 +62,12 @@ export function AnalysisTooltip({
 
           return (
             <>
-              <strong className="analysis-info-name">{source.category?.name ?? '未分類'}</strong>
+              <strong className="analysis-info-name">{source.category?.name ?? t('expenses.uncategorized')}</strong>
               <span className="analysis-info-amount">
                 {currency} {displayAmount(formatShareAmount(source.amount))}
               </span>
               <small>
-                占{kind}花費 {formatAnalysisPercent(source.amount, chart.total)}
+                {t(kind === '個人' ? 'expenses.personalPercent' : 'expenses.groupPercent', { percent: formatAnalysisPercent(source.amount, chart.total) })}
               </small>
             </>
           );

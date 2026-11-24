@@ -1,3 +1,5 @@
+import '../i18n/shared-messages.js';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../components/ui/button.js';
 import React, { useState } from 'react';
 import { Trash2 } from 'lucide-react';
@@ -5,6 +7,7 @@ import { FormDialog } from './FormDialog.js';
 import { Link, NavLink, useLocation, useMatch } from 'react-router-dom';
 import { useSession } from '../features/auth/session.js';
 import { Icon } from './Icon.js';
+import { LanguageMenu, MobileLanguageBar } from './LanguageMenu.js';
 import { useAvailableTrip } from '../features/trips/use-available-trip.js';
 
 type NavigationSection = 'trips' | 'members' | 'settlement' | null;
@@ -34,6 +37,8 @@ function TripNavigation({
   trash: boolean;
   openTrips: () => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="trip-nav-group">
       {mobile ? (
@@ -48,7 +53,7 @@ function TripNavigation({
           }}
         >
           <Icon name="trips" />
-          <span>我的旅行</span>
+          <span>{t('common.myTrips')}</span>
         </Button>
       ) : (
         <Link
@@ -57,7 +62,7 @@ function TripNavigation({
           aria-current={section === 'trips' && !trash ? 'page' : undefined}
         >
           <Icon name="trips" />
-          <span>我的旅行</span>
+          <span>{t('common.myTrips')}</span>
         </Link>
       )}
       {tripId || !mobile ? (
@@ -70,7 +75,7 @@ function TripNavigation({
                 aria-current={section === 'members' ? 'page' : undefined}
               >
                 <Icon name="members" />
-                <span>同行者</span>
+                <span>{t('common.members')}</span>
               </Link>
               <Link
                 to={`/trips/${tripId}/settlement`}
@@ -78,7 +83,7 @@ function TripNavigation({
                 aria-current={section === 'settlement' ? 'location' : undefined}
               >
                 <Icon name="settlement" />
-                <span>分帳結算</span>
+                <span>{t('ledger.settlement')}</span>
               </Link>
             </>
           ) : null}
@@ -89,7 +94,7 @@ function TripNavigation({
               aria-current={trash ? 'page' : undefined}
             >
               <Trash2 className="icon" size={19} strokeWidth={1.6} aria-hidden="true" />
-              <span>垃圾桶</span>
+              <span>{t('common.trash')}</span>
             </Link>
           ) : null}
         </div>
@@ -99,6 +104,7 @@ function TripNavigation({
 }
 
 function Navigation({ mobile = false }: { mobile?: boolean }) {
+  const { t } = useTranslation();
   const { signOut, closing } = useSession();
   const tripMatch = useMatch('/trips/:tripId/*');
   const matchedId = tripMatch?.params.tripId;
@@ -112,7 +118,7 @@ function Navigation({ mobile = false }: { mobile?: boolean }) {
     <>
       <nav
         className={mobile ? 'bottom-nav' : undefined}
-        aria-label={mobile ? '行動導覽' : '主要導覽'}
+        aria-label={t(mobile ? 'common.mobileNavigation' : 'common.navigation')}
       >
         <TripNavigation
           section={section}
@@ -123,7 +129,7 @@ function Navigation({ mobile = false }: { mobile?: boolean }) {
         />
         <NavLink to="/categories">
           <Icon name="list" />
-          <span>支出分類</span>
+          <span>{t('common.categories')}</span>
         </NavLink>
         {mobile ? (
           <Button
@@ -135,15 +141,17 @@ function Navigation({ mobile = false }: { mobile?: boolean }) {
             }}
           >
             <Icon name="back" />
-            <span>登出</span>
+            <span>{t('common.signOut')}</span>
           </Button>
         ) : null}
       </nav>
       {mobile && tripsMenu ? (
         <FormDialog
-          title="我的旅行"
+          title={t('common.myTrips')}
           className={`mobile-trips-menu${availableTrip ? ' has-current-trip' : ''}`}
-          description={availableTrip ? `目前：${availableTrip.name}` : undefined}
+          description={
+            availableTrip ? t('common.currentTrip', { name: availableTrip.name }) : undefined
+          }
           onClose={() => setTripsMenu(false)}
           showClose
         >
@@ -154,7 +162,7 @@ function Navigation({ mobile = false }: { mobile?: boolean }) {
             onClick={() => setTripsMenu(false)}
           >
             <Icon name="trips" />
-            旅行清單
+            {t('common.tripList')}
           </Link>
           <Link
             tabIndex={0}
@@ -163,7 +171,7 @@ function Navigation({ mobile = false }: { mobile?: boolean }) {
             onClick={() => setTripsMenu(false)}
           >
             <Trash2 className="icon" aria-hidden="true" />
-            垃圾桶
+            {t('common.trash')}
           </Link>
         </FormDialog>
       ) : null}
@@ -172,6 +180,7 @@ function Navigation({ mobile = false }: { mobile?: boolean }) {
 }
 
 export function AppShell({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation();
   const { account, signOut, error, closing } = useSession();
 
   return (
@@ -181,16 +190,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <span className="brand-mark" aria-hidden="true">
             t.
           </span>
-          旅帳
+          {t('app.title')}
         </Link>
         <Navigation />
         <footer>
           <div className="eyebrow">
-            A LITTLE RECORD
+            {t('common.sidebarFirst')}
             <br />
-            OF EVERY JOURNEY.
+            {t('common.sidebarSecond')}
           </div>
-          <p>{account?.name} 的旅行帳本</p>
+          <p>{t('common.accountLedger', { name: account?.name })}</p>
+          <LanguageMenu className="sidebar-language-menu" />
           <Button
             variant="ghost"
             className="text-btn"
@@ -200,11 +210,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             }}
           >
             <Icon name="back" />
-            <span>登出</span>
+            <span>{t('common.signOut')}</span>
           </Button>
         </footer>
       </aside>
       <main className="main">
+        <MobileLanguageBar />
         {error ? (
           <p className="error" role="alert">
             {error.message}

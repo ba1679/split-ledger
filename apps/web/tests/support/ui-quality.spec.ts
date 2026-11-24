@@ -154,7 +154,7 @@ test('empty, offline, pending, unknown and confirmed-save feedback is visible an
 
   await expect(save).toBeEnabled();
   await item.fill('沿途的咖啡');
-  await page.getByLabel('金額', { exact: true }).fill('1200');
+  await page.getByLabel('支出金額', { exact: true }).fill('1200');
   await page.context().setOffline(true);
   await save.click();
   await expect(page.getByRole('alert')).toContainText('目前無法連線');
@@ -204,7 +204,7 @@ test('empty, offline, pending, unknown and confirmed-save feedback is visible an
   await page.getByRole('link', { name: '記一筆', exact: true }).click();
   await expect(save).toBeEnabled();
   await item.fill('另一杯咖啡');
-  await page.getByLabel('金額', { exact: true }).fill('800');
+  await page.getByLabel('支出金額', { exact: true }).fill('800');
   await page.route(`**/api/trips/${trip.id}/expenses/*`, (route) => route.abort('failed'));
   await page.route(`**/api/trips/${trip.id}/expenses`, async (route) => {
     if (route.request().method() !== 'POST') return route.continue();

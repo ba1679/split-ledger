@@ -38,21 +38,21 @@ export interface OperationOutcome {
 
 export type LifecycleOperation = 'trash' | 'restore' | 'purge';
 
-export function lifecycleOutcomeMessage(outcome: OperationOutcome) {
+export function lifecycleOutcomeMessageKey(outcome: OperationOutcome) {
   const action =
     outcome.result.kind === 'move_to_trash'
-      ? '移入'
+      ? 'Trash'
       : outcome.result.kind === 'purge'
-        ? '永久刪除'
-        : '復原';
-  const current =
+        ? 'Purge'
+        : 'Restore';
+  const state =
     outcome.currentState.state === 'active'
-      ? '一般可用'
+      ? 'Active'
       : outcome.currentState.state === 'trash'
-        ? '已在垃圾桶，可前往復原'
-        : '已永久刪除，無法再開啟';
+        ? 'InTrash'
+        : 'Purged';
 
-  return `原次${action}已確認成功。目前旅行${current}。`;
+  return `lifecycle${action}${state}`;
 }
 
 export function useLifecycleCommand(

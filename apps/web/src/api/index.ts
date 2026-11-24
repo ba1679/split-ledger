@@ -1,3 +1,4 @@
+import { localizeApiError } from '../i18n/api-errors.js';
 import type { ExactAmount } from '@split-ledger/shared';
 import type { OverpaymentConfirmation } from '../features/repayments/types.js';
 
@@ -85,9 +86,14 @@ export class ApiError extends Error {
     message: string,
     readonly field?: string,
     readonly confirmation?: OverpaymentConfirmation,
+    readonly serverMessage?: string,
   ) {
     super(message);
   }
+}
+
+export function apiErrorMessage(error: ApiError): string {
+  return localizeApiError(error.code, error.field, error.serverMessage);
 }
 
 export async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -107,9 +113,10 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
     throw new ApiError(
       response.status,
       error?.code ?? 'UNKNOWN_ERROR',
-      error?.message ?? '暫時無法取得資料，請稍後再試。',
+      localizeApiError(error?.code ?? 'UNKNOWN_ERROR', error?.field, error?.message),
       error?.field,
       error?.confirmation,
+      error?.message,
     );
   }
   if (response.status === 204) return undefined as T;

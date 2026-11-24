@@ -30,7 +30,7 @@ export interface BrowserExpense {
   currencyCode: string;
   minorUnit: number;
   spentOn: string;
-  category: unknown;
+  category: { id: string; name: string } | null;
   payerMemberId: string;
   shares: { memberId: string; amount: ExactAmount }[];
 }
@@ -166,8 +166,8 @@ export async function readBrowserSplittingSnapshot(
       currencyCode: row.currency_code,
       minorUnit: row.minor_unit,
       payerMemberId: row.payer_member_id,
-      category: row.category_id,
     });
+    expect(view.category?.id ?? null).toBe(row.category_id);
     expect(fixtureMinorAmount(view.amount, view.minorUnit).toString()).toBe(
       String(row.amount_minor),
     );

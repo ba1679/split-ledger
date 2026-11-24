@@ -29,7 +29,7 @@ export interface StaleExpenseDraft {
 
 export async function assertSnackDraft(page: Page, draft: ExpenseVerificationDraft): Promise<void> {
   await expect(page.getByLabel('支出項目', { exact: true })).toHaveValue(draft.item);
-  await expect(page.getByLabel('金額', { exact: true })).toHaveValue(draft.amount);
+  await expect(page.getByLabel('支出金額', { exact: true })).toHaveValue(draft.amount);
   await expect(
     page.getByRole('textbox', { name: '支出日期', exact: true, includeHidden: true }),
   ).toHaveValue(draft.date);
@@ -59,7 +59,7 @@ export async function arrangeStaleExpenseDraft(
   await page.getByRole('link', { name: '記一筆', exact: true }).click();
   await page.getByLabel('支出項目', { exact: true }).fill('點心');
   await chooseCurrency(page, 'JPY');
-  await page.getByLabel('金額', { exact: true }).fill('500');
+  await page.getByLabel('支出金額', { exact: true }).fill('500');
   await page.getByRole('radio', { name: 'Alice', exact: true }).check();
   for (const name of ['Alice', 'Amy'])
     await page.getByRole('checkbox', { name, exact: true }).check();

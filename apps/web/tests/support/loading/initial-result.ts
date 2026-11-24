@@ -140,7 +140,7 @@ export async function assertInitialResult(world: LedgerWorld, content: string): 
     case '既有支出表單資料': {
       const expense = state.authority as Expense;
       await expect(region.getByLabel('支出項目', { exact: true })).toHaveValue(expense.item);
-      await expect(region.getByLabel('金額', { exact: true })).toHaveValue(expense.amount);
+      await expect(region.getByLabel('支出金額', { exact: true })).toHaveValue(expense.amount);
       await expect(region.getByRole('textbox', { name: '支出日期', exact: true })).toHaveValue(
         expense.spentOn.replaceAll('-', '/'),
       );

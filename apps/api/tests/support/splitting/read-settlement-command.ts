@@ -7,12 +7,16 @@ import { splittingTripId } from './members-fixture.js';
 export const readSettlementPhrase = 'owner 查詢旅行分帳結算';
 
 /** One owner GET preserves the complete projection and its opaque arrangement keys. */
-export async function readTripSettlement(world: LedgerWorld): Promise<void> {
+export async function readTripSettlement(
+  world: LedgerWorld,
+  include?: 'explanationDetails',
+): Promise<void> {
   const owner = world.users.get('甲');
   expect(owner, 'Settlement query requires the owner session').toBeDefined();
   const before = await snapshotSplittingSources(world);
   world.response = await world.api.get(`/api/trips/${splittingTripId(world)}/settlement`, {
     headers: { Cookie: owner!.cookie },
+    ...(include === undefined ? {} : { params: { include } }),
   });
   const reply = (await world.response.json()) as AccessSettlementView;
   world.set('splitting:reply', reply);

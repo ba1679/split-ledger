@@ -1,0 +1,107 @@
+{
+  "baseline": "baseline-v0.4",
+  "inputSha256": "144a81b3086885bf57f5a694a78ed75f089f032730f91767088598ed1572a3d3",
+  "outputSha256": "ab8d439c84e177774d165aa96c1ab47ccd6e3c3ad810c19bc8fb612d6fae9f3d",
+  "penCli": "0.3.18",
+  "inputFormat": "2.22",
+  "outputFormat": "2.25",
+  "productBaseCommit": "228109265ddc3384853745b1083edb1f94ce3579",
+  "productManifestSha256": "a1ab54e69453343a15a3469ad3170d7bd35f9a1c5413ca5b4f8d8622e7cce5b7",
+  "preexistingLayers": 1504,
+  "existingLayersWithExplicitDefaultFontWeight": 12,
+  "allComponentRefsResolve": true,
+  "noOverlapInBaselineRegionsAndNewScreens": true,
+  "oldPreviewsRepeatedExportsIdentical": [
+    {
+      "frameId": "A6z1TP",
+      "sha256": "3aab8c257474ad1331be45905fe7685ea2b939ac1aa708d36d6210034541f296"
+    },
+    {
+      "frameId": "DYqPD",
+      "sha256": "2deaedcf01d2ebbde37bbc14edb06e5ea85f89d306e160488c009d6d7b424dab"
+    },
+    {
+      "frameId": "GlUDZ",
+      "sha256": "3482c15262c16ae7750cb48a72388597534747494e15b22994dff73a935b7bb4"
+    },
+    {
+      "frameId": "K4fUl",
+      "sha256": "99ee11590473f0d17e0514f2841456284c7d7d759404bc1a66363a19a3b00f4a"
+    },
+    {
+      "frameId": "UfWmt",
+      "sha256": "e1c7ed4012c885dc2e42abdf5a7110952dfcd89d7aa177b620c664e17e0f2214"
+    },
+    {
+      "frameId": "XKz6N",
+      "sha256": "1f1ee38fd5e1a6e2bc11342fa505843fe564b9e7a1a9a34a322dd708f8c2f350"
+    },
+    {
+      "frameId": "c01mB",
+      "sha256": "7ad8667c290b07e56c5c0286ac52deb6ad49fc44de1c7ea3480b5b2cff2f5de6"
+    },
+    {
+      "frameId": "fpiar",
+      "sha256": "74eb5af60614556def454a98b741143b14ffa35b46bf0605e4fc138512e6a276"
+    },
+    {
+      "frameId": "i1wuXl",
+      "sha256": "059199ea48c9fd8aa8a4d9f5cb01011fec777c3f236184c20b91abcfe7c3f459"
+    },
+    {
+      "frameId": "j4FlQR",
+      "sha256": "88b6170777cb1086e4c66a56e89bfbb7211e21b523e5cfc4dd9358ad53d2970e"
+    },
+    {
+      "frameId": "o337R",
+      "sha256": "7fd5c4df2bbc6141c511b4d777f7dfa6cfa4ddd2f8018803f5a5b64fce0c968c"
+    },
+    {
+      "frameId": "pwPFO",
+      "sha256": "6512ffccf4a22ddf6beb6c11a8c68b0200e5e77c8c152a1280737ce44c0c4866"
+    },
+    {
+      "frameId": "vQfME",
+      "sha256": "a869ac177a349c7c0995fc8d8e23ad996260f6156f0661694246fcac284818f1"
+    },
+    {
+      "frameId": "zQocB",
+      "sha256": "a23b8e392ecbd6d8a088bf19a49aa44d74f623aa4d8c1777b56c135c57197ff8"
+    }
+  ],
+  "newPreviews": [
+    {
+      "frameId": "pqjS7",
+      "viewport": [
+        390,
+        844
+      ],
+      "preview": "../previews/language-login-mobile.png",
+      "previewSha256": "7eb45414437863e3edd29567e421ad4a453a34177bf48f360b17b03b9457f122",
+      "product": "language-login-mobile-product.png",
+      "productSha256": "804383deb8e676e38029117b7c02d0ac4684b38c5e526073baebcfc402aa13eb"
+    },
+    {
+      "frameId": "p3HrQ",
+      "viewport": [
+        1440,
+        900
+      ],
+      "preview": "../previews/language-ledger-desktop.png",
+      "previewSha256": "3a640ce6a773968978606cd376b56c0cecfe7e96fdd6092c33cc5225de9d953c",
+      "product": "language-ledger-desktop-product.png",
+      "productSha256": "0beeaec0b88e958a9d77f6d8943ed046fa94a50c061afe7a5f0ea771f1532820"
+    },
+    {
+      "frameId": "IdwIn",
+      "viewport": [
+        390,
+        844
+      ],
+      "preview": "../previews/language-repayment-mobile.png",
+      "previewSha256": "d391e237b1c1d459719e3efc451c602624f72c3c8ce9ac3e2aa5623854b97cbb",
+      "product": "language-repayment-mobile-product.png",
+      "productSha256": "16b23be732daf7889e9226c73f004175f7919c9019eba6d64dcac5e69ec85bf1"
+    }
+  ]
+}

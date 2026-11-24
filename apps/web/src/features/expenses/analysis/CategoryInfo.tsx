@@ -1,10 +1,12 @@
 import React, { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 import type { AnalysisCategory, AnalysisChart } from '../../../api/expense-analysis.js';
 import { Button } from '../../../components/ui/button.js';
 import { formatShareAmount } from '../ExpenseShares.js';
 import { displayAmount } from '../money.js';
 import { formatAnalysisPercent } from './math.js';
+import '../messages.js';
 
 export type AnalysisTrigger = HTMLElement | SVGElement;
 
@@ -21,6 +23,7 @@ export function CategoryInfo({
   kind: '個人' | '團體';
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const close = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     close.current?.focus({ preventScroll: true });
@@ -38,14 +41,14 @@ export function CategoryInfo({
   }, [onClose]);
 
   return (
-    <section role="dialog" aria-label="分類資訊" className="analysis-info-card">
+    <section role="dialog" aria-label={t('expenses.categoryInfo')} className="analysis-info-card">
       <header>
-        <strong className="analysis-info-name">{row.category?.name ?? '未分類'}</strong>
+        <strong className="analysis-info-name">{row.category?.name ?? t('expenses.uncategorized')}</strong>
         <Button
           ref={close}
           variant="ghost"
           className="analysis-info-close"
-          aria-label="關閉分類資訊"
+          aria-label={t('expenses.closeCategoryInfo')}
           onClick={onClose}
         >
           <X size={18} aria-hidden="true" />
@@ -55,7 +58,7 @@ export function CategoryInfo({
         {currency} {displayAmount(formatShareAmount(row.amount))}
       </p>
       <p className="analysis-info-percent">
-        占{kind}花費 {formatAnalysisPercent(row.amount, chart.total)}
+        {t(kind === '個人' ? 'expenses.personalPercent' : 'expenses.groupPercent', { percent: formatAnalysisPercent(row.amount, chart.total) })}
       </p>
     </section>
   );

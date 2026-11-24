@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+import '../../i18n/shared-messages.js';
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { createAuthClient } from 'better-auth/react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -17,6 +19,7 @@ interface SessionState {
 const SessionContext = createContext<SessionState | null>(null);
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation();
   const client = useQueryClient();
   const navigate = useNavigate();
   const [closing, setClosing] = useState(false);
@@ -71,13 +74,13 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     try {
       const result = await authClient.signOut();
 
-      if (result.error) throw new Error('登出尚未完成，請重新嘗試。');
+      if (result.error) throw new Error(t('common.signOutError'));
 
       client.clear();
       client.setQueryData(sessionKey, null);
       navigate('/', { replace: true });
     } catch (error) {
-      setSignOutError(error instanceof Error ? error : new Error('登出尚未完成，請重新嘗試。'));
+      setSignOutError(error instanceof Error ? error : new Error(t('common.signOutError')));
     } finally {
       setClosing(false);
     }

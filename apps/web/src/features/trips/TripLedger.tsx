@@ -1,3 +1,6 @@
+import { MobileLanguageBar } from '../../components/LanguageMenu.js';
+import { tripText } from './messages.js';
+import { useTranslation } from 'react-i18next';
 import './analysis-entry.css';
 import { TripManagementMenu } from './TripManagementMenu.js';
 import { Button } from '../../components/ui/button.js';
@@ -22,12 +25,14 @@ import { TripForm } from './TripForm.js';
 import { displayAmount } from '../expenses/money.js';
 import { formatShareAmount } from '../expenses/ExpenseShares.js';
 import type { SettlementView } from '../settlement/types.js';
+import { balanceStatus, formatBalanceAmount } from '../settlement/balance-status.js';
 import { Icon } from '../../components/Icon.js';
 import { useLedgerEntryState, useUnavailableLedgerCleanup } from './use-ledger-entry-state.js';
 import { useLedgerManagement } from './use-ledger-management.js';
 import { TripAccessState } from './TripAccessState.js';
 
 export function TripLedger() {
+  const { t, i18n } = useTranslation();
   const { tripId } = useParams(),
     { account } = useSession();
   const [editing, setEditing] = useState(false);
@@ -106,12 +111,14 @@ export function TripLedger() {
       <>
         {lifecycleDialog}
         {thumbnailDialog}
-        <Link className="back" to="/trips">
-          <Icon name="back" />
-          <span>我的旅行</span>
-        </Link>
+        <MobileLanguageBar>
+          <Link className="back" to="/trips">
+            <Icon name="back" />
+            <span>{tripText('myTrips')}</span>
+          </Link>
+        </MobileLanguageBar>
         <QueryState
-          label="旅行資料"
+          label={tripText('tripDetails')}
           layout="summary"
           fetchStatus={trip.fetchStatus}
           pending={trip.isPending}
@@ -127,18 +134,20 @@ export function TripLedger() {
     <>
       {lifecycleDialog}
       {thumbnailDialog}
-      <Link className="back" to="/trips">
-        <Icon name="back" />
-        <span>我的旅行</span>
-      </Link>
-      <header className="page-head" role="region" aria-label="旅行資料">
+      <MobileLanguageBar>
+        <Link className="back" to="/trips">
+          <Icon name="back" />
+          <span>{tripText('myTrips')}</span>
+        </Link>
+      </MobileLanguageBar>
+      <header className="page-head" role="region" aria-label={tripText('tripDetails')}>
         <div>
           <div className="eyebrow">TRAVEL JOURNAL</div>
           <h1>{trip.data.name}</h1>
           <p className="muted">
             <span>{tripDates(trip.data)}</span>
             <Button variant="ghost" className="text-btn" onClick={() => setEditing(true)}>
-              旅行日期
+              {tripText('tripDates')}
             </Button>
           </p>
         </div>
@@ -146,7 +155,7 @@ export function TripLedger() {
           <Button asChild variant="default">
             <Link to={`/trips/${trip.data.id}/expenses/new`}>
               <Icon name="plus" />
-              <span>記一筆</span>
+              <span>{t('ledger.addExpense')}</span>
             </Link>
           </Button>
           <TripManagementMenu
@@ -157,35 +166,35 @@ export function TripLedger() {
         </div>
       </header>
       <div className="ledger-analysis-navigation">
-        <nav aria-label="旅行內導覽" className="trip-navigation">
+        <nav aria-label={tripText('tripNavigation')} className="trip-navigation">
           <Button asChild variant="outline">
             <Link to={`/trips/${tripId}/members`}>
               <Icon name="members" />
-              同行者
+              {t('common.members')}
             </Link>
           </Button>
           <Button asChild variant="outline">
             <Link to={`/trips/${tripId}/settlement`}>
               <Icon name="settlement" />
-              分帳結算
+              {t('ledger.settlement')}
             </Link>
           </Button>
         </nav>
         <Button asChild variant="outline" className="analysis-entry">
           <Link to={`/trips/${tripId}/analysis`}>
             <ChartPie size={20} strokeWidth={1.6} aria-hidden="true" />
-            花費分析
+            {t('common.spendingAnalysis')}
           </Link>
         </Button>
       </div>
-      {(location.state as { message?: string } | null)?.message ? (
+      {location.state?.messageKey || location.state?.message ? (
         <p className="feedback" role="status">
-          {(location.state as { message: string }).message}
+          {location.state.messageKey ? t(location.state.messageKey) : location.state.message}
         </p>
       ) : null}
       {totals.isPending || totals.error ? (
         <QueryState
-          label="分幣別總額"
+          label={tripText('totalsByCurrency')}
           layout="summary"
           fetchStatus={totals.fetchStatus}
           pending={totals.isPending}
@@ -197,9 +206,9 @@ export function TripLedger() {
       ) : totals.data.totals.length ? (
         <>
           <div className="section-head">
-            <span>個人總花費 · 依幣別分開統計</span>
+            <span>{tripText('myTotalExpensesByCurrency')}</span>
           </div>
-          <section className="totals" aria-label="分幣別總額">
+          <section className="totals" aria-label={tripText('totalsByCurrency')}>
             {totals.data.totals.map((total) => (
               <section
                 className="total-card"
@@ -218,7 +227,7 @@ export function TripLedger() {
         </>
       ) : null}
       {members.data && settlement.data ? (
-        <section aria-label="成員淨額" className="balance-grid">
+        <section aria-label={tripText('memberBalances')} className="balance-grid">
           {[...new Set(settlement.data.balances.map((balance) => balance.currencyCode))].map(
             (currency) => (
               <div key={currency} className="settlement-panel">
@@ -239,10 +248,14 @@ export function TripLedger() {
                     >
                       <span className="balance-person">
                         <span>{member.name}</span>
-                        <span>{sign > 0n ? '應收' : sign < 0n ? '應付' : '已平衡'}</span>
+                        <span>
+                          {t(
+                            balanceStatus(sign, member.id, currency, settlement.data!.arrangements),
+                          )}
+                        </span>
                       </span>
                       <strong className={sign > 0n ? 'receivable' : undefined}>
-                        {currency} {formatShareAmount(amount)}
+                        {currency} {formatBalanceAmount(amount, i18n.resolvedLanguage)}
                       </strong>
                     </div>
                   );
@@ -261,7 +274,7 @@ export function TripLedger() {
             </div>
           ) : null}
           <QueryState
-            label="支出清單"
+            label={tripText('expenseList')}
             layout="list"
             fetchStatus={expenses.fetchStatus}
             pending={expenses.isPending}
@@ -274,29 +287,31 @@ export function TripLedger() {
       ) : totalCount === 0 ? (
         <div className="empty">
           <Icon name="note" />
-          <h2>旅程還有很多空白，真好。</h2>
-          <p>先記下一筆機票，或今天的一杯咖啡。</p>
+          <h2>{tripText('aBlankPageForYourJourney')}</h2>
+          <p>{tripText('startWithAFlightTicketOrTodayS')}</p>
           <Button asChild variant="default">
-            <Link to={`/trips/${trip.data.id}/expenses/new`}>記錄第一筆支出</Link>
+            <Link to={`/trips/${trip.data.id}/expenses/new`}>
+              {tripText('addYourFirstExpense')}
+            </Link>
           </Button>
         </div>
       ) : (
         <>
-          <section aria-label="支出清單">
+          <section aria-label={tripText('expenseList')}>
             <div className="section-head">
-              <h2>沿途的花費</h2>
+              <h2>{tripText('expensesAlongTheWay')}</h2>
               <span className="ledger-record-count">
-                {totalCount} 筆紀錄
+                {tripText('recordCount', { count: totalCount })}
                 {expenses.isFetching && !expenses.isFetchingNextPage ? (
                   <span aria-busy="true">
-                    <BusyIndicator accessibleLabel="正在更新支出清單" />
+                    <BusyIndicator accessibleLabel={tripText('updatingExpenseList')} />
                   </span>
                 ) : null}
               </span>
             </div>
             {expenses.error ? (
               <p className="error" role="alert">
-                暫時無法更新支出清單，已載入的紀錄仍保留。
+                {tripText('couldNotUpdateTheExpenseListLoadedRecords')}
                 {!expenses.isFetchNextPageError ? (
                   <Button
                     variant="ghost"
@@ -307,7 +322,7 @@ export function TripLedger() {
                       void expenses.refetch();
                     }}
                   >
-                    重新更新清單
+                    {tripText('updateListAgain')}
                   </Button>
                 ) : null}
               </p>
@@ -327,7 +342,7 @@ export function TripLedger() {
                     <div className="row-sub">
                       <span>{expense.spentOn}</span>
                       {' · '}
-                      <span>{expense.category?.name ?? '未分類'}</span>
+                      <span>{expense.category?.name ?? tripText('uncategorized')}</span>
                     </div>
                   </div>{' '}
                   <div className="row-amount">
@@ -343,8 +358,8 @@ export function TripLedger() {
               <ActionButton
                 type="button"
                 variant="outline"
-                label="載入更多"
-                busyLabel="正在讀取更多支出"
+                label={tripText('loadMore')}
+                busyLabel={tripText('loadingMoreExpenses')}
                 busy={expenses.isFetchingNextPage}
                 disabled={expenses.isFetching}
                 onClick={() => {

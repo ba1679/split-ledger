@@ -67,7 +67,7 @@ export async function assertOperationBusy(world: LedgerWorld): Promise<void> {
   const body = recorded.effectiveBody ?? recorded.body;
   if (['新增支出', '修改支出'].includes(state.operation)) {
     await expect(ui.page.getByLabel('支出項目', { exact: true })).toHaveValue(String(body.item));
-    await expect(ui.page.getByLabel('金額', { exact: true })).toHaveValue(String(body.amount));
+    await expect(ui.page.getByLabel('支出金額', { exact: true })).toHaveValue(String(body.amount));
     await expect(ui.page.getByRole('textbox', { name: '支出日期', exact: true })).toHaveValue(
       String(body.spentOn).replaceAll('-', '/'),
     );

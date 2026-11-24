@@ -1,3 +1,6 @@
+import { useTranslation } from 'react-i18next';
+import '../i18n/calendar-messages.js';
+import '../i18n/shared-messages.js';
 import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Input } from '../components/ui/input.js';
 import React, { useId, useLayoutEffect, useRef, useState } from 'react';
@@ -5,7 +8,16 @@ import { createPortal } from 'react-dom';
 import { calendarDate, dateOnly, localToday, parseDate, shiftMonth } from './date.js';
 import './date-picker.css';
 
-const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+const chineseWeekdays = ['日', '一', '二', '三', '四', '五', '六'];
+const englishWeekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const englishMonths = new Intl.DateTimeFormat('en', { month: 'long', timeZone: 'UTC' });
+const englishDay = new Intl.DateTimeFormat('en', { dateStyle: 'full', timeZone: 'UTC' });
+const englishShortDay = new Intl.DateTimeFormat('en', {
+  weekday: 'short',
+  month: 'short',
+  day: 'numeric',
+  timeZone: 'UTC',
+});
 
 const CalendarIcon = () => (
   <CalendarDays className="icon" size={19} strokeWidth={1.6} aria-hidden="true" />
@@ -45,6 +57,9 @@ function positionPicker(dialog: HTMLDialogElement, anchor: HTMLDivElement) {
 }
 
 function Calendar({ label, value, anchor, opener, onSelect, onClose }: PickerProps) {
+  const { t, i18n } = useTranslation();
+  const english = i18n.resolvedLanguage === 'en';
+  const weekdays = english ? englishWeekdays : chineseWeekdays;
   const selected = parseDate(value),
     today = localToday();
   const [focused, setFocused] = useState(() => selected ?? today);
@@ -231,7 +246,7 @@ function Calendar({ label, value, anchor, opener, onSelect, onClose }: PickerPro
     <dialog
       className="date-dialog"
       ref={dialogRef}
-      aria-label={`選擇${label}`}
+      aria-label={t('calendar.choose', { label })}
       onKeyDown={keydown}
       onCancel={(event) => {
         event.preventDefault();
@@ -249,8 +264,8 @@ function Calendar({ label, value, anchor, opener, onSelect, onClose }: PickerPro
     >
       <div className="date-sheet-handle" aria-hidden="true" />
       <div className="date-sheet-heading">
-        <h2>選擇{label}</h2>
-        <button type="button" aria-label="關閉日期選擇器" onClick={onClose}>
+        <h2>{t('calendar.choose', { label })}</h2>
+        <button type="button" aria-label={t('calendar.close')} onClick={onClose}>
           ×
         </button>
       </div>
@@ -259,7 +274,7 @@ function Calendar({ label, value, anchor, opener, onSelect, onClose }: PickerPro
           <button
             type="button"
             className="calendar-title"
-            aria-label={mode === 'days' ? '選擇年份與月份' : '返回日期選擇'}
+            aria-label={t(mode === 'days' ? 'calendar.selectMonthYear' : 'calendar.returnToDays')}
             onClick={() => {
               focusTarget.current = mode === 'days' ? 'month' : 'day';
               setMonthFocus(month);
@@ -267,14 +282,18 @@ function Calendar({ label, value, anchor, opener, onSelect, onClose }: PickerPro
             }}
           >
             <span id={headingId} aria-live="polite">
-              {year} 年{mode === 'days' ? ` ${month + 1} 月` : ''}
+              {english
+                ? mode === 'days'
+                  ? `${englishMonths.format(calendarDate(year, month, 1))} ${year}`
+                  : year
+                : `${year} 年${mode === 'days' ? ` ${month + 1} 月` : ''}`}
             </span>
           </button>
           <div className="calendar-navigation">
             <button
               type="button"
               data-focus="previous"
-              aria-label={mode === 'days' ? '上一個月' : '上一年'}
+              aria-label={t(mode === 'days' ? 'calendar.previousMonth' : 'calendar.previousYear')}
               onClick={() => move(-1)}
               disabled={year === 1 && (mode === 'months' || month === 0)}
             >
@@ -283,7 +302,7 @@ function Calendar({ label, value, anchor, opener, onSelect, onClose }: PickerPro
             <button
               type="button"
               data-focus="next"
-              aria-label={mode === 'days' ? '下一個月' : '下一年'}
+              aria-label={t(mode === 'days' ? 'calendar.nextMonth' : 'calendar.nextYear')}
               onClick={() => move(1)}
               disabled={year === 9999 && (mode === 'months' || month === 11)}
             >
@@ -293,7 +312,7 @@ function Calendar({ label, value, anchor, opener, onSelect, onClose }: PickerPro
         </div>
         {mode === 'months' ? (
           <>
-            <div className="calendar-months" role="group" aria-label="選擇月份">
+            <div className="calendar-months" role="group" aria-label={t('calendar.selectMonth')}>
               {Array.from({ length: 12 }, (_, index) => (
                 <button
                   type="button"
@@ -315,7 +334,7 @@ function Calendar({ label, value, anchor, opener, onSelect, onClose }: PickerPro
                     setMode('days');
                   }}
                 >
-                  {index + 1} 月
+                  {english ? englishMonths.format(calendarDate(year, index, 1)) : `${index + 1} 月`}
                 </button>
               ))}
             </div>
@@ -328,7 +347,7 @@ function Calendar({ label, value, anchor, opener, onSelect, onClose }: PickerPro
                   setMode('days');
                 }}
               >
-                返回日期選擇
+                {t('calendar.returnToDays')}
               </button>
             </div>
           </>
@@ -338,7 +357,7 @@ function Calendar({ label, value, anchor, opener, onSelect, onClose }: PickerPro
               <thead>
                 <tr role="row">
                   {weekdays.map((day) => (
-                    <th key={day} scope="col" aria-label={`星期${day}`}>
+                    <th key={day} scope="col" aria-label={english ? day : `星期${day}`}>
                       {day}
                     </th>
                   ))}
@@ -351,6 +370,9 @@ function Calendar({ label, value, anchor, opener, onSelect, onClose }: PickerPro
                       const key = dateOnly(date),
                         isSelected = !!selected && key === dateOnly(selected),
                         isToday = key === dateOnly(today);
+                      const dateLabel = english
+                        ? englishDay.format(date)
+                        : `${date.getUTCFullYear()} 年 ${date.getUTCMonth() + 1} 月 ${date.getUTCDate()} 日，星期${weekdays[date.getUTCDay()]}`;
 
                       return (
                         <td role="gridcell" aria-selected={isSelected} key={key}>
@@ -360,7 +382,9 @@ function Calendar({ label, value, anchor, opener, onSelect, onClose }: PickerPro
                             disabled={date.getUTCFullYear() < 1 || date.getUTCFullYear() > 9999}
                             tabIndex={key === dateOnly(focused) ? 0 : -1}
                             aria-current={isToday ? 'date' : undefined}
-                            aria-label={`${date.getUTCFullYear()} 年 ${date.getUTCMonth() + 1} 月 ${date.getUTCDate()} 日，星期${weekdays[date.getUTCDay()]}${isToday ? '，今天' : ''}`}
+                            aria-label={
+                              isToday ? t('calendar.todayDate', { date: dateLabel }) : dateLabel
+                            }
                             className={`calendar-day${date.getUTCMonth() !== month ? ' is-outside' : ''}${isToday ? ' is-today' : ''}${isSelected ? ' is-selected' : ''}`}
                             onClick={() => commit(date)}
                           >
@@ -376,11 +400,12 @@ function Calendar({ label, value, anchor, opener, onSelect, onClose }: PickerPro
             <div className="calendar-footer">
               <button type="button" className="calendar-today" onClick={() => commit(localToday())}>
                 <CalendarIcon />
-                回到今天
+                {t('calendar.today')}
               </button>
               <span>
-                {today.getUTCMonth() + 1} 月 {today.getUTCDate()} 日 · 週
-                {weekdays[today.getUTCDay()]}
+                {english
+                  ? englishShortDay.format(today)
+                  : `${today.getUTCMonth() + 1} 月 ${today.getUTCDate()} 日 · 週${weekdays[today.getUTCDay()]}`}
               </span>
             </div>
           </>
@@ -406,6 +431,7 @@ export function DateField({
   error?: string;
   placeholder?: string;
 }) {
+  const { t } = useTranslation();
   const id = useId(),
     fieldRef = useRef<HTMLDivElement>(null),
     inputRef = useRef<HTMLInputElement>(null);
@@ -423,7 +449,7 @@ export function DateField({
     <div className="field">
       <label htmlFor={id}>
         {label}
-        {optional ? <span className="optional">選填</span> : null}
+        {optional ? <span className="optional">{t('common.optional')}</span> : null}
       </label>
       <div
         ref={fieldRef}
@@ -459,7 +485,7 @@ export function DateField({
           <button
             type="button"
             className="date-clear"
-            aria-label={`清除${label}`}
+            aria-label={t('calendar.clear', { label })}
             onClick={() => {
               onChange('');
               inputRef.current?.focus();
@@ -471,7 +497,7 @@ export function DateField({
         <button
           type="button"
           className="date-toggle"
-          aria-label={`選擇${label}`}
+          aria-label={t('calendar.choose', { label })}
           aria-haspopup="dialog"
           aria-expanded={open}
           onClick={(event) => show(event.currentTarget)}
@@ -482,10 +508,10 @@ export function DateField({
         </button>
       </div>
       <span id={`${id}-hint`} className="sr-only">
-        以 YYYY/MM/DD 輸入日期，或按向下鍵開啟日曆。
+        {t('calendar.entryHelp')}
       </span>
       <p id={`${id}-error`} className="error" role="status">
-        {error || (invalid ? '請輸入有效日期，例如 2027/03/11。' : '')}
+        {error || (invalid ? t('calendar.invalid') : '')}
       </p>
       {open ? (
         <Calendar

@@ -24,7 +24,7 @@ export async function arrangeBreakfast(page: Page, world: LedgerWorld): Promise<
   await page.getByRole('link', { name: '記一筆', exact: true }).click();
   await page.getByLabel('支出項目', { exact: true }).fill('早餐');
   await chooseCurrency(page, 'TWD');
-  await page.getByLabel('金額', { exact: true }).fill('100');
+  await page.getByLabel('支出金額', { exact: true }).fill('100');
   await page.getByRole('radio', { name: 'Alice', exact: true }).check();
   for (const name of ['Alice', 'Amy'])
     await page.getByRole('checkbox', { name, exact: true }).check();

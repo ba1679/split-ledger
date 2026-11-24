@@ -1,6 +1,6 @@
 MemberBalance:
   type: object
-  description: 成員在單一幣別的精確淨額；正數應收、負數應付、零已平衡。同幣別全體成員淨額精確總和為零。
+  description: 成員在單一幣別的精確淨額；正數應收、負數應付、零為淨額零。介面的「已結清」還須確認此成員在該幣別無待付款安排。同幣別全體成員淨額精確總和為零。
   additionalProperties: false
   required: [memberId, currencyCode, netAmount]
   properties:
@@ -25,6 +25,7 @@ PaymentArrangement:
       $ref: ./shared.yaml#/ExactAmount
 SettlementView:
   type: object
+  description: 未指定 include 查詢時的既有回應形狀；所有欄位及繁中 explanation 維持原語意。
   additionalProperties: false
   required: [accountingRevision, simplifyDebts, balances, arrangements, explanation, directArrangementCount, suggestedArrangementCount]
   properties:
@@ -50,6 +51,59 @@ SettlementView:
       type: integer
       minimum: 0
       description: 不多於 directArrangementCount；簡化關閉時兩者相同。
+SettlementExplanationArrangement:
+  type: object
+  description: 簡化前的直接付款關係，使用穩定成員 ID 與精確金額；非可提交的付款安排，不含 arrangement key。
+  additionalProperties: false
+  required: [debtorMemberId, creditorMemberId, currencyCode, amount]
+  properties:
+    debtorMemberId: {type: string, format: uuid}
+    creditorMemberId: {type: string, format: uuid}
+    currencyCode: {$ref: ./shared.yaml#/CurrencyCode}
+    amount: {$ref: ./shared.yaml#/ExactAmount}
+SettlementExplanationDetails:
+  type: object
+  description: 與同一個 SettlementView 的餘額、選定安排、計數及 accountingRevision 同快照。客戶端用 kind、directArrangements、外層 arrangements 與計數組成所選語言的三句內說明；名稱由同旅行穩定成員 ID 對應，原文顯示。
+  additionalProperties: false
+  required: [kind, directArrangements]
+  properties:
+    kind:
+      type: string
+      enum: [direct, unchanged, changed]
+      description: direct 表示簡化關閉；unchanged 表示簡化開啟但直接安排與選定安排的關係及精確金額相同；changed 表示至少一項關係或精確金額不同。若兩邊筆數相同仍須比較關係及金額，不可僅以計數判斷。
+    directArrangements:
+      type: array
+      description: 簡化前全部未結清直接安排，按幣別、付款人 ID、收款人 ID 穩定排序；長度等於外層 directArrangementCount。direct 與 unchanged 時仍回傳真實直接安排，不以空陣列代替。
+      items: {$ref: '#/SettlementExplanationArrangement'}
+SettlementViewWithExplanationDetails:
+  type: object
+  description: include=explanationDetails 時的擴充回應；既有欄位和 explanation 原文保持不變，新增同快照 explanationDetails。此形狀只經明確 opt-in 回傳。
+  additionalProperties: false
+  required: [accountingRevision, simplifyDebts, balances, arrangements, explanation, directArrangementCount, suggestedArrangementCount, explanationDetails]
+  properties:
+    accountingRevision:
+      type: string
+      pattern: '^(?:0|[1-9][0-9]*)$'
+      description: 同一一致性來源快照的旅行帳務版本。
+    simplifyDebts:
+      type: boolean
+    balances:
+      type: array
+      description: 依幣別、成員 ID 穩定排序；可含精確零淨額。不同幣別不換算。
+      items: {$ref: '#/MemberBalance'}
+    arrangements:
+      type: array
+      description: 依幣別、付款人成員 ID、收款人成員 ID 穩定排序；已結清安排不再列入。
+      items: {$ref: '#/PaymentArrangement'}
+    explanation:
+      type: string
+      description: 保留既有後端確定性繁中模板的至多三句說明，供舊客戶端使用。
+    directArrangementCount: {type: integer, minimum: 0}
+    suggestedArrangementCount:
+      type: integer
+      minimum: 0
+      description: 不多於 directArrangementCount；簡化關閉時兩者相同。
+    explanationDetails: {$ref: '#/SettlementExplanationDetails'}
 SettleArrangementRequest:
   type: object
   description: owner 對目前安排輸入正數實付；expectedAmount 是所見精確應付快照，伺服器須在旅行鎖內重新核對。不足額保留可支付欠款並記錄部分還款，不能自動免除；不傳取整方式。

@@ -15,7 +15,7 @@ async function prepareDraft(page: Page, world: LedgerWorld) {
     .getByRole('option')
     .filter({ hasText: /^JPY\b/ })
     .click();
-  await page.getByLabel('金額', { exact: true }).fill('1200');
+  await page.getByLabel('支出金額', { exact: true }).fill('1200');
 }
 
 test('404 and unavailable verification retain the original POST UUID until an explicit successful recheck', async ({
@@ -55,7 +55,7 @@ test('404 and unavailable verification retain the original POST UUID until an ex
   await save.click();
   await expect(page.getByText('保存結果尚未確認，請重新整理確認。', { exact: true })).toBeVisible();
   await expect(save).toBeDisabled();
-  await expect(page.getByLabel('金額', { exact: true })).toHaveValue('1200');
+  await expect(page.getByLabel('支出金額', { exact: true })).toHaveValue('1200');
   lookupStatus = 503;
   await page.getByRole('button', { name: '重新查證', exact: true }).click();
   await expect(page.getByRole('button', { name: '重新查證', exact: true })).toBeEnabled();

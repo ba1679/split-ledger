@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+import { tripText } from './messages.js';
 import React, { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from 'react-router-dom';
@@ -10,19 +12,21 @@ import { Button } from '../../components/ui/button.js';
 import { ArrowRight, FileText, Plus } from 'lucide-react';
 
 export function tripDates(trip: Pick<Trip, 'startDate' | 'endDate'>) {
-  if (!trip.startDate && !trip.endDate) return '旅行日期未定';
+  if (!trip.startDate && !trip.endDate) return tripText('tripDatesNotSet');
 
-  return `${trip.startDate ?? '開始日未定'} — ${trip.endDate ?? '結束日未定'}`;
+  return `${trip.startDate ?? tripText('startDateNotSet')} — ${trip.endDate ?? tripText('endDateNotSet')}`;
 }
 
 export function Trips() {
+  const { t } = useTranslation();
   const { account } = useSession();
   const location = useLocation();
   const heading = useRef<HTMLHeadingElement>(null);
-  const message = (location.state as { message?: string } | null)?.message;
+  const { messageKey, message } =
+    (location.state as { messageKey?: string; message?: string } | null) ?? {};
   useEffect(() => {
-    if (message) heading.current?.focus();
-  }, [message]);
+    if (messageKey || message) heading.current?.focus();
+  }, [messageKey, message]);
   const [creating, setCreating] = useState(false);
   const [creationResult, setCreationResult] = useState(false);
   const trips = useQuery({
@@ -34,29 +38,29 @@ export function Trips() {
     <>
       {!creationResult ? (
         <div className="trips-page">
-          <div className="mobile-trip-brand">t. 旅帳</div>
+          <div className="mobile-trip-brand">t. {tripText('brand')}</div>
           <header className="page-head">
             <div>
               <div className="eyebrow">MY JOURNEYS</div>
               <h1 ref={heading} tabIndex={-1}>
-                每一趟，都有故事。
+                {tripText('everyTripHasAStory')}
               </h1>
-              <p className="muted">把沿途的小花費，留在各自的旅行裡。</p>
+              <p className="muted">{tripText('listSubtitle')}</p>
             </div>
             <Button onClick={() => setCreating(true)}>
               <Plus className="icon" size={19} strokeWidth={1.6} aria-hidden="true" />
-              <span>新增旅行</span>
+              <span>{tripText('newTrip')}</span>
             </Button>
           </header>
-          {(location.state as { message?: string } | null)?.message ? (
+          {messageKey || message ? (
             <p className="feedback" role="status">
-              {(location.state as { message: string }).message}
+              {messageKey ? t(messageKey) : message}
             </p>
           ) : null}
           {trips.isPending || trips.error ? (
             <QueryState
-              label="旅行清單"
-              pendingMessage="正在整理你的旅程…"
+              label={tripText('tripList')}
+              pendingMessage={tripText('loadingYourTrips')}
               layout="cards"
               fetchStatus={trips.fetchStatus}
               pending={trips.isPending}
@@ -66,7 +70,7 @@ export function Trips() {
               }}
             />
           ) : trips.data.items.length ? (
-            <div className="grid" role="region" aria-label="旅行清單">
+            <div className="grid" role="region" aria-label={tripText('tripList')}>
               {trips.data.items.map((trip, index) => (
                 <Link className="trip-card ds-trip-card" to={`/trips/${trip.id}`} key={trip.id}>
                   <div className={`landscape${index % 2 ? ' warm' : ''}`}>
@@ -88,8 +92,8 @@ export function Trips() {
                     </div>
                     <p className="card-date">{tripDates(trip)}</p>
                     <div className="card-bottom">
-                      <span>{trip.expenseCount} 筆支出</span>
-                      <span>開啟旅行帳本</span>
+                      <span>{tripText('expenseCount', { count: trip.expenseCount })}</span>
+                      <span>{tripText('openTripLedger')}</span>
                     </div>
                   </div>
                 </Link>
@@ -97,13 +101,13 @@ export function Trips() {
             </div>
           ) : (
             <div className="empty">
-              <h2>旅程，從第一本帳本開始。</h2>
-              <p>建立一趟旅行，記下你的第一筆支出。</p>
+              <h2>{tripText('startYourJourneyWithATripLedger')}</h2>
+              <p>{tripText('createATripAndAddYourFirstExpense')}</p>
             </div>
           )}
           <p className="intro-note">
             <FileText className="icon" size={19} strokeWidth={1.6} aria-hidden="true" />
-            <span>不同幣別各自統計，保留每筆支出原本的樣子。</span>
+            <span>{tripText('listCurrencyNote')}</span>
           </p>
         </div>
       ) : null}

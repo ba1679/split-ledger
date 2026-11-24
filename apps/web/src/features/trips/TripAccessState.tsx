@@ -1,3 +1,4 @@
+import { tripText, useTripText } from './messages.js';
 import React, { type RefObject } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient, type UseQueryResult } from '@tanstack/react-query';
@@ -16,6 +17,7 @@ export function TripAccessState({
   heading: RefObject<HTMLHeadingElement | null>;
   tripId: string;
 }) {
+  useTripText();
   const { account } = useSession();
   const client = useQueryClient();
   const draft = client.getQueryData<RetainedExpenseDraft>(expenseDraftKey(account!.id, tripId));
@@ -25,11 +27,11 @@ export function TripAccessState({
         {authority.error ? (
           <Link className="back" to="/trips">
             <Icon name="back" />
-            <span>我的旅行</span>
+            <span>{tripText('myTrips')}</span>
           </Link>
         ) : null}
         <QueryState
-          label="旅行資料"
+          label={tripText('tripDetails')}
           fetchStatus={authority.fetchStatus}
           pending={authority.isPending}
           error={authority.error}
@@ -44,17 +46,19 @@ export function TripAccessState({
   return (
     <section className="state">
       <h1 ref={heading} tabIndex={-1}>
-        {state === 'trash' ? '旅行已在垃圾桶' : '找不到這趟旅行'}
+        {state === 'trash' ? tripText('tripIsInTrash') : tripText('tripNotFound')}
       </h1>
       <p>
-        {state === 'trash' ? '請先從垃圾桶復原，再繼續記帳。' : '旅行已永久刪除，無法再開啟帳本。'}
+        {state === 'trash'
+          ? tripText('restoreItFromTrashBeforeContinuingToRecord')
+          : tripText('thisTripWasPermanentlyDeletedItsLedgerCan')}
       </p>
       <Link to={state === 'trash' ? '/trips/trash' : '/trips'}>
-        {state === 'trash' ? '前往垃圾桶復原' : '返回旅行清單'}
+        {state === 'trash' ? tripText('goToTrashToRestore') : tripText('backToTripList')}
       </Link>
       {draft ? (
-        <section aria-label="尚未保存的支出草稿">
-          <h2>尚未保存的支出草稿</h2>
+        <section aria-label={tripText('unsavedExpenseDraft')}>
+          <h2>{tripText('unsavedExpenseDraft')}</h2>
           <p>{draft.item}</p>
           <p>
             {draft.amount} {draft.currencyCode}

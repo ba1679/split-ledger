@@ -9,6 +9,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import {
   apiRequest,
+  apiErrorMessage,
   ApiError,
   type ItemList,
   type Trip,
@@ -34,7 +35,58 @@ import type {
 } from './types.js';
 import type { Repayment } from '../repayments/types.js';
 import { displayAmount } from '../expenses/money.js';
+import { useTranslation } from 'react-i18next';
+import { registerInterfaceMessages } from '../../i18n/runtime.js';
 import './settle.css';
+
+registerInterfaceMessages('settleForm', {
+  form: ['結清表單', 'Payment form'],
+  changed: ['付款安排已更新，請重新載入。', 'Payment arrangements have changed. Reload them.'],
+  back: ['返回安排', 'Back to arrangements'],
+  amountInvalid: [
+    '請輸入符合幣別位數的正數實付金額。',
+    'Enter a positive amount paid with valid currency precision.',
+  ],
+  dateInvalid: ['請輸入有效結清日期（YYYY/MM/DD）。', 'Enter a valid payment date (YYYY/MM/DD).'],
+  title: ['記錄實付', 'Record a payment'],
+  intro: [
+    '填入實際收到的金額；不足額時記錄部分還款，剩餘欠款會保留。',
+    'Enter the amount actually paid. A partial payment leaves the remaining amount due.',
+  ],
+  due: ['這筆安排的應付金額', 'Amount due for this arrangement'],
+  paid: ['實付金額', 'Amount paid'],
+  amountPlaceholder: ['輸入實際支付金額', 'Enter amount paid'],
+  amountHint: [
+    '已帶入剩餘應付，請依付款人實際支付的金額調整。',
+    'The remaining amount due is filled in. Adjust it to the amount actually paid.',
+  ],
+  date: ['結清日期', 'Payment date'],
+  stale: [
+    '付款安排已更新，請重新載入後再結清。',
+    'Payment arrangements have changed. Reload before settling.',
+  ],
+  reload: ['重新載入安排', 'Reload arrangements'],
+  partialUnknown: [
+    '部分還款結果尚未確認，請查證原本這次操作的結果。',
+    'Payment status unconfirmed. Check whether the partial payment was recorded.',
+  ],
+  settleUnknown: [
+    '結清結果尚未確認，請查證原本這次操作的結果。',
+    'Payment status unconfirmed. Check whether the payment was recorded.',
+  ],
+  check: ['查證結果', 'Check status'],
+  checking: ['正在查證原次實付結果', 'Checking payment status'],
+  partialSaved: [
+    '已記錄部分還款：實付 {{paidCurrency}} {{paid}}；尚欠 {{dueCurrency}} {{due}}。這筆安排尚未結清。',
+    'Partial payment recorded: {{paidCurrency}} {{paid}} paid; {{dueCurrency}} {{due}} remains due. This arrangement is not settled.',
+  ],
+  settled: [
+    '結清成功：應付 {{currency}} {{due}}；實付 {{currency}} {{paid}}。這筆安排已結清。',
+    'Settlement complete: {{currency}} {{due}} due; {{currency}} {{paid}} paid. This arrangement is settled.',
+  ],
+  partialAction: ['記錄部分還款', 'Record partial payment'],
+  settleAction: ['結清這筆安排', 'Settle this arrangement'],
+});
 
 function sameExact(left: ExactAmount, right: ExactAmount) {
   return (
@@ -124,6 +176,7 @@ function matchesResult(
 }
 
 export function SettleArrangement() {
+  const { t } = useTranslation();
   const { tripId } = useParams();
   const [search] = useSearchParams();
   const { account } = useSession();
@@ -157,7 +210,7 @@ export function SettleArrangement() {
   if (!query.data)
     return (
       <QueryState
-        label="結清表單"
+        label={t('settleForm.form')}
         layout="form"
         fetchStatus={query.fetchStatus}
         pending={query.isPending}
@@ -190,6 +243,7 @@ function LoadedSettlement({
   };
   arrangementKey: string | null;
 }) {
+  const { t } = useTranslation();
   // The command must keep the exact arrangement the owner opened, even if a later
   // query changes after a committed POST or another device edits the trip.
   const [snapshot] = useState(initial);
@@ -198,9 +252,9 @@ function LoadedSettlement({
   );
   if (!arrangement)
     return (
-      <div className="settle-page" role="region" aria-label="結清表單">
-        <p role="alert">付款安排已更新，請重新載入。</p>
-        <Link to={`/trips/${snapshot.trip.id}/settlement`}>返回安排</Link>
+      <div className="settle-page" role="region" aria-label={t('settleForm.form')}>
+        <p role="alert">{t('settleForm.changed')}</p>
+        <Link to={`/trips/${snapshot.trip.id}/settlement`}>{t('settleForm.back')}</Link>
       </div>
     );
 
@@ -231,6 +285,7 @@ function SettleEditor({
   revision: string;
   precision: number;
 }) {
+  const { t } = useTranslation();
   const { account } = useSession();
   const client = useQueryClient();
   const base = `/api/trips/${trip.id}`;
@@ -240,9 +295,9 @@ function SettleEditor({
     prefillArrangementPayment(arrangement.amount, precision, arrangement.currencyCode),
   );
   const [date, setDate] = useState(() => dateOnly(localToday()).replaceAll('-', '/'));
-  const [amountError, setAmountError] = useState('');
-  const [dateError, setDateError] = useState('');
-  const [failure, setFailure] = useState('');
+  const [amountInvalid, setAmountInvalid] = useState(false);
+  const [dateInvalid, setDateInvalid] = useState(false);
+  const [failure, setFailure] = useState<ApiError | null>(null);
   const [stale, setStale] = useState(false);
   const [unknown, setUnknown] = useState<SettleArrangementRequest | null>(null);
   const [saved, setSaved] = useState<ArrangementPaymentResult | null>(null);
@@ -340,7 +395,7 @@ function SettleEditor({
   async function save(event: React.FormEvent) {
     event.preventDefault();
     if (writing.current || locked) return;
-    setFailure('');
+    setFailure(null);
     let validAmount = false;
     try {
       validAmount = parseMoney(amount, precision, arrangement.currencyCode) > 0n;
@@ -348,8 +403,8 @@ function SettleEditor({
       /* Show the same field correction for invalid precision. */
     }
     const parsedDate = parseDate(date);
-    setAmountError(validAmount ? '' : '請輸入符合幣別位數的正數實付金額。');
-    setDateError(parsedDate ? '' : '請輸入有效結清日期（YYYY/MM/DD）。');
+    setAmountInvalid(!validAmount);
+    setDateInvalid(!parsedDate);
     if (!validAmount || !parsedDate) return;
     const command: SettleArrangementRequest = {
       id,
@@ -380,7 +435,7 @@ function SettleEditor({
       if (error instanceof ApiError && error.status >= 400 && error.status < 500) {
         if (['ACCOUNTING_REVISION_CONFLICT', 'ARRANGEMENT_NOT_FOUND'].includes(error.code))
           setStale(true);
-        else setFailure(error.message);
+        else setFailure(error);
       } else await verify(command);
     } finally {
       writing.current = false;
@@ -389,19 +444,19 @@ function SettleEditor({
   }
 
   return (
-    <div className="settle-page" role="region" aria-label="結清表單">
+    <div className="settle-page" role="region" aria-label={t('settleForm.form')}>
       <Link className="back" to={`/trips/${trip.id}/settlement`}>
         <Icon name="back" />
-        <span>返回安排</span>
+        <span>{t('settleForm.back')}</span>
       </Link>
       <header className="page-head">
         <div>
-          <h1>記錄實付</h1>
-          <p className="muted">填入實際收到的金額；不足額時記錄部分還款，剩餘欠款會保留。</p>
+          <h1>{t('settleForm.title')}</h1>
+          <p className="muted">{t('settleForm.intro')}</p>
         </div>
       </header>
-      <section className="settle-due" aria-label="這筆安排的應付金額">
-        <p>這筆安排的應付金額</p>
+      <section className="settle-due" aria-label={t('settleForm.due')}>
+        <p>{t('settleForm.due')}</p>
         <h2>
           {payer} → {payee}
         </h2>
@@ -418,30 +473,35 @@ function SettleEditor({
         noValidate
       >
         <div className="field">
-          <label htmlFor={amountId}>實付金額</label>
+          <label htmlFor={amountId}>{t('settleForm.paid')}</label>
           <Input
             id={amountId}
             inputMode="decimal"
             value={amount}
             onChange={(event) => setAmount(event.target.value)}
-            placeholder="輸入實際支付金額"
-            aria-invalid={Boolean(amountError)}
+            placeholder={t('settleForm.amountPlaceholder')}
+            aria-invalid={amountInvalid}
             aria-describedby={`${amountId}-hint ${amountId}-error`}
             disabled={locked}
           />
           <p id={`${amountId}-hint`} className="field-hint">
-            已帶入剩餘應付，請依付款人實際支付的金額調整。
+            {t('settleForm.amountHint')}
           </p>
           <p id={`${amountId}-error`} role="alert" className="error">
-            {amountError}
+            {amountInvalid ? t('settleForm.amountInvalid') : ''}
           </p>
         </div>
         <fieldset disabled={locked}>
-          <DateField label="結清日期" value={date} onChange={setDate} error={dateError} />
+          <DateField
+            label={t('settleForm.date')}
+            value={date}
+            onChange={setDate}
+            error={dateInvalid ? t('settleForm.dateInvalid') : ''}
+          />
         </fieldset>
         {stale ? (
           <p role="alert" className="error">
-            付款安排已更新，請重新載入後再結清。
+            {t('settleForm.stale')}
             <Button
               type="button"
               variant="outline"
@@ -449,28 +509,25 @@ function SettleEditor({
                 window.location.assign(`/trips/${trip.id}/settlement`);
               }}
             >
-              重新載入安排
+              {t('settleForm.reload')}
             </Button>
           </p>
         ) : null}
         {failure ? (
           <p role="alert" className="error">
-            {failure}
+            {apiErrorMessage(failure)}
           </p>
         ) : null}
         {unknown ? (
           <div role="alert" className="settle-unknown">
-            <p>
-              {partialDraft ? '部分還款結果尚未確認' : '結清結果尚未確認'}
-              ，請查證原本這次操作的結果。
-            </p>
+            <p>{t(partialDraft ? 'settleForm.partialUnknown' : 'settleForm.settleUnknown')}</p>
             <ActionButton
               ref={recheck}
               type="button"
               variant="outline"
               busy={checking}
-              label="查證結果"
-              busyLabel="正在查證原次實付結果"
+              label={t('settleForm.check')}
+              busyLabel={t('settleForm.checking')}
               onClick={() => {
                 void verify(unknown);
               }}
@@ -479,25 +536,31 @@ function SettleEditor({
         ) : null}
         {saved && 'kind' in saved ? (
           <p role="status" className="feedback">
-            已記錄部分還款：實付 {saved.repayment.currencyCode}{' '}
-            {displayAmount(saved.repayment.amount)}；尚欠 {saved.repayment.currencyCode}{' '}
-            {displayAmount(formatShareAmount(saved.remainingAmount))}。這筆安排尚未結清。
+            {t('settleForm.partialSaved', {
+              paidCurrency: saved.repayment.currencyCode,
+              paid: displayAmount(saved.repayment.amount),
+              dueCurrency: saved.repayment.currencyCode,
+              due: displayAmount(formatShareAmount(saved.remainingAmount)),
+            })}
           </p>
         ) : saved ? (
           <p role="status" className="feedback">
-            結清成功：應付 {saved.currencyCode} {formatShareAmount(saved.obligation)}；實付{' '}
-            {saved.currencyCode} {saved.repayment.amount}。這筆安排已結清。
+            {t('settleForm.settled', {
+              currency: saved.currencyCode,
+              due: formatShareAmount(saved.obligation),
+              paid: saved.repayment.amount,
+            })}
           </p>
         ) : null}
         <div className="settle-actions">
           <ActionButton
             busy={busy}
-            label={partialDraft ? '記錄部分還款' : '結清這筆安排'}
+            label={t(partialDraft ? 'settleForm.partialAction' : 'settleForm.settleAction')}
             type="submit"
             disabled={locked}
           />
           <Button asChild type="button" variant="outline">
-            <Link to={`/trips/${trip.id}/settlement`}>返回安排</Link>
+            <Link to={`/trips/${trip.id}/settlement`}>{t('settleForm.back')}</Link>
           </Button>
         </div>
       </form>

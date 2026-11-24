@@ -1,3 +1,4 @@
+import { tripText, useTripText } from './messages.js';
 import React, { useEffect, useId, useRef, useState } from 'react';
 import { ChevronDown, Image, Trash2 } from 'lucide-react';
 import { Button } from '../../components/ui/button.js';
@@ -7,6 +8,7 @@ export function TripManagementMenu({
 }: {
   onSelect: (action: 'thumbnail' | 'trash') => void;
 }) {
+  useTripText();
   const [open, setOpen] = useState(false);
   const id = useId();
   const anchor = useRef<HTMLDivElement>(null);
@@ -66,14 +68,14 @@ export function TripManagementMenu({
           }
         }}
       >
-        管理旅行 <ChevronDown size={16} aria-hidden="true" />
+        {tripText('manageTrip')} <ChevronDown size={16} aria-hidden="true" />
       </Button>
       {open ? (
         <div
           id={id}
           className="trip-management-menu"
           role="menu"
-          aria-label="管理旅行"
+          aria-label={tripText('manageTrip')}
           onKeyDown={(event) => {
             const index = items.current.indexOf(document.activeElement as HTMLButtonElement);
             const next =
@@ -95,8 +97,8 @@ export function TripManagementMenu({
         >
           {(
             [
-              { action: 'thumbnail', text: '自訂旅行縮圖', Icon: Image },
-              { action: 'trash', text: '移至垃圾桶', Icon: Trash2 },
+              { action: 'thumbnail', text: tripText('customizeTripThumbnail'), Icon: Image },
+              { action: 'trash', text: tripText('moveToTrash'), Icon: Trash2 },
             ] as const
           ).map(({ action, text, Icon }, index) => (
             <button

@@ -1,3 +1,4 @@
+import { tripText, useTripText } from './messages.js';
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -11,7 +12,12 @@ import { QueryState } from '../../components/QueryState.js';
 import { TripCommandDialog } from './TripCommandDialog.js';
 import { TripThumbnail } from './TripThumbnail.js';
 import { TripOperationCheck } from './TripOperationCheck.js';
-import { useLifecycleCommand, lifecycleOutcomeMessage, type TrashTrip } from './management-api.js';
+import {
+  useLifecycleCommand,
+  lifecycleOutcomeMessageKey,
+  type TrashTrip,
+} from './management-api.js';
+import { interfaceI18n } from '../../i18n/runtime.js';
 
 function TrashCard({
   trip,
@@ -28,6 +34,7 @@ function TrashCard({
   visible: boolean;
   onFocusRecovery: () => void;
 }) {
+  useTripText();
   const { account } = useSession();
   const purgeTrigger = useRef<HTMLButtonElement>(null);
   const [confirming, setConfirming] = useState(false);
@@ -36,9 +43,7 @@ function TrashCard({
     trip,
     'restore',
     (result, verified) =>
-      onMessage(
-        verified ? lifecycleOutcomeMessage(result) : '旅行已復原，可以從我的旅行重新開啟。',
-      ),
+      onMessage(verified ? lifecycleOutcomeMessageKey(result) : 'tripRestoredYouCanOpenItFromMy'),
     undefined,
     onRelease,
   );
@@ -61,17 +66,17 @@ function TrashCard({
       }}
       onComplete={(result, verified) => {
         setConfirming(false);
-        onMessage(verified ? lifecycleOutcomeMessage(result) : '旅行已永久刪除。');
+        onMessage(verified ? lifecycleOutcomeMessageKey(result) : 'tripPermanentlyDeleted');
       }}
     />
   );
   const restoreOutcome = restore.unknown ? (
     <section className="operation-outcome" role="status">
-      <p>「{trip.name}」復原結果尚未確認，請先查證原次操作。</p>
+      <p>{tripText('theRestoreResultForNameIsUnconfirmedCheck', { name: trip.name })}</p>
       <TripOperationCheck
         busy={restore.isPending}
         onCheck={restore.verify}
-        busyLabel="正在查證旅行復原"
+        busyLabel={tripText('checkingTripRestore')}
       />
     </section>
   ) : null;
@@ -102,16 +107,16 @@ function TrashCard({
         <div className="trash-card-content">
           <h2>{trip.name}</h2>
           <p>
-            移入垃圾桶：
-            {new Intl.DateTimeFormat('zh-TW', {
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit',
-            }).format(new Date(trip.deletedAt))}
+            {tripText('movedToTrashDate', {
+              date: new Intl.DateTimeFormat(
+                interfaceI18n.resolvedLanguage === 'zh-Hant' ? 'zh-TW' : 'en-US',
+                { year: 'numeric', month: '2-digit', day: '2-digit' },
+              ).format(new Date(trip.deletedAt)),
+            })}
           </p>
           <div className="trash-card-actions">
             <ActionButton
-              label="復原旅行"
+              label={tripText('restoreTrip')}
               busy={restore.isPending}
               disabled={restore.isPending || restore.unknown || purgeUnknown || confirming}
               onClick={() => {
@@ -131,7 +136,7 @@ function TrashCard({
                 setConfirming(true);
               }}
             >
-              永久刪除
+              {tripText('permanentlyDelete')}
             </Button>
           </div>
           {restoreOutcome}
@@ -147,6 +152,7 @@ function TrashCard({
 }
 
 export function TrashTrips() {
+  useTripText();
   const { account } = useSession();
   const [message, setMessage] = useState('');
   const [retained, setRetained] = useState<TrashTrip[]>([]);
@@ -164,25 +170,25 @@ export function TrashTrips() {
     <div className="trash-page">
       <Link className="back" to="/trips">
         <Icon name="back" />
-        <span>我的旅行</span>
+        <span>{tripText('myTrips')}</span>
       </Link>
       <header className="page-head">
         <div>
           <div className="eyebrow">TRIP TRASH</div>
           <h1 ref={heading} tabIndex={-1}>
-            垃圾桶
+            {tripText('trash')}
           </h1>
-          <p className="muted">旅行會保留在這裡，直到你選擇復原或永久刪除。</p>
+          <p className="muted">{tripText('trashIntro')}</p>
         </div>
       </header>
       {message ? (
         <p className="feedback" role="status">
-          {message}
+          {tripText(message)}
         </p>
       ) : null}
       {trash.isPending || trash.error ? (
         <QueryState
-          label="垃圾桶"
+          label={tripText('trash')}
           layout="media"
           fetchStatus={trash.fetchStatus}
           pending={trash.isPending}
@@ -192,12 +198,14 @@ export function TrashTrips() {
           }}
         />
       ) : null}
-      {items.length ? <p className="trash-count">{items.length} 趟已刪旅行</p> : null}
+      {items.length ? (
+        <p className="trash-count">{tripText('deletedTripCount', { count: items.length })}</p>
+      ) : null}
       <div
         className="trash-cards"
         role="region"
         aria-label={
-          trash.isPending || trash.error || !cards.length ? undefined : '已移入垃圾桶的旅行'
+          trash.isPending || trash.error || !cards.length ? undefined : tripText('tripsInTrash')
         }
       >
         {cards.map((trip) => (
@@ -221,12 +229,12 @@ export function TrashTrips() {
         ))}
       </div>
       {items.length ? (
-        <p className="trash-note">移入垃圾桶不會結清欠款，也不會變更旅行帳務。</p>
+        <p className="trash-note">{tripText('movingATripToTrashDoesNotSettle')}</p>
       ) : null}
       {!cards.length && !trash.isPending && !trash.error ? (
-        <div className="empty" role="region" aria-label="已移入垃圾桶的旅行">
-          <h2>沒有已刪旅行</h2>
-          <p>移至垃圾桶的旅行會保留在這裡，直到你選擇復原或永久刪除。</p>
+        <div className="empty" role="region" aria-label={tripText('tripsInTrash')}>
+          <h2>{tripText('noTripsInTrash')}</h2>
+          <p>{tripText('trashEmptyDescription')}</p>
         </div>
       ) : null}
     </div>

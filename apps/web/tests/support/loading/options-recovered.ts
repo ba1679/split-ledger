@@ -29,7 +29,7 @@ export interface RecoveredOptions {
 export async function assertRecoveredDraft(world: LedgerWorld): Promise<void> {
   const page = managementUI(world).page;
   await expect(page.getByLabel('支出項目', { exact: true })).toHaveValue('點心');
-  await expect(page.getByLabel('金額', { exact: true })).toHaveValue('100');
+  await expect(page.getByLabel('支出金額', { exact: true })).toHaveValue('100');
   await expect(page.getByRole('textbox', { name: '支出日期', exact: true })).toHaveValue(
     '2027/03/11',
   );

@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+import '../i18n/shared-messages.js';
 import { ChevronDown } from 'lucide-react';
 import { Input } from '../components/ui/input.js';
 import React, { useId, useRef, useState } from 'react';
@@ -6,6 +8,7 @@ import { BusyIndicator } from './waiting/BusyIndicator.js';
 export interface ComboOption {
   value: string;
   label: string;
+  searchText?: string;
 }
 
 export function SearchCombo({
@@ -29,6 +32,7 @@ export function SearchCombo({
   disabled?: boolean;
   pending?: boolean;
 }) {
+  const { t } = useTranslation();
   const id = useId(),
     root = useRef<HTMLDivElement>(null),
     input = useRef<HTMLInputElement>(null);
@@ -38,7 +42,9 @@ export function SearchCombo({
   const filtered =
     search === null
       ? options
-      : options.filter((option) => option.label.toLowerCase().includes(search.toLowerCase()));
+      : options.filter((option) =>
+          `${option.label} ${option.searchText ?? ''}`.toLowerCase().includes(search.toLowerCase()),
+        );
   const selected = options.find((option) => option.value === value);
 
   function select(option: ComboOption) {
@@ -70,7 +76,7 @@ export function SearchCombo({
     <div
       className="field"
       role="group"
-      aria-label={`${label}選項`}
+      aria-label={t('common.options', { label })}
       aria-busy={pending || undefined}
       ref={root}
       onBlur={(event) => {
@@ -82,8 +88,8 @@ export function SearchCombo({
     >
       <label htmlFor={id}>
         {label}
-        {optional ? <span className="optional">選填</span> : null}
-        {pending ? <BusyIndicator accessibleLabel={`正在讀取${label}選項`} /> : null}
+        {optional ? <span className="optional">{t('common.optional')}</span> : null}
+        {pending ? <BusyIndicator accessibleLabel={t('common.loadingOptions', { label })} /> : null}
       </label>
       <div className="combo">
         <Input
@@ -102,7 +108,10 @@ export function SearchCombo({
           disabled={disabled}
           readOnly={pending}
           aria-disabled={pending || undefined}
-          placeholder={`搜尋${label}${label === '幣別' ? '代碼或名稱' : ''}`}
+          placeholder={t(
+            /^(?:幣別|currency)$/iu.test(label) ? 'common.searchCurrency' : 'common.search',
+            { label },
+          )}
           value={search ?? selected?.label ?? ''}
           onClick={() => {
             if (pending) return;
@@ -139,7 +148,7 @@ export function SearchCombo({
         <button
           type="button"
           className="combo-toggle"
-          aria-label={`展開${label}選單`}
+          aria-label={t('common.expandOptions', { label })}
           aria-expanded={open && !pending}
           aria-controls={`${id}-options`}
           disabled={disabled || pending}
@@ -155,7 +164,12 @@ export function SearchCombo({
           </span>
         </button>
         {open && !pending ? (
-          <div id={`${id}-options`} className="options" role="listbox" aria-label={`${label}選項`}>
+          <div
+            id={`${id}-options`}
+            className="options"
+            role="listbox"
+            aria-label={t('common.options', { label })}
+          >
             {filtered.length ? (
               filtered.map((option, index) => (
                 <div
@@ -174,7 +188,7 @@ export function SearchCombo({
                 </div>
               ))
             ) : (
-              <p className="combo-empty">找不到符合的{label}</p>
+              <p className="combo-empty">{t('common.noOptions', { label })}</p>
             )}
           </div>
         ) : null}

@@ -1,5 +1,6 @@
 @import '../styles/base.css';
 @import '../components/app-shell.css';
+@import '../components/language-menu.css';
 @import '../features/trips/journeys.css';
 @import '../features/trips/management.css';
 @import '../features/trips/thumbnail-editor.css';

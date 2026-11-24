@@ -7,6 +7,18 @@
 | DSL 句型 | Gherkin 參數 | Data Table 參數 | 預設參數 | StepDef 實作語意 |
 | --- | --- | --- | --- | --- |
 | `owner 查詢旅行分帳結算` | 無 | 不支援 | 無 | When：owner session GET /api/trips/{tripId}/settlement，保存200回應、accountingRevision及安排key；只一查詢，DB不改寫。比對時用獨立有理數oracle；不必操作UI。 |
+| `owner 查詢可翻譯的結算說明` | 無 | 不支援 | 無 | When：以 owner session 單次 GET /api/trips/{tripId}/settlement?include=explanationDetails；保存完整200回應、revision、模式及查詢前DB來源快照。DB不改寫；查詢使用一致性來源快照，不以先查預設回應再組合擴充欄位。 |
+| `owner 查詢不支援的結算說明選項` | 無 | 不支援 | include=unknown。 | When：以 owner session 單次 GET /api/trips/{tripId}/settlement?include=unknown；保存請求前完整帳務快照與回應，不修改DB；不重試其他查詢值。 |
+| `分帳旅行已有擁有者但查詢者未登入` | 無 | 不支援 | 無 | Given：隔離DB建立含owner、啟用成員與一筆帳務來源的旅行，保存tripId及來源快照；查詢者不帶有效session，權威狀態已落地，不執行受測查詢。 |
+| `分帳旅行已有擁有者且查詢者是其他帳號` | 無 | 不支援 | 無 | Given：隔離DB建立owner旅行及其帳務來源，再建立另一個有效登入帳號作查詢者；確認查詢者不擁有該旅行，保存tripId與來源快照，不執行受測查詢。 |
+| `擁有者的分帳旅行已在垃圾桶` | 無 | 不支援 | 無 | Given：隔離DB建立owner旅行及其帳務來源，將該旅行以正式模型標記為本人垃圾桶狀態；查詢者為owner有效session，保存tripId、生命週期狀態及來源快照，不執行受測查詢。 |
+| `查詢者要求可翻譯的結算說明` | 無 | 不支援 | 無 | When：使用Given查詢者session狀態，單次GET /api/trips/{tripId}/settlement?include=explanationDetails；保存回應與請求前DB來源／revision／生命週期快照；失敗時DB不得改動，不以其他owner身分重試。 |
+| `可翻譯結算查詢被拒絕為 "{錯誤}"` | 錯誤:enum UNAUTHENTICATED/NOT_FOUND/TRIP_TRASHED。 | 不支援 | 無 | Then：依契約分別驗401/404/409及code，NOT_FOUND不得洩漏其他owner的成員、金額、ID或可翻譯資料；全部失敗回應不得包含balances、arrangements、explanationDetails。核對DB來源、revision、owner關聯及生命週期狀態與查詢前完全一致，對仍啟用的旅行可由owner再讀確認；垃圾桶狀態直接核對DB。 |
+| `結算維持原有欄位及繁中說明` | 無 | 不支援 | 無 | Then：原查詢200 JSON 欄位集合恰為 accountingRevision、simplifyDebts、balances、arrangements、explanation、directArrangementCount、suggestedArrangementCount，沒有 explanationDetails 或其他新增欄位。explanation 是原有確定性繁中三句內說明，對應同revision來源及安排；用DB獨立oracle比對精確淨額、安排與計數，來源未變。 |
+| `結算說明資料的類型為 "{類型}"` | 類型:enum direct/unchanged/changed。 | 不支援 | 無 | Then：擴充查詢200且 explanationDetails.kind 等於類型。以DB同revision原始支出、分攤、還款與調整獨立重建直接安排和外層安排，按成員ID/幣別/ExactAmount精確比較：模式關閉才是direct；模式開啟且兩集合關係與金額全同才是unchanged；否則changed。檢查欄位只出現契約允許項，DB來源未改。 |
+| `說明中的原付款關係如下：` | 無 | 必填多列；付款人/收款人:string 成員別名、幣別:ISO code、金額:正數大單位有理數 string。 | 無 | Then：擴充查詢200的 explanationDetails.directArrangements 完整集合等於表格，成員別名映射同旅行穩定memberId；每筆幣別及ExactAmount/minorUnit精確比對，排序按幣別、付款人ID、收款人ID，長度等於directArrangementCount。依同revision DB來源獨立重建直接關係，比對不得只檢查表格子集，且每筆不含可提交的arrangement key；DB未改。 |
+| `付款筆數相同但說明資料的類型為 "{類型}"` | 類型:enum changed。 | 不支援 | 無 | Then：擴充查詢200的directArrangementCount與suggestedArrangementCount同為2，kind=changed；獨立DB oracle重建直接Alice→Bob JPY60、Bob→Carol JPY40及簡化Alice→Bob JPY20、Alice→Carol JPY40，精確核對同revision的directArrangements與外層arrangements，證明不能只按筆數分類；來源未改。 |
+| `可翻譯說明與結算安排來自同一帳務版本` | 無 | 不支援 | 無 | Then：擴充查詢200的accountingRevision等於受測請求的一致性DB來源版本；DB獨立oracle由該版本同一組支出、份額、實付、結清調整重建balances、directArrangements、arrangements、兩種計數與kind，逐一精確比對並核對既有繁中explanation語意，不能從不同時點拼湊；查詢前後來源與revision不變。 |
 | `成員的分幣別精確淨額如下：` | 無 | 必填多列；成員:string、幣別:ISO code、淨額:有號大單位有理數 string。 | 無 | Then：200 balances對每個表格幣別/成員依ExactAmount minorUnit精確比較；未列成員同該幣別必為0，回應可省略或回傳零，不能有未列非零值。獨立依DB支出支付−份額+送出還款−收到還款+有號調整計算oracle，全部來源同revision；再讀一致且來源不變。 |
 | `各幣別淨額精確總和為零` | 無 | 不支援 | 無 | Then：逐幣別以BigInt約分所有balances後精確加總為0，對照DB來源oracle；不可用各成員顯示小數加總或跨幣別相抵，GET再讀同revision亦零。 |
 | `結算付款安排如下：` | 無 | 必填多列；付款人/收款人:string、幣別:ISO code、金額:正數大單位有理數 string。 | 無 | Then：完整arrangements集合與表格相同；key非空且可供當次模式/revision結清，兩端ID同旅行且不相同。依DB來源重建oracle，精確比對各筆amount/minorUnit、直接/建議筆數，不能只匹配其中一筆或自行忽略額外安排；來源未變，再讀相同排列與金額。 |

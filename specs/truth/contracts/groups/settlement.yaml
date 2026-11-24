@@ -1,19 +1,28 @@
 settlement:
   parameters:
     - $ref: ../components/parameters.yaml#/TripId
+    - $ref: ../components/parameters.yaml#/SettlementExplanationInclude
   get:
     tags: [settlement]
     operationId: getTripSettlement
     x-session-required: true
     security: [{BetterAuthSession: []}]
     summary: 查看分幣別精確餘額與付款安排
-    description: 只供旅行 owner；在一致性快照中從現有支出、分攤集合、所有實付及歷史結清調整重建。關閉簡化時保留直接關係並可同對互抵；開啟時按每幣別淨額確定性配對且筆數不得增加。切換模式不改寫來源。
+    description: 只供旅行 owner；在一致性快照中從現有支出、分攤集合、所有實付及歷史結清調整重建。關閉簡化時保留直接關係並可同對互抵；開啟時按每幣別淨額確定性配對且筆數不得增加。切換模式不改寫來源。省略 include 時精確回傳既有 SettlementView 的欄位集合與繁中 explanation；include=explanationDetails 時同一請求的回應另含原直接安排與說明分支，供 Web 依介面語言呈現。讀取仍唯讀且沿用 owner 與生命週期拒絕規則。
     responses:
       '200':
-        description: 同一帳務 revision 的餘額、安排及三句內說明。
+        description: 同一帳務 revision 的餘額、安排及三句內說明。省略 include 時為 SettlementView；include=explanationDetails 時為 SettlementViewWithExplanationDetails，既有欄位值維持一致。
         content:
           application/json:
-            schema: {$ref: ../components/schemas/settlement.yaml#/SettlementView}
+            schema:
+              oneOf:
+                - {$ref: ../components/schemas/settlement.yaml#/SettlementView}
+                - {$ref: ../components/schemas/settlement.yaml#/SettlementViewWithExplanationDetails}
+      '400':
+        description: include 值不支援或格式不合法；code=VALIDATION_ERROR。
+        content:
+          application/json:
+            schema: {$ref: ../components/schemas/shared.yaml#/ApiError}
       '401':
         description: 尚未登入。
         content:

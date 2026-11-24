@@ -1,10 +1,13 @@
 import { addRational, rational, type ExactAmount } from '@split-ledger/shared';
+import { interfaceI18n } from '../../../i18n/runtime.js';
+import { expenseMessage } from '../messages.js';
 
 export function formatAnalysisPercent(amount: ExactAmount, total: ExactAmount): string | null {
   const n = BigInt(amount.numerator) * BigInt(total.denominator) * 10n ** BigInt(total.minorUnit);
   const d = BigInt(amount.denominator) * BigInt(total.numerator) * 10n ** BigInt(amount.minorUnit);
   if (d === 0n) return null;
-  if (n > 0n && n * 10000n < d) return '小於0.01%';
+  if (n > 0n && n * 10000n < d)
+    return interfaceI18n.isInitialized ? expenseMessage('tinyPercent') : '小於0.01%';
   const rounded = (n * 20000n + d) / (d * 2n);
   const fraction = String(rounded % 100n)
     .padStart(2, '0')

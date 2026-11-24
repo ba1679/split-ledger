@@ -201,7 +201,7 @@ export async function arrangeOperationData(
     if (operation === '新增支出') {
       await page.getByLabel('支出項目', { exact: true }).fill('點心');
       await chooseCurrency(page, 'JPY');
-      await page.getByLabel('金額', { exact: true }).fill('100');
+      await page.getByLabel('支出金額', { exact: true }).fill('100');
       const date = page.getByRole('textbox', { name: '支出日期', exact: true });
       await date.fill('2027/03/11');
       await date.press('Tab');
@@ -229,7 +229,7 @@ export async function arrangeOperationData(
       status = 201;
       control = button('儲存支出');
     } else if (operation === '修改支出') {
-      await page.getByLabel('金額', { exact: true }).fill('200');
+      await page.getByLabel('支出金額', { exact: true }).fill('200');
       method = 'PATCH';
       path = `${base}/expenses/${targetId}`;
       control = button('儲存支出');
