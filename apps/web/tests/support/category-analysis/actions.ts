@@ -38,17 +38,18 @@ async function sectorInteriorPoint(sector: Locator) {
 }
 
 export async function openBrowserAnalysisFromLedger(page: Page, world: LedgerWorld) {
-  const link = page.getByRole('link', { name: '花費分析', exact: true });
+  const link = page.getByRole('link', { name: '看分析', exact: true });
   await expect(link, 'Product ledger must expose the approved analysis entry').toBeVisible();
   const mobile = page.getByRole('navigation', { name: '行動導覽', exact: true });
+  const isMobile = await mobile.isVisible();
   world.set('analysis:ledgerGeometry', {
     entry: await link.boundingBox(),
-    navigation: await page
-      .getByRole('navigation', { name: '旅行內導覽', exact: true })
-      .boundingBox(),
-    bottomCount: (await mobile.isVisible())
-      ? await mobile.locator('a:visible,button:visible').count()
+    spending: await page.getByRole('region', { name: '個人花費摘要' }).boundingBox(),
+    floatingAdd: isMobile
+      ? await page.getByRole('link', { name: '記一筆', exact: true }).boundingBox()
       : null,
+    mobileNavigation: isMobile ? await mobile.boundingBox() : null,
+    bottomCount: isMobile ? await mobile.locator('a:visible,button:visible').count() : null,
   });
   const screenshot = `.cache/007-implement/ledger-${world.namespace}.png`;
   await page.screenshot({ path: screenshot, fullPage: true });
@@ -217,7 +218,7 @@ export async function switchPendingTainanAnalysis(page: Page, world: LedgerWorld
   const { navigateTainanLedger } = await import('./races.js');
   await navigateTainanLedger(page, world);
   const control = world.get<AnalysisReadControl>('analysis:tainanControl');
-  const link = page.getByRole('link', { name: '花費分析', exact: true });
+  const link = page.getByRole('link', { name: '看分析', exact: true });
   await expect(link).toBeVisible();
   await link.click();
   await expect.poll(() => control.arrived).toBe(true);

@@ -1,3 +1,4 @@
+import { tripEditor } from '../home-navigation.js';
 import { expect, type Browser, type Page } from '@playwright/test';
 import type { LedgerWorld } from '../../../../api/tests/support/world.js';
 import {
@@ -53,8 +54,8 @@ export async function arrangeFormatPhoto(
   // Read the fixture's default state afresh before opening the actual editing flow.
   await page.reload();
   await expect(page.getByRole('heading', { name: '日本旅行', exact: true })).toBeVisible();
-  await page.getByRole('button', { name: '管理旅行', exact: true }).click();
-  await page.getByRole('menuitem', { name: '自訂旅行縮圖', exact: true }).click();
+  await tripEditor(page).click();
+  await page.getByRole('menuitem', { name: '更換縮圖', exact: true }).click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
   await expect(dialog.locator('img[src*="/thumbnail/"],img[src^="blob:"]')).toHaveCount(0);

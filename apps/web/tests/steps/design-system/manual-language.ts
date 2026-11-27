@@ -1,3 +1,4 @@
+import { openAppSettings } from '../../support/home-navigation.js';
 import type { Page } from '@playwright/test';
 import { Given, When, Then, expect, test } from '../../support/fixtures.js';
 import { login, mockGoogle } from '../../support/browser.js';
@@ -38,10 +39,25 @@ async function expectLanguage(page: Page, language: 'en' | 'zh-Hant') {
 }
 
 async function chooseLanguage(page: Page, name: string) {
-  const trigger = page.getByRole('button', { name: /^(Language|語言)/u });
+  const pathname = new URL(page.url()).pathname;
+  if (pathname !== '/' && pathname !== '/trips') {
+    const home = await page.context().newPage();
+    try {
+      await home.setViewportSize(page.viewportSize()!);
+      await home.goto(new URL('/trips', page.url()).href);
+      await chooseLanguage(home, name);
+      await expectLanguage(page, name === 'English' ? 'en' : 'zh-Hant');
+    } finally {
+      await home.close();
+    }
+
+    return;
+  }
+  if (pathname === '/trips') await openAppSettings(page);
+  const trigger = page.getByRole('button', { name: /^(Language|語言|語系)/u });
   await expect(trigger).toHaveCount(1);
   await trigger.click();
-  const menu = page.getByRole('menu', { name: /^(Language|語言)$/u });
+  const menu = page.getByRole('menu', { name: /^(Language|語言|語系)$/u });
   await expect(menu.getByRole('menuitemradio')).toHaveCount(2);
   await expect(menu.getByRole('menuitemradio', { checked: true })).toHaveCount(1);
   await expect(menu).toBeInViewport({ ratio: 1 });
@@ -165,7 +181,7 @@ Then('原帳本仍使用繁中', async ({ page, world }) => {
 });
 
 async function signOut(page: Page) {
-  await page.getByRole('button', { name: '登出', exact: true }).click();
+  await (await openAppSettings(page)).getByRole('button', { name: '登出', exact: true }).click();
   await expect(page).toHaveURL(/\/$/u);
 }
 

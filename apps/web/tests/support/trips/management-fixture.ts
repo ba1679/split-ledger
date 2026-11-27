@@ -1,3 +1,4 @@
+import { tripEditor } from '../home-navigation.js';
 import { expect, test, type Page, type Request } from '@playwright/test';
 import type { LedgerWorld } from '../../../../api/tests/support/world.js';
 import {
@@ -114,7 +115,7 @@ export async function arrangeManagementPage(
     await expect(page.getByText('日本旅行', { exact: true })).toBeVisible();
     if (state === '永久刪除確認')
       await page.getByRole('button', { name: '永久刪除', exact: true }).click();
-  } else if (state === '旅行清單' || state === '新增表單') {
+  } else if (['旅行清單', '新增表單', '移入確認', '縮圖編輯'].includes(state)) {
     await page.goto('/trips');
     await expect(
       page
@@ -123,20 +124,20 @@ export async function arrangeManagementPage(
     ).toBeVisible();
     if (state === '新增表單')
       await page.getByRole('button', { name: '新增旅行', exact: true }).click();
+    if (state === '移入確認' || state === '縮圖編輯') {
+      await tripEditor(page).click();
+      await page
+        .getByRole('menuitem', {
+          name: state === '移入確認' ? '移至垃圾桶' : '更換縮圖',
+          exact: true,
+        })
+        .click();
+    }
   } else {
     await page.goto(`/trips/${managementTripId(world)}`);
     await expect(page.getByRole('heading', { name: '日本旅行', exact: true })).toBeVisible();
     await expect(page.getByRole('region', { name: '成員淨額', exact: true })).toBeVisible();
     await expect(page.getByText('晚餐', { exact: true })).toBeVisible();
-    if (state === '移入確認' || state === '縮圖編輯') {
-      await page.getByRole('button', { name: '管理旅行', exact: true }).click();
-      await page
-        .getByRole('menuitem', {
-          name: state === '移入確認' ? '移至垃圾桶' : '自訂旅行縮圖',
-          exact: true,
-        })
-        .click();
-    }
   }
   if (['移入確認', '永久刪除確認', '縮圖編輯', '新增表單'].includes(state))
     await expect(page.getByRole('dialog')).toBeVisible();

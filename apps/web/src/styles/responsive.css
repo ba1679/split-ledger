@@ -30,16 +30,6 @@
     width: 34px;
     height: 34px;
   }
-  .total-card {
-    padding: 18px;
-  }
-  .totals {
-    gap: 10px;
-    grid-template-columns: repeat(auto-fit, minmax(min(135px, 100%), 1fr));
-  }
-  .total-value {
-    font-size: 26px;
-  }
   .form-actions {
     flex-wrap: wrap;
   }

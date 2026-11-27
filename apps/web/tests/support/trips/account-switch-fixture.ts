@@ -1,3 +1,4 @@
+import { goToTripList, tripEditor } from '../home-navigation.js';
 import { expect, type Page } from '@playwright/test';
 import type { LedgerWorld } from '../../../../api/tests/support/world.js';
 import {
@@ -17,19 +18,9 @@ import { deferOwnerRead } from '../loading/deferred-owner-read.js';
 
 export async function arrangeAccountSwitch(page: Page, world: LedgerWorld): Promise<void> {
   const navigateTrips = async (trash = false) => {
-    const mobile = page.getByRole('navigation', { name: '行動導覽', exact: true });
-    if (await mobile.isVisible()) {
-      await mobile.getByRole('button', { name: '我的旅行', exact: true }).click();
-      await page
-        .getByRole('dialog', { name: '我的旅行', exact: true })
-        .getByRole('link', { name: trash ? '垃圾桶' : '旅行清單', exact: true })
-        .click();
-    } else {
-      await page
-        .getByRole('navigation', { name: '主要導覽', exact: true })
-        .getByRole('link', { name: trash ? '垃圾桶' : '我的旅行', exact: true })
-        .click();
-    }
+    await goToTripList(page);
+    if (trash)
+      await page.locator('main').getByRole('link', { name: '垃圾桶', exact: true }).click();
   };
   await arrangeManagementPage(page, world, '帳本');
   const activeId = managementTripId(world),
@@ -63,8 +54,9 @@ export async function arrangeAccountSwitch(page: Page, world: LedgerWorld): Prom
   await expect(page.getByRole('heading', { name: '日本旅行', exact: true })).toBeVisible();
   await expect.poll(() => deferred.arrived).toBe(true);
   expect(deferred.finished).toBe(false);
-  await page.getByRole('button', { name: '管理旅行', exact: true }).click();
-  await page.getByRole('menuitem', { name: '自訂旅行縮圖', exact: true }).click();
+  await goToTripList(page);
+  await tripEditor(page).click();
+  await page.getByRole('menuitem', { name: '更換縮圖', exact: true }).click();
   await selectThumbnailDraft(world, '神社照片');
   const draft = world.get<ThumbnailDraft>('management:draft');
   const urls = await objectUrls(page);

@@ -1,14 +1,3 @@
-.page-head:has(.ledger-actions) {
-  flex-wrap: wrap;
-}
-.ledger-actions {
-  display: flex;
-  gap: 12px;
-}
-.ledger-actions > .ds-button,
-.trip-management > .ds-button {
-  min-width: 170px;
-}
 .trip-management {
   position: relative;
 }
@@ -52,22 +41,12 @@
 .trip-management-menu svg {
   color: var(--green);
 }
-@media (max-width: 700px) {
-  .ledger-actions {
-    width: 100%;
-  }
-  .ledger-actions > *,
-  .trip-management > .ds-button {
-    flex: 1;
-    min-width: 0;
-  }
-  .trip-management > .ds-button {
-    width: 100%;
-  }
-  .trip-management-menu {
-    width: 220px;
-    max-width: calc(100vw - 40px);
-  }
+.trip-management-menu .trip-management-danger {
+  color: var(--danger);
+  border-top: 1px solid var(--line);
+}
+.trip-management-menu .trip-management-danger svg {
+  color: inherit;
 }
 
 .dialog-close {
@@ -230,29 +209,6 @@
   color: var(--muted);
   margin-top: 60px;
 }
-.form-dialog.mobile-trips-menu {
-  inset: auto 0 56px;
-  margin: 0;
-  width: 100%;
-  max-width: none;
-  padding: 18px 12px 24px;
-  border: 0;
-  border-radius: 12px 12px 0 0;
-}
-.form-dialog.mobile-trips-menu h2 {
-  font-family: inherit;
-  font-weight: 700;
-  font-size: 20px;
-  line-height: 1.5;
-  margin: 0 8px 12px;
-}
-.form-dialog.mobile-trips-menu::backdrop {
-  background: linear-gradient(
-    to bottom,
-    #12251d77 0 calc(100% - 56px),
-    transparent calc(100% - 56px)
-  );
-}
 .sheet-item {
   min-height: 48px;
   padding: 12px 20px;
@@ -260,11 +216,6 @@
   gap: 16px;
   align-items: center;
   border-radius: 7px;
-}
-.sheet-item.active {
-  background: var(--soft);
-  color: var(--green);
-  font-weight: 600;
 }
 @media (max-width: 700px) {
   .bottom-nav button.active {
@@ -346,14 +297,8 @@
     display: flex;
     flex-direction: column;
   }
-  body:has(.mobile-trips-menu[open]) .bottom-nav {
-    background: white;
-  }
 }
 
-:root {
-  --mobile-navigation-height: calc(57px + max(8px, env(safe-area-inset-bottom)));
-}
 .form-dialog.trip-command-dialog.trash-confirmation {
   min-height: min(380px, calc(100dvh - 32px));
 }
@@ -372,15 +317,6 @@
   margin-top: 76px;
 }
 @media (max-width: 700px) {
-  .ledger-actions {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .ledger-actions > .ds-button,
-  .trip-management > .ds-button {
-    width: 100%;
-    min-width: 0;
-  }
   .bottom-nav button {
     gap: 0;
   }
@@ -389,17 +325,6 @@
     gap: 0;
     font-size: 11px;
     min-height: 48px;
-  }
-  .form-dialog.mobile-trips-menu {
-    position: fixed;
-    bottom: var(--mobile-navigation-height);
-  }
-  .form-dialog.mobile-trips-menu::backdrop {
-    background: linear-gradient(
-      to bottom,
-      #192e2980 0 calc(100% - var(--mobile-navigation-height)),
-      transparent calc(100% - var(--mobile-navigation-height))
-    );
   }
   .form-dialog.trip-command-dialog.trash-confirmation {
     min-height: min(400px, calc(100dvh - 32px));
@@ -418,26 +343,6 @@
   }
 }
 
-.form-dialog.mobile-trips-menu {
-  min-height: 182px;
-  padding-bottom: 18px;
-}
-.mobile-trips-menu .sheet-item {
-  font-size: 15px;
-  line-height: 24px;
-}
-.mobile-trips-menu .sheet-item + .sheet-item {
-  margin-top: 6px;
-}
-.form-dialog.mobile-trips-menu.has-current-trip {
-  min-height: 239px;
-}
-.mobile-trips-menu .dialog-description {
-  font-size: 13px;
-  margin: -4px 8px 24px;
-}
-
-.mobile-trip-brand,
 .mobile-confirm-copy {
   display: none;
 }
@@ -451,14 +356,6 @@
   margin-top: 71px;
 }
 @media (max-width: 700px) {
-  .mobile-trip-brand {
-    display: block;
-    font-family: var(--serif);
-    font-size: 26px;
-    font-weight: 700;
-    line-height: 1.2;
-    margin-bottom: 20px;
-  }
   .trips-page .page-head {
     flex-direction: column;
     align-items: stretch;

@@ -38,29 +38,6 @@ fieldset {
   color: var(--ink);
   font-size: 20px;
 }
-.totals {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(165px, 100%), 1fr));
-  gap: 16px;
-  margin: 22px 0 34px;
-}
-.total-card {
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--panel);
-  padding: 24px;
-  min-width: 0;
-}
-.total-card:first-child {
-  background: var(--green);
-  color: white;
-  border-color: var(--green);
-}
-.total-label {
-  font-size: 12px;
-  letter-spacing: 1px;
-  opacity: 0.8;
-}
 .total-value {
   font-size: 32px;
   font-weight: 550;
@@ -68,11 +45,6 @@ fieldset {
   margin-top: 9px;
   font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
-}
-.currency-code {
-  font-size: 14px;
-  letter-spacing: 1px;
-  font-weight: 500;
 }
 .expense-row {
   display: flex;

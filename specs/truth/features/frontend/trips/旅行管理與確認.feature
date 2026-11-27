@@ -1,20 +1,20 @@
 Feature: 旅行管理與確認
 
-  # Acceptance: trip-thumbnail-lifecycle／管理旅行以原按鈕展開選單
+  # Acceptance: trip-thumbnail-lifecycle／旅行卡片右上角開啟選單
   @F006-034
-  Rule: 管理旅行直接展開操作選單
+  Rule: 旅行卡片直接展開操作選單
 
-    Example: owner 的旅行管理畫面為 "帳本"
-      Given owner 的旅行管理畫面為 "帳本"
+    Example: owner 的旅行管理畫面為 "旅行清單"
+      Given owner 的旅行管理畫面為 "旅行清單"
       When owner 選擇旅行操作 "管理旅行"
-      Then 管理選單列出縮圖與移入入口而不遮罩帳本
+      Then 管理選單列出日期、縮圖與移入入口而不遮罩旅行清單
 
   # Acceptance: trip-thumbnail-lifecycle／管理選單進入各項操作
   @F006-035
   Rule: 管理選單導向縮圖編輯
 
-    Example: owner 的旅行管理畫面為 "帳本"；管理旅行選單已展開
-      Given owner 的旅行管理畫面為 "帳本"
+    Example: owner 的旅行管理畫面為 "旅行清單"；管理旅行選單已展開
+      Given owner 的旅行管理畫面為 "旅行清單"
       And 管理旅行選單已展開
       When owner 選擇旅行操作 "自訂旅行縮圖"
       Then 畫面進入縮圖編輯且尚未保存
@@ -23,8 +23,8 @@ Feature: 旅行管理與確認
   @F006-036
   Rule: 管理選單導向移入確認
 
-    Example: owner 的旅行管理畫面為 "帳本"；管理旅行選單已展開
-      Given owner 的旅行管理畫面為 "帳本"
+    Example: owner 的旅行管理畫面為 "旅行清單"；管理旅行選單已展開
+      Given owner 的旅行管理畫面為 "旅行清單"
       And 管理旅行選單已展開
       When owner 選擇旅行操作 "移至垃圾桶"
       Then 畫面進入移入確認且尚未保存
@@ -33,8 +33,8 @@ Feature: 旅行管理與確認
   @F006-037
   Rule: 關閉管理選單回到原觸發點
 
-    Example: owner 的旅行管理畫面為 "帳本"；管理旅行選單已展開
-      Given owner 的旅行管理畫面為 "帳本"
+    Example: owner 的旅行管理畫面為 "旅行清單"；管理旅行選單已展開
+      Given owner 的旅行管理畫面為 "旅行清單"
       And 管理旅行選單已展開
       When owner 按 Escape 關閉管理選單
       Then 選單關閉且焦點返回管理旅行
@@ -95,7 +95,7 @@ Feature: 旅行管理與確認
 
   # Acceptance: trip-trash-and-restoration／垃圾桶可到達；plan Wave3導航保護
   @F006-043
-  Rule: 垃圾桶使用我的旅行的次級入口
+  Rule: 從旅行清單頁首進入垃圾桶
 
     Scenario Outline: <裝置> 的資料組合
       Given owner 的旅行管理畫面為 "旅行清單"

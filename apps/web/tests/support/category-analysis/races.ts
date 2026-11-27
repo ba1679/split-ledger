@@ -1,3 +1,4 @@
+import { goToTripList } from '../home-navigation.js';
 import { expect, type Page } from '@playwright/test';
 import type { LedgerWorld } from '../../../../api/tests/support/world.js';
 import type { CategoryAnalysisContext } from '../../../../api/tests/support/category-analysis/context.js';
@@ -69,7 +70,7 @@ export async function arrangePendingJapanAnalysis(
   await openAnalysisLedger(page, world, viewport);
   const control = controlNextAnalysis(world, '延遲成功');
   world.set('analysis:japanControl', control);
-  const link = page.getByRole('link', { name: '花費分析', exact: true });
+  const link = page.getByRole('link', { name: '看分析', exact: true });
   await expect(link, 'Product ledger must expose the approved analysis entry').toBeVisible();
   await link.click();
   await expect.poll(() => control.arrived).toBe(true);
@@ -90,18 +91,7 @@ export function arrangePendingTainanAnalysis(world: LedgerWorld) {
 }
 
 export async function navigateTainanLedger(page: Page, world: LedgerWorld) {
-  const mobile = page.getByRole('navigation', { name: '行動導覽', exact: true });
-  if (await mobile.isVisible()) {
-    await mobile.getByRole('button', { name: '我的旅行', exact: true }).click();
-    await page
-      .getByRole('dialog', { name: '我的旅行', exact: true })
-      .getByRole('link', { name: '旅行清單', exact: true })
-      .click();
-  } else
-    await page
-      .getByRole('navigation', { name: '主要導覽', exact: true })
-      .getByRole('link', { name: '我的旅行', exact: true })
-      .click();
+  await goToTripList(page);
   const tainan = world.get<CategoryAnalysisContext>('analysis:tainanContext');
   await page.locator(`a.trip-card[href="/trips/${tainan.tripId}"]`).click();
   world.set('analysis:context', tainan);

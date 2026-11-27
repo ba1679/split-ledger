@@ -12,7 +12,7 @@ Then('關閉未確認操作不改變旅行資料', async ({ world }) => {
       ? '永久刪除'
       : closed.editor === '新增表單'
         ? '新增旅行'
-        : '管理旅行';
+        : '編輯 日本旅行';
 
   await expect(page.getByRole('dialog')).toBeHidden();
   await expect(page).toHaveURL(ui.startUrl);
@@ -30,7 +30,10 @@ Then('關閉未確認操作不改變旅行資料', async ({ world }) => {
     await page.getByRole('button', { name: '新增旅行', exact: true }).click({ trial: true });
   } else {
     await expect(page.getByRole('heading', { name: '日本旅行', exact: true })).toBeVisible();
-    await page.getByRole('link', { name: '記一筆', exact: true }).click({ trial: true });
+    await page
+      .getByRole('link')
+      .filter({ has: page.getByRole('heading', { name: '日本旅行', exact: true }) })
+      .click({ trial: true });
   }
   await assertManagementUnchanged(world);
   if (world.state.has('management:draft')) await assertDraftUrlsReleased(page);

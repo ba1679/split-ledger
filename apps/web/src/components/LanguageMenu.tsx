@@ -1,5 +1,4 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
 import { Check, ChevronDown, Languages } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from './ui/button.js';
@@ -10,7 +9,13 @@ const languages = [
   { value: 'en', label: 'English' },
 ] as const;
 
-export function LanguageMenu({ className = '' }: { className?: string }) {
+export function LanguageMenu({
+  className = '',
+  inline = false,
+}: {
+  className?: string;
+  inline?: boolean;
+}) {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const anchor = useRef<HTMLDivElement>(null);
@@ -18,7 +23,7 @@ export function LanguageMenu({ className = '' }: { className?: string }) {
   const menu = useRef<HTMLDivElement>(null);
   const menuId = useId();
   const selected = i18n.resolvedLanguage === 'zh-Hant' ? languages[0] : languages[1];
-  const label = t('language.label');
+  const label = t(inline ? 'common.settingsLanguage' : 'language.label');
 
   useEffect(() => {
     if (!open) return;
@@ -72,7 +77,10 @@ export function LanguageMenu({ className = '' }: { className?: string }) {
         }}
       >
         <Languages aria-hidden="true" size={16} />
-        <span lang={selected.value}>{selected.label}</span>
+        {inline ? <span>{label}</span> : null}
+        <span className={inline ? 'settings-language-value' : undefined} lang={selected.value}>
+          {selected.label}
+        </span>
         <ChevronDown className="language-menu-chevron" aria-hidden="true" size={16} />
       </Button>
       {open ? (
@@ -115,19 +123,6 @@ export function LanguageMenu({ className = '' }: { className?: string }) {
           ))}
         </div>
       ) : null}
-    </div>
-  );
-}
-
-export function MobileLanguageBar({ children }: { children?: ReactNode }) {
-  return (
-    <div
-      className={
-        children ? 'mobile-language-bar' : 'mobile-language-bar mobile-language-bar-fallback'
-      }
-    >
-      {children}
-      <LanguageMenu className="mobile-language-control" />
     </div>
   );
 }

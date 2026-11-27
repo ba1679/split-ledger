@@ -40,7 +40,6 @@ export function CreatedTripResult({
 
   return (
     <div className="created-trip-result">
-      <div className="mobile-trip-brand">t. {tripText('brand')}</div>
       <header>
         <div className="eyebrow">MY JOURNEYS</div>
         <h1 ref={heading} tabIndex={-1}>

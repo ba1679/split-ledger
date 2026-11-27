@@ -1,11 +1,13 @@
+import { goToTripList, tripEditor } from '../../../support/home-navigation.js';
 import { When, expect } from '../../../support/fixtures.js';
 import { managementUI } from '../../../support/trips/management-fixture.js';
 
 When('owner 選擇旅行操作 {string}', async ({ world }, operation: string) => {
   const { page } = managementUI(world);
+  if (operation === '管理旅行') await goToTripList(page);
   const actions = {
-    管理旅行: page.getByRole('button', { name: '管理旅行', exact: true }),
-    自訂旅行縮圖: page.getByRole('menuitem', { name: '自訂旅行縮圖', exact: true }),
+    管理旅行: tripEditor(page),
+    自訂旅行縮圖: page.getByRole('menuitem', { name: '更換縮圖', exact: true }),
     移至垃圾桶: page.getByRole('menuitem', { name: '移至垃圾桶', exact: true }),
     永久刪除: page.getByRole('button', { name: '永久刪除', exact: true }),
     確認移入: page.getByRole('dialog').getByRole('button', { name: '移至垃圾桶', exact: true }),

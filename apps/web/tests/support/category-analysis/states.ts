@@ -109,7 +109,7 @@ export async function arrangeAnalysisFailure(page: Page, world: LedgerWorld, sta
   const { controlNextAnalysis } = await import('./response.js');
   const control = controlNextAnalysis(world, '失敗');
   if (state === '初讀失敗') {
-    const link = page.getByRole('link', { name: '花費分析', exact: true });
+    const link = page.getByRole('link', { name: '看分析', exact: true });
     await expect(link, 'Product ledger must expose the approved analysis entry').toBeVisible();
     await link.click();
   } else await refocusBrowserAnalysis(page);

@@ -2,7 +2,7 @@
   display: grid;
   gap: 24px;
 }
-.repayment-page > .mobile-language-bar > .back,
+.repayment-page > .back,
 .repayment-page .page-head {
   margin: 0;
 }

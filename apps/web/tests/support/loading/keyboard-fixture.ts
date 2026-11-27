@@ -1,3 +1,4 @@
+import { goToTripList, tripEditor } from '../home-navigation.js';
 import { expect, type Page, type Locator } from '@playwright/test';
 import type { LedgerWorld } from '../../../../api/tests/support/world.js';
 import { arrangeManagementPage, managementUI } from '../trips/management-fixture.js';
@@ -31,15 +32,16 @@ export async function arrangeKeyboard(
   expect(before.thumbnails.length).toBe(1);
   expect(before.expenses.length).toBeGreaterThan(0);
   expect(before.repayments.length).toBeGreaterThan(0);
-  const trigger = page.getByRole('button', { name: '管理旅行', exact: true });
+  await goToTripList(page);
+  const trigger = tripEditor(page);
   await tabTo(page, trigger);
-  await expect(trigger).toHaveAccessibleName('管理旅行');
+  await expect(trigger).toHaveAccessibleName('編輯 日本旅行');
   await expect(trigger).toBeFocused();
   world.set('loading:keyboard', {
     device,
     before,
     originalFocus: trigger,
-    originalName: await trigger.innerText(),
+    originalName: await trigger.getAttribute('aria-label'),
     startUrl: page.url(),
   });
   expect(managementUI(world).writes.length).toBe(0);

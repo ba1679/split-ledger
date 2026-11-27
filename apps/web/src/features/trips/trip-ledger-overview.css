@@ -1,0 +1,245 @@
+.ledger-header-marker {
+  height: 1px;
+}
+.ledger-page-header {
+  position: sticky;
+  top: 0;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 68px;
+  background: var(--bg);
+}
+.ledger-title {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.ledger-title h1 {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-family: inherit;
+  font-size: 40px;
+  font-weight: 750;
+}
+.ledger-page-header[data-compact] {
+  box-shadow: 0 1px var(--line);
+}
+.ledger-page-header[data-compact] h1 {
+  font-size: 22px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ledger-desktop-add {
+  flex: none;
+}
+.ledger-trip-dates {
+  font-size: 14px;
+  margin-bottom: 30px;
+}
+.ledger-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 322px), 1fr));
+  gap: 24px;
+  margin-bottom: 38px;
+}
+.ledger-summary-card {
+  min-width: 0;
+  padding: 12px 22px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--ds-card-radius);
+  background: var(--panel);
+}
+.ledger-summary-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+}
+.ledger-summary-heading h2,
+.ledger-expenses .section-head h2 {
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 20px;
+}
+.ledger-analysis-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--green);
+  white-space: nowrap;
+}
+.ledger-analysis-link:hover {
+  text-decoration: underline;
+}
+.ledger-currency-note,
+.ledger-summary-empty {
+  font-size: 14px;
+}
+.ledger-currency-totals,
+.ledger-balances {
+  border-top: 1px solid var(--line);
+  margin-top: 8px;
+  padding-top: 6px;
+}
+.ledger-currency-row,
+.ledger-balance-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 0;
+  font-size: 14px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.ledger-currency-row {
+  justify-content: space-between;
+}
+.ledger-currency-row > span {
+  color: var(--muted);
+  font-weight: 650;
+}
+.ledger-currency-row .total-value {
+  margin-top: 0;
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1.25;
+  text-align: right;
+}
+.ledger-balance-row strong {
+  margin-left: auto;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.ledger-balance-row strong.receivable {
+  color: var(--green);
+}
+.ledger-balance-row > .muted {
+  flex: none;
+}
+.ledger-balanced-currency {
+  padding: 6px 0;
+  font-size: 14px;
+}
+.ledger-balance-currency + .ledger-balance-currency {
+  border-top: 1px solid var(--line);
+}
+.ledger-expenses .section-head {
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+.ledger-expenses .expense-row {
+  min-height: 70px;
+  padding-block: 12px;
+  scroll-margin-block: 80px 92px;
+}
+.ledger-mobile-add.ds-button {
+  display: none;
+}
+.sheet-sign-out.ds-button {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+@media (max-width: 700px) {
+  .ledger-page-header {
+    position: static;
+    min-height: 56px;
+    box-shadow: none;
+  }
+  .ledger-page-header[data-compact] {
+    box-shadow: none;
+  }
+  .ledger-title {
+    width: 100%;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .ledger-page-header .ledger-title h1 {
+    font-size: 30px;
+    overflow: visible;
+    white-space: normal;
+  }
+  .ledger-desktop-add.ds-button,
+  .ledger-currency-note {
+    display: none;
+  }
+  .ledger-trip-dates {
+    margin-bottom: 24px;
+  }
+  .ledger-overview {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    margin-bottom: 26px;
+  }
+  .ledger-summary-card {
+    padding: 6px 15px 12px;
+  }
+  .ledger-summary-heading h2,
+  .ledger-expenses .section-head h2 {
+    font-size: 18px;
+  }
+  .ledger-currency-row,
+  .ledger-balance-row {
+    padding-block: 6px;
+  }
+  .ledger-currency-row .total-value {
+    font-size: 22px;
+  }
+  .ledger-expenses .expense-row {
+    min-height: 62px;
+    padding-block: 9px;
+  }
+  .ledger-expenses .row-amount {
+    font-size: 14px;
+  }
+  body:has(.ledger-bottom-nav) .main {
+    padding-bottom: calc(112px + env(safe-area-inset-bottom));
+  }
+  .bottom-nav.ledger-bottom-nav {
+    left: max(8px, min(4vw, 16px));
+    right: calc(64px + max(8px, min(4vw, 16px)));
+    padding: 5px 4px;
+    bottom: max(28px, env(safe-area-inset-bottom));
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--panel);
+    box-shadow: 0 3px 12px #192e2924;
+  }
+  .ledger-bottom-nav > a,
+  .ledger-bottom-nav .trip-nav-group :is(a, button) {
+    color: var(--ink);
+    border-radius: 10px;
+  }
+  .ledger-bottom-nav :is(a, button).active {
+    background: var(--soft);
+    color: var(--green);
+  }
+  .ledger-mobile-add.ds-button {
+    display: inline-flex;
+    position: fixed;
+    right: max(8px, min(4vw, 16px));
+    bottom: calc(max(28px, env(safe-area-inset-bottom)) + 6px);
+    width: 56px;
+    height: 56px;
+    z-index: 10;
+    border-radius: 50%;
+    box-shadow: 0 3px 12px #192e2924;
+  }
+  .ledger-mobile-add.ds-button .icon {
+    width: 28px;
+    height: 28px;
+  }
+  .date-picker-open .ledger-mobile-add {
+    visibility: hidden;
+  }
+}

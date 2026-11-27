@@ -3,9 +3,11 @@ import { interfaceI18n, registerInterfaceMessages } from '../../i18n/runtime.js'
 
 registerInterfaceMessages('trips', {
   brand: ['旅帳', 'Travel Ledger'],
+  editNamedTrip: ['編輯 {{name}}', 'Edit {{name}}'],
   myTrips: ['我的旅行', 'My trips'],
   tripList: ['旅行清單', 'Trip list'],
   tripDetails: ['旅行資料', 'Trip details'],
+  overview: ['旅行總覽', 'Trip overview'],
   everyTripHasAStory: ['每一趟，都有故事。', 'Every trip has a story.'],
   listSubtitle: [
     '把沿途的小花費，留在各自的旅行裡。',
@@ -68,6 +70,15 @@ registerInterfaceMessages('trips', {
   totalsByCurrency: ['分幣別總額', 'Totals by currency'],
   myTotalExpensesByCurrency: ['個人總花費 · 依幣別分開統計', 'My share by currency'],
   memberBalances: ['成員淨額', 'Member balances'],
+  personalSpending: ['個人花費', 'My spending'],
+  personalSpendingSummary: ['個人花費摘要', 'Personal spending summary'],
+  separateByCurrency: ['依幣別分開統計', 'Totals are separate by currency'],
+  noPersonalSpending: ['目前沒有個人花費。', 'No personal spending yet.'],
+  viewAnalysis: ['看分析', 'Spending analysis'],
+  balancesDue: ['應收應付', 'Amounts owed'],
+  balanceSummary: ['應收應付摘要', 'Balance summary'],
+  noBalances: ['目前沒有應收應付。', 'No balances due.'],
+  balancedCurrency: ['{{currency}} 已平衡', '{{currency}} settled'],
   expenseList: ['支出清單', 'Expense list'],
   aBlankPageForYourJourney: ['旅程還有很多空白，真好。', 'A blank page for your journey.'],
   startWithAFlightTicketOrTodayS: [
@@ -89,6 +100,8 @@ registerInterfaceMessages('trips', {
   loadMore: ['載入更多', 'Load more'],
   loadingMoreExpenses: ['正在讀取更多支出', 'Loading more expenses'],
   manageTrip: ['管理旅行', 'Manage trip'],
+  editTripDates: ['編輯旅行日期', 'Edit trip dates'],
+  changeTripCover: ['更換縮圖', 'Change cover'],
   customizeTripThumbnail: ['自訂旅行縮圖', 'Edit cover'],
   moveToTrash: ['移至垃圾桶', 'Move to Trash'],
   movingToTrash: ['正在移至垃圾桶', 'Moving to Trash'],

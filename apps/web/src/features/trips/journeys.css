@@ -108,3 +108,64 @@
   color: var(--muted);
   font-size: 13px;
 }
+
+.trip-list-card {
+  position: relative;
+  min-width: 0;
+}
+.trip-list-card:has([aria-expanded='true']) {
+  z-index: 2;
+}
+.trip-list-card > .trip-management {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+}
+.trip-list-card .trip-card:hover {
+  transform: none;
+}
+.trip-list-card .trip-management > button {
+  width: 44px;
+  height: 44px;
+}
+.trip-list-card .trip-management > button[aria-expanded='true'] {
+  background: var(--soft);
+  border-color: var(--green);
+}
+.trips-list-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.trips-list-actions .ds-button {
+  min-height: 44px;
+}
+
+@media (max-width: 700px) {
+  .trips-list-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .trips-list-actions {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .trip-list-card .landscape {
+    height: 100px;
+  }
+  .trip-list-card .landscape .word {
+    font-size: 36px;
+  }
+}
+.trip-list-card .trip-management-menu {
+  width: 210px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.trip-list-card .trip-management-menu[data-placement='above'] {
+  top: auto;
+  bottom: calc(100% + 8px);
+}

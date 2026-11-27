@@ -1,3 +1,4 @@
+import { tripEditor } from '../home-navigation.js';
 import { expect } from '@playwright/test';
 import type { LedgerWorld } from '../../../../api/tests/support/world.js';
 import { managementUI } from '../trips/management-fixture.js';
@@ -6,7 +7,7 @@ import { tabTo } from './keyboard-fixture.js';
 
 export async function openTrashByKeyboard(world: LedgerWorld): Promise<void> {
   const page = managementUI(world).page;
-  const trigger = page.getByRole('button', { name: '管理旅行', exact: true });
+  const trigger = tripEditor(page);
   await tabTo(page, trigger);
   await page.keyboard.press('Enter');
   const menu = page.getByRole('menu');

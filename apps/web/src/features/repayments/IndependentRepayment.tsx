@@ -1,4 +1,3 @@
-import { MobileLanguageBar } from '../../components/LanguageMenu.js';
 import { useTranslation } from 'react-i18next';
 import { currencyOption } from '../../i18n/currency-options.js';
 import React, { useId, useRef, useState, useSyncExternalStore } from 'react';
@@ -374,12 +373,10 @@ function RepaymentEditor({
 
   return (
     <div className="repayment-page">
-      <MobileLanguageBar>
-        <Link className="back" to={`/trips/${trip.id}/settlement`}>
-          <Icon name="back" />
-          <span>{trip.name}</span>
-        </Link>
-      </MobileLanguageBar>
+      <Link className="back" to={`/trips/${trip.id}/settlement`}>
+        <Icon name="back" />
+        <span>{trip.name}</span>
+      </Link>
       <header className="page-head">
         <div>
           <h1>{t('repaymentForm.title')}</h1>

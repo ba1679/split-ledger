@@ -73,12 +73,12 @@ export async function assertKeyboardDateResult(world: LedgerWorld, result: strin
     expect(response.status()).toBe(200);
     expect(await response.json()).toMatchObject({ id: wait.tripId, ...state.target });
     const dates = page
-      .getByRole('region', { name: '旅行資料', exact: true })
-      .locator('p')
-      .filter({ has: state.trigger });
+      .locator('.trip-list-card')
+      .filter({ hasText: '日本旅行' })
+      .locator('.card-date');
     await expect(dates).toContainText(/03[/.月-]0?9|3月9日/);
     await expect(dates).toContainText(/03[/.月-]16|3月16日/);
-    await expect(state.trigger).toHaveAccessibleName('旅行日期');
+    await expect(state.trigger).toHaveAccessibleName('編輯 日本旅行');
   }
   for (const text of new Set(
     state.announcements.filter((text) => /日期|儲存|保存|成功/.test(text)),
@@ -101,6 +101,6 @@ export async function assertKeyboardDateResult(world: LedgerWorld, result: strin
   expect(dates.rows).toEqual([
     { start_date: state.target.startDate, end_date: state.target.endDate },
   ]);
-  expect(new URL(page.url()).pathname).toBe(`/trips/${wait.tripId}`);
+  expect(new URL(page.url()).pathname).toBe('/trips');
   await assertOtherDataUnchanged(world);
 }

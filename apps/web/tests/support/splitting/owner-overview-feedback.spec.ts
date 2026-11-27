@@ -1,3 +1,5 @@
+import { seedTrip } from '../../../../api/tests/support/seed.js';
+import { goToTripList, openAppSettings, tripEditor } from '../home-navigation.js';
 import { test, expect } from '../fixtures.js';
 import { seedBrowserSplittingExpenses } from './fixture.js';
 import { splittingTripId } from '../../../../api/tests/support/splitting/members-fixture.js';
@@ -15,7 +17,7 @@ for (const width of [375, 1280])
     ]);
     const tripId = splittingTripId(world);
     await page.goto(`/trips/${tripId}`);
-    await expect(page.getByText('個人總花費 · 依幣別分開統計', { exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '個人花費', exact: true })).toBeVisible();
     const totals = page.getByRole('region', { name: '分幣別總額', exact: true });
 
     await expect(totals.getByRole('group', { name: 'KRW', exact: true })).toContainText('25,000');
@@ -57,12 +59,8 @@ for (const width of [375, 1280])
     if (width === 1280) {
       const parent = await nav.getByRole('link', { name: '我的旅行', exact: true }).boundingBox();
       const child = await nav.getByRole('link', { name: '同行者', exact: true }).boundingBox();
-      const categories = await nav
-        .getByRole('link', { name: '支出分類', exact: true })
-        .boundingBox();
-
       expect(child!.x).toBeGreaterThan(parent!.x);
-      expect(child!.y).toBeLessThan(categories!.y);
+      await expect(nav.getByRole('link', { name: '支出分類', exact: true })).toHaveCount(0);
     }
     await page.goto(`/trips/${tripId}/settlement`);
     const toggle = page.getByRole('switch', { name: '簡化付款', exact: true });
@@ -150,3 +148,163 @@ for (const width of [375, 1280])
       width,
     );
   });
+
+const japanExpenses = [
+  { item: '共同拉麵', day: 15, amount: '2000' },
+  { item: '車站咖啡', day: 15, amount: '540' },
+  { item: '京都到大阪', day: 14, amount: '850' },
+  { item: '抹茶冰淇淋', day: 14, amount: '460' },
+  { item: '美術館門票', day: 13, amount: '1200' },
+  { item: '錦市場點心', day: 13, amount: '680' },
+  { item: '京都町家住宿', day: 12, amount: '15000' },
+  { item: '京都市巴士', day: 12, amount: '390' },
+  { item: '旅遊手冊', day: 11, amount: '900' },
+  { item: '植物園套票', day: 11, amount: '2200' },
+  { item: '機場接駁', day: 10, amount: '600' },
+  { item: '往返機票', day: 10, amount: '8000', currency: 'TWD' },
+];
+
+for (const width of [390, 1440]) {
+  test(`trip ledger overview and fixed entry at ${width}px`, async ({ page, world }, testInfo) => {
+    const mobile = width === 390;
+    await page.setViewportSize({ width, height: mobile ? 844 : 900 });
+    await seedBrowserSplittingExpenses(
+      page,
+      world,
+      japanExpenses.map(({ item, amount, currency }) => ({
+        項目: item,
+        幣別: currency ?? 'JPY',
+        金額: amount,
+        付款人: 'Alice',
+        分攤者: item === '共同拉麵' ? 'Alice、Amy' : 'Alice',
+      })),
+    );
+    await seedTrip(world, '台南的慢週末', '甲', {
+      startDate: '2027-04-03',
+      endDate: '2027-04-05',
+    });
+    const tripId = splittingTripId(world);
+    await world.db.query(
+      "UPDATE trips SET name='日本春日旅行',start_date='2027-03-10',end_date='2027-03-15' WHERE id=$1",
+      [tripId],
+    );
+    for (const { item, day } of japanExpenses) {
+      await world.db.query('UPDATE expenses SET spent_on=$3 WHERE trip_id=$1 AND item=$2', [
+        tripId,
+        item,
+        `2027-03-${day}`,
+      ]);
+    }
+    const path = `/trips/${tripId}`;
+    const screenshot = (state: string) =>
+      page.screenshot({
+        path: `.cache/008-overview/${testInfo.project.name}-${width}-${state}.png`,
+      });
+    await page.goto(path);
+    const add = page.getByRole('link', { name: '記一筆', exact: true });
+    const spending = page.getByRole('region', { name: '個人花費摘要' });
+    const balances = page.getByRole('region', { name: '應收應付摘要' });
+    const expenses = page.getByRole('region', { name: '支出清單' });
+    const navigation = page.getByRole('navigation', { name: mobile ? '行動導覽' : '主要導覽' });
+    await expect(spending.getByRole('group', { name: 'JPY' })).toContainText('23,820');
+    await expect(balances.getByText('TWD 已平衡')).toBeVisible();
+    await expect(expenses.getByRole('link')).toHaveCount(12);
+    await expect(add).toHaveCount(1);
+    const first = (await spending.boundingBox())!;
+    const second = (await balances.boundingBox())!;
+    if (mobile) {
+      expect(second.y).toBeGreaterThanOrEqual(first.y + first.height);
+      await expect(navigation.getByRole('button', { name: '登出' })).toHaveCount(0);
+    } else {
+      expect(second.x).toBeGreaterThanOrEqual(first.x + first.width);
+      expect(second.y).toBe(first.y);
+      await expect(navigation.getByRole('link', { name: '旅行總覽' })).toHaveAttribute(
+        'aria-current',
+        'page',
+      );
+    }
+    await screenshot('overview');
+    await expect(page.getByRole('button', { name: '全站設定' })).toHaveCount(0);
+    await expect(tripEditor(page, '日本春日旅行')).toHaveCount(0);
+    await goToTripList(page);
+    await expect(page.locator('main').getByRole('link', { name: '垃圾桶' })).toHaveAttribute(
+      'href',
+      '/trips/trash',
+    );
+    await screenshot('home');
+    const manage = tripEditor(page, '日本春日旅行');
+    await manage.focus();
+    await manage.press('Enter');
+    const dates = page.getByRole('menuitem', { name: '編輯旅行日期' });
+    await expect(dates).toBeFocused();
+    await screenshot('trip-settings');
+    await dates.press('Enter');
+    await page.getByRole('dialog').getByRole('button', { name: '取消' }).click();
+    await expect(manage).toBeFocused();
+
+    const otherManage = tripEditor(page, '台南的慢週末');
+    await otherManage.click();
+    await page.getByRole('menuitem', { name: '編輯旅行日期' }).click();
+    await expect(page.getByRole('dialog').getByLabel('旅行名稱')).toHaveValue('台南的慢週末');
+    await page.keyboard.press('Escape');
+    await expect(otherManage).toBeFocused();
+
+    const settings = await openAppSettings(page);
+    await expect(settings.getByRole('link', { name: '支出分類' })).toHaveAttribute(
+      'href',
+      '/categories',
+    );
+    await screenshot('app-settings');
+    const language = settings.getByRole('button', { name: /^語系/ });
+    await language.click();
+    await expect(settings.getByRole('menuitemradio', { name: '繁體中文' })).toBeChecked();
+    await expect(settings.getByRole('menuitemradio', { name: 'English' })).toBeVisible();
+    await screenshot('language-options');
+    await language.press('Escape');
+    await expect(settings).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('button', { name: '全站設定' })).toBeFocused();
+    await page.locator(`a.trip-card[href="${path}"]`).click();
+
+    if (!mobile) {
+      for (const label of ['同行者', '分帳結算']) {
+        await navigation.getByRole('link', { name: label }).click();
+        await navigation.getByRole('link', { name: '旅行總覽' }).click();
+        await expect(page).toHaveURL(new RegExp(path + '$'));
+      }
+    }
+
+    await spending.getByRole('link', { name: '看分析' }).click();
+    await expect(page).toHaveURL(new RegExp(path + '/analysis$'));
+    await page.goBack();
+    await expect(expenses.getByRole('link')).toHaveCount(12);
+    await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
+    await expect(add).toBeInViewport();
+    await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0);
+    if (mobile) {
+      const last = (await expenses.getByRole('link').last().boundingBox())!;
+      const bar = (await navigation.boundingBox())!;
+      expect(last.y + last.height).toBeLessThanOrEqual(bar.y);
+    } else {
+      await expect(page.getByRole('region', { name: '旅行資料' })).toHaveAttribute(
+        'data-compact',
+        'true',
+      );
+    }
+    await screenshot('scroll');
+    await add.click();
+    await expect(page).toHaveURL(new RegExp(path + '/expenses/new$'));
+
+    if (mobile) {
+      const longName = '日本春日旅行北海道京都大阪奈良瀨戶內海交通與住宿共同記帳';
+      await world.db.query('UPDATE trips SET name=$2 WHERE id=$1', [tripId, longName]);
+      await page.setViewportSize({ width: 320, height: 700 });
+      await page.goto(path);
+      await expect(page.getByRole('heading', { name: longName })).toBeVisible();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
+      await expect(add).toBeInViewport();
+      await (await openAppSettings(page)).getByRole('button', { name: '登出' }).click();
+      await expect(page.getByRole('button', { name: /使用 Google 帳號登入/ })).toBeVisible();
+    }
+  });
+}

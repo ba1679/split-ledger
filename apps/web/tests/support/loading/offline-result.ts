@@ -1,3 +1,4 @@
+import { goToTripList, tripEditor } from '../home-navigation.js';
 import { expect } from '@playwright/test';
 import type { LedgerWorld } from '../../../../api/tests/support/world.js';
 import type { ItemList, Trip } from '../../../src/api/index.js';
@@ -36,10 +37,11 @@ export async function assertOfflineRecovered(world: LedgerWorld): Promise<void> 
   await region.locator(`a[href="/trips/${tripId}"]`).click();
   await expect(page.getByRole('heading', { name: '日本旅行', exact: true })).toBeVisible();
   await waitForManagementReads(ui);
-  const trigger = page.getByRole('button', { name: '管理旅行', exact: true });
+  await goToTripList(page);
+  const trigger = tripEditor(page);
   await expect(trigger).toBeEnabled();
   await trigger.click();
-  await page.getByRole('menuitem', { name: '自訂旅行縮圖', exact: true }).click();
+  await page.getByRole('menuitem', { name: '更換縮圖', exact: true }).click();
   await selectThumbnailDraft(world, '神社照片');
   await expect(
     page.getByRole('dialog').getByRole('button', { name: '保存圖片', exact: true }),

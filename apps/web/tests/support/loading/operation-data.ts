@@ -1,3 +1,4 @@
+import { tripEditorById } from '../home-navigation.js';
 import { randomUUID } from 'node:crypto';
 import { expect, type Locator, type Page } from '@playwright/test';
 import type { LedgerWorld } from '../../../../api/tests/support/world.js';
@@ -156,8 +157,9 @@ export async function arrangeOperationData(
     path = '/api/trips';
     status = 201;
   } else if (operation === '保存旅行名稱與日期') {
-    await page.goto(`/trips/${tripId}`);
-    await button('旅行日期').click();
+    await page.goto('/trips');
+    await tripEditorById(page, tripId).click();
+    await page.getByRole('menuitem', { name: '編輯旅行日期', exact: true }).click();
     await page.getByLabel('旅行名稱', { exact: true }).fill('京都旅行');
     for (const [label, value] of [
       ['開始日', '2027/03/10'],
@@ -171,8 +173,8 @@ export async function arrangeOperationData(
     method = 'PATCH';
   } else if (['移至垃圾桶', '復原旅行', '永久刪除旅行'].includes(operation)) {
     if (operation === '移至垃圾桶') {
-      await page.goto(`/trips/${tripId}`);
-      await button('管理旅行').click();
+      await page.goto('/trips');
+      await tripEditorById(page, tripId).click();
       await page.getByRole('menuitem', { name: '移至垃圾桶', exact: true }).click();
       control = page.getByRole('dialog').getByRole('button', { name: '移至垃圾桶', exact: true });
       path = `${base}/trash`;
@@ -188,9 +190,9 @@ export async function arrangeOperationData(
       }
     }
   } else if (['保存新縮圖', '更換縮圖', '保存預覽的預設縮圖'].includes(operation)) {
-    await page.goto(`/trips/${tripId}`);
-    await button('管理旅行').click();
-    await page.getByRole('menuitem', { name: '自訂旅行縮圖', exact: true }).click();
+    await page.goto('/trips');
+    await tripEditorById(page, tripId).click();
+    await page.getByRole('menuitem', { name: '更換縮圖', exact: true }).click();
     await selectThumbnailDraft(world, operation === '保存預覽的預設縮圖' ? '預設圖' : '神社照片');
     control = button('保存圖片');
     path = `${base}/thumbnail`;

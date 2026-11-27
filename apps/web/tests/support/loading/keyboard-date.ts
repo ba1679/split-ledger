@@ -1,3 +1,4 @@
+import { tripEditor } from '../home-navigation.js';
 import { expect, type Locator } from '@playwright/test';
 import type { LedgerWorld } from '../../../../api/tests/support/world.js';
 import { managementUI } from '../trips/management-fixture.js';
@@ -19,8 +20,10 @@ export async function arrangeKeyboardDate(world: LedgerWorld, result: string): P
   expect(['延遲', '成功']).toContain(result);
   const page = managementUI(world).page,
     tripId = managementTripId(world);
-  const trigger = page.getByRole('button', { name: '旅行日期', exact: true });
+  const trigger = tripEditor(page);
   await tabTo(page, trigger);
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('menuitem', { name: '編輯旅行日期' })).toBeFocused();
   await page.keyboard.press('Enter');
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();

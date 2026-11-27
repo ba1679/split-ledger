@@ -1,3 +1,4 @@
+import { goToTripList, tripEditorById } from './home-navigation.js';
 import type { Page } from '@playwright/test';
 import type { LedgerWorld } from './fixtures.js';
 import { expect } from './fixtures.js';
@@ -287,7 +288,10 @@ export async function tripCreate(
 }
 
 export async function tripEnd(page: Page, date: string) {
-  await page.getByRole('button', { name: '旅行日期', exact: true }).click();
+  const id = new URL(page.url()).pathname.split('/').at(-1)!;
+  await goToTripList(page);
+  await tripEditorById(page, id).click();
+  await page.getByRole('menuitem', { name: '編輯旅行日期', exact: true }).click();
   const dialog = page.getByRole('dialog');
 
   await dialog.getByLabel('結束日', { exact: true }).fill(date.replaceAll('-', '/'));

@@ -86,6 +86,13 @@ export function initializeInterfaceLanguage(): void {
     document.title = interfaceI18n.t('app.title', { lng: value });
   };
   interfaceI18n.on('languageChanged', syncDocument);
+  window.addEventListener('storage', (event) => {
+    if (
+      event.key === interfaceLanguageKey &&
+      (event.newValue === 'en' || event.newValue === 'zh-Hant')
+    )
+      void interfaceI18n.changeLanguage(event.newValue);
+  });
   void interfaceI18n.use(initReactI18next).init({
     lng: language,
     supportedLngs: ['en', 'zh-Hant'],

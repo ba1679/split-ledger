@@ -1,3 +1,4 @@
+import { tripEditor } from '../../../support/home-navigation.js';
 import { Given, expect } from '../../../support/fixtures.js';
 import { arrangeManagementPage, managementUI } from '../../../support/trips/management-fixture.js';
 import { arrangeUnknownReset } from '../../../support/thumbnail/unknown-reset.js';
@@ -11,8 +12,8 @@ Given('原次預設圖片結果未知且編輯曾關閉再返回', async ({ page
   const loss = world.get<CommittedResponseLoss>('management:responseLoss');
   await page.getByRole('dialog').getByRole('button', { name: '關閉', exact: true }).click();
   await expect(page.getByRole('dialog')).toBeHidden();
-  await page.getByRole('button', { name: '管理旅行', exact: true }).click();
-  await page.getByRole('menuitem', { name: '自訂旅行縮圖', exact: true }).click();
+  await tripEditor(page).click();
+  await page.getByRole('menuitem', { name: '更換縮圖', exact: true }).click();
   await expect(page.getByRole('dialog')).toHaveAccessibleName(/自訂旅行縮圖/);
   await assertUnknownOutcome(world);
   expect(managementUI(world).writes.length).toBe(1);

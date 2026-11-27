@@ -25,7 +25,7 @@ Then('垃圾桶導覽可達且不冒用旅行內導覽', async ({ world }) => {
     exact: true,
   });
 
-  await expect(navigation.locator('[aria-current]:not([aria-current="false"])')).toHaveCount(1);
+  await expect(navigation.getByRole('link', { name: '我的旅行', exact: true })).toBeVisible();
   const reads = ui.reads.filter(
     (request) => new URL(request.url()).pathname === '/api/trips/trash',
   );
@@ -71,8 +71,6 @@ Then('垃圾桶導覽可達且不冒用旅行內導覽', async ({ world }) => {
         '我的旅行',
         '同行者',
         '分帳結算',
-        '支出分類',
-        '登出',
       ]);
     } else {
       const group = nav.locator('.trip-nav-group');

@@ -82,15 +82,21 @@ export async function assertAnalysisRoute(page: Page, world: LedgerWorld) {
 
 export async function assertMobileAnalysisEntry(page: Page, world: LedgerWorld) {
   await assertAnalysisRoute(page, world);
-  const g = world.get<{
-    entry: { x: number; y: number; width: number; height: number };
-    navigation: { x: number; y: number; width: number; height: number };
+  type Box = { x: number; y: number; width: number; height: number };
+  const { entry, spending, floatingAdd, mobileNavigation, bottomCount } = world.get<{
+    entry: Box;
+    spending: Box;
+    floatingAdd: Box;
+    mobileNavigation: Box;
     bottomCount: number;
   }>('analysis:ledgerGeometry');
-  expect(g.entry.y).toBeGreaterThanOrEqual(g.navigation.y + g.navigation.height - 1);
-  expect(Math.abs(g.entry.x - g.navigation.x)).toBeLessThanOrEqual(2);
-  expect(g.entry.width).toBeGreaterThanOrEqual(g.navigation.width - 2);
-  expect(g.bottomCount).toBe(5);
+  expect(entry.x).toBeGreaterThanOrEqual(spending.x);
+  expect(entry.y).toBeGreaterThanOrEqual(spending.y);
+  expect(entry.x + entry.width).toBeLessThanOrEqual(spending.x + spending.width);
+  expect(entry.y + entry.height).toBeLessThanOrEqual(spending.y + spending.height);
+  expect(floatingAdd.x).toBeGreaterThanOrEqual(mobileNavigation.x + mobileNavigation.width);
+  expect(floatingAdd.width).toBeGreaterThanOrEqual(44);
+  expect(bottomCount).toBe(3);
   expect(world.state.has('analysis:ledgerScreenshot')).toBe(true);
 }
 
@@ -483,11 +489,15 @@ export async function assertReturnedAnalysisLedger(page: Page, world: LedgerWorl
   await expect(totals).toBeVisible();
   await expect(balances).toBeAttached();
   await expect(expenses).toBeAttached();
-  const a = await totals.boundingBox(),
-    b = await balances.boundingBox(),
+  const a = await page.getByRole('region', { name: '個人花費摘要' }).boundingBox(),
+    b = await page.getByRole('region', { name: '應收應付摘要' }).boundingBox(),
     d = await expenses.boundingBox();
-  expect(a!.y + a!.height).toBeLessThanOrEqual(b!.y + 1);
-  expect(b!.y + b!.height).toBeLessThanOrEqual(d!.y + 1);
+  const desktop = page.viewportSize()!.width >= 900;
+  if (desktop) {
+    expect(Math.abs(a!.y - b!.y)).toBeLessThanOrEqual(1);
+    expect(a!.x + a!.width).toBeLessThanOrEqual(b!.x);
+  } else expect(a!.y + a!.height).toBeLessThanOrEqual(b!.y + 1);
+  expect(Math.max(a!.y + a!.height, b!.y + b!.height)).toBeLessThanOrEqual(d!.y + 1);
   const response = await world.api.get(`/api/trips/${c.tripId}/totals?scope=personal`, { headers });
   expect(response.status()).toBe(200);
   const body = await response.json();
@@ -510,6 +520,14 @@ export async function assertReturnedAnalysisLedger(page: Page, world: LedgerWorl
       row.currencyCode,
     );
     expect(exactEqual(row.netAmount, expected)).toBe(true);
+    if (
+      view.balances
+        .filter((balance: typeof row) => balance.currencyCode === row.currencyCode)
+        .every((balance: typeof row) => BigInt(balance.netAmount.numerator) === 0n)
+    ) {
+      await expect(balances.getByText(`${row.currencyCode} 已平衡`, { exact: true })).toBeVisible();
+      continue;
+    }
     const member = source.members!.find((m) => m.id === row.memberId)!;
     const absolute = displayOracle({
       ...expected,

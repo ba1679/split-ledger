@@ -34,10 +34,12 @@ export function TripForm({
   trip,
   onClose,
   onCreationResult,
+  onEdited,
 }: {
   trip?: Trip;
   onClose: () => void;
   onCreationResult?: () => void;
+  onEdited?: (messageKey: string | undefined) => void;
 }) {
   useTripText();
   const { account } = useSession(),
@@ -101,7 +103,8 @@ export function TripForm({
     ]);
     if (!alive.current) return;
     onClose();
-    navigate(`/trips/${saved.id}`, messageKey ? { state: { messageKey } } : undefined);
+    if (trip && onEdited) onEdited(messageKey);
+    else navigate(`/trips/${saved.id}`, messageKey ? { state: { messageKey } } : undefined);
   }
 
   async function verifyPhoto(saved: Trip, original: PhotoAttempt) {

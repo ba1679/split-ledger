@@ -78,7 +78,7 @@ export async function analysisUISnapshot(page: Page) {
 export async function openConfirmedBrowserAnalysis(page: Page, world: LedgerWorld) {
   const c = analysisContext(world),
     before = await analysisSnapshot(world);
-  const link = page.getByRole('link', { name: '花費分析', exact: true });
+  const link = page.getByRole('link', { name: '看分析', exact: true });
   await expect(link, 'Product ledger must expose the approved analysis entry').toBeVisible();
   const responsePromise = page.waitForResponse(
     (r) => new URL(r.url()).pathname === `/api/trips/${c.tripId}/expense-analysis`,
